@@ -142,12 +142,13 @@ class ClassicalProvider : CryptoProvider {
 
     // Ed25519 ASN.1 DER wrapping
     private fun wrapEd25519PrivateKey(raw: ByteArray): ByteArray {
-        // PKCS#8: SEQUENCE { SEQUENCE { OID 1.3.101.112 }, OCTET STRING { OCTET STRING { raw } } }
+        // PKCS#8: SEQUENCE { INTEGER(0), SEQUENCE { OID 1.3.101.112 }, OCTET STRING { OCTET STRING { raw } } }
+        val version = byteArrayOf(0x02, 0x01, 0x00) // INTEGER 0
         val oid = byteArrayOf(0x06, 0x03, 0x2b, 0x65, 0x70)
         val algoSeq = byteArrayOf(0x30, oid.size.toByte()) + oid
         val innerOctet = byteArrayOf(0x04, raw.size.toByte()) + raw
         val outerOctet = byteArrayOf(0x04, innerOctet.size.toByte()) + innerOctet
-        val total = algoSeq + outerOctet
+        val total = version + algoSeq + outerOctet
         return byteArrayOf(0x30, total.size.toByte()) + total
     }
 

@@ -189,7 +189,7 @@ fun TxSigningScreen(
                                             .padding(horizontal = 10.dp, vertical = 4.dp)
                                     ) {
                                         Text(
-                                            "${timerSeconds / 60}:${String.format("%02d", timerSeconds % 60)}",
+                                            "${timerSeconds / 60}:${String.format(java.util.Locale.ROOT, "%02d", timerSeconds % 60)}",
                                             fontSize = 13.sp,
                                             fontWeight = FontWeight.Bold,
                                             fontFamily = FontFamily.Monospace,
