@@ -1,5 +1,8 @@
 package my.ssdid.mobile.domain.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 enum class Algorithm(
     val w3cType: String,
     val proofType: String,
