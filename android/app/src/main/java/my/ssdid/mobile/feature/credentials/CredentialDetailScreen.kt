@@ -31,7 +31,7 @@ class CredentialDetailViewModel @Inject constructor(
     private val vault: Vault,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    private val credentialId: String = savedStateHandle["credentialId"] ?: ""
+    val credentialId: String = savedStateHandle["credentialId"] ?: ""
 
     private val _credential = MutableStateFlow<VerifiableCredential?>(null)
     val credential = _credential.asStateFlow()

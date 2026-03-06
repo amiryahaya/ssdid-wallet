@@ -2,8 +2,10 @@ package my.ssdid.mobile.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import my.ssdid.mobile.feature.auth.AuthFlowScreen
 import my.ssdid.mobile.feature.credentials.CredentialDetailScreen
 import my.ssdid.mobile.feature.credentials.CredentialsScreen
@@ -17,8 +19,6 @@ import my.ssdid.mobile.feature.registration.RegistrationScreen
 import my.ssdid.mobile.feature.scan.ScanQrScreen
 import my.ssdid.mobile.feature.settings.SettingsScreen
 import my.ssdid.mobile.feature.transaction.TxSigningScreen
-import java.net.URLDecoder
-import java.net.URLEncoder
 
 @Composable
 fun SsdidNavGraph(navController: NavHostController) {
@@ -77,54 +77,53 @@ fun SsdidNavGraph(navController: NavHostController) {
         composable(Screen.ScanQr.route) {
             ScanQrScreen(
                 onBack = { navController.popBackStack() },
-                onScanned = { serverUrl, serverDid, action ->
-                    val encodedUrl = URLEncoder.encode(serverUrl, "UTF-8")
-                    val encodedDid = URLEncoder.encode(serverDid, "UTF-8")
+                onScanned = { serverUrl, serverDid, action, sessionToken ->
                     when (action) {
-                        "register" -> navController.navigate(Screen.Registration.createRoute(encodedUrl, encodedDid))
-                        "auth" -> navController.navigate(Screen.AuthFlow.createRoute(encodedUrl))
-                        "tx" -> navController.navigate(Screen.TxSigning.createRoute(encodedUrl, ""))
+                        "register" -> navController.navigate(Screen.Registration.createRoute(serverUrl, serverDid))
+                        "auth" -> navController.navigate(Screen.AuthFlow.createRoute(serverUrl))
+                        "tx" -> navController.navigate(Screen.TxSigning.createRoute(serverUrl, sessionToken))
                     }
                 }
             )
         }
-        composable(Screen.Registration.route) { backStackEntry ->
-            val serverUrl = backStackEntry.arguments?.getString("serverUrl") ?: return@composable
-            val serverDid = backStackEntry.arguments?.getString("serverDid") ?: return@composable
+        composable(
+            Screen.Registration.route,
+            arguments = listOf(
+                navArgument("serverUrl") { type = NavType.StringType; defaultValue = "" },
+                navArgument("serverDid") { type = NavType.StringType; defaultValue = "" }
+            )
+        ) {
             RegistrationScreen(
-                serverUrl = serverUrl,
-                serverDid = serverDid,
                 onBack = { navController.popBackStack() },
                 onComplete = {
-                    navController.navigate(Screen.WalletHome.route) {
-                        popUpTo(Screen.WalletHome.route) { inclusive = true }
-                    }
+                    navController.popBackStack(Screen.WalletHome.route, inclusive = false)
                 }
             )
         }
-        composable(Screen.AuthFlow.route) { backStackEntry ->
-            val serverUrl = backStackEntry.arguments?.getString("serverUrl") ?: return@composable
+        composable(
+            Screen.AuthFlow.route,
+            arguments = listOf(
+                navArgument("serverUrl") { type = NavType.StringType; defaultValue = "" }
+            )
+        ) {
             AuthFlowScreen(
-                serverUrl = serverUrl,
                 onBack = { navController.popBackStack() },
                 onComplete = {
-                    navController.navigate(Screen.WalletHome.route) {
-                        popUpTo(Screen.WalletHome.route) { inclusive = true }
-                    }
+                    navController.popBackStack(Screen.WalletHome.route, inclusive = false)
                 }
             )
         }
-        composable(Screen.TxSigning.route) { backStackEntry ->
-            val serverUrl = backStackEntry.arguments?.getString("serverUrl") ?: return@composable
-            val sessionToken = backStackEntry.arguments?.getString("sessionToken") ?: return@composable
+        composable(
+            Screen.TxSigning.route,
+            arguments = listOf(
+                navArgument("serverUrl") { type = NavType.StringType; defaultValue = "" },
+                navArgument("sessionToken") { type = NavType.StringType; defaultValue = "" }
+            )
+        ) {
             TxSigningScreen(
-                serverUrl = serverUrl,
-                sessionToken = sessionToken,
                 onBack = { navController.popBackStack() },
                 onComplete = {
-                    navController.navigate(Screen.WalletHome.route) {
-                        popUpTo(Screen.WalletHome.route) { inclusive = true }
-                    }
+                    navController.popBackStack(Screen.WalletHome.route, inclusive = false)
                 }
             )
         }

@@ -28,7 +28,6 @@ import my.ssdid.mobile.domain.model.Identity
 import my.ssdid.mobile.domain.model.VerifiableCredential
 import my.ssdid.mobile.domain.vault.Vault
 import my.ssdid.mobile.ui.theme.*
-import java.net.URLDecoder
 import javax.inject.Inject
 
 sealed class AuthState {
@@ -44,7 +43,7 @@ class AuthFlowViewModel @Inject constructor(
     private val vault: Vault,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    val serverUrl: String = URLDecoder.decode(savedStateHandle["serverUrl"] ?: "", "UTF-8")
+    val serverUrl: String = savedStateHandle["serverUrl"] ?: ""
 
     private val _state = MutableStateFlow<AuthState>(AuthState.Idle)
     val state = _state.asStateFlow()
@@ -82,7 +81,6 @@ class AuthFlowViewModel @Inject constructor(
 
 @Composable
 fun AuthFlowScreen(
-    serverUrl: String,
     onBack: () -> Unit,
     onComplete: () -> Unit,
     viewModel: AuthFlowViewModel = hiltViewModel()

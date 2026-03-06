@@ -18,7 +18,7 @@ import my.ssdid.mobile.ui.theme.*
 @Composable
 fun ScanQrScreen(
     onBack: () -> Unit,
-    onScanned: (serverUrl: String, serverDid: String, action: String) -> Unit
+    onScanned: (serverUrl: String, serverDid: String, action: String, sessionToken: String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -84,7 +84,8 @@ fun ScanQrScreen(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp),
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 32.dp),
             shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(containerColor = BgCard)
         ) {
@@ -97,33 +98,6 @@ fun ScanQrScreen(
                 Spacer(Modifier.height(6.dp))
                 QrFormatRow("SSDID Transaction", "ssdid://tx?url=...&session=...")
             }
-        }
-
-        Spacer(Modifier.height(12.dp))
-
-        // Placeholder scan button for testing navigation
-        Button(
-            onClick = {
-                onScanned(
-                    "https://demo.ssdid.my",
-                    "did:ssdid:server:demo",
-                    "register"
-                )
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp)
-                .padding(bottom = 32.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = AccentDim)
-        ) {
-            Text(
-                "Simulate Scan (Demo)",
-                color = Accent,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.padding(vertical = 4.dp)
-            )
         }
     }
 }

@@ -20,6 +20,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -27,7 +28,6 @@ import my.ssdid.mobile.domain.SsdidClient
 import my.ssdid.mobile.domain.model.Identity
 import my.ssdid.mobile.domain.vault.Vault
 import my.ssdid.mobile.ui.theme.*
-import java.net.URLDecoder
 import javax.inject.Inject
 
 enum class RegistrationStep(val label: String) {
@@ -50,8 +50,8 @@ class RegistrationViewModel @Inject constructor(
     private val vault: Vault,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    val serverUrl: String = URLDecoder.decode(savedStateHandle["serverUrl"] ?: "", "UTF-8")
-    val serverDid: String = URLDecoder.decode(savedStateHandle["serverDid"] ?: "", "UTF-8")
+    val serverUrl: String = savedStateHandle["serverUrl"] ?: ""
+    val serverDid: String = savedStateHandle["serverDid"] ?: ""
 
     private val _state = MutableStateFlow<RegistrationState>(RegistrationState.Idle)
     val state = _state.asStateFlow()
@@ -73,10 +73,13 @@ class RegistrationViewModel @Inject constructor(
     fun register() {
         val identity = _selectedIdentity.value ?: return
         viewModelScope.launch {
-            _state.value = RegistrationState.InProgress(RegistrationStep.CONNECTING)
             try {
+                _state.value = RegistrationState.InProgress(RegistrationStep.CONNECTING)
+                delay(800)
                 _state.value = RegistrationState.InProgress(RegistrationStep.MUTUAL_AUTH)
+                delay(600)
                 _state.value = RegistrationState.InProgress(RegistrationStep.IDENTITY_SELECT)
+                delay(400)
                 client.registerWithService(identity, serverUrl)
                     .onSuccess { _state.value = RegistrationState.Success }
                     .onFailure { _state.value = RegistrationState.Error(it.message ?: "Registration failed") }
@@ -89,8 +92,6 @@ class RegistrationViewModel @Inject constructor(
 
 @Composable
 fun RegistrationScreen(
-    serverUrl: String,
-    serverDid: String,
     onBack: () -> Unit,
     onComplete: () -> Unit,
     viewModel: RegistrationViewModel = hiltViewModel()

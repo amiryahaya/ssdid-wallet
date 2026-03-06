@@ -13,16 +13,22 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import my.ssdid.mobile.ui.theme.*
+import javax.inject.Inject
 
-private enum class ActivityType(val icon: String, val color: androidx.compose.ui.graphics.Color, val dimColor: androidx.compose.ui.graphics.Color) {
+enum class ActivityType(val icon: String, val color: androidx.compose.ui.graphics.Color, val dimColor: androidx.compose.ui.graphics.Color) {
     IDENTITY_CREATED("\u2B21", Accent, AccentDim),
     REGISTERED("\uD83D\uDD17", Success, SuccessDim),
     AUTHENTICATED("\u2713", Classical, ClassicalDim),
     TRANSACTION_SIGNED("\u270E", Warning, WarningDim)
 }
 
-private data class ActivityItem(
+data class ActivityItem(
     val type: ActivityType,
     val title: String,
     val subtitle: String,
@@ -30,20 +36,30 @@ private data class ActivityItem(
     val date: String
 )
 
-private val placeholderData = listOf(
-    ActivityItem(ActivityType.IDENTITY_CREATED, "Identity Created", "Personal (KAZ-Sign 192)", "14:32", "Today"),
-    ActivityItem(ActivityType.REGISTERED, "Registered with Service", "demo.ssdid.my", "14:28", "Today"),
-    ActivityItem(ActivityType.AUTHENTICATED, "Authenticated", "portal.university.edu.my", "11:05", "Today"),
-    ActivityItem(ActivityType.TRANSACTION_SIGNED, "Transaction Signed", "1,500.00 MYR - Payment", "09:45", "Today"),
-    ActivityItem(ActivityType.IDENTITY_CREATED, "Identity Created", "Work (Ed25519)", "16:20", "Yesterday"),
-    ActivityItem(ActivityType.REGISTERED, "Registered with Service", "bank.example.com", "15:10", "Yesterday"),
-    ActivityItem(ActivityType.AUTHENTICATED, "Authenticated", "gov.my", "10:30", "2 days ago"),
-    ActivityItem(ActivityType.TRANSACTION_SIGNED, "Transaction Signed", "250.00 MYR - Transfer", "09:15", "2 days ago")
-)
+@HiltViewModel
+class TxHistoryViewModel @Inject constructor() : ViewModel() {
+    private val _activities = MutableStateFlow(
+        listOf(
+            ActivityItem(ActivityType.IDENTITY_CREATED, "Identity Created", "Personal (KAZ-Sign 192)", "14:32", "Today"),
+            ActivityItem(ActivityType.REGISTERED, "Registered with Service", "demo.ssdid.my", "14:28", "Today"),
+            ActivityItem(ActivityType.AUTHENTICATED, "Authenticated", "portal.university.edu.my", "11:05", "Today"),
+            ActivityItem(ActivityType.TRANSACTION_SIGNED, "Transaction Signed", "1,500.00 MYR - Payment", "09:45", "Today"),
+            ActivityItem(ActivityType.IDENTITY_CREATED, "Identity Created", "Work (Ed25519)", "16:20", "Yesterday"),
+            ActivityItem(ActivityType.REGISTERED, "Registered with Service", "bank.example.com", "15:10", "Yesterday"),
+            ActivityItem(ActivityType.AUTHENTICATED, "Authenticated", "gov.my", "10:30", "2 days ago"),
+            ActivityItem(ActivityType.TRANSACTION_SIGNED, "Transaction Signed", "250.00 MYR - Transfer", "09:15", "2 days ago")
+        )
+    )
+    val activities = _activities.asStateFlow()
+}
 
 @Composable
-fun TxHistoryScreen(onBack: () -> Unit) {
-    val groupedItems = placeholderData.groupBy { it.date }
+fun TxHistoryScreen(
+    onBack: () -> Unit,
+    viewModel: TxHistoryViewModel = hiltViewModel()
+) {
+    val activities by viewModel.activities.collectAsState()
+    val groupedItems = activities.groupBy { it.date }
 
     Column(
         modifier = Modifier
@@ -58,7 +74,7 @@ fun TxHistoryScreen(onBack: () -> Unit) {
             Text("Activity History", style = MaterialTheme.typography.titleLarge)
         }
 
-        if (placeholderData.isEmpty()) {
+        if (activities.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()

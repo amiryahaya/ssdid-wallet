@@ -1,0 +1,13 @@
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+*.iml
+.idea/
+
+# macOS
+.DS_Store
+
+# Claude
+.claude/settings.local.json

@@ -21,11 +21,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import my.ssdid.mobile.domain.SsdidClient
 import my.ssdid.mobile.domain.vault.Vault
 import my.ssdid.mobile.ui.theme.*
-import java.net.URLDecoder
 import javax.inject.Inject
 
 sealed class TxState {
@@ -41,8 +41,8 @@ class TxSigningViewModel @Inject constructor(
     private val vault: Vault,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    val serverUrl: String = URLDecoder.decode(savedStateHandle["serverUrl"] ?: "", "UTF-8")
-    val sessionToken: String = URLDecoder.decode(savedStateHandle["sessionToken"] ?: "", "UTF-8")
+    val serverUrl: String = savedStateHandle["serverUrl"] ?: ""
+    val sessionToken: String = savedStateHandle["sessionToken"] ?: ""
 
     private val _state = MutableStateFlow<TxState>(TxState.Idle)
     val state = _state.asStateFlow()
@@ -55,7 +55,10 @@ class TxSigningViewModel @Inject constructor(
         viewModelScope.launch {
             while (_timerSeconds.value > 0 && _state.value is TxState.Idle) {
                 delay(1000)
-                _timerSeconds.value = _timerSeconds.value - 1
+                _timerSeconds.update { it - 1 }
+            }
+            if (_timerSeconds.value == 0 && _state.value is TxState.Idle) {
+                _state.value = TxState.Failed("Challenge expired. Please scan QR again.")
             }
         }
     }
@@ -83,8 +86,6 @@ class TxSigningViewModel @Inject constructor(
 
 @Composable
 fun TxSigningScreen(
-    serverUrl: String,
-    sessionToken: String,
     onBack: () -> Unit,
     onComplete: () -> Unit,
     viewModel: TxSigningViewModel = hiltViewModel()
