@@ -9,6 +9,7 @@ import dagger.hilt.components.SingletonComponent
 import my.ssdid.mobile.domain.SsdidClient
 import my.ssdid.mobile.domain.crypto.ClassicalProvider
 import my.ssdid.mobile.domain.crypto.CryptoProvider
+import my.ssdid.mobile.domain.crypto.PqcProvider
 import my.ssdid.mobile.domain.transport.SsdidHttpClient
 import my.ssdid.mobile.domain.vault.Vault
 import my.ssdid.mobile.domain.vault.VaultImpl
@@ -41,11 +42,7 @@ object AppModule {
     @Provides
     @Singleton
     @Named("pqc")
-    fun providePqcProvider(): CryptoProvider {
-        // PqcProvider requires native library; provide ClassicalProvider as stub until Task 4
-        // TODO: Replace with PqcProvider() after KAZ-Sign JNI integration
-        return ClassicalProvider()
-    }
+    fun providePqcProvider(): CryptoProvider = PqcProvider()
 
     @Provides
     @Singleton
