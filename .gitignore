@@ -3,11 +3,51 @@ android/.gradle/
 android/build/
 android/app/build/
 android/local.properties
+android/captures/
+android/.externalNativeBuild/
+android/.cxx/
 *.iml
 .idea/
 
-# macOS
+# iOS
+ios/build/
+ios/DerivedData/
+ios/*.xcworkspace/xcuserdata/
+ios/*.xcodeproj/xcuserdata/
+ios/*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+ios/Pods/
+ios/.build/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+xcuserdata/
+
+# HarmonyOS NEXT
+harmony/.preview/
+harmony/build/
+harmony/oh_modules/
+harmony/.cxx/
+harmony/entry/build/
+harmony/entry/oh_modules/
+harmony/local.properties
+harmony/.idea/
+*.har
+*.hap
+*.hsp
+
+# General
 .DS_Store
+*.swp
+*.swo
+*~
+*.log
+Thumbs.db
 
 # Claude
 .claude/settings.local.json
