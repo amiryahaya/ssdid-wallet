@@ -1,6 +1,7 @@
 package my.ssdid.mobile.platform.deeplink
 
 import android.net.Uri
+import my.ssdid.mobile.platform.security.UrlValidator
 import my.ssdid.mobile.ui.navigation.Screen
 
 data class DeepLinkAction(
@@ -27,10 +28,14 @@ object DeepLinkHandler {
      * Parses a deep link URI with scheme `ssdid://`.
      * Returns null if the URI is not a valid SSDID deep link.
      */
+    private val VALID_ACTIONS = setOf("register", "authenticate", "sign")
+
     fun parse(uri: Uri): DeepLinkAction? {
         if (uri.scheme != "ssdid") return null
         val action = uri.host ?: return null
+        if (action !in VALID_ACTIONS) return null
         val serverUrl = uri.getQueryParameter("server_url") ?: return null
+        if (!UrlValidator.isValidServerUrl(serverUrl)) return null
         return DeepLinkAction(
             action = action,
             serverUrl = serverUrl,

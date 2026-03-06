@@ -1,6 +1,7 @@
 package my.ssdid.mobile.domain.transport
 
 import kotlinx.serialization.json.Json
+import my.ssdid.mobile.BuildConfig
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -19,7 +20,8 @@ class SsdidHttpClient(registryUrl: String) {
         .connectTimeout(10, TimeUnit.SECONDS)
         .readTimeout(10, TimeUnit.SECONDS)
         .addInterceptor(HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
+            level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.HEADERS
+                    else HttpLoggingInterceptor.Level.NONE
         })
         .build()
 

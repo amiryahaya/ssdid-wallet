@@ -158,4 +158,46 @@ class DeepLinkHandlerTest {
 
         assertThat(route).isNull()
     }
+
+    @Test
+    fun `parse returns null for unrecognized action`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "delete",
+            queryParams = mapOf("server_url" to "https://demo.ssdid.my")
+        )
+        val result = DeepLinkHandler.parse(uri)
+
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `parse returns null for HTTP server_url`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "register",
+            queryParams = mapOf(
+                "server_url" to "http://evil.example.com",
+                "server_did" to "did:ssdid:server:demo"
+            )
+        )
+        val result = DeepLinkHandler.parse(uri)
+
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `parse returns null for private IP server_url`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "register",
+            queryParams = mapOf(
+                "server_url" to "https://192.168.1.1",
+                "server_did" to "did:ssdid:server:demo"
+            )
+        )
+        val result = DeepLinkHandler.parse(uri)
+
+        assertThat(result).isNull()
+    }
 }

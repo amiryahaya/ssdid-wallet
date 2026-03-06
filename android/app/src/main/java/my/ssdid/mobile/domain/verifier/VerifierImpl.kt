@@ -1,5 +1,9 @@
 package my.ssdid.mobile.domain.verifier
 
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
 import my.ssdid.mobile.domain.crypto.CryptoProvider
 import my.ssdid.mobile.domain.crypto.Multibase
 import my.ssdid.mobile.domain.model.*
@@ -48,9 +52,18 @@ class VerifierImpl(
         val algorithm = algorithmFromW3cType(vm.type)
         val provider = if (algorithm.isPostQuantum) pqcProvider else classicalProvider
         val signature = Multibase.decode(proof.proofValue)
-        // For VC proof, the signed data is the credential without the proof field
-        // Simplified: verify signature over the proofValue
-        provider.verify(algorithm, publicKey, signature, proof.proofValue.toByteArray())
+        // Canonical signed data = credential JSON with proof field removed
+        val signedData = canonicalizeCredentialWithoutProof(credential)
+        provider.verify(algorithm, publicKey, signature, signedData)
+    }
+
+    private fun canonicalizeCredentialWithoutProof(credential: VerifiableCredential): ByteArray {
+        val json = Json { encodeDefaults = true }
+        val fullJson = json.encodeToString(credential)
+        val jsonObj = Json.parseToJsonElement(fullJson).jsonObject.toMutableMap()
+        jsonObj.remove("proof")
+        val withoutProof = JsonObject(jsonObj)
+        return Json.encodeToString(withoutProof).toByteArray()
     }
 
     private fun algorithmFromW3cType(type: String): Algorithm {
