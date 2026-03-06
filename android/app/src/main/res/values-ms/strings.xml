@@ -1,4 +1,183 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SSDID</string>
+
+    <!-- Common / Umum -->
+    <string name="back">Kembali</string>
+    <string name="done">Selesai</string>
+    <string name="cancel">Batal</string>
+    <string name="delete">Padam</string>
+    <string name="go_back">Kembali</string>
+    <string name="ok">OK</string>
+    <string name="confirm">Sahkan</string>
+    <string name="retry">Cuba Semula</string>
+    <string name="close">Tutup</string>
+    <string name="save">Simpan</string>
+    <string name="copy">Salin</string>
+    <string name="share">Kongsi</string>
+    <string name="loading">Memuatkan...</string>
+    <string name="error">Ralat</string>
+    <string name="success">Berjaya</string>
+
+    <!-- Onboarding / Pengenalan -->
+    <string name="onboarding_title_1">Identiti Anda, Kawalan Anda</string>
+    <string name="onboarding_desc_1">Miliki identiti digital anda dengan teknologi terdesentralisasi dan berdaulat sendiri.</string>
+    <string name="onboarding_title_2">Keselamatan Pasca-Kuantum</string>
+    <string name="onboarding_desc_2">Dilindungi oleh kriptografi pasca-kuantum KAZ-Sign bersama algoritma klasik.</string>
+    <string name="onboarding_title_3">Pengesahan Lancar</string>
+    <string name="onboarding_desc_3">Daftar dan sahkan identiti dengan perkhidmatan menggunakan kod QR dan pautan dalam.</string>
+    <string name="onboarding_next">Seterusnya</string>
+    <string name="onboarding_get_started">Mula</string>
+    <string name="onboarding_skip">Langkau</string>
+
+    <!-- Create Identity / Cipta Identiti -->
+    <string name="create_identity_title">Cipta Identiti</string>
+    <string name="identity_name_label">NAMA IDENTITI</string>
+    <string name="identity_name_hint">cth. Peribadi, Kerja</string>
+    <string name="signature_algorithm_label">ALGORITMA TANDATANGAN</string>
+    <string name="create_identity_button">Cipta Identiti</string>
+    <string name="create_identity_generating">Menjana kunci...</string>
+    <string name="create_identity_success">Identiti berjaya dicipta</string>
+    <string name="create_identity_error">Gagal mencipta identiti</string>
+
+    <!-- Biometric Setup / Persediaan Biometrik -->
+    <string name="biometric_setup_title">Pengesahan Biometrik</string>
+    <string name="biometric_enable">Aktifkan Pengesahan Biometrik</string>
+    <string name="biometric_skip">Langkau buat masa ini</string>
+    <string name="biometric_security_info">Data biometrik anda tidak akan meninggalkan peranti ini. Ia hanya digunakan untuk membuka kunci peti besi identiti anda.</string>
+    <string name="biometric_not_available">Pengesahan biometrik tidak tersedia pada peranti ini.</string>
+
+    <!-- Wallet Home / Dompet Utama -->
+    <string name="wallet_identity_label">DOMPET IDENTITI</string>
+    <string name="wallet_app_name">SSDID</string>
+    <string name="wallet_my_identities">IDENTITI SAYA</string>
+    <string name="wallet_new">+ Baru</string>
+    <string name="wallet_create_first">Cipta identiti pertama anda</string>
+    <string name="wallet_quick_actions">TINDAKAN PANTAS</string>
+    <string name="wallet_scan_qr">Imbas QR</string>
+    <string name="wallet_credentials">Kelayakan</string>
+    <string name="wallet_history">Sejarah</string>
+    <string name="wallet_active">Aktif</string>
+    <string name="wallet_settings">Tetapan</string>
+
+    <!-- Identity Detail / Butiran Identiti -->
+    <string name="identity_detail_title">Butiran Identiti</string>
+    <string name="identity_detail_did">DID</string>
+    <string name="identity_detail_algorithm">Algoritma</string>
+    <string name="identity_detail_created">Dicipta</string>
+    <string name="identity_detail_public_key">Kunci Awam</string>
+    <string name="identity_detail_registrations">Pendaftaran</string>
+    <string name="identity_detail_delete_title">Padam Identiti</string>
+    <string name="identity_detail_delete_message">Adakah anda pasti mahu memadamkan identiti ini? Tindakan ini tidak boleh dibuat asal.</string>
+    <string name="identity_detail_copied">Disalin ke papan keratan</string>
+
+    <!-- Scan QR / Imbas QR -->
+    <string name="scan_qr_title">Imbas Kod QR</string>
+    <string name="scan_camera_preview">Pratonton Kamera</string>
+    <string name="scan_supported_formats">FORMAT DISOKONG</string>
+    <string name="scan_permission_required">Kebenaran Kamera Diperlukan</string>
+    <string name="scan_permission_message">Sila berikan kebenaran kamera dalam tetapan peranti anda untuk mengimbas kod QR.</string>
+    <string name="scan_open_settings">Buka Tetapan</string>
+    <string name="scan_invalid_qr">Format kod QR tidak sah</string>
+
+    <!-- Registration / Pendaftaran -->
+    <string name="registration_title">Pendaftaran Perkhidmatan</string>
+    <string name="registration_server_info">MAKLUMAT PELAYAN</string>
+    <string name="registration_select_identity">PILIH IDENTITI</string>
+    <string name="registration_no_identities">Tiada identiti tersedia</string>
+    <string name="registration_register_button">Daftar dengan Perkhidmatan</string>
+    <string name="registration_registering">Mendaftar\u2026</string>
+    <string name="registration_complete">Pendaftaran Selesai</string>
+    <string name="registration_complete_desc">Identiti anda telah didaftarkan dengan perkhidmatan ini.</string>
+    <string name="registration_failed">Pendaftaran Gagal</string>
+    <string name="registration_failed_desc">Tidak dapat melengkapkan pendaftaran. Sila cuba semula.</string>
+
+    <!-- Authentication / Pengesahan -->
+    <string name="auth_title">Pengesahan</string>
+    <string name="auth_service_request">PERMINTAAN PERKHIDMATAN</string>
+    <string name="auth_select_credential">PILIH KELAYAKAN</string>
+    <string name="auth_no_credentials">Tiada kelayakan tersedia</string>
+    <string name="auth_biometric_confirm">Pengesahan Biometrik</string>
+    <string name="auth_biometric_touch">Sentuh penderia untuk mengesahkan pengesahan</string>
+    <string name="auth_authenticate_button">Sahkan</string>
+    <string name="auth_authenticating">Mengesahkan\u2026</string>
+    <string name="auth_success">Pengesahan Berjaya</string>
+    <string name="auth_success_desc">Anda telah disahkan dengan perkhidmatan ini.</string>
+    <string name="auth_failed">Pengesahan Gagal</string>
+    <string name="auth_failed_desc">Tidak dapat melengkapkan pengesahan. Sila cuba semula.</string>
+
+    <!-- Transaction Signing / Tandatangan Transaksi -->
+    <string name="tx_signing_title">Tandatangan Transaksi</string>
+    <string name="tx_details">BUTIRAN TRANSAKSI</string>
+    <string name="tx_security">KESELAMATAN</string>
+    <string name="tx_challenge_expires">Cabaran tamat dalam</string>
+    <string name="tx_bound_hash">Transaksi terikat kepada hash cabaran</string>
+    <string name="tx_sha3_verify">Pengesahan integriti SHA3-256</string>
+    <string name="tx_pqc_available">Tandatangan pasca-kuantum (jika tersedia)</string>
+    <string name="tx_biometric_required">Biometrik Diperlukan</string>
+    <string name="tx_biometric_touch">Sentuh penderia untuk membenarkan tandatangan</string>
+    <string name="tx_sign_button">Tandatangan Transaksi</string>
+    <string name="tx_signing">Menandatangan\u2026</string>
+    <string name="tx_confirmed">Transaksi Disahkan</string>
+    <string name="tx_confirmed_desc">Transaksi anda telah ditandatangani dan dihantar.</string>
+    <string name="tx_failed">Transaksi Gagal</string>
+    <string name="tx_failed_desc">Tidak dapat melengkapkan tandatangan transaksi. Sila cuba semula.</string>
+    <string name="tx_challenge_expired">Cabaran tamat tempoh. Sila imbas QR semula.</string>
+
+    <!-- Credentials / Kelayakan -->
+    <string name="credentials_title">Kelayakan</string>
+    <string name="credentials_empty">Tiada kelayakan lagi</string>
+    <string name="credentials_empty_desc">Kelayakan yang dikeluarkan kepada anda oleh perkhidmatan akan muncul di sini.</string>
+
+    <!-- Credential Detail / Butiran Kelayakan -->
+    <string name="credential_detail_title">Butiran Kelayakan</string>
+    <string name="credential_subject">SUBJEK KELAYAKAN</string>
+    <string name="credential_claims">TUNTUTAN</string>
+    <string name="credential_no_claims">Tiada tuntutan tambahan</string>
+    <string name="credential_proof">BUKTI</string>
+    <string name="credential_show_json">Tunjuk JSON Mentah</string>
+    <string name="credential_hide_json">Sembunyikan JSON Mentah</string>
+    <string name="credential_delete_title">Padam Kelayakan</string>
+    <string name="credential_delete_message">Adakah anda pasti mahu memadamkan kelayakan ini? Tindakan ini tidak boleh dibuat asal.</string>
+    <string name="credential_issuer">Pengeluar</string>
+    <string name="credential_issued_date">Tarikh Dikeluarkan</string>
+    <string name="credential_expiry_date">Tarikh Luput</string>
+    <string name="credential_status">Status</string>
+    <string name="credential_valid">Sah</string>
+    <string name="credential_expired">Tamat Tempoh</string>
+    <string name="credential_revoked">Dibatalkan</string>
+
+    <!-- Settings / Tetapan -->
+    <string name="settings_title">Tetapan</string>
+    <string name="settings_security">KESELAMATAN</string>
+    <string name="settings_biometric">Pengesahan Biometrik</string>
+    <string name="settings_auto_lock">Kunci Auto</string>
+    <string name="settings_auto_lock_value">5 minit</string>
+    <string name="settings_network">RANGKAIAN</string>
+    <string name="settings_registry_url">URL Pendaftaran</string>
+    <string name="settings_preferences">KEUTAMAAN</string>
+    <string name="settings_language">Bahasa</string>
+    <string name="settings_language_value">Bahasa Melayu</string>
+    <string name="settings_notifications">Pemberitahuan</string>
+    <string name="settings_version">Versi</string>
+    <string name="settings_version_value">1.0.0</string>
+    <string name="settings_about">Perihal</string>
+    <string name="settings_export">Eksport Data</string>
+    <string name="settings_reset">Set Semula Dompet</string>
+    <string name="settings_reset_warning">Ini akan memadamkan semua identiti dan kelayakan. Tindakan ini tidak boleh dibuat asal.</string>
+
+    <!-- Activity History / Sejarah Aktiviti -->
+    <string name="history_title">Sejarah Aktiviti</string>
+    <string name="history_empty">Tiada aktiviti lagi</string>
+    <string name="history_empty_desc">Sejarah identiti dan transaksi anda akan muncul di sini.</string>
+    <string name="history_registration">Pendaftaran</string>
+    <string name="history_authentication">Pengesahan</string>
+    <string name="history_transaction">Transaksi</string>
+    <string name="history_credential_issued">Kelayakan Dikeluarkan</string>
+
+    <!-- Registration Steps / Langkah Pendaftaran -->
+    <string name="step_connecting">Menyambung</string>
+    <string name="step_mutual_auth">Pengesahan Bersama</string>
+    <string name="step_identity_select">Pilih Identiti</string>
+    <string name="step_complete">Selesai</string>
 </resources>

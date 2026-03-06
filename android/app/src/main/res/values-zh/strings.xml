@@ -1,4 +1,183 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SSDID</string>
+
+    <!-- Common -->
+    <string name="back">返回</string>
+    <string name="done">完成</string>
+    <string name="cancel">取消</string>
+    <string name="delete">删除</string>
+    <string name="go_back">返回</string>
+    <string name="ok">确定</string>
+    <string name="confirm">确认</string>
+    <string name="retry">重试</string>
+    <string name="close">关闭</string>
+    <string name="save">保存</string>
+    <string name="copy">复制</string>
+    <string name="share">分享</string>
+    <string name="loading">加载中...</string>
+    <string name="error">错误</string>
+    <string name="success">成功</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_title_1">您的身份，由您掌控</string>
+    <string name="onboarding_desc_1">通过去中心化的自主主权技术掌控您的数字身份。</string>
+    <string name="onboarding_title_2">后量子安全</string>
+    <string name="onboarding_desc_2">受 KAZ-Sign 后量子密码学与经典算法的双重保护。</string>
+    <string name="onboarding_title_3">无缝验证</string>
+    <string name="onboarding_desc_3">使用二维码和深度链接向服务进行注册和身份验证。</string>
+    <string name="onboarding_next">下一步</string>
+    <string name="onboarding_get_started">开始使用</string>
+    <string name="onboarding_skip">跳过</string>
+
+    <!-- Create Identity -->
+    <string name="create_identity_title">创建身份</string>
+    <string name="identity_name_label">身份名称</string>
+    <string name="identity_name_hint">例如：个人、工作</string>
+    <string name="signature_algorithm_label">签名算法</string>
+    <string name="create_identity_button">创建身份</string>
+    <string name="create_identity_generating">正在生成密钥...</string>
+    <string name="create_identity_success">身份创建成功</string>
+    <string name="create_identity_error">创建身份失败</string>
+
+    <!-- Biometric Setup -->
+    <string name="biometric_setup_title">生物识别认证</string>
+    <string name="biometric_enable">启用生物识别认证</string>
+    <string name="biometric_skip">暂时跳过</string>
+    <string name="biometric_security_info">您的生物识别数据不会离开此设备。它仅用于解锁您的身份保管库。</string>
+    <string name="biometric_not_available">此设备不支持生物识别认证。</string>
+
+    <!-- Wallet Home -->
+    <string name="wallet_identity_label">身份钱包</string>
+    <string name="wallet_app_name">SSDID</string>
+    <string name="wallet_my_identities">我的身份</string>
+    <string name="wallet_new">+ 新建</string>
+    <string name="wallet_create_first">创建您的第一个身份</string>
+    <string name="wallet_quick_actions">快捷操作</string>
+    <string name="wallet_scan_qr">扫描二维码</string>
+    <string name="wallet_credentials">凭证</string>
+    <string name="wallet_history">历史</string>
+    <string name="wallet_active">活跃</string>
+    <string name="wallet_settings">设置</string>
+
+    <!-- Identity Detail -->
+    <string name="identity_detail_title">身份详情</string>
+    <string name="identity_detail_did">DID</string>
+    <string name="identity_detail_algorithm">算法</string>
+    <string name="identity_detail_created">创建时间</string>
+    <string name="identity_detail_public_key">公钥</string>
+    <string name="identity_detail_registrations">注册记录</string>
+    <string name="identity_detail_delete_title">删除身份</string>
+    <string name="identity_detail_delete_message">您确定要删除此身份吗？此操作无法撤销。</string>
+    <string name="identity_detail_copied">已复制到剪贴板</string>
+
+    <!-- Scan QR -->
+    <string name="scan_qr_title">扫描二维码</string>
+    <string name="scan_camera_preview">相机预览</string>
+    <string name="scan_supported_formats">支持的格式</string>
+    <string name="scan_permission_required">需要相机权限</string>
+    <string name="scan_permission_message">请在设备设置中授予相机权限以扫描二维码。</string>
+    <string name="scan_open_settings">打开设置</string>
+    <string name="scan_invalid_qr">无效的二维码格式</string>
+
+    <!-- Registration -->
+    <string name="registration_title">服务注册</string>
+    <string name="registration_server_info">服务器信息</string>
+    <string name="registration_select_identity">选择身份</string>
+    <string name="registration_no_identities">没有可用的身份</string>
+    <string name="registration_register_button">注册服务</string>
+    <string name="registration_registering">正在注册\u2026</string>
+    <string name="registration_complete">注册完成</string>
+    <string name="registration_complete_desc">您的身份已注册到此服务。</string>
+    <string name="registration_failed">注册失败</string>
+    <string name="registration_failed_desc">无法完成注册。请重试。</string>
+
+    <!-- Authentication -->
+    <string name="auth_title">身份验证</string>
+    <string name="auth_service_request">服务请求</string>
+    <string name="auth_select_credential">选择凭证</string>
+    <string name="auth_no_credentials">没有可用的凭证</string>
+    <string name="auth_biometric_confirm">生物识别确认</string>
+    <string name="auth_biometric_touch">触摸传感器以确认身份验证</string>
+    <string name="auth_authenticate_button">验证</string>
+    <string name="auth_authenticating">正在验证\u2026</string>
+    <string name="auth_success">验证成功</string>
+    <string name="auth_success_desc">您已通过此服务的身份验证。</string>
+    <string name="auth_failed">验证失败</string>
+    <string name="auth_failed_desc">无法完成身份验证。请重试。</string>
+
+    <!-- Transaction Signing -->
+    <string name="tx_signing_title">签署交易</string>
+    <string name="tx_details">交易详情</string>
+    <string name="tx_security">安全性</string>
+    <string name="tx_challenge_expires">挑战将在以下时间过期</string>
+    <string name="tx_bound_hash">交易绑定到挑战哈希</string>
+    <string name="tx_sha3_verify">SHA3-256 完整性验证</string>
+    <string name="tx_pqc_available">后量子签名（如可用）</string>
+    <string name="tx_biometric_required">需要生物识别</string>
+    <string name="tx_biometric_touch">触摸传感器以授权签名</string>
+    <string name="tx_sign_button">签署交易</string>
+    <string name="tx_signing">正在签署\u2026</string>
+    <string name="tx_confirmed">交易已确认</string>
+    <string name="tx_confirmed_desc">您的交易已签署并提交。</string>
+    <string name="tx_failed">交易失败</string>
+    <string name="tx_failed_desc">无法完成交易签署。请重试。</string>
+    <string name="tx_challenge_expired">挑战已过期。请重新扫描二维码。</string>
+
+    <!-- Credentials -->
+    <string name="credentials_title">凭证</string>
+    <string name="credentials_empty">暂无凭证</string>
+    <string name="credentials_empty_desc">服务向您签发的凭证将显示在此处。</string>
+
+    <!-- Credential Detail -->
+    <string name="credential_detail_title">凭证详情</string>
+    <string name="credential_subject">凭证主体</string>
+    <string name="credential_claims">声明</string>
+    <string name="credential_no_claims">没有其他声明</string>
+    <string name="credential_proof">证明</string>
+    <string name="credential_show_json">显示原始 JSON</string>
+    <string name="credential_hide_json">隐藏原始 JSON</string>
+    <string name="credential_delete_title">删除凭证</string>
+    <string name="credential_delete_message">您确定要删除此凭证吗？此操作无法撤销。</string>
+    <string name="credential_issuer">签发者</string>
+    <string name="credential_issued_date">签发日期</string>
+    <string name="credential_expiry_date">到期日期</string>
+    <string name="credential_status">状态</string>
+    <string name="credential_valid">有效</string>
+    <string name="credential_expired">已过期</string>
+    <string name="credential_revoked">已撤销</string>
+
+    <!-- Settings -->
+    <string name="settings_title">设置</string>
+    <string name="settings_security">安全</string>
+    <string name="settings_biometric">生物识别认证</string>
+    <string name="settings_auto_lock">自动锁定超时</string>
+    <string name="settings_auto_lock_value">5 分钟</string>
+    <string name="settings_network">网络</string>
+    <string name="settings_registry_url">注册表 URL</string>
+    <string name="settings_preferences">偏好设置</string>
+    <string name="settings_language">语言</string>
+    <string name="settings_language_value">中文</string>
+    <string name="settings_notifications">通知</string>
+    <string name="settings_version">版本</string>
+    <string name="settings_version_value">1.0.0</string>
+    <string name="settings_about">关于</string>
+    <string name="settings_export">导出数据</string>
+    <string name="settings_reset">重置钱包</string>
+    <string name="settings_reset_warning">这将删除所有身份和凭证。此操作无法撤销。</string>
+
+    <!-- Activity History -->
+    <string name="history_title">活动历史</string>
+    <string name="history_empty">暂无活动</string>
+    <string name="history_empty_desc">您的身份和交易历史将显示在此处。</string>
+    <string name="history_registration">注册</string>
+    <string name="history_authentication">身份验证</string>
+    <string name="history_transaction">交易</string>
+    <string name="history_credential_issued">凭证已签发</string>
+
+    <!-- Registration Steps -->
+    <string name="step_connecting">正在连接</string>
+    <string name="step_mutual_auth">相互认证</string>
+    <string name="step_identity_select">选择身份</string>
+    <string name="step_complete">完成</string>
 </resources>
