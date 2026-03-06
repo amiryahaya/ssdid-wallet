@@ -1912,6 +1912,530 @@ Implements `VaultStorage` interface using:
 
 ---
 
+## Phase 1B: Gap Remediation (Android)
+
+> These tasks implement features identified in `docs/12.SSDID-Gap-Analysis-And-Remediation.md`. They build on the Phase 1 codebase and follow the same architecture patterns (UI → Feature → Domain → Platform).
+
+### Task 16: Model Prerequisites (Gap 9 & Gap 10)
+
+**Files:**
+- Modify: `android/app/src/main/java/my/ssdid/mobile/domain/model/DidDocument.kt`
+- Modify: `android/app/src/main/java/my/ssdid/mobile/domain/model/VerifiableCredential.kt`
+- Create: `android/app/src/main/java/my/ssdid/mobile/domain/model/CredentialStatus.kt`
+- Modify: `android/app/src/main/java/my/ssdid/mobile/domain/verifier/VerifierImpl.kt`
+- Test: `android/app/src/test/java/my/ssdid/mobile/domain/model/CredentialStatusTest.kt`
+
+**Step 1: Add `nextKeyHash` to DidDocument**
+
+```kotlin
+// In DidDocument.kt — add field:
+@Serializable
+data class DidDocument(
+    val id: String,
+    val verificationMethod: List<VerificationMethod>,
+    val authentication: List<String>,
+    val capabilityInvocation: List<String> = emptyList(),
+    val nextKeyHash: String? = null  // SHA3-256 hash of pre-committed next key (KERI)
+)
+```
+
+**Step 2: Create CredentialStatus model**
+
+```kotlin
+// CredentialStatus.kt
+@Serializable
+data class CredentialStatus(
+    val id: String,                    // e.g. "https://registry.example/api/status/1#42"
+    val type: String,                  // "BitstringStatusListEntry"
+    val statusPurpose: String,         // "revocation"
+    val statusListIndex: String,       // "42"
+    val statusListCredential: String   // "https://registry.example/api/status/1"
+)
+```
+
+**Step 3: Add `credentialStatus` to VerifiableCredential**
+
+```kotlin
+// In VerifiableCredential.kt — add optional field:
+val credentialStatus: CredentialStatus? = null
+```
+
+**Step 4: Ensure VerifierImpl uses `ignoreUnknownKeys = true`**
+
+```kotlin
+// In VerifierImpl.kt — ensure the Json instance handles new fields:
+private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
+```
+
+**Step 5: Write tests**
+
+```kotlin
+@Test
+fun `DidDocument deserializes with nextKeyHash`() {
+    val json = """{"id":"did:ssdid:abc","verificationMethod":[],"authentication":[],"nextKeyHash":"uSHA3hash"}"""
+    val doc = Json { ignoreUnknownKeys = true }.decodeFromString<DidDocument>(json)
+    assertThat(doc.nextKeyHash).isEqualTo("uSHA3hash")
+}
+
+@Test
+fun `CredentialStatus serialization round-trip`() {
+    val status = CredentialStatus(
+        id = "https://reg.example/api/status/1#42",
+        type = "BitstringStatusListEntry",
+        statusPurpose = "revocation",
+        statusListIndex = "42",
+        statusListCredential = "https://reg.example/api/status/1"
+    )
+    val json = Json.encodeToString(status)
+    val decoded = Json.decodeFromString<CredentialStatus>(json)
+    assertThat(decoded).isEqualTo(status)
+}
+```
+
+**Step 6: Run tests, commit**
+
+```bash
+cd android && ./gradlew testDebugUnitTest --tests "*.CredentialStatusTest"
+git add -A && git commit -m "feat(android): add nextKeyHash and credentialStatus model fields (Gap 9, 10)"
+```
+
+---
+
+### Task 17: Recovery Key Generation (Gap 1 — Tier 1)
+
+**Files:**
+- Modify: `android/app/src/main/java/my/ssdid/mobile/domain/vault/Vault.kt`
+- Modify: `android/app/src/main/java/my/ssdid/mobile/domain/vault/VaultImpl.kt`
+- Modify: `android/app/src/main/java/my/ssdid/mobile/domain/model/Identity.kt`
+- Create: `android/app/src/main/java/my/ssdid/mobile/domain/recovery/RecoveryManager.kt`
+- Create: `android/app/src/main/java/my/ssdid/mobile/feature/recovery/RecoverySetupScreen.kt`
+- Test: `android/app/src/test/java/my/ssdid/mobile/domain/recovery/RecoveryManagerTest.kt`
+
+**Step 1: Add recovery key fields to Identity**
+
+```kotlin
+// In Identity.kt — add:
+val recoveryKeyId: String? = null,
+val hasRecoveryKey: Boolean = false
+```
+
+**Step 2: Create RecoveryManager**
+
+```kotlin
+@Singleton
+class RecoveryManager @Inject constructor(
+    private val vault: Vault,
+    private val classicalProvider: ClassicalProvider
+) {
+    /**
+     * Generate a recovery keypair for the given identity.
+     * Returns the recovery private key bytes — caller must export/store offline.
+     * The recovery public key is added to the DID Document.
+     */
+    suspend fun generateRecoveryKey(identity: Identity): Result<ByteArray> {
+        val algo = identity.algorithm
+        val recoveryKeyPair = classicalProvider.generateKeyPair(algo)
+        // Store recovery public key reference in identity metadata
+        val recoveryKeyId = "${identity.keyId}-recovery"
+        vault.storeRecoveryPublicKey(recoveryKeyId, recoveryKeyPair.publicKey, algo)
+        return Result.success(recoveryKeyPair.privateKey)
+    }
+
+    /**
+     * Recover identity using offline recovery key.
+     * Signs a DID Document update removing old device key, adding new device key.
+     */
+    suspend fun recoverWithKey(
+        did: String,
+        recoveryPrivateKey: ByteArray,
+        newDevicePublicKey: ByteArray
+    ): Result<Unit> {
+        // Build rotation request signed by recovery key
+        // Submit to registry
+        return Result.success(Unit)
+    }
+}
+```
+
+**Step 3: Add Vault interface methods**
+
+```kotlin
+// In Vault.kt — add:
+suspend fun storeRecoveryPublicKey(keyId: String, publicKey: ByteArray, algorithm: Algorithm)
+suspend fun getRecoveryPublicKey(keyId: String): ByteArray?
+```
+
+**Step 4: Create RecoverySetupScreen**
+
+- Header with back arrow
+- Three tier cards matching mockup screen 14
+- Tier 1 button calls `viewModel.generateRecoveryKey()`
+- On success, display recovery key as QR code or copyable text for offline storage
+- Tiers 2 and 3 show "Coming Soon" disabled state
+
+**Step 5: Add navigation route**
+
+```kotlin
+// In NavGraph.kt — add route:
+composable("recovery-setup/{keyId}") { backStackEntry ->
+    val keyId = backStackEntry.arguments?.getString("keyId") ?: return@composable
+    RecoverySetupScreen(
+        keyId = keyId,
+        onBack = { navController.popBackStack() }
+    )
+}
+```
+
+**Step 6: Write tests**
+
+```kotlin
+@Test
+fun `generateRecoveryKey returns private key bytes`() = runTest {
+    val identity = Identity(keyId = "key1", did = "did:ssdid:abc", name = "Test", ...)
+    val result = recoveryManager.generateRecoveryKey(identity)
+    assertThat(result.isSuccess).isTrue()
+    assertThat(result.getOrNull()).isNotEmpty()
+}
+```
+
+**Step 7: Run tests, commit**
+
+```bash
+cd android && ./gradlew testDebugUnitTest --tests "*.RecoveryManagerTest"
+git add -A && git commit -m "feat(android): add recovery key generation (Gap 1 Tier 1)"
+```
+
+---
+
+### Task 18: Encrypted Backup & Export (Gap 5)
+
+**Files:**
+- Create: `android/app/src/main/java/my/ssdid/mobile/domain/backup/BackupManager.kt`
+- Create: `android/app/src/main/java/my/ssdid/mobile/domain/backup/BackupFormat.kt`
+- Create: `android/app/src/main/java/my/ssdid/mobile/feature/backup/BackupScreen.kt`
+- Modify: `android/app/src/main/java/my/ssdid/mobile/di/AppModule.kt`
+- Test: `android/app/src/test/java/my/ssdid/mobile/domain/backup/BackupManagerTest.kt`
+
+**Step 1: Create BackupFormat data classes**
+
+```kotlin
+@Serializable
+data class BackupPackage(
+    val version: Int = 1,
+    val salt: String,       // base64url
+    val nonce: String,      // base64url
+    val ciphertext: String, // base64url
+    val algorithms: List<String>,
+    val dids: List<String>,
+    val createdAt: String,
+    val hmac: String        // base64url, HMAC-SHA256 over package (using mac_key)
+)
+
+@Serializable
+data class BackupPayload(
+    val identities: List<BackupIdentity>
+)
+
+@Serializable
+data class BackupIdentity(
+    val keyId: String,
+    val did: String,
+    val name: String,
+    val algorithm: String,
+    val privateKey: String,  // base64url
+    val publicKey: String,   // base64url
+    val createdAt: String
+)
+```
+
+**Step 2: Create BackupManager**
+
+```kotlin
+@Singleton
+class BackupManager @Inject constructor(
+    private val vault: Vault,
+    private val biometricAuthenticator: BiometricAuthenticator
+) {
+    companion object {
+        private const val ARGON2_TIME = 3
+        private const val ARGON2_MEMORY = 65536 // 64MB
+        private const val ARGON2_PARALLELISM = 1
+        private const val SALT_LENGTH = 32
+        private const val NONCE_LENGTH = 12
+    }
+
+    /**
+     * Create encrypted backup of all identities.
+     * Requires biometric auth to unlock hardware keystore.
+     * Passphrase encrypts the backup via Argon2id + AES-256-GCM.
+     * Uses HKDF to derive separate enc_key and mac_key.
+     */
+    suspend fun createBackup(passphrase: String): Result<ByteArray>
+
+    /**
+     * Restore identities from encrypted backup.
+     */
+    suspend fun restoreBackup(backupData: ByteArray, passphrase: String): Result<Int>
+}
+```
+
+**Step 3: Create BackupScreen** matching mockup screen 16
+
+- Passphrase and confirm inputs
+- Strength indicator
+- Create Backup button (triggers biometric → export)
+- Import Backup File button (file picker → passphrase prompt → restore)
+
+**Step 4: Add route and DI**
+
+**Step 5: Write tests**
+
+```kotlin
+@Test
+fun `createBackup and restoreBackup round-trip`() = runTest {
+    // Setup: create an identity in vault
+    // Create backup with passphrase
+    // Restore backup with same passphrase
+    // Verify identity is restored
+}
+
+@Test
+fun `restoreBackup fails with wrong passphrase`() = runTest {
+    // Create backup
+    // Attempt restore with different passphrase
+    // Verify failure
+}
+
+@Test
+fun `backup HMAC verification catches tampering`() = runTest {
+    // Create backup
+    // Tamper with ciphertext
+    // Verify HMAC check fails before decryption
+}
+```
+
+**Step 6: Run tests, commit**
+
+```bash
+cd android && ./gradlew testDebugUnitTest --tests "*.BackupManagerTest"
+git add -A && git commit -m "feat(android): add encrypted backup and restore (Gap 5)"
+```
+
+---
+
+### Task 19: Key Rotation with Pre-Commitment (Gap 2)
+
+**Files:**
+- Create: `android/app/src/main/java/my/ssdid/mobile/domain/rotation/KeyRotationManager.kt`
+- Modify: `android/app/src/main/java/my/ssdid/mobile/domain/vault/Vault.kt`
+- Modify: `android/app/src/main/java/my/ssdid/mobile/domain/vault/VaultImpl.kt`
+- Modify: `android/app/src/main/java/my/ssdid/mobile/domain/SsdidClient.kt`
+- Create: `android/app/src/main/java/my/ssdid/mobile/feature/rotation/KeyRotationScreen.kt`
+- Test: `android/app/src/test/java/my/ssdid/mobile/domain/rotation/KeyRotationManagerTest.kt`
+
+**Dependencies:** Task 16 (nextKeyHash model field)
+
+**Step 1: Create KeyRotationManager**
+
+```kotlin
+@Singleton
+class KeyRotationManager @Inject constructor(
+    private val vault: Vault,
+    private val client: SsdidClient
+) {
+    /**
+     * Prepare rotation: generate next keypair, compute SHA3-256 hash,
+     * store pre-rotated key securely. Returns the hash to publish.
+     */
+    suspend fun prepareRotation(identity: Identity): Result<String>
+
+    /**
+     * Execute rotation: reveal pre-committed key, generate next pre-commitment,
+     * sign DID Document update with current key, submit to registry.
+     */
+    suspend fun executeRotation(identity: Identity): Result<Identity>
+
+    /**
+     * Get pre-rotation status for an identity.
+     */
+    suspend fun getRotationStatus(identity: Identity): RotationStatus
+}
+
+data class RotationStatus(
+    val hasPreCommitment: Boolean,
+    val nextKeyHash: String?,
+    val lastRotatedAt: String?,
+    val rotationHistory: List<RotationEntry>
+)
+
+data class RotationEntry(
+    val timestamp: String,
+    val oldKeyIdFragment: String,
+    val newKeyIdFragment: String
+)
+```
+
+**Step 2: Add Vault methods for pre-rotated keys**
+
+```kotlin
+// In Vault.kt — add:
+suspend fun storePreRotatedKey(identityKeyId: String, preRotatedKeyPair: KeyPair)
+suspend fun getPreRotatedKey(identityKeyId: String): KeyPair?
+suspend fun promotePreRotatedKey(identityKeyId: String): Identity
+```
+
+**Step 3: Add SsdidClient rotation endpoint**
+
+```kotlin
+// In SsdidClient.kt — add:
+suspend fun submitKeyRotation(
+    identity: Identity,
+    newPublicKey: ByteArray,
+    nextKeyHash: String,
+    signedUpdate: ByteArray
+): Result<Unit>
+```
+
+**Step 4: Create KeyRotationScreen** matching mockup screen 15
+
+- Current key info card
+- Pre-commitment status
+- "Rotate Now" button
+- Warning about grace period
+- Rotation history
+
+**Step 5: Write tests**
+
+```kotlin
+@Test
+fun `prepareRotation generates pre-commitment hash`() = runTest { ... }
+
+@Test
+fun `executeRotation promotes pre-rotated key`() = runTest { ... }
+
+@Test
+fun `executeRotation fails without pre-commitment`() = runTest { ... }
+```
+
+**Step 6: Run tests, commit**
+
+```bash
+cd android && ./gradlew testDebugUnitTest --tests "*.KeyRotationManagerTest"
+git add -A && git commit -m "feat(android): add key rotation with KERI pre-commitment (Gap 2)"
+```
+
+---
+
+### Task 20: Activity History Persistence (Gap 9)
+
+**Files:**
+- Create: `android/app/src/main/java/my/ssdid/mobile/domain/history/ActivityRepository.kt`
+- Create: `android/app/src/main/java/my/ssdid/mobile/domain/history/ActivityRepositoryImpl.kt`
+- Create: `android/app/src/main/java/my/ssdid/mobile/domain/model/ActivityRecord.kt`
+- Modify: `android/app/src/main/java/my/ssdid/mobile/feature/history/TxHistoryScreen.kt`
+- Modify: `android/app/src/main/java/my/ssdid/mobile/domain/SsdidClient.kt`
+- Test: `android/app/src/test/java/my/ssdid/mobile/domain/history/ActivityRepositoryTest.kt`
+
+**Step 1: Create ActivityRecord model**
+
+```kotlin
+@Serializable
+data class ActivityRecord(
+    val id: String,                    // UUID
+    val type: ActivityType,
+    val did: String,
+    val serviceDid: String? = null,
+    val serviceUrl: String? = null,
+    val timestamp: String,             // ISO 8601
+    val status: ActivityStatus,
+    val details: Map<String, String> = emptyMap()
+)
+
+@Serializable
+enum class ActivityType {
+    IDENTITY_CREATED, KEY_ROTATED, DEVICE_ENROLLED, DEVICE_REMOVED,
+    SERVICE_REGISTERED, AUTHENTICATED, TX_SIGNED,
+    CREDENTIAL_RECEIVED, CREDENTIAL_PRESENTED, BACKUP_CREATED
+}
+
+@Serializable
+enum class ActivityStatus { SUCCESS, FAILED }
+```
+
+**Step 2: Create ActivityRepository interface and DataStore-backed implementation**
+
+**Step 3: Wire into SsdidClient** — record activity after each operation
+
+**Step 4: Update TxHistoryScreen** — read from ActivityRepository instead of empty list
+
+**Step 5: Write tests, commit**
+
+```bash
+cd android && ./gradlew testDebugUnitTest --tests "*.ActivityRepositoryTest"
+git add -A && git commit -m "feat(android): add persistent activity history (Gap 9)"
+```
+
+---
+
+### Task 21: Device Management UI (Gap 3 — Partial)
+
+**Files:**
+- Create: `android/app/src/main/java/my/ssdid/mobile/feature/device/DeviceManagementScreen.kt`
+- Modify: `android/app/src/main/java/my/ssdid/mobile/ui/navigation/NavGraph.kt`
+
+**Note:** This task adds the Device Management UI and navigation only. The actual multi-device enrollment protocol (QR pairing, registry relay) requires backend work and is deferred to a future task. The screen shows current device info and a "Coming Soon" state for enrollment.
+
+**Step 1: Create DeviceManagementScreen** matching mockup screen 17
+
+- "This Device" card with device name, primary badge, key ID
+- "Other Devices" section (empty with "No other devices enrolled" message)
+- "Enroll New Device" button (disabled with "Coming Soon" tooltip)
+
+**Step 2: Add navigation route**
+
+```kotlin
+composable("device-management/{keyId}") { backStackEntry ->
+    val keyId = backStackEntry.arguments?.getString("keyId") ?: return@composable
+    DeviceManagementScreen(
+        keyId = keyId,
+        onBack = { navController.popBackStack() }
+    )
+}
+```
+
+**Step 3: Link from IdentityDetailScreen** — add "Devices" action button
+
+**Step 4: Commit**
+
+```bash
+git add -A && git commit -m "feat(android): add device management screen placeholder (Gap 3)"
+```
+
+---
+
+### Task 22: Settings Navigation to Gap Features
+
+**Files:**
+- Modify: `android/app/src/main/java/my/ssdid/mobile/feature/settings/SettingsScreen.kt`
+- Modify: `android/app/src/main/java/my/ssdid/mobile/ui/navigation/NavGraph.kt`
+
+**Step 1: Add settings entries for gap features**
+
+Add these items to the Settings screen:
+- "Recovery Setup" → navigates to `recovery-setup/{keyId}` (requires selecting identity first)
+- "Backup & Export" → navigates to `backup-export`
+- "Key Rotation" → navigates to `key-rotation/{keyId}` (requires selecting identity first)
+
+**Step 2: Wire navigation routes** for all new screens in NavGraph
+
+**Step 3: Commit**
+
+```bash
+git add -A && git commit -m "feat(android): wire settings navigation to gap feature screens"
+```
+
+---
+
 ## Phase 2: iOS (Swift / SwiftUI)
 
 Mirror the Android architecture. Key differences:
@@ -1937,7 +2461,7 @@ Mirror the Android architecture. Key differences:
 6. Transport (URLSession + Codable DTOs)
 7. Verifier
 8. SsdidClient
-9. SwiftUI screens (13 screens matching mockup)
+9. SwiftUI screens (17 screens matching mockup — 13 core + 4 gap feature screens)
 10. QR Scanner (AVFoundation)
 11. Deep Links (Universal Links)
 12. i18n (Localizable.strings)
@@ -1967,9 +2491,12 @@ Mirror the same architecture. Key differences:
 ## Execution Order Summary
 
 ```
-Phase 1: Android (Tasks 1-15)  ← Reference implementation, full TDD
-Phase 2: iOS (Tasks 1-12)      ← Port domain layer, native platform layer
-Phase 3: HarmonyOS (Tasks 1-12 + N-API binding)
+Phase 1:  Android (Tasks 1-15)   ← Reference implementation, full TDD
+Phase 1B: Gap Remediation (Tasks 16-22) ← Recovery, backup, rotation, history, device mgmt
+Phase 2:  iOS (Tasks 1-12)       ← Port domain layer, native platform layer
+Phase 3:  HarmonyOS (Tasks 1-12 + N-API binding)
 ```
 
 Each phase is independently deployable. Start Phase 2 after Phase 1 Tasks 1-8 (domain layer complete). Phase 3 can start after Phase 1 Tasks 1-8 as well. UI tasks (10+) can be parallelized across platforms.
+
+Phase 1B depends on Phase 1 completion. Task 19 (key rotation) depends on Task 16 (model prerequisites). Task 17 (recovery) and Task 18 (backup) are independent of each other.
