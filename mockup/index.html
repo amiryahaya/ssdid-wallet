@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SSDID Mobile App Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- SCREEN NAVIGATOR -->
+<div class="screen-nav">
+  <div class="screen-nav-inner">
+    <button class="nav-pill active" data-screen="onboarding">Onboarding</button>
+    <button class="nav-pill" data-screen="create-identity">Create ID</button>
+    <button class="nav-pill" data-screen="biometric-setup">Biometric</button>
+    <button class="nav-pill" data-screen="wallet-home">Wallet</button>
+    <button class="nav-pill" data-screen="identity-detail">ID Detail</button>
+    <button class="nav-pill" data-screen="scan-qr">Scan QR</button>
+    <button class="nav-pill" data-screen="registration">Register</button>
+    <button class="nav-pill" data-screen="auth-flow">Auth</button>
+    <button class="nav-pill" data-screen="tx-signing">Sign TX</button>
+    <button class="nav-pill" data-screen="credentials">Credentials</button>
+    <button class="nav-pill" data-screen="credential-detail">VC Detail</button>
+    <button class="nav-pill" data-screen="settings">Settings</button>
+    <button class="nav-pill" data-screen="tx-history">History</button>
+  </div>
+</div>
+
+<!-- PHONE FRAME -->
+<div class="phone-frame">
+  <div class="phone-notch"></div>
+  <div class="phone-screen">
+
+    <!-- ==================== SCREEN: ONBOARDING ==================== -->
+    <div class="screen active" id="screen-onboarding">
+      <div class="onboarding-bg">
+        <div class="onboarding-grid"></div>
+        <div class="onboarding-glow"></div>
+      </div>
+      <div class="onboarding-content">
+        <div class="onboarding-logo">
+          <div class="logo-mark">
+            <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+              <rect x="4" y="4" width="56" height="56" rx="16" stroke="currentColor" stroke-width="2"/>
+              <path d="M20 32L28 40L44 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="32" cy="16" r="3" fill="currentColor" opacity="0.4"/>
+              <circle cx="32" cy="48" r="3" fill="currentColor" opacity="0.4"/>
+              <circle cx="16" cy="32" r="3" fill="currentColor" opacity="0.4"/>
+              <circle cx="48" cy="32" r="3" fill="currentColor" opacity="0.4"/>
+            </svg>
+          </div>
+          <h1 class="onboarding-title">SSDID</h1>
+          <p class="onboarding-subtitle">Self-Sovereign Digital Identity</p>
+        </div>
+
+        <div class="onboarding-slides">
+          <div class="slide active" data-slide="0">
+            <div class="slide-icon">
+              <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <path d="M24 4L6 14V24C6 35.1 13.68 45.36 24 48C34.32 45.36 42 35.1 42 24V14L24 4Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                <path d="M18 24L22 28L30 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h2>Own Your Identity</h2>
+            <p>Create and control your digital identity. No central authority. Your keys, your data.</p>
+          </div>
+          <div class="slide" data-slide="1">
+            <div class="slide-icon">
+              <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <rect x="8" y="20" width="32" height="22" rx="4" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M16 20V14C16 9.58 19.58 6 24 6C28.42 6 32 9.58 32 14V20" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="24" cy="31" r="3" fill="currentColor"/>
+                <path d="M24 34V37" stroke="currentColor" stroke-width="1.5"/>
+              </svg>
+            </div>
+            <h2>Post-Quantum Security</h2>
+            <p>Protected by KAZ-Sign cryptography. Future-proof against quantum computing threats.</p>
+          </div>
+          <div class="slide" data-slide="2">
+            <div class="slide-icon">
+              <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <path d="M12 16H36M12 24H36M12 32H28" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="38" cy="34" r="8" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M35 34L37 36L41 32" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h2>Verifiable Credentials</h2>
+            <p>Receive and present tamper-proof digital credentials. No personal data exposed.</p>
+          </div>
+        </div>
+
+        <div class="slide-dots">
+          <span class="dot active"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
+
+        <div class="onboarding-actions">
+          <button class="btn-primary" onclick="nextSlideOrScreen()">
+            <span class="btn-text">Get Started</span>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN: CREATE IDENTITY ==================== -->
+    <div class="screen" id="screen-create-identity">
+      <div class="screen-header">
+        <button class="header-back" onclick="showScreen('onboarding')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <h2 class="header-title">Create Identity</h2>
+        <div class="header-spacer"></div>
+      </div>
+
+      <div class="screen-body">
+        <div class="section-label">Identity Name</div>
+        <div class="input-group">
+          <input type="text" class="text-input" placeholder="e.g. Personal, Work" value="Personal">
+        </div>
+
+        <div class="section-label">Signature Algorithm</div>
+        <div class="algo-selector">
+          <div class="algo-card">
+            <div class="algo-badge classical">Classical</div>
+            <button class="algo-option" data-algo="ed25519">
+              <span class="algo-name">Ed25519</span>
+              <span class="algo-desc">Recommended default</span>
+            </button>
+            <button class="algo-option" data-algo="ecdsa-p256">
+              <span class="algo-name">ECDSA P-256</span>
+              <span class="algo-desc">NIST compliance</span>
+            </button>
+            <button class="algo-option" data-algo="ecdsa-p384">
+              <span class="algo-name">ECDSA P-384</span>
+              <span class="algo-desc">High security</span>
+            </button>
+          </div>
+          <div class="algo-card">
+            <div class="algo-badge pqc">Post-Quantum</div>
+            <button class="algo-option selected" data-algo="kaz-sign">
+              <span class="algo-name">KAZ-Sign</span>
+              <span class="algo-desc">Quantum-resistant</span>
+              <span class="algo-check">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 8L7 11L12 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <div class="section-label">KAZ-Sign Security Level</div>
+        <div class="level-selector">
+          <button class="level-option" data-level="128">
+            <span class="level-num">128</span>
+            <span class="level-hash">SHA-256</span>
+            <span class="level-meta">PK: 54B / Sig: 162B</span>
+          </button>
+          <button class="level-option selected" data-level="192">
+            <span class="level-num">192</span>
+            <span class="level-hash">SHA-384</span>
+            <span class="level-meta">PK: 88B / Sig: 264B</span>
+          </button>
+          <button class="level-option" data-level="256">
+            <span class="level-num">256</span>
+            <span class="level-hash">SHA-512</span>
+            <span class="level-meta">PK: 118B / Sig: 356B</span>
+          </button>
+        </div>
+
+        <div class="info-card">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1"/>
+            <path d="M9 8V13M9 5.5V6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          <p>Your private key will be generated on-device and protected by hardware-backed encryption. It never leaves this device.</p>
+        </div>
+      </div>
+
+      <div class="screen-footer">
+        <button class="btn-primary" onclick="showScreen('biometric-setup')">
+          <span class="btn-text">Create Identity</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN: BIOMETRIC SETUP ==================== -->
+    <div class="screen" id="screen-biometric-setup">
+      <div class="screen-header">
+        <button class="header-back" onclick="showScreen('create-identity')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <h2 class="header-title">Security Setup</h2>
+        <div class="header-spacer"></div>
+      </div>
+
+      <div class="screen-body centered">
+        <div class="biometric-icon">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+            <path d="M28 16C28 16 32 12 40 12C48 12 52 16 52 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.3"/>
+            <path d="M22 24C22 24 28 16 40 16C52 16 58 24 58 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+            <path d="M18 32C18 32 24 20 40 20C56 20 62 32 62 32" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+            <path d="M16 40C16 40 22 24 40 24C58 24 64 40 64 40" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+            <path d="M40 28C40 28 48 32 48 44C48 56 40 64 40 64" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M40 36C40 36 44 38 44 46C44 54 40 58 40 58" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M32 34C32 34 32 42 34 48" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+          </svg>
+        </div>
+
+        <h2 class="biometric-title">Enable Biometric</h2>
+        <p class="biometric-desc">Use fingerprint or face recognition to quickly unlock your vault and authorize signing operations.</p>
+
+        <div class="biometric-features">
+          <div class="bio-feature">
+            <div class="bio-feature-icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10L8 14L16 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <span>Unlock vault instantly</span>
+          </div>
+          <div class="bio-feature">
+            <div class="bio-feature-icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10L8 14L16 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <span>Authorize key operations</span>
+          </div>
+          <div class="bio-feature">
+            <div class="bio-feature-icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10L8 14L16 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <span>Password fallback available</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="screen-footer">
+        <button class="btn-primary" onclick="showScreen('wallet-home')">
+          <span class="btn-text">Enable Biometric</span>
+        </button>
+        <button class="btn-ghost" onclick="showScreen('wallet-home')">
+          <span class="btn-text">Use Password Instead</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN: WALLET HOME ==================== -->
+    <div class="screen" id="screen-wallet-home">
+      <div class="wallet-header">
+        <div class="wallet-header-top">
+          <div class="wallet-greeting">
+            <span class="greeting-label">Identity Wallet</span>
+            <h1 class="greeting-title">SSDID</h1>
+          </div>
+          <button class="icon-btn" onclick="showScreen('settings')">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+              <circle cx="11" cy="11" r="3" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M11 1V4M11 18V21M1 11H4M18 11H21M4.2 4.2L6.3 6.3M15.7 15.7L17.8 17.8M17.8 4.2L15.7 6.3M6.3 15.7L4.2 17.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="screen-body wallet-body">
+        <!-- Identity Cards -->
+        <div class="section-header">
+          <span class="section-label">My Identities</span>
+          <button class="section-action" onclick="showScreen('create-identity')">+ New</button>
+        </div>
+
+        <div class="identity-cards">
+          <div class="id-card" onclick="showScreen('identity-detail')">
+            <div class="id-card-header">
+              <div class="id-card-algo">
+                <span class="algo-tag pqc">KAZ-Sign 192</span>
+              </div>
+              <div class="id-card-status active">Active</div>
+            </div>
+            <div class="id-card-body">
+              <div class="id-card-name">Personal</div>
+              <div class="id-card-did">
+                <span class="did-prefix">did:ssdid:</span>
+                <span class="did-id">7KmVwPq9RtXz</span>
+              </div>
+            </div>
+            <div class="id-card-footer">
+              <div class="id-card-meta">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1V7L10 10" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+                Created 2 Mar 2026
+              </div>
+              <div class="id-card-creds">3 credentials</div>
+            </div>
+          </div>
+
+          <div class="id-card secondary" onclick="showScreen('identity-detail')">
+            <div class="id-card-header">
+              <div class="id-card-algo">
+                <span class="algo-tag classical">Ed25519</span>
+              </div>
+              <div class="id-card-status active">Active</div>
+            </div>
+            <div class="id-card-body">
+              <div class="id-card-name">Work</div>
+              <div class="id-card-did">
+                <span class="did-prefix">did:ssdid:</span>
+                <span class="did-id">xN3FyBqW8mTp</span>
+              </div>
+            </div>
+            <div class="id-card-footer">
+              <div class="id-card-meta">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1V7L10 10" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+                Created 4 Mar 2026
+              </div>
+              <div class="id-card-creds">1 credential</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="section-header">
+          <span class="section-label">Quick Actions</span>
+        </div>
+        <div class="quick-actions">
+          <button class="action-card" onclick="showScreen('scan-qr')">
+            <div class="action-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M4 8V4H8M16 4H20V8M20 16V20H16M8 20H4V16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="9" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1"/>
+              </svg>
+            </div>
+            <span>Scan QR</span>
+          </button>
+          <button class="action-card" onclick="showScreen('credentials')">
+            <div class="action-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="5" width="18" height="14" rx="3" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M3 10H21" stroke="currentColor" stroke-width="1"/>
+                <path d="M7 15H12" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <span>Credentials</span>
+          </button>
+          <button class="action-card" onclick="showScreen('tx-history')">
+            <div class="action-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M12 7V12L15 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <span>History</span>
+          </button>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="section-header">
+          <span class="section-label">Recent Activity</span>
+          <button class="section-action" onclick="showScreen('tx-history')">View All</button>
+        </div>
+        <div class="activity-list">
+          <div class="activity-item">
+            <div class="activity-icon auth">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M5 9L8 12L13 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <div class="activity-info">
+              <div class="activity-title">Authenticated</div>
+              <div class="activity-sub">MyBank Portal</div>
+            </div>
+            <div class="activity-time">2m ago</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon sign">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M14 4L4 14M4 14H9M4 14V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="activity-info">
+              <div class="activity-title">Transaction Signed</div>
+              <div class="activity-sub">Transfer #TX-4829</div>
+            </div>
+            <div class="activity-time">1h ago</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon register">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 4V14M4 9H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <div class="activity-info">
+              <div class="activity-title">Registered</div>
+              <div class="activity-sub">GovServices Portal</div>
+            </div>
+            <div class="activity-time">3d ago</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Tab Bar -->
+      <div class="tab-bar">
+        <button class="tab active">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 8L11 2L19 8V18C19 19.1 18.1 20 17 20H5C3.9 20 3 19.1 3 18V8Z" stroke="currentColor" stroke-width="1.5"/></svg>
+          <span>Home</span>
+        </button>
+        <button class="tab" onclick="showScreen('credentials')">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="4" width="18" height="14" rx="3" stroke="currentColor" stroke-width="1.5"/><path d="M2 9H20" stroke="currentColor" stroke-width="1"/></svg>
+          <span>Credentials</span>
+        </button>
+        <button class="tab scan-tab" onclick="showScreen('scan-qr')">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+            <path d="M4 9V4H9M17 4H22V9M22 17V22H17M9 22H4V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="tab" onclick="showScreen('tx-history')">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M11 6V11L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <span>History</span>
+        </button>
+        <button class="tab" onclick="showScreen('settings')">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M11 1V4M11 18V21M1 11H4M18 11H21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <span>Settings</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN: IDENTITY DETAIL ==================== -->
+    <div class="screen" id="screen-identity-detail">
+      <div class="screen-header">
+        <button class="header-back" onclick="showScreen('wallet-home')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <h2 class="header-title">Identity Details</h2>
+        <button class="header-action">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="4" r="1.5" fill="currentColor"/><circle cx="10" cy="10" r="1.5" fill="currentColor"/><circle cx="10" cy="16" r="1.5" fill="currentColor"/></svg>
+        </button>
+      </div>
+
+      <div class="screen-body">
+        <div class="detail-card">
+          <div class="detail-card-header">
+            <h3>Personal</h3>
+            <span class="status-badge active">Active</span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-label">DID</span>
+            <div class="detail-value mono">
+              <span>did:ssdid:7KmVwPq9RtXzN3Fy</span>
+              <button class="copy-btn">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="4" y="4" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1"/><path d="M2 10V2H10" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-label">Key ID</span>
+            <div class="detail-value mono">
+              <span>did:ssdid:7KmVwPq9RtXzN3Fy#key-1</span>
+              <button class="copy-btn">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="4" y="4" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1"/><path d="M2 10V2H10" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-label">Algorithm</span>
+            <div class="detail-value"><span class="algo-tag pqc">KAZ-Sign 192</span></div>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-label">W3C Type</span>
+            <div class="detail-value mono"><span>KazSignVerificationKey2024</span></div>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-label">Created</span>
+            <div class="detail-value">2 March 2026, 10:24 AM</div>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-label">Key Storage</span>
+            <div class="detail-value">
+              <span class="storage-badge">Hardware-backed</span>
+            </div>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-label">Public Key</span>
+            <div class="detail-value mono truncated">
+              <span>uhaXgBZDq8R2mNvK4tYpWx...</span>
+              <button class="copy-btn">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="4" y="4" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1"/><path d="M2 10V2H10" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-header">
+          <span class="section-label">Linked Credentials</span>
+          <span class="section-count">3</span>
+        </div>
+
+        <div class="credential-mini-list">
+          <div class="cred-mini" onclick="showScreen('credential-detail')">
+            <div class="cred-mini-icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="4" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M2 8H18" stroke="currentColor" stroke-width="1"/></svg>
+            </div>
+            <div class="cred-mini-info">
+              <div class="cred-mini-name">MyBank Account</div>
+              <div class="cred-mini-issuer">Issued by did:ssdid:bAnk...sVr</div>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          </div>
+          <div class="cred-mini">
+            <div class="cred-mini-icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L3 6V10C3 14.4 6.2 18.5 10 19.5C13.8 18.5 17 14.4 17 10V6L10 2Z" stroke="currentColor" stroke-width="1.2"/></svg>
+            </div>
+            <div class="cred-mini-info">
+              <div class="cred-mini-name">GovServices</div>
+              <div class="cred-mini-issuer">Issued by did:ssdid:gOvS...xQr</div>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          </div>
+          <div class="cred-mini">
+            <div class="cred-mini-icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="4" stroke="currentColor" stroke-width="1.2"/><path d="M3 18C3 14.1 6.1 11 10 11C13.9 11 17 14.1 17 18" stroke="currentColor" stroke-width="1.2"/></svg>
+            </div>
+            <div class="cred-mini-info">
+              <div class="cred-mini-name">Enterprise SSO</div>
+              <div class="cred-mini-issuer">Issued by did:ssdid:eNtR...mWz</div>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+
+        <div class="section-header">
+          <span class="section-label">DID Document</span>
+        </div>
+        <div class="json-preview">
+          <pre><code>{
+  "@context": ["https://www.w3.org/ns/did/v1"],
+  "id": "did:ssdid:7KmVwPq9RtXzN3Fy",
+  "controller": "did:ssdid:7KmVwPq9RtXzN3Fy",
+  "verificationMethod": [{
+    "id": "...#key-1",
+    "type": "KazSignVerificationKey2024",
+    "publicKeyMultibase": "uhaXgBZDq8..."
+  }],
+  "authentication": ["...#key-1"],
+  "assertionMethod": ["...#key-1"]
+}</code></pre>
+        </div>
+
+        <div class="danger-zone">
+          <button class="btn-danger">Deactivate Identity</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN: SCAN QR ==================== -->
+    <div class="screen" id="screen-scan-qr">
+      <div class="screen-header transparent">
+        <button class="header-back light" onclick="showScreen('wallet-home')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <h2 class="header-title light">Scan Code</h2>
+        <div class="header-spacer"></div>
+      </div>
+
+      <div class="scanner-view">
+        <div class="scanner-overlay">
+          <div class="scanner-frame">
+            <div class="corner tl"></div>
+            <div class="corner tr"></div>
+            <div class="corner bl"></div>
+            <div class="corner br"></div>
+            <div class="scan-line"></div>
+          </div>
+        </div>
+        <p class="scanner-hint">Point camera at a service QR code to register, authenticate, or sign</p>
+
+        <div class="scanner-actions">
+          <button class="scanner-btn">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M11 2V5M11 17V20M2 11H5M17 11H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span>Flash</span>
+          </button>
+          <button class="scanner-btn">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M8 8H14V14H8Z" stroke="currentColor" stroke-width="1"/></svg>
+            <span>Gallery</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN: REGISTRATION FLOW ==================== -->
+    <div class="screen" id="screen-registration">
+      <div class="screen-header">
+        <button class="header-back" onclick="showScreen('wallet-home')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <h2 class="header-title">Service Registration</h2>
+        <div class="header-spacer"></div>
+      </div>
+
+      <div class="screen-body">
+        <div class="flow-progress">
+          <div class="flow-step completed">
+            <div class="step-dot"></div>
+            <span>Scanned</span>
+          </div>
+          <div class="flow-line completed"></div>
+          <div class="flow-step completed">
+            <div class="step-dot"></div>
+            <span>Verified</span>
+          </div>
+          <div class="flow-line active"></div>
+          <div class="flow-step active">
+            <div class="step-dot"></div>
+            <span>Approve</span>
+          </div>
+          <div class="flow-line"></div>
+          <div class="flow-step">
+            <div class="step-dot"></div>
+            <span>Done</span>
+          </div>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <rect x="4" y="6" width="24" height="20" rx="4" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M4 12H28" stroke="currentColor" stroke-width="1"/>
+              <path d="M10 18H16" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              <path d="M10 22H22" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="service-info">
+            <div class="service-name">MyBank Portal</div>
+            <div class="service-did mono">did:ssdid:bAnKpOrTaL...sVr</div>
+          </div>
+          <div class="service-verified">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M5 9L8 12L13 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            Mutual auth verified
+          </div>
+        </div>
+
+        <div class="section-label">Select Identity</div>
+        <div class="identity-select">
+          <div class="id-select-option selected">
+            <div class="id-select-radio"></div>
+            <div class="id-select-info">
+              <span class="id-select-name">Personal</span>
+              <span class="id-select-algo">KAZ-Sign 192</span>
+            </div>
+            <span class="id-select-did mono">7KmV...tXz</span>
+          </div>
+          <div class="id-select-option">
+            <div class="id-select-radio"></div>
+            <div class="id-select-info">
+              <span class="id-select-name">Work</span>
+              <span class="id-select-algo">Ed25519</span>
+            </div>
+            <span class="id-select-did mono">xN3F...mTp</span>
+          </div>
+        </div>
+
+        <div class="info-card warning">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M9 2L1 16H17L9 2Z" stroke="currentColor" stroke-width="1"/>
+            <path d="M9 7V11M9 13.5V14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          <p>This service will receive your DID and public key. No personal data will be shared.</p>
+        </div>
+      </div>
+
+      <div class="screen-footer">
+        <button class="btn-primary" onclick="showScreen('wallet-home')">
+          <span class="btn-text">Approve Registration</span>
+        </button>
+        <button class="btn-ghost" onclick="showScreen('wallet-home')">
+          <span class="btn-text">Decline</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN: AUTHENTICATION ==================== -->
+    <div class="screen" id="screen-auth-flow">
+      <div class="screen-header">
+        <button class="header-back" onclick="showScreen('wallet-home')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <h2 class="header-title">Authentication</h2>
+        <div class="header-spacer"></div>
+      </div>
+
+      <div class="screen-body centered">
+        <div class="auth-service-icon">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <rect x="6" y="10" width="36" height="28" rx="6" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M6 18H42" stroke="currentColor" stroke-width="1"/>
+            <path d="M14 26H24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M14 32H32" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h2 class="auth-title">MyBank Portal</h2>
+        <p class="auth-subtitle">requests authentication</p>
+
+        <div class="auth-details">
+          <div class="auth-detail-row">
+            <span class="auth-detail-label">Service DID</span>
+            <span class="auth-detail-value mono">did:ssdid:bAnK...sVr</span>
+          </div>
+          <div class="auth-detail-row">
+            <span class="auth-detail-label">Identity</span>
+            <span class="auth-detail-value">Personal (KAZ-Sign 192)</span>
+          </div>
+          <div class="auth-detail-row">
+            <span class="auth-detail-label">Credential</span>
+            <span class="auth-detail-value">MyBank Account</span>
+          </div>
+          <div class="auth-detail-row">
+            <span class="auth-detail-label">Mutual Auth</span>
+            <span class="auth-detail-value verified">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7L6 10L11 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              Server verified
+            </span>
+          </div>
+        </div>
+
+        <div class="biometric-prompt">
+          <div class="biometric-prompt-icon">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+              <path d="M14 8C14 8 16 6 20 6C24 6 26 8 26 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity="0.4"/>
+              <path d="M10 12C10 12 14 8 20 8C26 8 30 12 30 12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity="0.6"/>
+              <path d="M8 16C8 16 12 10 20 10C28 10 32 16 32 16" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              <path d="M20 14C20 14 24 16 24 22C24 28 20 32 20 32" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              <path d="M20 18C20 18 22 19 22 23C22 27 20 29 20 29" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="biometric-prompt-text">Touch sensor to authenticate</span>
+        </div>
+      </div>
+
+      <div class="screen-footer">
+        <button class="btn-primary">
+          <span class="btn-text">Authenticate</span>
+        </button>
+        <button class="btn-ghost" onclick="showScreen('wallet-home')">
+          <span class="btn-text">Cancel</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN: TX SIGNING ==================== -->
+    <div class="screen" id="screen-tx-signing">
+      <div class="screen-header">
+        <button class="header-back" onclick="showScreen('wallet-home')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <h2 class="header-title">Sign Transaction</h2>
+        <div class="header-spacer"></div>
+      </div>
+
+      <div class="screen-body">
+        <div class="tx-service">
+          <span class="tx-service-label">Requested by</span>
+          <span class="tx-service-name">MyBank Portal</span>
+        </div>
+
+        <div class="tx-card">
+          <div class="tx-card-header">
+            <span class="tx-card-title">Transaction Details</span>
+            <span class="tx-card-id mono">#TX-4830</span>
+          </div>
+
+          <div class="tx-row">
+            <span class="tx-label">Type</span>
+            <span class="tx-value">Fund Transfer</span>
+          </div>
+          <div class="tx-row">
+            <span class="tx-label">Amount</span>
+            <span class="tx-value highlight">RM 5,000.00</span>
+          </div>
+          <div class="tx-row">
+            <span class="tx-label">Recipient</span>
+            <span class="tx-value">Ahmad bin Hassan</span>
+          </div>
+          <div class="tx-row">
+            <span class="tx-label">Account</span>
+            <span class="tx-value mono">****-****-8842</span>
+          </div>
+          <div class="tx-row">
+            <span class="tx-label">Reference</span>
+            <span class="tx-value">Invoice #INV-2026-0342</span>
+          </div>
+        </div>
+
+        <div class="tx-security">
+          <div class="tx-security-row">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1L2 4V8C2 12.4 4.9 16.5 8 17.3C11.1 16.5 14 12.4 14 8V4L8 1Z" stroke="currentColor" stroke-width="1"/></svg>
+            <span>Transaction bound to challenge via SHA3-256</span>
+          </div>
+          <div class="tx-security-row">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 8L7 11L12 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            <span>Signing with KAZ-Sign 192</span>
+          </div>
+          <div class="tx-security-row">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1"/><path d="M8 5V8L10 10" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+            <span>Challenge expires in 4:32</span>
+          </div>
+        </div>
+
+        <div class="tx-hash">
+          <span class="tx-hash-label">TX Hash (SHA3-256)</span>
+          <span class="tx-hash-value mono">a7f3b2e1...c9d4f8</span>
+        </div>
+      </div>
+
+      <div class="screen-footer">
+        <button class="btn-primary btn-sign">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M14 4L4 14M4 14H9M4 14V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="btn-text">Sign & Submit</span>
+        </button>
+        <button class="btn-ghost" onclick="showScreen('wallet-home')">
+          <span class="btn-text">Reject</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN: CREDENTIALS ==================== -->
+    <div class="screen" id="screen-credentials">
+      <div class="screen-header">
+        <button class="header-back" onclick="showScreen('wallet-home')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <h2 class="header-title">Credentials</h2>
+        <div class="header-spacer"></div>
+      </div>
+
+      <div class="screen-body">
+        <div class="cred-card" onclick="showScreen('credential-detail')">
+          <div class="cred-card-stripe bank"></div>
+          <div class="cred-card-content">
+            <div class="cred-card-header">
+              <div class="cred-card-type">AccountCredential</div>
+              <div class="cred-card-valid">Valid</div>
+            </div>
+            <div class="cred-card-name">MyBank Account</div>
+            <div class="cred-card-issuer">
+              <span class="cred-issuer-label">Issuer</span>
+              <span class="cred-issuer-did mono">did:ssdid:bAnKpOrTaL...sVr</span>
+            </div>
+            <div class="cred-card-footer">
+              <div class="cred-card-date">Issued: 2 Mar 2026</div>
+              <div class="cred-card-expires">Expires: 2 Mar 2027</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cred-card">
+          <div class="cred-card-stripe gov"></div>
+          <div class="cred-card-content">
+            <div class="cred-card-header">
+              <div class="cred-card-type">ServiceCredential</div>
+              <div class="cred-card-valid">Valid</div>
+            </div>
+            <div class="cred-card-name">GovServices Portal</div>
+            <div class="cred-card-issuer">
+              <span class="cred-issuer-label">Issuer</span>
+              <span class="cred-issuer-did mono">did:ssdid:gOvSeRvIcE...xQr</span>
+            </div>
+            <div class="cred-card-footer">
+              <div class="cred-card-date">Issued: 28 Feb 2026</div>
+              <div class="cred-card-expires">Expires: 28 Feb 2027</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cred-card">
+          <div class="cred-card-stripe enterprise"></div>
+          <div class="cred-card-content">
+            <div class="cred-card-header">
+              <div class="cred-card-type">EmployeeCredential</div>
+              <div class="cred-card-valid">Valid</div>
+            </div>
+            <div class="cred-card-name">Enterprise SSO</div>
+            <div class="cred-card-issuer">
+              <span class="cred-issuer-label">Issuer</span>
+              <span class="cred-issuer-did mono">did:ssdid:eNtRpRiSe...mWz</span>
+            </div>
+            <div class="cred-card-footer">
+              <div class="cred-card-date">Issued: 1 Mar 2026</div>
+              <div class="cred-card-expires">Expires: 1 Sep 2026</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab" onclick="showScreen('wallet-home')">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 8L11 2L19 8V18C19 19.1 18.1 20 17 20H5C3.9 20 3 19.1 3 18V8Z" stroke="currentColor" stroke-width="1.5"/></svg>
+          <span>Home</span>
+        </button>
+        <button class="tab active">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="4" width="18" height="14" rx="3" stroke="currentColor" stroke-width="1.5"/><path d="M2 9H20" stroke="currentColor" stroke-width="1"/></svg>
+          <span>Credentials</span>
+        </button>
+        <button class="tab scan-tab" onclick="showScreen('scan-qr')">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M4 9V4H9M17 4H22V9M22 17V22H17M9 22H4V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="tab" onclick="showScreen('tx-history')">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M11 6V11L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <span>History</span>
+        </button>
+        <button class="tab" onclick="showScreen('settings')">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M11 1V4M11 18V21M1 11H4M18 11H21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <span>Settings</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN: CREDENTIAL DETAIL ==================== -->
+    <div class="screen" id="screen-credential-detail">
+      <div class="screen-header">
+        <button class="header-back" onclick="showScreen('credentials')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <h2 class="header-title">Credential</h2>
+        <div class="header-spacer"></div>
+      </div>
+
+      <div class="screen-body">
+        <div class="vc-detail-card">
+          <div class="vc-detail-header">
+            <div class="vc-detail-type">AccountCredential</div>
+            <div class="vc-detail-status valid">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7L6 10L11 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              Valid
+            </div>
+          </div>
+          <h3 class="vc-detail-name">MyBank Account</h3>
+        </div>
+
+        <div class="detail-card compact">
+          <div class="detail-row">
+            <span class="detail-label">Credential ID</span>
+            <div class="detail-value mono"><span>urn:uuid:a1b2c3d4-e5f6...</span></div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Issuer</span>
+            <div class="detail-value mono"><span>did:ssdid:bAnKpOrTaL...sVr</span></div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Subject</span>
+            <div class="detail-value mono"><span>did:ssdid:7KmVwPq9RtXzN3Fy</span></div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Issued</span>
+            <div class="detail-value">2 March 2026, 10:30 AM</div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Expires</span>
+            <div class="detail-value">2 March 2027, 10:30 AM</div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Proof Type</span>
+            <div class="detail-value"><span class="algo-tag pqc">KazSignSignature2024</span></div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Proof Purpose</span>
+            <div class="detail-value">assertionMethod</div>
+          </div>
+        </div>
+
+        <div class="section-header">
+          <span class="section-label">Verifiable Credential</span>
+        </div>
+        <div class="json-preview">
+          <pre><code>{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1"
+  ],
+  "id": "urn:uuid:a1b2c3d4-e5f6...",
+  "type": [
+    "VerifiableCredential",
+    "AccountCredential"
+  ],
+  "issuer": "did:ssdid:bAnKpOrTaL...sVr",
+  "issuanceDate": "2026-03-02T10:30:00Z",
+  "credentialSubject": {
+    "id": "did:ssdid:7KmVwPq9RtXzN3Fy"
+  },
+  "proof": {
+    "type": "KazSignSignature2024",
+    "proofPurpose": "assertionMethod",
+    "proofValue": "uDAdFfa9SkqZ..."
+  }
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN: SETTINGS ==================== -->
+    <div class="screen" id="screen-settings">
+      <div class="screen-header">
+        <button class="header-back" onclick="showScreen('wallet-home')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <h2 class="header-title">Settings</h2>
+        <div class="header-spacer"></div>
+      </div>
+
+      <div class="screen-body">
+        <div class="settings-group">
+          <div class="settings-group-title">Security</div>
+          <div class="settings-item">
+            <div class="settings-item-icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M14 8C14 8 16 6 20 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity="0.4" transform="scale(0.5) translate(10,6)"/><path d="M6 10C6 10 8 14 10 14C12 14 14 10 14 10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><rect x="3" y="3" width="14" height="14" rx="4" stroke="currentColor" stroke-width="1.2"/></svg>
+            </div>
+            <div class="settings-item-info">
+              <span class="settings-item-name">Biometric Authentication</span>
+              <span class="settings-item-desc">Face ID / Fingerprint</span>
+            </div>
+            <div class="toggle active"></div>
+          </div>
+          <div class="settings-item">
+            <div class="settings-item-icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="8" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M7 8V6C7 3.8 8.3 2 10 2C11.7 2 13 3.8 13 6V8" stroke="currentColor" stroke-width="1.2"/></svg>
+            </div>
+            <div class="settings-item-info">
+              <span class="settings-item-name">Auto-Lock</span>
+              <span class="settings-item-desc">After 5 minutes</span>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          </div>
+          <div class="settings-item">
+            <div class="settings-item-icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L4 5V10C4 14.4 6.6 18.5 10 19.5C13.4 18.5 16 14.4 16 10V5L10 2Z" stroke="currentColor" stroke-width="1.2"/></svg>
+            </div>
+            <div class="settings-item-info">
+              <span class="settings-item-name">Change Password</span>
+              <span class="settings-item-desc">Update vault password</span>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">Network</div>
+          <div class="settings-item">
+            <div class="settings-item-icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.2"/><path d="M2 10H18M10 2C12 4.7 13 7.3 13 10C13 12.7 12 15.3 10 18M10 2C8 4.7 7 7.3 7 10C7 12.7 8 15.3 10 18" stroke="currentColor" stroke-width="1"/></svg>
+            </div>
+            <div class="settings-item-info">
+              <span class="settings-item-name">Registry URL</span>
+              <span class="settings-item-desc mono">registry.ssdid.my</span>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">Preferences</div>
+          <div class="settings-item">
+            <div class="settings-item-icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="1.2"/><path d="M10 2V6M10 14V18M2 10H6M14 10H18" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </div>
+            <div class="settings-item-info">
+              <span class="settings-item-name">Appearance</span>
+              <span class="settings-item-desc">Dark</span>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          </div>
+          <div class="settings-item">
+            <div class="settings-item-icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 5H17M3 10H17M3 15H12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </div>
+            <div class="settings-item-info">
+              <span class="settings-item-name">Language</span>
+              <span class="settings-item-desc">English</span>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          </div>
+          <div class="settings-item">
+            <div class="settings-item-icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2C10 2 4 6 4 11C4 14.3 6.7 17 10 17C13.3 17 16 14.3 16 11C16 6 10 2 10 2Z" stroke="currentColor" stroke-width="1.2"/></svg>
+            </div>
+            <div class="settings-item-info">
+              <span class="settings-item-name">Default Algorithm</span>
+              <span class="settings-item-desc">KAZ-Sign 192</span>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">About</div>
+          <div class="settings-item">
+            <div class="settings-item-info">
+              <span class="settings-item-name">Version</span>
+              <span class="settings-item-desc">1.0.0 (Build 1)</span>
+            </div>
+          </div>
+          <div class="settings-item">
+            <div class="settings-item-info">
+              <span class="settings-item-name">W3C DID 1.1</span>
+              <span class="settings-item-desc">Compliant</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN: TX HISTORY ==================== -->
+    <div class="screen" id="screen-tx-history">
+      <div class="screen-header">
+        <button class="header-back" onclick="showScreen('wallet-home')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <h2 class="header-title">Activity History</h2>
+        <div class="header-spacer"></div>
+      </div>
+
+      <div class="screen-body">
+        <div class="history-date">Today</div>
+        <div class="activity-list">
+          <div class="activity-item">
+            <div class="activity-icon auth">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M5 9L8 12L13 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <div class="activity-info">
+              <div class="activity-title">Authenticated</div>
+              <div class="activity-sub">MyBank Portal</div>
+            </div>
+            <div class="activity-time">2m ago</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon sign">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M14 4L4 14M4 14H9M4 14V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="activity-info">
+              <div class="activity-title">Transaction Signed</div>
+              <div class="activity-sub">Transfer RM 5,000.00 - #TX-4830</div>
+            </div>
+            <div class="activity-time">1h ago</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon auth">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M5 9L8 12L13 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <div class="activity-info">
+              <div class="activity-title">Authenticated</div>
+              <div class="activity-sub">MyBank Portal</div>
+            </div>
+            <div class="activity-time">1h ago</div>
+          </div>
+        </div>
+
+        <div class="history-date">3 March 2026</div>
+        <div class="activity-list">
+          <div class="activity-item">
+            <div class="activity-icon register">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 4V14M4 9H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <div class="activity-info">
+              <div class="activity-title">Registered</div>
+              <div class="activity-sub">GovServices Portal</div>
+            </div>
+            <div class="activity-time">3:42 PM</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon sign">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M14 4L4 14M4 14H9M4 14V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="activity-info">
+              <div class="activity-title">Transaction Signed</div>
+              <div class="activity-sub">Transfer RM 1,200.00 - #TX-4829</div>
+            </div>
+            <div class="activity-time">10:15 AM</div>
+          </div>
+        </div>
+
+        <div class="history-date">2 March 2026</div>
+        <div class="activity-list">
+          <div class="activity-item">
+            <div class="activity-icon register">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 4V14M4 9H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <div class="activity-info">
+              <div class="activity-title">Registered</div>
+              <div class="activity-sub">MyBank Portal</div>
+            </div>
+            <div class="activity-time">10:30 AM</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon create">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2L4 5V10C4 13.3 6.1 16.4 9 17.5C11.9 16.4 14 13.3 14 10V5L9 2Z" stroke="currentColor" stroke-width="1.2"/></svg>
+            </div>
+            <div class="activity-info">
+              <div class="activity-title">Identity Created</div>
+              <div class="activity-sub">Personal (KAZ-Sign 192)</div>
+            </div>
+            <div class="activity-time">10:24 AM</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab" onclick="showScreen('wallet-home')">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 8L11 2L19 8V18C19 19.1 18.1 20 17 20H5C3.9 20 3 19.1 3 18V8Z" stroke="currentColor" stroke-width="1.5"/></svg>
+          <span>Home</span>
+        </button>
+        <button class="tab" onclick="showScreen('credentials')">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="4" width="18" height="14" rx="3" stroke="currentColor" stroke-width="1.5"/><path d="M2 9H20" stroke="currentColor" stroke-width="1"/></svg>
+          <span>Credentials</span>
+        </button>
+        <button class="tab scan-tab" onclick="showScreen('scan-qr')">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M4 9V4H9M17 4H22V9M22 17V22H17M9 22H4V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="tab active">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M11 6V11L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <span>History</span>
+        </button>
+        <button class="tab" onclick="showScreen('settings')">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M11 1V4M11 18V21M1 11H4M18 11H21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <span>Settings</span>
+        </button>
+      </div>
+    </div>
+
+  </div><!-- end phone-screen -->
+</div><!-- end phone-frame -->
+
+<script src="app.js"></script>
+</body>
+</html>
