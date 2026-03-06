@@ -8,7 +8,7 @@
     <application
         android:name=".SsdidApp"
         android:label="SSDID"
-        android:theme="@style/Theme.Material3.DayNight.NoActionBar"
+        android:theme="@style/Theme.Ssdid"
         android:supportsRtl="true">
         <activity
             android:name=".MainActivity"
