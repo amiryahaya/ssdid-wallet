@@ -1,6 +1,7 @@
 package my.ssdid.mobile.platform.storage
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -16,6 +17,8 @@ import my.ssdid.mobile.domain.vault.VaultStorage
 import java.io.File
 import java.util.Base64
 
+// Identity metadata (DID, name, public keys) and VCs are non-secret and stored in plaintext.
+// Private keys are stored separately in filesDir/keys/, encrypted with Android Keystore AES-256-GCM.
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "ssdid_vault")
 
 class DataStoreVaultStorage(private val context: Context) : VaultStorage {
@@ -48,7 +51,8 @@ class DataStoreVaultStorage(private val context: Context) : VaultStorage {
         val jsonStr = context.dataStore.data.map { it[identitiesKey] }.first() ?: return emptyList()
         return try {
             json.decodeFromString(jsonStr)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to deserialize identities — data may be corrupted", e)
             emptyList()
         }
     }
@@ -83,7 +87,8 @@ class DataStoreVaultStorage(private val context: Context) : VaultStorage {
         val jsonStr = context.dataStore.data.map { it[credentialsKey] }.first() ?: return emptyList()
         return try {
             json.decodeFromString(jsonStr)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to deserialize credentials — data may be corrupted", e)
             emptyList()
         }
     }
@@ -108,5 +113,9 @@ class DataStoreVaultStorage(private val context: Context) : VaultStorage {
 
     private fun deleteKeyFile(keyId: String) {
         keyFile(keyId).delete()
+    }
+
+    companion object {
+        private const val TAG = "DataStoreVaultStorage"
     }
 }

@@ -25,20 +25,20 @@ enum class Algorithm(
         isPostQuantum = false
     ),
     KAZ_SIGN_128(
-        w3cType = "KazSignVerificationKey2024",
-        proofType = "KazSignSignature2024",
+        w3cType = "KazSign128VerificationKey2024",
+        proofType = "KazSign128Signature2024",
         isPostQuantum = true,
         kazSignLevel = 128
     ),
     KAZ_SIGN_192(
-        w3cType = "KazSignVerificationKey2024",
-        proofType = "KazSignSignature2024",
+        w3cType = "KazSign192VerificationKey2024",
+        proofType = "KazSign192Signature2024",
         isPostQuantum = true,
         kazSignLevel = 192
     ),
     KAZ_SIGN_256(
-        w3cType = "KazSignVerificationKey2024",
-        proofType = "KazSignSignature2024",
+        w3cType = "KazSign256VerificationKey2024",
+        proofType = "KazSign256Signature2024",
         isPostQuantum = true,
         kazSignLevel = 256
     );

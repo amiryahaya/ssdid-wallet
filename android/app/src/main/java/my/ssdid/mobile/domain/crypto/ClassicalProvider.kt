@@ -46,14 +46,76 @@ class ClassicalProvider : CryptoProvider {
     private fun generateEd25519(): KeyPairResult {
         val kpg = KeyPairGenerator.getInstance("Ed25519", "BC")
         val kp = kpg.generateKeyPair()
-        // Extract raw 32-byte keys from encoded format
-        val pubEncoded = kp.public.encoded
-        val privEncoded = kp.private.encoded
-        // Ed25519 public key: last 32 bytes of X.509 encoding
-        val pubBytes = pubEncoded.takeLast(32).toByteArray()
-        // Ed25519 private key: last 32 bytes of PKCS8 encoding
-        val privBytes = privEncoded.takeLast(32).toByteArray()
+        // Extract raw 32-byte keys from encoded format using ASN.1 structure
+        val pubBytes = extractEd25519PublicKeyRaw(kp.public.encoded)
+        val privBytes = extractEd25519PrivateKeyRaw(kp.private.encoded)
         return KeyPairResult(publicKey = pubBytes, privateKey = privBytes)
+    }
+
+    /**
+     * X.509 SubjectPublicKeyInfo for Ed25519:
+     * SEQUENCE { SEQUENCE { OID 1.3.101.112 }, BIT STRING { 0x00, raw[32] } }
+     * The raw key starts after the BIT STRING tag, length, and 0x00 padding byte.
+     */
+    private fun extractEd25519PublicKeyRaw(encoded: ByteArray): ByteArray {
+        // Find BIT STRING (tag 0x03) containing the raw key
+        var i = 0
+        // Skip outer SEQUENCE
+        require(encoded[i] == 0x30.toByte()) { "Expected SEQUENCE at start of X.509" }
+        i++ ; i += derLengthSize(encoded, i)
+        // Skip algorithm SEQUENCE
+        require(encoded[i] == 0x30.toByte()) { "Expected algorithm SEQUENCE" }
+        i++ ; val algoLen = derReadLength(encoded, i); i += derLengthSize(encoded, i) + algoLen
+        // BIT STRING
+        require(encoded[i] == 0x03.toByte()) { "Expected BIT STRING" }
+        i++ ; val bsLen = derReadLength(encoded, i); i += derLengthSize(encoded, i)
+        // Skip the 0x00 padding byte
+        require(encoded[i] == 0x00.toByte()) { "Expected 0x00 BIT STRING padding" }
+        i++
+        val keyLen = bsLen - 1
+        require(keyLen == 32) { "Expected 32-byte Ed25519 public key, got $keyLen" }
+        return encoded.copyOfRange(i, i + keyLen)
+    }
+
+    /**
+     * PKCS#8 for Ed25519:
+     * SEQUENCE { INTEGER(0), SEQUENCE { OID }, OCTET STRING { OCTET STRING { raw[32] } } }
+     */
+    private fun extractEd25519PrivateKeyRaw(encoded: ByteArray): ByteArray {
+        var i = 0
+        // Skip outer SEQUENCE
+        require(encoded[i] == 0x30.toByte()) { "Expected SEQUENCE" }
+        i++ ; i += derLengthSize(encoded, i)
+        // Skip version INTEGER
+        require(encoded[i] == 0x02.toByte()) { "Expected INTEGER (version)" }
+        i++ ; val intLen = derReadLength(encoded, i); i += derLengthSize(encoded, i) + intLen
+        // Skip algorithm SEQUENCE
+        require(encoded[i] == 0x30.toByte()) { "Expected algorithm SEQUENCE" }
+        i++ ; val algoLen = derReadLength(encoded, i); i += derLengthSize(encoded, i) + algoLen
+        // Outer OCTET STRING
+        require(encoded[i] == 0x04.toByte()) { "Expected OCTET STRING (outer)" }
+        i++ ; i += derLengthSize(encoded, i)
+        // Inner OCTET STRING containing raw key
+        require(encoded[i] == 0x04.toByte()) { "Expected OCTET STRING (inner)" }
+        i++ ; val keyLen = derReadLength(encoded, i); i += derLengthSize(encoded, i)
+        require(keyLen == 32) { "Expected 32-byte Ed25519 private key, got $keyLen" }
+        return encoded.copyOfRange(i, i + keyLen)
+    }
+
+    private fun derReadLength(data: ByteArray, offset: Int): Int {
+        val b = data[offset].toInt() and 0xFF
+        return if (b < 0x80) b
+        else {
+            val numBytes = b and 0x7F
+            var len = 0
+            for (j in 1..numBytes) len = (len shl 8) or (data[offset + j].toInt() and 0xFF)
+            len
+        }
+    }
+
+    private fun derLengthSize(data: ByteArray, offset: Int): Int {
+        val b = data[offset].toInt() and 0xFF
+        return if (b < 0x80) 1 else 1 + (b and 0x7F)
     }
 
     private fun signEd25519(privateKey: ByteArray, data: ByteArray): ByteArray {

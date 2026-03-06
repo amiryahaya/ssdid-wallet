@@ -6,9 +6,12 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collectLatest
 import my.ssdid.mobile.platform.deeplink.DeepLinkHandler
 import my.ssdid.mobile.ui.navigation.SsdidNavGraph
 import my.ssdid.mobile.ui.theme.SsdidTheme
@@ -16,21 +19,24 @@ import my.ssdid.mobile.ui.theme.SsdidTheme
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private var navController: NavHostController? = null
+    private val pendingDeepLinks = MutableSharedFlow<Intent>(extraBufferCapacity = 1)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             SsdidTheme {
-                val controller = rememberNavController()
-                navController = controller
-                SsdidNavGraph(navController = controller)
+                val navController = rememberNavController()
+                SsdidNavGraph(navController = navController)
 
-                // Handle deep link from cold start
-                if (savedInstanceState == null) {
-                    intent?.data?.let { uri ->
-                        handleDeepLink(intent)
+                LaunchedEffect(Unit) {
+                    // Handle cold start deep link
+                    if (savedInstanceState == null) {
+                        intent?.data?.let { handleDeepLink(intent, navController) }
+                    }
+                    // Handle warm start deep links via flow
+                    pendingDeepLinks.collectLatest { newIntent ->
+                        handleDeepLink(newIntent, navController)
                     }
                 }
             }
@@ -39,10 +45,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        handleDeepLink(intent)
+        if (intent.data != null) {
+            pendingDeepLinks.tryEmit(intent)
+        }
     }
 
-    private fun handleDeepLink(intent: Intent) {
+    private fun handleDeepLink(intent: Intent, navController: NavHostController) {
         val uri = intent.data ?: return
         val deepLinkAction = DeepLinkHandler.parse(uri) ?: run {
             Log.w(TAG, "Unrecognized deep link URI: $uri")
@@ -52,8 +60,7 @@ class MainActivity : ComponentActivity() {
             Log.w(TAG, "Unknown deep link action: ${deepLinkAction.action}")
             return
         }
-        navController?.navigate(route)
-        // Clear the intent data so it is not re-processed on config change
+        navController.navigate(route)
         intent.data = null
     }
 

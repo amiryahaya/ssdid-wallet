@@ -49,7 +49,8 @@ data class TxChallengeRequest(
 
 @Serializable
 data class TxChallengeResponse(
-    val challenge: String
+    val challenge: String,
+    val transaction: Map<String, String> = emptyMap()
 )
 
 @Serializable

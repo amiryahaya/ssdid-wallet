@@ -50,7 +50,16 @@ class TxSigningViewModel @Inject constructor(
     private val _timerSeconds = MutableStateFlow(120)
     val timerSeconds = _timerSeconds.asStateFlow()
 
+    private val _transactionDetails = MutableStateFlow<Map<String, String>>(emptyMap())
+    val transactionDetails = _transactionDetails.asStateFlow()
+
     init {
+        // Fetch transaction details from server
+        viewModelScope.launch {
+            client.fetchTransactionDetails(sessionToken, serverUrl)
+                .onSuccess { _transactionDetails.value = it }
+                .onFailure { _state.value = TxState.Failed("Failed to load transaction: ${it.message}") }
+        }
         // Start visual countdown timer
         viewModelScope.launch {
             while (_timerSeconds.value > 0 && _state.value is TxState.Idle) {
@@ -72,11 +81,11 @@ class TxSigningViewModel @Inject constructor(
                 _state.value = TxState.Failed("No identity available for signing")
                 return@launch
             }
-            val transaction = mapOf(
-                "amount" to "1,500.00 MYR",
-                "recipient" to "did:ssdid:merchant:abc123",
-                "description" to "Payment for services"
-            )
+            val transaction = _transactionDetails.value
+            if (transaction.isEmpty()) {
+                _state.value = TxState.Failed("No transaction details available")
+                return@launch
+            }
             client.signTransaction(sessionToken, identity, transaction, serverUrl)
                 .onSuccess { _state.value = TxState.Confirmed }
                 .onFailure { _state.value = TxState.Failed(it.message ?: "Transaction signing failed") }
@@ -92,6 +101,7 @@ fun TxSigningScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val timerSeconds by viewModel.timerSeconds.collectAsState()
+    val txDetails by viewModel.transactionDetails.collectAsState()
 
     Column(
         modifier = Modifier
@@ -127,13 +137,25 @@ fun TxSigningScreen(
                                 Text("TRANSACTION DETAILS", style = MaterialTheme.typography.labelMedium)
                                 Spacer(Modifier.height(14.dp))
 
-                                TxDetailRow("Amount", "1,500.00 MYR", highlight = true)
-                                HorizontalDivider(color = Border, modifier = Modifier.padding(vertical = 8.dp))
-                                TxDetailRow("Recipient", "did:ssdid:merchant:abc123", mono = true)
-                                HorizontalDivider(color = Border, modifier = Modifier.padding(vertical = 8.dp))
-                                TxDetailRow("Description", "Payment for services")
-                                HorizontalDivider(color = Border, modifier = Modifier.padding(vertical = 8.dp))
-                                TxDetailRow("Server", viewModel.serverUrl, mono = true)
+                                if (txDetails.isEmpty()) {
+                                    Text("Loading transaction details...", fontSize = 13.sp, color = TextSecondary)
+                                } else {
+                                    txDetails.entries.forEachIndexed { index, (key, value) ->
+                                        val isAmount = key.equals("amount", ignoreCase = true)
+                                        val isDid = value.startsWith("did:")
+                                        TxDetailRow(
+                                            label = key.replaceFirstChar { it.uppercase() },
+                                            value = value,
+                                            highlight = isAmount,
+                                            mono = isDid
+                                        )
+                                        if (index < txDetails.size - 1) {
+                                            HorizontalDivider(color = Border, modifier = Modifier.padding(vertical = 8.dp))
+                                        }
+                                    }
+                                    HorizontalDivider(color = Border, modifier = Modifier.padding(vertical = 8.dp))
+                                    TxDetailRow("Server", viewModel.serverUrl, mono = true)
+                                }
                             }
                         }
                     }

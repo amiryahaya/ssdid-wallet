@@ -82,7 +82,7 @@ class VaultImpl(
         )
     }
 
-    override suspend fun createProof(keyId: String, document: Map<String, Any>, proofPurpose: String, challenge: String?): Result<Proof> = runCatching {
+    override suspend fun createProof(keyId: String, document: Map<String, String>, proofPurpose: String, challenge: String?): Result<Proof> = runCatching {
         val identity = storage.getIdentity(keyId) ?: throw IllegalArgumentException("Identity not found: $keyId")
         val canonicalJson = Json.encodeToString(document)
         val dataToSign = if (challenge != null) {

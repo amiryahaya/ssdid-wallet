@@ -69,17 +69,24 @@ class SsdidClient(
         val serverApi = httpClient.serverApi(serverUrl)
         val resp = serverApi.authenticate(AuthenticateRequest(credential))
 
-        // Verify server's session token signature (mutual auth)
-        if (resp.server_signature != null) {
-            val verified = verifier.verifyChallengeResponse(
-                resp.server_did,
-                resp.server_key_id,
-                resp.session_token,
-                resp.server_signature
-            ).getOrThrow()
-            if (!verified) throw SecurityException("Server session token verification failed")
-        }
+        // Verify server's session token signature (mutual auth — mandatory)
+        val serverSig = resp.server_signature
+            ?: throw SecurityException("Server did not provide mutual authentication signature")
+        val verified = verifier.verifyChallengeResponse(
+            resp.server_did,
+            resp.server_key_id,
+            resp.session_token,
+            serverSig
+        ).getOrThrow()
+        if (!verified) throw SecurityException("Server session token verification failed")
         resp
+    }
+
+    /** Fetch transaction details from server for display before signing */
+    suspend fun fetchTransactionDetails(sessionToken: String, serverUrl: String): Result<Map<String, String>> = runCatching {
+        val serverApi = httpClient.serverApi(serverUrl)
+        val resp = serverApi.requestChallenge(TxChallengeRequest(sessionToken))
+        resp.transaction
     }
 
     /** Flow 4: Sign a transaction with challenge-response + TX binding */
