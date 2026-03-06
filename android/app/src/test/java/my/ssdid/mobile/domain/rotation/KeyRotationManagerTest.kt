@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
 import my.ssdid.mobile.domain.crypto.CryptoProvider
-import my.ssdid.mobile.domain.crypto.KeyPair
+import my.ssdid.mobile.domain.crypto.KeyPairResult
 import my.ssdid.mobile.domain.model.Algorithm
 import my.ssdid.mobile.domain.model.Identity
 import my.ssdid.mobile.domain.vault.PreRotatedKeyData
@@ -40,7 +40,7 @@ class KeyRotationManagerTest {
     fun `prepareRotation generates pre-commitment hash`() = runTest {
         val nextPub = ByteArray(32) { it.toByte() }
         val nextPriv = ByteArray(64) { it.toByte() }
-        coEvery { classicalProvider.generateKeyPair(Algorithm.ED25519) } returns KeyPair(nextPub, nextPriv)
+        coEvery { classicalProvider.generateKeyPair(Algorithm.ED25519) } returns KeyPairResult(nextPub, nextPriv)
         coEvery { keystoreManager.encrypt(any(), any()) } returns ByteArray(80)
         coEvery { storage.getEncryptedPrivateKey(testIdentity.keyId) } returns ByteArray(80)
 
