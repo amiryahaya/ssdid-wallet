@@ -15,6 +15,7 @@ import my.ssdid.mobile.domain.vault.VaultImpl
 import my.ssdid.mobile.domain.vault.VaultStorage
 import my.ssdid.mobile.domain.verifier.Verifier
 import my.ssdid.mobile.domain.verifier.VerifierImpl
+import my.ssdid.mobile.platform.biometric.BiometricAuthenticator
 import my.ssdid.mobile.platform.keystore.AndroidKeystoreManager
 import my.ssdid.mobile.platform.keystore.KeystoreManager
 import javax.inject.Named
@@ -23,6 +24,10 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+
+    @Provides
+    @Singleton
+    fun provideBiometricAuthenticator(): BiometricAuthenticator = BiometricAuthenticator()
 
     @Provides
     @Singleton
