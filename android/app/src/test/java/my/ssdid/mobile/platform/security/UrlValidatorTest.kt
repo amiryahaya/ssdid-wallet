@@ -64,4 +64,19 @@ class UrlValidatorTest {
     fun `no-scheme URL is rejected`() {
         assertThat(UrlValidator.isValidServerUrl("demo.ssdid.my")).isFalse()
     }
+
+    @Test
+    fun `IPv6 loopback is rejected`() {
+        assertThat(UrlValidator.isValidServerUrl("https://[::1]")).isFalse()
+    }
+
+    @Test
+    fun `IPv6 unique local address is rejected`() {
+        assertThat(UrlValidator.isValidServerUrl("https://[fd00::1]")).isFalse()
+    }
+
+    @Test
+    fun `IPv6 link-local address is rejected`() {
+        assertThat(UrlValidator.isValidServerUrl("https://[fe80::1]")).isFalse()
+    }
 }

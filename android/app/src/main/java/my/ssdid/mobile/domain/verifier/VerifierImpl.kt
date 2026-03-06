@@ -16,6 +16,12 @@ class VerifierImpl(
     private val pqcProvider: CryptoProvider
 ) : Verifier {
 
+    private val canonicalJson = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+        explicitNulls = false
+    }
+
     override suspend fun resolveDid(did: String): Result<DidDocument> = runCatching {
         registryApi.resolveDid(did)
     }
@@ -58,12 +64,11 @@ class VerifierImpl(
     }
 
     private fun canonicalizeCredentialWithoutProof(credential: VerifiableCredential): ByteArray {
-        val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
-        val fullJson = json.encodeToString(credential)
-        val jsonObj = Json.parseToJsonElement(fullJson).jsonObject.toMutableMap()
+        val fullJson = canonicalJson.encodeToString(credential)
+        val jsonObj = canonicalJson.parseToJsonElement(fullJson).jsonObject.toMutableMap()
         jsonObj.remove("proof")
-        val withoutProof = JsonObject(jsonObj)
-        return Json.encodeToString(withoutProof).toByteArray()
+        val sorted = JsonObject(jsonObj.toSortedMap())
+        return canonicalJson.encodeToString(sorted).toByteArray(Charsets.UTF_8)
     }
 
     private fun algorithmFromW3cType(type: String): Algorithm {

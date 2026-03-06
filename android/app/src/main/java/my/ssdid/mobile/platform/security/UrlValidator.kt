@@ -26,10 +26,10 @@ object UrlValidator {
         if (host.isBlank()) return false
 
         // Reject localhost and loopback
-        if (host == "localhost" || host == "127.0.0.1" || host == "::1") return false
+        if (host == "localhost" || host == "127.0.0.1" || host == "::1" || host == "[::1]") return false
 
-        // Reject private/internal IP ranges
-        if (isPrivateIp(host)) return false
+        // Reject private/internal IP ranges (IPv4 and IPv6)
+        if (isPrivateIp(host) || isPrivateIpv6(host)) return false
 
         // Reject hosts without a dot (single-label names like "intranet")
         if (!host.contains('.')) return false
@@ -56,5 +56,13 @@ object UrlValidator {
             octets.all { it == 0 } -> true
             else -> false
         }
+    }
+
+    private fun isPrivateIpv6(host: String): Boolean {
+        // Strip bracket notation [::1] -> ::1
+        val raw = host.removePrefix("[").removeSuffix("]").lowercase()
+        return raw == "::1" ||
+            raw.startsWith("fc") || raw.startsWith("fd") || // Unique local (fc00::/7)
+            raw.startsWith("fe80") // Link-local (fe80::/10)
     }
 }

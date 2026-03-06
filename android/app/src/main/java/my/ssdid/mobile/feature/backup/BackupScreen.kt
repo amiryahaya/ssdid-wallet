@@ -80,7 +80,7 @@ fun BackupScreen(
     var passphrase by remember { mutableStateOf("") }
     var confirmPassphrase by remember { mutableStateOf("") }
 
-    val passphrasesMatch = passphrase == confirmPassphrase && passphrase.isNotEmpty()
+    val passphrasesMatch = passphrase == confirmPassphrase && passphrase.length >= 8
     val canCreate = passphrasesMatch && state !is BackupState.Creating
 
     Column(

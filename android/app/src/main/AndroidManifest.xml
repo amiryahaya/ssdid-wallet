@@ -9,7 +9,9 @@
         android:name=".SsdidApp"
         android:label="SSDID"
         android:theme="@style/Theme.Ssdid"
-        android:supportsRtl="true">
+        android:supportsRtl="true"
+        android:allowBackup="false"
+        android:fullBackupContent="false">
         <activity
             android:name=".MainActivity"
             android:exported="true"

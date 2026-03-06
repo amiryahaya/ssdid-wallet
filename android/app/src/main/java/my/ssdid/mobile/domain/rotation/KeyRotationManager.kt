@@ -41,6 +41,11 @@ class KeyRotationManager @Inject constructor(
     private fun providerFor(algorithm: Algorithm): CryptoProvider =
         if (algorithm.isPostQuantum) pqcProvider else classicalProvider
 
+    private fun stableAlias(keyId: String): String {
+        val hash = MessageDigest.getInstance("SHA-256").digest(keyId.toByteArray(Charsets.UTF_8))
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(hash).take(16)
+    }
+
     /**
      * Prepare rotation: generate next keypair, compute SHA3-256 hash of public key,
      * store pre-rotated key encrypted. Returns the hash to publish in DID Document.
@@ -56,7 +61,7 @@ class KeyRotationManager @Inject constructor(
 
         // Encrypt and store pre-rotated key material
         val preRotatedKeyId = "${identity.keyId}-prerotated"
-        val wrappingAlias = "ssdid_prerot_${identity.keyId.hashCode().toUInt()}"
+        val wrappingAlias = "ssdid_prerot_${stableAlias(identity.keyId)}"
         keystoreManager.generateWrappingKey(wrappingAlias)
 
         val encryptedPrivateKey = keystoreManager.encrypt(wrappingAlias, nextKeyPair.privateKey)
@@ -111,7 +116,8 @@ class KeyRotationManager @Inject constructor(
             )
         )
 
-        // Clean up old pre-rotated key
+        // Clean up: delete old identity's private key and pre-rotated key
+        storage.deleteIdentity(identity.keyId)
         storage.deletePreRotatedKey(preRotatedKeyId)
 
         newIdentity

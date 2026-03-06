@@ -157,18 +157,18 @@ fun SsdidNavGraph(navController: NavHostController) {
             TxHistoryScreen(onBack = { navController.popBackStack() })
         }
         composable(Screen.RecoverySetup.route) { backStackEntry ->
-            val keyId = backStackEntry.arguments?.getString("keyId") ?: return@composable
+            backStackEntry.arguments?.getString("keyId") ?: return@composable
             RecoverySetupScreen(onBack = { navController.popBackStack() })
         }
         composable(Screen.KeyRotation.route) { backStackEntry ->
-            val keyId = backStackEntry.arguments?.getString("keyId") ?: return@composable
+            backStackEntry.arguments?.getString("keyId") ?: return@composable
             KeyRotationScreen(onBack = { navController.popBackStack() })
         }
         composable(Screen.BackupExport.route) {
             BackupScreen(onBack = { navController.popBackStack() })
         }
         composable(Screen.DeviceManagement.route) { backStackEntry ->
-            val keyId = backStackEntry.arguments?.getString("keyId") ?: return@composable
+            backStackEntry.arguments?.getString("keyId") ?: return@composable
             DeviceManagementScreen(onBack = { navController.popBackStack() })
         }
     }

@@ -81,6 +81,7 @@ class KeyRotationManagerTest {
 
         coVerify { storage.saveIdentity(match { it.preRotatedKeyId == null }, preRotEncPriv) }
         coVerify { storage.addRotationEntry(eq("did:ssdid:abc123"), any()) }
+        coVerify { storage.deleteIdentity("did:ssdid:abc123#key-1") }
         coVerify { storage.deletePreRotatedKey("did:ssdid:abc123#key-1-prerotated") }
     }
 

@@ -26,7 +26,7 @@ class BackupManager @Inject constructor(
     private val storage: VaultStorage,
     private val keystoreManager: KeystoreManager
 ) {
-    private val json = Json { ignoreUnknownKeys = true }
+    private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
     private val b64 = Base64.getUrlEncoder().withoutPadding()
     private val b64Decoder = Base64.getUrlDecoder()
     private val secureRandom = SecureRandom()
@@ -83,26 +83,24 @@ class BackupManager @Inject constructor(
 
         val now = DateTimeFormatter.ISO_INSTANT.format(Instant.now().atOffset(ZoneOffset.UTC))
 
-        // Build package without HMAC first
-        val packageWithoutHmac = BackupPackage(
+        // Compute HMAC over deterministic binary: salt || nonce || ciphertext
+        val mac = Mac.getInstance("HmacSHA256")
+        mac.init(SecretKeySpec(macKey, "HmacSHA256"))
+        mac.update(salt)
+        mac.update(nonce)
+        val hmacBytes = mac.doFinal(ciphertext)
+        macKey.fill(0)
+
+        // Build final package
+        val finalPackage = BackupPackage(
             salt = b64.encodeToString(salt),
             nonce = b64.encodeToString(nonce),
             ciphertext = b64.encodeToString(ciphertext),
             algorithms = identities.map { it.algorithm.name }.distinct(),
             dids = identities.map { it.did },
             createdAt = now,
-            hmac = ""
+            hmac = b64.encodeToString(hmacBytes)
         )
-        val packageJsonForHmac = json.encodeToString(packageWithoutHmac)
-
-        // Compute HMAC
-        val mac = Mac.getInstance("HmacSHA256")
-        mac.init(SecretKeySpec(macKey, "HmacSHA256"))
-        val hmacBytes = mac.doFinal(packageJsonForHmac.toByteArray(Charsets.UTF_8))
-        macKey.fill(0)
-
-        // Build final package with HMAC
-        val finalPackage = packageWithoutHmac.copy(hmac = b64.encodeToString(hmacBytes))
         json.encodeToString(finalPackage).toByteArray(Charsets.UTF_8)
     }
 
@@ -115,20 +113,20 @@ class BackupManager @Inject constructor(
         val macKey = deriveSubKey(backupKey, "mac")
         backupKey.fill(0)
 
-        // Verify HMAC before decryption
-        val packageForHmac = backupPackage.copy(hmac = "")
-        val packageJsonForHmac = json.encodeToString(packageForHmac)
+        // Verify HMAC over deterministic binary: salt || nonce || ciphertext
+        val nonce = b64Decoder.decode(backupPackage.nonce)
+        val ciphertext = b64Decoder.decode(backupPackage.ciphertext)
         val mac = Mac.getInstance("HmacSHA256")
         mac.init(SecretKeySpec(macKey, "HmacSHA256"))
-        val expectedHmac = mac.doFinal(packageJsonForHmac.toByteArray(Charsets.UTF_8))
+        mac.update(salt)
+        mac.update(nonce)
+        val expectedHmac = mac.doFinal(ciphertext)
         macKey.fill(0)
 
         val actualHmac = b64Decoder.decode(backupPackage.hmac)
         require(expectedHmac.contentEquals(actualHmac)) { "HMAC verification failed: backup may be tampered with" }
 
         // Decrypt payload
-        val nonce = b64Decoder.decode(backupPackage.nonce)
-        val ciphertext = b64Decoder.decode(backupPackage.ciphertext)
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
         cipher.init(Cipher.DECRYPT_MODE, SecretKeySpec(encKey, "AES"), GCMParameterSpec(GCM_TAG_BITS, nonce))
         val payloadBytes = cipher.doFinal(ciphertext)
@@ -165,15 +163,28 @@ class BackupManager @Inject constructor(
     }
 
     private fun deriveBackupKey(passphrase: String, salt: ByteArray): ByteArray {
-        val spec = PBEKeySpec(passphrase.toCharArray(), salt, PBKDF2_ITERATIONS, KEY_LENGTH_BITS)
-        val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
-        return factory.generateSecret(spec).encoded
+        val chars = passphrase.toCharArray()
+        val spec = PBEKeySpec(chars, salt, PBKDF2_ITERATIONS, KEY_LENGTH_BITS)
+        try {
+            val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
+            return factory.generateSecret(spec).encoded
+        } finally {
+            spec.clearPassword()
+            chars.fill('\u0000')
+        }
     }
 
-    private fun deriveSubKey(backupKey: ByteArray, purpose: String): ByteArray {
-        val md = java.security.MessageDigest.getInstance("SHA-256")
-        md.update(backupKey)
-        md.update(purpose.toByteArray(Charsets.UTF_8))
-        return md.digest()
+    /**
+     * HKDF-Expand (RFC 5869) using HMAC-SHA256.
+     * PRK = backupKey (already derived via PBKDF2), info = purpose label.
+     * Outputs exactly 32 bytes (one HMAC block).
+     */
+    private fun deriveSubKey(prk: ByteArray, info: String): ByteArray {
+        val mac = Mac.getInstance("HmacSHA256")
+        mac.init(SecretKeySpec(prk, "HmacSHA256"))
+        val infoBytes = info.toByteArray(Charsets.UTF_8)
+        mac.update(infoBytes)
+        mac.update(0x01) // counter byte for first (and only) block
+        return mac.doFinal()
     }
 }

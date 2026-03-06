@@ -62,11 +62,13 @@ class TxSigningViewModel @Inject constructor(
         }
         // Start visual countdown timer
         viewModelScope.launch {
-            while (_timerSeconds.value > 0 && _state.value is TxState.Idle) {
+            while (_timerSeconds.value > 0) {
+                val currentState = _state.value
+                if (currentState !is TxState.Idle && currentState !is TxState.Loading) break
                 delay(1000)
                 _timerSeconds.update { it - 1 }
             }
-            if (_timerSeconds.value == 0 && _state.value is TxState.Idle) {
+            if (_timerSeconds.value <= 0 && _state.value is TxState.Idle) {
                 _state.value = TxState.Failed("Challenge expired. Please scan QR again.")
             }
         }

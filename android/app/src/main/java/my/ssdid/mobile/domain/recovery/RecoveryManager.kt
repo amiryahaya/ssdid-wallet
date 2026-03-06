@@ -6,6 +6,8 @@ import my.ssdid.mobile.domain.model.Identity
 import my.ssdid.mobile.domain.vault.Vault
 import my.ssdid.mobile.domain.vault.VaultStorage
 import my.ssdid.mobile.platform.keystore.KeystoreManager
+import java.security.MessageDigest
+import java.util.Base64
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -32,7 +34,7 @@ class RecoveryManager @Inject constructor(
         val recoveryKeyId = "${identity.keyId}-recovery"
 
         // Store the recovery public key encrypted (for DID Document building)
-        val wrappingAlias = "ssdid_recovery_${identity.keyId.hashCode().toUInt()}"
+        val wrappingAlias = "ssdid_recovery_${stableAlias(identity.keyId)}"
         keystoreManager.generateWrappingKey(wrappingAlias)
         val encryptedRecoveryPubKey = keystoreManager.encrypt(wrappingAlias, recoveryKeyPair.publicKey)
 
@@ -61,5 +63,10 @@ class RecoveryManager @Inject constructor(
     suspend fun hasRecoveryKey(keyId: String): Boolean {
         val identity = storage.getIdentity(keyId)
         return identity?.hasRecoveryKey == true
+    }
+
+    private fun stableAlias(keyId: String): String {
+        val hash = MessageDigest.getInstance("SHA-256").digest(keyId.toByteArray(Charsets.UTF_8))
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(hash).take(16)
     }
 }
