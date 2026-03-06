@@ -1,6 +1,7 @@
 package my.ssdid.mobile.feature.settings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,7 +14,7 @@ import androidx.compose.ui.unit.sp
 import my.ssdid.mobile.ui.theme.*
 
 @Composable
-fun SettingsScreen(onBack: () -> Unit) {
+fun SettingsScreen(onBack: () -> Unit, onBackupExport: () -> Unit = {}) {
     Column(Modifier.fillMaxSize().background(BgPrimary).statusBarsPadding()) {
         Row(Modifier.padding(20.dp)) {
             TextButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
@@ -26,6 +27,7 @@ fun SettingsScreen(onBack: () -> Unit) {
             item { SettingsItem("Biometric Authentication", "Face ID / Fingerprint", toggle = true) }
             item { SettingsItem("Auto-Lock", "After 5 minutes") }
             item { SettingsItem("Change Password", "Update vault password") }
+            item { SettingsItem("Backup & Export", "Encrypted backup of all identities", onClick = onBackupExport) }
 
             item { Spacer(Modifier.height(16.dp)); Text("NETWORK", style = MaterialTheme.typography.labelMedium); Spacer(Modifier.height(8.dp)) }
             item { SettingsItem("Registry URL", "registry.ssdid.my") }
@@ -43,10 +45,10 @@ fun SettingsScreen(onBack: () -> Unit) {
 }
 
 @Composable
-fun SettingsItem(title: String, subtitle: String, toggle: Boolean = false) {
+fun SettingsItem(title: String, subtitle: String, toggle: Boolean = false, onClick: (() -> Unit)? = null) {
     var isOn by remember { mutableStateOf(true) }
     Card(
-        Modifier.fillMaxWidth(),
+        Modifier.fillMaxWidth().then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = BgCard)
     ) {

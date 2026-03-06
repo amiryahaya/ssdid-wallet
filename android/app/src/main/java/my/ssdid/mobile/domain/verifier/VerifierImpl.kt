@@ -58,7 +58,7 @@ class VerifierImpl(
     }
 
     private fun canonicalizeCredentialWithoutProof(credential: VerifiableCredential): ByteArray {
-        val json = Json { encodeDefaults = true }
+        val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
         val fullJson = json.encodeToString(credential)
         val jsonObj = Json.parseToJsonElement(fullJson).jsonObject.toMutableMap()
         jsonObj.remove("proof")

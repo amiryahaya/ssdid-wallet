@@ -11,7 +11,8 @@ data class DidDocument(
     val verificationMethod: List<VerificationMethod>,
     val authentication: List<String>,
     val assertionMethod: List<String>,
-    val capabilityInvocation: List<String> = emptyList()
+    val capabilityInvocation: List<String> = emptyList(),
+    val nextKeyHash: String? = null
 ) {
     companion object {
         fun build(did: Did, keyId: String, algorithm: Algorithm, publicKeyMultibase: String): DidDocument {

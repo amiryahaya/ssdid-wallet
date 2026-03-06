@@ -10,40 +10,47 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import my.ssdid.mobile.domain.history.ActivityRepository
+import my.ssdid.mobile.domain.model.ActivityRecord
+import my.ssdid.mobile.domain.model.ActivityType
 import my.ssdid.mobile.ui.theme.*
 import javax.inject.Inject
 
-enum class ActivityType(val icon: String, val color: androidx.compose.ui.graphics.Color, val dimColor: androidx.compose.ui.graphics.Color) {
-    IDENTITY_CREATED("\u2B21", Accent, AccentDim),
-    REGISTERED("\uD83D\uDD17", Success, SuccessDim),
-    AUTHENTICATED("\u2713", Classical, ClassicalDim),
-    TRANSACTION_SIGNED("\u270E", Warning, WarningDim)
+private data class ActivityStyle(val icon: String, val color: Color, val dimColor: Color)
+
+private fun ActivityType.style(): ActivityStyle = when (this) {
+    ActivityType.IDENTITY_CREATED -> ActivityStyle("\u2B21", Accent, AccentDim)
+    ActivityType.SERVICE_REGISTERED -> ActivityStyle("\uD83D\uDD17", Success, SuccessDim)
+    ActivityType.AUTHENTICATED -> ActivityStyle("\u2713", Classical, ClassicalDim)
+    ActivityType.TX_SIGNED -> ActivityStyle("\u270E", Warning, WarningDim)
+    ActivityType.KEY_ROTATED -> ActivityStyle("\uD83D\uDD04", Pqc, PqcDim)
+    ActivityType.CREDENTIAL_RECEIVED -> ActivityStyle("\uD83D\uDCC4", Success, SuccessDim)
+    ActivityType.BACKUP_CREATED -> ActivityStyle("\uD83D\uDCBE", Accent, AccentDim)
+    else -> ActivityStyle("\u2022", TextSecondary, BgCard)
 }
 
-data class ActivityItem(
-    val type: ActivityType,
-    val title: String,
-    val subtitle: String,
-    val timestamp: String,
-    val date: String
-)
-
 @HiltViewModel
-class TxHistoryViewModel @Inject constructor() : ViewModel() {
-    // TODO: Populate from real activity log once persistence is implemented
-    private val _activities = MutableStateFlow<List<ActivityItem>>(emptyList())
+class TxHistoryViewModel @Inject constructor(
+    private val activityRepository: ActivityRepository
+) : ViewModel() {
+    private val _activities = MutableStateFlow<List<ActivityRecord>>(emptyList())
     val activities = _activities.asStateFlow()
 
-    fun addActivity(activity: ActivityItem) {
-        _activities.value = listOf(activity) + _activities.value
+    init {
+        viewModelScope.launch {
+            _activities.value = activityRepository.listActivities()
+        }
     }
 }
 
@@ -53,7 +60,7 @@ fun TxHistoryScreen(
     viewModel: TxHistoryViewModel = hiltViewModel()
 ) {
     val activities by viewModel.activities.collectAsState()
-    val groupedItems = activities.groupBy { it.date }
+    val groupedItems = activities.groupBy { it.timestamp.take(10) }
 
     Column(
         modifier = Modifier
@@ -104,7 +111,19 @@ fun TxHistoryScreen(
                             modifier = Modifier.padding(top = 8.dp, bottom = 6.dp)
                         )
                     }
-                    items(items) { activity ->
+                    items(items) { record ->
+                        val style = record.type.style()
+                        val title = record.type.name
+                            .replace("_", " ")
+                            .lowercase()
+                            .replaceFirstChar { it.uppercase() }
+                        val subtitle = record.serviceUrl ?: record.did
+                        val time = if (record.timestamp.length > 11) {
+                            record.timestamp.substring(11).take(5)
+                        } else {
+                            ""
+                        }
+
                         Card(
                             Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
@@ -119,27 +138,27 @@ fun TxHistoryScreen(
                                     modifier = Modifier
                                         .size(40.dp)
                                         .clip(RoundedCornerShape(12.dp))
-                                        .background(activity.type.dimColor),
+                                        .background(style.dimColor),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text(activity.type.icon, fontSize = 16.sp, color = activity.type.color)
+                                    Text(style.icon, fontSize = 16.sp, color = style.color)
                                 }
                                 Spacer(Modifier.width(12.dp))
                                 Column(Modifier.weight(1f)) {
                                     Text(
-                                        activity.title,
+                                        title,
                                         fontSize = 14.sp,
                                         fontWeight = FontWeight.Medium,
                                         color = TextPrimary
                                     )
                                     Text(
-                                        activity.subtitle,
+                                        subtitle,
                                         fontSize = 12.sp,
                                         color = TextTertiary
                                     )
                                 }
                                 Text(
-                                    activity.timestamp,
+                                    time,
                                     fontSize = 12.sp,
                                     color = TextTertiary
                                 )

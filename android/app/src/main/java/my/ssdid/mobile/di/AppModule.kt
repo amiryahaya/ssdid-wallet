@@ -7,9 +7,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import my.ssdid.mobile.domain.SsdidClient
+import my.ssdid.mobile.domain.backup.BackupManager
 import my.ssdid.mobile.domain.crypto.ClassicalProvider
 import my.ssdid.mobile.domain.crypto.CryptoProvider
 import my.ssdid.mobile.domain.crypto.PqcProvider
+import my.ssdid.mobile.domain.recovery.RecoveryManager
+import my.ssdid.mobile.domain.rotation.KeyRotationManager
 import my.ssdid.mobile.domain.transport.SsdidHttpClient
 import my.ssdid.mobile.domain.vault.Vault
 import my.ssdid.mobile.domain.vault.VaultImpl
@@ -74,4 +77,31 @@ object AppModule {
         verifier: Verifier,
         httpClient: SsdidHttpClient
     ): SsdidClient = SsdidClient(vault, verifier, httpClient)
+
+    @Provides
+    @Singleton
+    fun provideRecoveryManager(
+        vault: Vault,
+        storage: VaultStorage,
+        @Named("classical") classical: CryptoProvider,
+        @Named("pqc") pqc: CryptoProvider,
+        keystoreManager: KeystoreManager
+    ): RecoveryManager = RecoveryManager(vault, storage, classical, pqc, keystoreManager)
+
+    @Provides
+    @Singleton
+    fun provideKeyRotationManager(
+        storage: VaultStorage,
+        @Named("classical") classical: CryptoProvider,
+        @Named("pqc") pqc: CryptoProvider,
+        keystoreManager: KeystoreManager
+    ): KeyRotationManager = KeyRotationManager(storage, classical, pqc, keystoreManager)
+
+    @Provides
+    @Singleton
+    fun provideBackupManager(
+        vault: Vault,
+        storage: VaultStorage,
+        keystoreManager: KeystoreManager
+    ): BackupManager = BackupManager(vault, storage, keystoreManager)
 }

@@ -28,4 +28,14 @@ sealed class Screen(val route: String) {
     }
     object Settings : Screen("settings")
     object TxHistory : Screen("tx_history")
+    object RecoverySetup : Screen("recovery_setup/{keyId}") {
+        fun createRoute(keyId: String) = "recovery_setup/${Uri.encode(keyId)}"
+    }
+    object KeyRotation : Screen("key_rotation/{keyId}") {
+        fun createRoute(keyId: String) = "key_rotation/${Uri.encode(keyId)}"
+    }
+    object BackupExport : Screen("backup_export")
+    object DeviceManagement : Screen("device_management/{keyId}") {
+        fun createRoute(keyId: String) = "device_management/${Uri.encode(keyId)}"
+    }
 }

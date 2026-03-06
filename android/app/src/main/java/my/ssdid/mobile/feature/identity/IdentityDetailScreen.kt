@@ -1,14 +1,17 @@
 package my.ssdid.mobile.feature.identity
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -43,6 +46,9 @@ fun IdentityDetailScreen(
     keyId: String,
     onBack: () -> Unit,
     onCredentialClick: (String) -> Unit,
+    onRecoverySetup: (String) -> Unit = {},
+    onKeyRotation: (String) -> Unit = {},
+    onDeviceManagement: (String) -> Unit = {},
     viewModel: IdentityDetailViewModel = hiltViewModel()
 ) {
     val identity by viewModel.identity.collectAsState()
@@ -81,7 +87,44 @@ fun IdentityDetailScreen(
                         }
                     }
                 }
+
+                // Action buttons
+                item {
+                    Spacer(Modifier.height(8.dp))
+                    Text("ACTIONS", style = MaterialTheme.typography.labelMedium)
+                    Spacer(Modifier.height(8.dp))
+                }
+                item {
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        ActionCard("\uD83D\uDD11", "Recovery", Modifier.weight(1f)) { onRecoverySetup(keyId) }
+                        ActionCard("\uD83D\uDD04", "Rotate Key", Modifier.weight(1f)) { onKeyRotation(keyId) }
+                        ActionCard("\uD83D\uDCF1", "Devices", Modifier.weight(1f)) { onDeviceManagement(keyId) }
+                    }
+                }
             }
+        }
+    }
+}
+
+@Composable
+fun ActionCard(icon: String, label: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Card(
+        modifier = modifier.clickable(onClick = onClick),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = BgCard)
+    ) {
+        Column(
+            Modifier.padding(18.dp).fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                Modifier.size(42.dp).clip(RoundedCornerShape(12.dp)).background(AccentDim),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(icon, color = Accent, fontSize = 18.sp)
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(label, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
         }
     }
 }

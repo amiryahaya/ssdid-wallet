@@ -7,15 +7,19 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import my.ssdid.mobile.feature.auth.AuthFlowScreen
+import my.ssdid.mobile.feature.backup.BackupScreen
 import my.ssdid.mobile.feature.credentials.CredentialDetailScreen
 import my.ssdid.mobile.feature.credentials.CredentialsScreen
+import my.ssdid.mobile.feature.device.DeviceManagementScreen
 import my.ssdid.mobile.feature.history.TxHistoryScreen
 import my.ssdid.mobile.feature.identity.CreateIdentityScreen
 import my.ssdid.mobile.feature.identity.IdentityDetailScreen
 import my.ssdid.mobile.feature.identity.WalletHomeScreen
 import my.ssdid.mobile.feature.onboarding.BiometricSetupScreen
 import my.ssdid.mobile.feature.onboarding.OnboardingScreen
+import my.ssdid.mobile.feature.recovery.RecoverySetupScreen
 import my.ssdid.mobile.feature.registration.RegistrationScreen
+import my.ssdid.mobile.feature.rotation.KeyRotationScreen
 import my.ssdid.mobile.feature.scan.ScanQrScreen
 import my.ssdid.mobile.feature.settings.SettingsScreen
 import my.ssdid.mobile.feature.transaction.TxSigningScreen
@@ -71,7 +75,10 @@ fun SsdidNavGraph(navController: NavHostController) {
             IdentityDetailScreen(
                 keyId = keyId,
                 onBack = { navController.popBackStack() },
-                onCredentialClick = { id -> navController.navigate(Screen.CredentialDetail.createRoute(id)) }
+                onCredentialClick = { id -> navController.navigate(Screen.CredentialDetail.createRoute(id)) },
+                onRecoverySetup = { id -> navController.navigate(Screen.RecoverySetup.createRoute(id)) },
+                onKeyRotation = { id -> navController.navigate(Screen.KeyRotation.createRoute(id)) },
+                onDeviceManagement = { id -> navController.navigate(Screen.DeviceManagement.createRoute(id)) }
             )
         }
         composable(Screen.ScanQr.route) {
@@ -141,10 +148,28 @@ fun SsdidNavGraph(navController: NavHostController) {
             )
         }
         composable(Screen.Settings.route) {
-            SettingsScreen(onBack = { navController.popBackStack() })
+            SettingsScreen(
+                onBack = { navController.popBackStack() },
+                onBackupExport = { navController.navigate(Screen.BackupExport.route) }
+            )
         }
         composable(Screen.TxHistory.route) {
             TxHistoryScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.RecoverySetup.route) { backStackEntry ->
+            val keyId = backStackEntry.arguments?.getString("keyId") ?: return@composable
+            RecoverySetupScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.KeyRotation.route) { backStackEntry ->
+            val keyId = backStackEntry.arguments?.getString("keyId") ?: return@composable
+            KeyRotationScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.BackupExport.route) {
+            BackupScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.DeviceManagement.route) { backStackEntry ->
+            val keyId = backStackEntry.arguments?.getString("keyId") ?: return@composable
+            DeviceManagementScreen(onBack = { navController.popBackStack() })
         }
     }
 }

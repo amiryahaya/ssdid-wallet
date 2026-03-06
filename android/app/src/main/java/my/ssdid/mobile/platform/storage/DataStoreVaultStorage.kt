@@ -13,6 +13,8 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import my.ssdid.mobile.domain.model.Identity
 import my.ssdid.mobile.domain.model.VerifiableCredential
+import my.ssdid.mobile.domain.rotation.RotationEntry
+import my.ssdid.mobile.domain.vault.PreRotatedKeyData
 import my.ssdid.mobile.domain.vault.VaultStorage
 import java.io.File
 import java.util.Base64
@@ -97,6 +99,76 @@ class DataStoreVaultStorage(private val context: Context) : VaultStorage {
         val credentials = listCredentials().filter { it.id != credentialId }
         context.dataStore.edit { prefs ->
             prefs[credentialsKey] = json.encodeToString(credentials)
+        }
+    }
+
+    // ---------- Recovery keys ----------
+
+    private val recoveryKeysDir: File
+        get() = File(File(context.filesDir, "keys"), "recovery").also { it.mkdirs() }
+
+    override suspend fun saveRecoveryPublicKey(keyId: String, encryptedPublicKey: ByteArray) {
+        val encoded = Base64.getUrlEncoder().withoutPadding().encodeToString(keyId.toByteArray())
+        File(recoveryKeysDir, encoded).writeBytes(encryptedPublicKey)
+    }
+
+    override suspend fun getRecoveryPublicKey(keyId: String): ByteArray? {
+        val encoded = Base64.getUrlEncoder().withoutPadding().encodeToString(keyId.toByteArray())
+        val file = File(recoveryKeysDir, encoded)
+        return if (file.exists()) file.readBytes() else null
+    }
+
+    // ---------- Pre-rotated keys (KERI) ----------
+
+    private val preRotatedKeysDir: File
+        get() = File(File(context.filesDir, "keys"), "prerotated").also { it.mkdirs() }
+
+    override suspend fun savePreRotatedKey(keyId: String, encryptedPrivateKey: ByteArray, publicKey: ByteArray) {
+        val encoded = Base64.getUrlEncoder().withoutPadding().encodeToString(keyId.toByteArray())
+        File(preRotatedKeysDir, "${encoded}_priv").writeBytes(encryptedPrivateKey)
+        File(preRotatedKeysDir, "${encoded}_pub").writeBytes(publicKey)
+    }
+
+    override suspend fun getPreRotatedKey(keyId: String): PreRotatedKeyData? {
+        val encoded = Base64.getUrlEncoder().withoutPadding().encodeToString(keyId.toByteArray())
+        val privFile = File(preRotatedKeysDir, "${encoded}_priv")
+        val pubFile = File(preRotatedKeysDir, "${encoded}_pub")
+        return if (privFile.exists() && pubFile.exists()) {
+            PreRotatedKeyData(privFile.readBytes(), pubFile.readBytes())
+        } else null
+    }
+
+    override suspend fun deletePreRotatedKey(keyId: String) {
+        val encoded = Base64.getUrlEncoder().withoutPadding().encodeToString(keyId.toByteArray())
+        File(preRotatedKeysDir, "${encoded}_priv").delete()
+        File(preRotatedKeysDir, "${encoded}_pub").delete()
+    }
+
+    // ---------- Rotation history ----------
+
+    private val rotationHistoryKey = stringPreferencesKey("rotation_history")
+
+    override suspend fun addRotationEntry(did: String, entry: RotationEntry) {
+        val history = getAllRotationHistory().toMutableMap()
+        val entries = history.getOrDefault(did, emptyList()).toMutableList()
+        entries.add(0, entry)
+        history[did] = entries
+        context.dataStore.edit { prefs ->
+            prefs[rotationHistoryKey] = json.encodeToString(history)
+        }
+    }
+
+    override suspend fun getRotationHistory(did: String): List<RotationEntry> {
+        return getAllRotationHistory()[did] ?: emptyList()
+    }
+
+    private suspend fun getAllRotationHistory(): Map<String, List<RotationEntry>> {
+        val jsonStr = context.dataStore.data.map { it[rotationHistoryKey] }.first() ?: return emptyMap()
+        return try {
+            json.decodeFromString(jsonStr)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to deserialize rotation history", e)
+            emptyMap()
         }
     }
 

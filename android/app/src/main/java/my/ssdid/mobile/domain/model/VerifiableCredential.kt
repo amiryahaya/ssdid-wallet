@@ -12,6 +12,7 @@ data class VerifiableCredential(
     val issuanceDate: String,
     val expirationDate: String? = null,
     val credentialSubject: CredentialSubject,
+    val credentialStatus: CredentialStatus? = null,
     val proof: Proof
 )
 

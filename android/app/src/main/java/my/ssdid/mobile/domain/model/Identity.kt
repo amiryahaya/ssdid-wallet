@@ -10,5 +10,8 @@ data class Identity(
     val algorithm: Algorithm,
     val publicKeyMultibase: String,
     val createdAt: String,
-    val isActive: Boolean = true
+    val isActive: Boolean = true,
+    val recoveryKeyId: String? = null,
+    val hasRecoveryKey: Boolean = false,
+    val preRotatedKeyId: String? = null
 )
