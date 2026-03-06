@@ -24,6 +24,7 @@ import kotlinx.coroutines.launch
 import my.ssdid.mobile.domain.model.VerifiableCredential
 import my.ssdid.mobile.domain.vault.Vault
 import my.ssdid.mobile.ui.theme.*
+import java.time.Instant
 import javax.inject.Inject
 
 @HiltViewModel
@@ -62,10 +63,13 @@ fun CredentialsScreen(
                     Row {
                         Box(Modifier.width(4.dp).height(100.dp).background(Accent))
                         Column(Modifier.padding(14.dp)) {
+                            val isExpired = vc.expirationDate?.let {
+                                try { Instant.now().isAfter(Instant.parse(it)) } catch (_: Exception) { false }
+                            } ?: false
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 Text(vc.type.lastOrNull() ?: "Credential", style = MaterialTheme.typography.labelSmall)
-                                Box(Modifier.clip(RoundedCornerShape(4.dp)).background(SuccessDim).padding(horizontal = 8.dp, vertical = 2.dp)) {
-                                    Text("Valid", fontSize = 10.sp, color = Success)
+                                Box(Modifier.clip(RoundedCornerShape(4.dp)).background(if (isExpired) DangerDim else SuccessDim).padding(horizontal = 8.dp, vertical = 2.dp)) {
+                                    Text(if (isExpired) "Expired" else "Valid", fontSize = 10.sp, color = if (isExpired) Danger else Success)
                                 }
                             }
                             Spacer(Modifier.height(4.dp))

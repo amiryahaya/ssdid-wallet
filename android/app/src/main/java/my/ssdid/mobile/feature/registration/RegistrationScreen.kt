@@ -20,7 +20,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -73,19 +72,10 @@ class RegistrationViewModel @Inject constructor(
     fun register() {
         val identity = _selectedIdentity.value ?: return
         viewModelScope.launch {
-            try {
-                _state.value = RegistrationState.InProgress(RegistrationStep.CONNECTING)
-                delay(800)
-                _state.value = RegistrationState.InProgress(RegistrationStep.MUTUAL_AUTH)
-                delay(600)
-                _state.value = RegistrationState.InProgress(RegistrationStep.IDENTITY_SELECT)
-                delay(400)
-                client.registerWithService(identity, serverUrl)
-                    .onSuccess { _state.value = RegistrationState.Success }
-                    .onFailure { _state.value = RegistrationState.Error(it.message ?: "Registration failed") }
-            } catch (e: Exception) {
-                _state.value = RegistrationState.Error(e.message ?: "Registration failed")
-            }
+            _state.value = RegistrationState.InProgress(RegistrationStep.CONNECTING)
+            client.registerWithService(identity, serverUrl)
+                .onSuccess { _state.value = RegistrationState.Success }
+                .onFailure { _state.value = RegistrationState.Error(it.message ?: "Registration failed") }
         }
     }
 }

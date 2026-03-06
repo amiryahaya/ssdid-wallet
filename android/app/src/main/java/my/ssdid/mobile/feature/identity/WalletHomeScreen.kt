@@ -22,6 +22,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import my.ssdid.mobile.domain.model.Identity
 import my.ssdid.mobile.domain.vault.Vault
 import my.ssdid.mobile.ui.theme.*
@@ -50,6 +52,10 @@ fun WalletHomeScreen(
     viewModel: WalletHomeViewModel = hiltViewModel()
 ) {
     val identities by viewModel.identities.collectAsState()
+
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        viewModel.refresh()
+    }
 
     Column(
         modifier = Modifier

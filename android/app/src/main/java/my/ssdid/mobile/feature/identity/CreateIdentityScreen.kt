@@ -27,10 +27,16 @@ class CreateIdentityViewModel @Inject constructor(private val client: SsdidClien
     private val _isCreating = MutableStateFlow(false)
     val isCreating = _isCreating.asStateFlow()
 
+    private val _error = MutableStateFlow<String?>(null)
+    val error = _error.asStateFlow()
+
     fun createIdentity(name: String, algorithm: Algorithm, onSuccess: () -> Unit) {
         viewModelScope.launch {
             _isCreating.value = true
-            client.initIdentity(name, algorithm).onSuccess { onSuccess() }
+            _error.value = null
+            client.initIdentity(name, algorithm)
+                .onSuccess { onSuccess() }
+                .onFailure { _error.value = it.message ?: "Failed to create identity" }
             _isCreating.value = false
         }
     }
@@ -45,6 +51,7 @@ fun CreateIdentityScreen(
     var name by remember { mutableStateOf("") }
     var selectedAlgo by remember { mutableStateOf(Algorithm.KAZ_SIGN_192) }
     val isCreating by viewModel.isCreating.collectAsState()
+    val error by viewModel.error.collectAsState()
 
     Column(
         modifier = Modifier.fillMaxSize().background(BgPrimary).statusBarsPadding()
@@ -113,6 +120,16 @@ fun CreateIdentityScreen(
                     }
                 }
             }
+        }
+
+        // Error display
+        error?.let { msg ->
+            Text(
+                msg,
+                color = Danger,
+                fontSize = 13.sp,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+            )
         }
 
         // Footer

@@ -80,8 +80,8 @@ fun SsdidNavGraph(navController: NavHostController) {
                 onScanned = { serverUrl, serverDid, action, sessionToken ->
                     when (action) {
                         "register" -> navController.navigate(Screen.Registration.createRoute(serverUrl, serverDid))
-                        "auth" -> navController.navigate(Screen.AuthFlow.createRoute(serverUrl))
-                        "tx" -> navController.navigate(Screen.TxSigning.createRoute(serverUrl, sessionToken))
+                        "authenticate" -> navController.navigate(Screen.AuthFlow.createRoute(serverUrl))
+                        "sign" -> navController.navigate(Screen.TxSigning.createRoute(serverUrl, sessionToken))
                     }
                 }
             )

@@ -38,19 +38,13 @@ data class ActivityItem(
 
 @HiltViewModel
 class TxHistoryViewModel @Inject constructor() : ViewModel() {
-    private val _activities = MutableStateFlow(
-        listOf(
-            ActivityItem(ActivityType.IDENTITY_CREATED, "Identity Created", "Personal (KAZ-Sign 192)", "14:32", "Today"),
-            ActivityItem(ActivityType.REGISTERED, "Registered with Service", "demo.ssdid.my", "14:28", "Today"),
-            ActivityItem(ActivityType.AUTHENTICATED, "Authenticated", "portal.university.edu.my", "11:05", "Today"),
-            ActivityItem(ActivityType.TRANSACTION_SIGNED, "Transaction Signed", "1,500.00 MYR - Payment", "09:45", "Today"),
-            ActivityItem(ActivityType.IDENTITY_CREATED, "Identity Created", "Work (Ed25519)", "16:20", "Yesterday"),
-            ActivityItem(ActivityType.REGISTERED, "Registered with Service", "bank.example.com", "15:10", "Yesterday"),
-            ActivityItem(ActivityType.AUTHENTICATED, "Authenticated", "gov.my", "10:30", "2 days ago"),
-            ActivityItem(ActivityType.TRANSACTION_SIGNED, "Transaction Signed", "250.00 MYR - Transfer", "09:15", "2 days ago")
-        )
-    )
+    // TODO: Populate from real activity log once persistence is implemented
+    private val _activities = MutableStateFlow<List<ActivityItem>>(emptyList())
     val activities = _activities.asStateFlow()
+
+    fun addActivity(activity: ActivityItem) {
+        _activities.value = listOf(activity) + _activities.value
+    }
 }
 
 @Composable

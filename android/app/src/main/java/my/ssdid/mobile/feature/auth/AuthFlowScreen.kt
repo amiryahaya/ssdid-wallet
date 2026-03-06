@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import my.ssdid.mobile.domain.SsdidClient
-import my.ssdid.mobile.domain.model.Identity
 import my.ssdid.mobile.domain.model.VerifiableCredential
 import my.ssdid.mobile.domain.vault.Vault
 import my.ssdid.mobile.ui.theme.*
@@ -48,9 +47,6 @@ class AuthFlowViewModel @Inject constructor(
     private val _state = MutableStateFlow<AuthState>(AuthState.Idle)
     val state = _state.asStateFlow()
 
-    private val _identities = MutableStateFlow<List<Identity>>(emptyList())
-    val identities = _identities.asStateFlow()
-
     private val _credentials = MutableStateFlow<List<VerifiableCredential>>(emptyList())
     val credentials = _credentials.asStateFlow()
 
@@ -59,7 +55,6 @@ class AuthFlowViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            _identities.value = vault.listIdentities()
             _credentials.value = vault.listCredentials()
         }
     }

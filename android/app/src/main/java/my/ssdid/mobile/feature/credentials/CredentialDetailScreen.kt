@@ -13,6 +13,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import java.time.Instant
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -114,13 +117,21 @@ fun CredentialDetailScreen(
                                     vc.type.lastOrNull() ?: "Credential",
                                     style = MaterialTheme.typography.headlineSmall
                                 )
+                                val isExpired = vc.expirationDate?.let {
+                                    try { Instant.now().isAfter(Instant.parse(it)) } catch (_: Exception) { false }
+                                } ?: false
                                 Box(
                                     Modifier
                                         .clip(RoundedCornerShape(4.dp))
-                                        .background(SuccessDim)
+                                        .background(if (isExpired) DangerDim else SuccessDim)
                                         .padding(horizontal = 10.dp, vertical = 3.dp)
                                 ) {
-                                    Text("Valid", fontSize = 11.sp, color = Success, fontWeight = FontWeight.Medium)
+                                    Text(
+                                        if (isExpired) "Expired" else "Valid",
+                                        fontSize = 11.sp,
+                                        color = if (isExpired) Danger else Success,
+                                        fontWeight = FontWeight.Medium
+                                    )
                                 }
                             }
                             Spacer(Modifier.height(16.dp))
@@ -201,27 +212,8 @@ fun CredentialDetailScreen(
                             shape = RoundedCornerShape(12.dp),
                             colors = CardDefaults.cardColors(containerColor = BgSecondary)
                         ) {
-                            val rawJson = buildString {
-                                appendLine("{")
-                                appendLine("  \"@context\": ${vc.context},")
-                                appendLine("  \"id\": \"${vc.id}\",")
-                                appendLine("  \"type\": ${vc.type},")
-                                appendLine("  \"issuer\": \"${vc.issuer}\",")
-                                appendLine("  \"issuanceDate\": \"${vc.issuanceDate}\",")
-                                vc.expirationDate?.let { appendLine("  \"expirationDate\": \"$it\",") }
-                                appendLine("  \"credentialSubject\": {")
-                                appendLine("    \"id\": \"${vc.credentialSubject.id}\",")
-                                appendLine("    \"claims\": ${vc.credentialSubject.claims}")
-                                appendLine("  },")
-                                appendLine("  \"proof\": {")
-                                appendLine("    \"type\": \"${vc.proof.type}\",")
-                                appendLine("    \"created\": \"${vc.proof.created}\",")
-                                appendLine("    \"verificationMethod\": \"${vc.proof.verificationMethod}\",")
-                                appendLine("    \"proofPurpose\": \"${vc.proof.proofPurpose}\",")
-                                appendLine("    \"proofValue\": \"${vc.proof.proofValue.take(40)}...\"")
-                                appendLine("  }")
-                                appendLine("}")
-                            }
+                            val prettyJson = Json { prettyPrint = true }
+                            val rawJson = prettyJson.encodeToString(vc)
                             Text(
                                 rawJson,
                                 modifier = Modifier.padding(14.dp),
