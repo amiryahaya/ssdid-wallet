@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "ssdid-mobile"
+rootProject.name = "ssdid-wallet"
 include(":app")

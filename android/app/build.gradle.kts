@@ -5,13 +5,14 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
     id("org.jetbrains.kotlin.plugin.compose")
     kotlin("kapt")
+    id("org.jetbrains.kotlinx.kover")
 }
 
 android {
-    namespace = "my.ssdid.mobile"
+    namespace = "my.ssdid.wallet"
     compileSdk = 35
     defaultConfig {
-        applicationId = "my.ssdid.mobile"
+        applicationId = "my.ssdid.wallet"
         minSdk = 26
         targetSdk = 35
         versionCode = 1

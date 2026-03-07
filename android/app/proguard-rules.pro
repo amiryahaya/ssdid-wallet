@@ -9,11 +9,11 @@
     kotlinx.serialization.KSerializer serializer(...);
 }
 
--keep,includedescriptorclasses class my.ssdid.mobile.**$$serializer { *; }
--keepclassmembers class my.ssdid.mobile.** {
+-keep,includedescriptorclasses class my.ssdid.wallet.**$$serializer { *; }
+-keepclassmembers class my.ssdid.wallet.** {
     *** Companion;
 }
--keepclasseswithmembers class my.ssdid.mobile.** {
+-keepclasseswithmembers class my.ssdid.wallet.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
 

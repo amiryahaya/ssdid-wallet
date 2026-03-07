@@ -1,0 +1,34 @@
+package my.ssdid.wallet.domain.vault
+
+import my.ssdid.wallet.domain.model.Identity
+import my.ssdid.wallet.domain.model.VerifiableCredential
+import my.ssdid.wallet.domain.rotation.RotationEntry
+
+data class PreRotatedKeyData(
+    val encryptedPrivateKey: ByteArray,
+    val publicKey: ByteArray
+)
+
+interface VaultStorage {
+    suspend fun saveIdentity(identity: Identity, encryptedPrivateKey: ByteArray)
+    suspend fun getIdentity(keyId: String): Identity?
+    suspend fun listIdentities(): List<Identity>
+    suspend fun deleteIdentity(keyId: String)
+    suspend fun getEncryptedPrivateKey(keyId: String): ByteArray?
+    suspend fun saveCredential(credential: VerifiableCredential)
+    suspend fun listCredentials(): List<VerifiableCredential>
+    suspend fun deleteCredential(credentialId: String)
+
+    // Recovery key storage
+    suspend fun saveRecoveryPublicKey(keyId: String, encryptedPublicKey: ByteArray)
+    suspend fun getRecoveryPublicKey(keyId: String): ByteArray?
+
+    // Pre-rotated key storage (KERI)
+    suspend fun savePreRotatedKey(keyId: String, encryptedPrivateKey: ByteArray, publicKey: ByteArray)
+    suspend fun getPreRotatedKey(keyId: String): PreRotatedKeyData?
+    suspend fun deletePreRotatedKey(keyId: String)
+
+    // Rotation history
+    suspend fun addRotationEntry(did: String, entry: RotationEntry)
+    suspend fun getRotationHistory(did: String): List<RotationEntry>
+}

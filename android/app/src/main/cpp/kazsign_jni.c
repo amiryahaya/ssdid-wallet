@@ -73,7 +73,7 @@ static void throw_kazsign_exception(JNIEnv *env, int error_code) {
             message = "Unknown error";
             break;
     }
-    throw_exception(env, "my/ssdid/mobile/domain/crypto/kazsign/KazSignException", message);
+    throw_exception(env, "my/ssdid/wallet/domain/crypto/kazsign/KazSignException", message);
 }
 
 /* ============================================================================
@@ -218,7 +218,7 @@ Java_my_ssdid_mobile_domain_crypto_kazsign_KazSignNative_nativeGenerateKeyPair(J
     free(sk);
 
     // Create KeyPair object
-    jclass keyPairClass = (*env)->FindClass(env, "my/ssdid/mobile/domain/crypto/kazsign/KeyPair");
+    jclass keyPairClass = (*env)->FindClass(env, "my/ssdid/wallet/domain/crypto/kazsign/KeyPair");
     if (!keyPairClass) {
         return NULL;
     }
@@ -363,7 +363,7 @@ Java_my_ssdid_mobile_domain_crypto_kazsign_KazSignNative_nativeVerify(JNIEnv *en
     (*env)->ReleaseByteArrayElements(env, publicKey, pkData, JNI_ABORT);
 
     // Create VerificationResult object
-    jclass resultClass = (*env)->FindClass(env, "my/ssdid/mobile/domain/crypto/kazsign/VerificationResult");
+    jclass resultClass = (*env)->FindClass(env, "my/ssdid/wallet/domain/crypto/kazsign/VerificationResult");
     if (!resultClass) {
         free(msg);
         return NULL;
@@ -1305,7 +1305,7 @@ Java_my_ssdid_mobile_domain_crypto_kazsign_KazSignNative_nativeLoadP12(JNIEnv *e
     free(cert);
 
     // Create P12Contents object
-    jclass p12Class = (*env)->FindClass(env, "my/ssdid/mobile/domain/crypto/kazsign/P12Contents");
+    jclass p12Class = (*env)->FindClass(env, "my/ssdid/wallet/domain/crypto/kazsign/P12Contents");
     if (!p12Class) {
         return NULL;
     }
