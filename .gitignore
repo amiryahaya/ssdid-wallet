@@ -6,8 +6,21 @@ android/local.properties
 android/captures/
 android/.externalNativeBuild/
 android/.cxx/
+android/app/.cxx/
 *.iml
 .idea/
+
+# Gradle
+.gradle/
+gradle/wrapper/gradle-wrapper.jar
+
+# Kotlin
+*.class
+
+# APK/AAB
+*.apk
+*.aab
+*.ap_
 
 # iOS
 ios/build/
@@ -41,6 +54,12 @@ harmony/.idea/
 *.hap
 *.hsp
 
+# Native build artifacts
+*.o
+*.so
+*.dylib
+*.a
+
 # General
 .DS_Store
 *.swp
@@ -49,5 +68,13 @@ harmony/.idea/
 *.log
 Thumbs.db
 
+# Environment / secrets
+.env
+.env.*
+*.keystore
+*.jks
+google-services.json
+
 # Claude
 .claude/settings.local.json
+.claude/todos.json
