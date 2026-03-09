@@ -92,4 +92,30 @@ class PqcProviderTest {
         val sig = provider.sign(Algorithm.SLH_DSA_SHAKE_128F, kp.privateKey, data)
         assertThat(provider.verify(Algorithm.SLH_DSA_SHAKE_128F, kp.publicKey, sig, data)).isTrue()
     }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `verify throws for unsupported classical algorithm`() {
+        provider.verify(Algorithm.ED25519, ByteArray(32), ByteArray(64), ByteArray(10))
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `sign throws for unsupported classical algorithm`() {
+        provider.sign(Algorithm.ED25519, ByteArray(32), ByteArray(10))
+    }
+
+    @Test
+    fun `BouncyCastle provider is installed after construction`() {
+        val bc = java.security.Security.getProvider("BC")
+        assertThat(bc).isNotNull()
+        assertThat(bc.javaClass.name).contains("BouncyCastle")
+    }
+
+    @Test
+    fun `BouncyCastle installer is idempotent`() {
+        // Creating multiple providers should not register duplicate BC instances
+        val p1 = PqcProvider()
+        val p2 = PqcProvider()
+        val providers = java.security.Security.getProviders().filter { it.name == "BC" }
+        assertThat(providers).hasSize(1)
+    }
 }

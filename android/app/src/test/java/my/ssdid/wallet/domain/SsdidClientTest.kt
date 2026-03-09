@@ -261,11 +261,13 @@ class SsdidClientTest {
 
     @Test
     fun `signTransaction signs challenge with tx hash binding`() = runTest {
+        val tx = mapOf("amount" to "500", "to" to "Bob")
+        val challengeResp = TxChallengeResponse(challenge = "server-challenge", transaction = tx)
+        coEvery { serverApi.requestChallenge(any()) } returns challengeResp
         coEvery { vault.sign(testIdentity.keyId, any()) } returns Result.success("txsig".toByteArray())
         val submitResp = TxSubmitResponse(transaction_id = "tx-001", status = "confirmed")
         coEvery { serverApi.submitTransaction(any()) } returns submitResp
 
-        val tx = mapOf("amount" to "500", "to" to "Bob")
         val result = client.signTransaction("session-abc", testIdentity, tx, "https://server.example.com")
 
         assertThat(result.isSuccess).isTrue()
@@ -277,7 +279,8 @@ class SsdidClientTest {
                 it.session_token == "session-abc" &&
                 it.did == testIdentity.did &&
                 it.key_id == testIdentity.keyId &&
-                it.transaction == tx
+                it.transaction == tx &&
+                it.signed_challenge.isNotEmpty()
             })
         }
     }
@@ -296,7 +299,12 @@ class SsdidClientTest {
 
         val payload = String(capturedPayload.captured)
         assertThat(payload).startsWith("test-challenge")
-        assertThat(payload.length).isGreaterThan("test-challenge".length)
+        // Payload format: "challenge" + Base64(SHA3-256(txJson))
+        // The Base64-encoded hash portion should be non-empty
+        val hashPortion = payload.removePrefix("test-challenge")
+        assertThat(hashPortion).isNotEmpty()
+        // Base64url (no padding) of a 32-byte SHA3-256 hash is 43 characters
+        assertThat(hashPortion.length).isEqualTo(43)
     }
 
     @Test

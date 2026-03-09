@@ -136,6 +136,7 @@ target_compile_options(kazsign PRIVATE
     -O2
     -fPIC
     -fvisibility=hidden
+    -fstack-protector-strong
 )
 
 # Export only necessary symbols

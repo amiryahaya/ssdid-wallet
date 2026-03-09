@@ -144,10 +144,13 @@ enum class Algorithm(
          * Disambiguate KAZ-Sign security level from public key size.
          * KAZ-Sign v2.0 public key sizes: 128→54B, 192→88B, 256→118B
          */
-        fun kazSignFromKeySize(keySize: Int): Algorithm = when {
-            keySize <= 54 -> KAZ_SIGN_128
-            keySize <= 88 -> KAZ_SIGN_192
-            else -> KAZ_SIGN_256
+        fun kazSignFromKeySize(keySize: Int): Algorithm = when (keySize) {
+            54 -> KAZ_SIGN_128
+            88 -> KAZ_SIGN_192
+            118 -> KAZ_SIGN_256
+            else -> throw IllegalArgumentException(
+                "Unknown KAZ-Sign public key size: $keySize. Expected 54, 88, or 118."
+            )
         }
     }
 }

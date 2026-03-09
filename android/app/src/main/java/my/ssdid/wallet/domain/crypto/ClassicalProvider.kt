@@ -1,17 +1,13 @@
 package my.ssdid.wallet.domain.crypto
 
 import my.ssdid.wallet.domain.model.Algorithm
-import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.*
 import java.security.spec.*
 
 class ClassicalProvider : CryptoProvider {
 
     init {
-        // Android ships a stripped BouncyCastle that lacks PQC algorithms (ML-DSA, SLH-DSA).
-        // Replace it with the full bcprov-jdk18on provider.
-        Security.removeProvider("BC")
-        Security.addProvider(BouncyCastleProvider())
+        BouncyCastleInstaller.ensureInstalled()
     }
 
     override fun supportsAlgorithm(algorithm: Algorithm): Boolean = !algorithm.isPostQuantum
@@ -27,6 +23,7 @@ class ClassicalProvider : CryptoProvider {
     }
 
     override fun sign(algorithm: Algorithm, privateKey: ByteArray, data: ByteArray): ByteArray {
+        require(supportsAlgorithm(algorithm)) { "Unsupported: $algorithm" }
         return when (algorithm) {
             Algorithm.ED25519 -> signEd25519(privateKey, data)
             // NOTE: Investigated NONEwithECDSA to avoid double-hashing the pre-hashed
@@ -44,11 +41,12 @@ class ClassicalProvider : CryptoProvider {
     }
 
     override fun verify(algorithm: Algorithm, publicKey: ByteArray, signature: ByteArray, data: ByteArray): Boolean {
+        require(supportsAlgorithm(algorithm)) { "Unsupported: $algorithm" }
         return when (algorithm) {
             Algorithm.ED25519 -> verifyEd25519(publicKey, signature, data)
             Algorithm.ECDSA_P256 -> verifyEcdsa("SHA256withECDSA", "secp256r1", publicKey, signature, data)
             Algorithm.ECDSA_P384 -> verifyEcdsa("SHA384withECDSA", "secp384r1", publicKey, signature, data)
-            else -> false
+            else -> throw IllegalArgumentException("Unsupported classical algorithm for verify: $algorithm")
         }
     }
 
@@ -149,25 +147,41 @@ class ClassicalProvider : CryptoProvider {
         return sig.verify(signature)
     }
 
+    // ASN.1 DER length encoding (supports lengths > 127)
+    private fun derEncodeLength(len: Int): ByteArray = when {
+        len < 0x80 -> byteArrayOf(len.toByte())
+        len <= 0xFF -> byteArrayOf(0x81.toByte(), len.toByte())
+        else -> byteArrayOf(0x82.toByte(), (len ushr 8).toByte(), len.toByte())
+    }
+
+    private fun derSequence(content: ByteArray): ByteArray =
+        byteArrayOf(0x30) + derEncodeLength(content.size) + content
+
+    private fun derOctetString(content: ByteArray): ByteArray =
+        byteArrayOf(0x04) + derEncodeLength(content.size) + content
+
+    private fun derBitString(content: ByteArray): ByteArray =
+        byteArrayOf(0x03) + derEncodeLength(content.size + 1) + byteArrayOf(0x00) + content
+
     // Ed25519 ASN.1 DER wrapping
     private fun wrapEd25519PrivateKey(raw: ByteArray): ByteArray {
         // PKCS#8: SEQUENCE { INTEGER(0), SEQUENCE { OID 1.3.101.112 }, OCTET STRING { OCTET STRING { raw } } }
         val version = byteArrayOf(0x02, 0x01, 0x00) // INTEGER 0
         val oid = byteArrayOf(0x06, 0x03, 0x2b, 0x65, 0x70)
-        val algoSeq = byteArrayOf(0x30, oid.size.toByte()) + oid
-        val innerOctet = byteArrayOf(0x04, raw.size.toByte()) + raw
-        val outerOctet = byteArrayOf(0x04, innerOctet.size.toByte()) + innerOctet
+        val algoSeq = derSequence(oid)
+        val innerOctet = derOctetString(raw)
+        val outerOctet = derOctetString(innerOctet)
         val total = version + algoSeq + outerOctet
-        return byteArrayOf(0x30, total.size.toByte()) + total
+        return derSequence(total)
     }
 
     private fun wrapEd25519PublicKey(raw: ByteArray): ByteArray {
         // X.509 SubjectPublicKeyInfo: SEQUENCE { SEQUENCE { OID }, BIT STRING { raw } }
         val oid = byteArrayOf(0x06, 0x03, 0x2b, 0x65, 0x70)
-        val algoSeq = byteArrayOf(0x30, oid.size.toByte()) + oid
-        val bitString = byteArrayOf(0x03, (raw.size + 1).toByte(), 0x00) + raw
+        val algoSeq = derSequence(oid)
+        val bitString = derBitString(raw)
         val total = algoSeq + bitString
-        return byteArrayOf(0x30, total.size.toByte()) + total
+        return derSequence(total)
     }
 
     private fun generateEcdsa(curveName: String): KeyPairResult {
@@ -261,10 +275,10 @@ class ClassicalProvider : CryptoProvider {
         // X.509: SEQUENCE { SEQUENCE { OID ecPublicKey, OID curve }, BIT STRING { 0x00, raw } }
         val curveOidBytes = curveOid(curveName)
         val algoSeqContent = ecPublicKeyOid + curveOidBytes
-        val algoSeq = byteArrayOf(0x30, algoSeqContent.size.toByte()) + algoSeqContent
-        val bitString = byteArrayOf(0x03, (raw.size + 1).toByte(), 0x00) + raw
+        val algoSeq = derSequence(algoSeqContent)
+        val bitString = derBitString(raw)
         val total = algoSeq + bitString
-        return byteArrayOf(0x30, total.size.toByte()) + total
+        return derSequence(total)
     }
 
     private fun wrapEcPrivateKey(raw: ByteArray, curveName: String): ByteArray {
@@ -273,13 +287,13 @@ class ClassicalProvider : CryptoProvider {
         val version = byteArrayOf(0x02, 0x01, 0x00)
         val curveOidBytes = curveOid(curveName)
         val algoSeqContent = ecPublicKeyOid + curveOidBytes
-        val algoSeq = byteArrayOf(0x30, algoSeqContent.size.toByte()) + algoSeqContent
+        val algoSeq = derSequence(algoSeqContent)
         val ecVersion = byteArrayOf(0x02, 0x01, 0x01)
-        val privOctet = byteArrayOf(0x04, raw.size.toByte()) + raw
+        val privOctet = derOctetString(raw)
         val ecPrivKeyContent = ecVersion + privOctet
-        val ecPrivKey = byteArrayOf(0x30, ecPrivKeyContent.size.toByte()) + ecPrivKeyContent
-        val outerOctet = byteArrayOf(0x04, ecPrivKey.size.toByte()) + ecPrivKey
+        val ecPrivKey = derSequence(ecPrivKeyContent)
+        val outerOctet = derOctetString(ecPrivKey)
         val total = version + algoSeq + outerOctet
-        return byteArrayOf(0x30, total.size.toByte()) + total
+        return derSequence(total)
     }
 }

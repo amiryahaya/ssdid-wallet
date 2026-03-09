@@ -225,4 +225,46 @@ class PqcProviderInstrumentedTest {
 
         assertThat(provider.verify(Algorithm.KAZ_SIGN_128, kp.publicKey, sig, data)).isTrue()
     }
+
+    @Test
+    fun kazSign192_viaPqcProvider() {
+        val kp = provider.generateKeyPair(Algorithm.KAZ_SIGN_192)
+        assertThat(kp.publicKey.size).isEqualTo(88)
+        assertThat(kp.privateKey.size).isEqualTo(50)
+
+        val data = "KAZ-Sign-192 via PqcProvider".toByteArray()
+        val sig = provider.sign(Algorithm.KAZ_SIGN_192, kp.privateKey, data)
+        assertThat(sig.size).isEqualTo(264)
+
+        assertThat(provider.verify(Algorithm.KAZ_SIGN_192, kp.publicKey, sig, data)).isTrue()
+    }
+
+    @Test
+    fun kazSign256_viaPqcProvider() {
+        val kp = provider.generateKeyPair(Algorithm.KAZ_SIGN_256)
+        assertThat(kp.publicKey.size).isEqualTo(118)
+        assertThat(kp.privateKey.size).isEqualTo(64)
+
+        val data = "KAZ-Sign-256 via PqcProvider".toByteArray()
+        val sig = provider.sign(Algorithm.KAZ_SIGN_256, kp.privateKey, data)
+        assertThat(sig.size).isEqualTo(354)
+
+        assertThat(provider.verify(Algorithm.KAZ_SIGN_256, kp.publicKey, sig, data)).isTrue()
+    }
+
+    @Test
+    fun kazSign_verifyRejectsWrongKey() {
+        val kp1 = provider.generateKeyPair(Algorithm.KAZ_SIGN_128)
+        val kp2 = provider.generateKeyPair(Algorithm.KAZ_SIGN_128)
+        val data = "cross-key via PqcProvider".toByteArray()
+        val sig = provider.sign(Algorithm.KAZ_SIGN_128, kp1.privateKey, data)
+        assertThat(provider.verify(Algorithm.KAZ_SIGN_128, kp2.publicKey, sig, data)).isFalse()
+    }
+
+    @Test
+    fun kazSign_verifyRejectsWrongData() {
+        val kp = provider.generateKeyPair(Algorithm.KAZ_SIGN_128)
+        val sig = provider.sign(Algorithm.KAZ_SIGN_128, kp.privateKey, "correct".toByteArray())
+        assertThat(provider.verify(Algorithm.KAZ_SIGN_128, kp.publicKey, sig, "wrong".toByteArray())).isFalse()
+    }
 }

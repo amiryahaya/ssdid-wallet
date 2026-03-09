@@ -84,6 +84,7 @@ JNIEXPORT jstring JNICALL
 Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeGetVersion(JNIEnv *env, jclass clazz) {
     (void)clazz;
     const char *version = kaz_sign_version();
+    if (!version) version = "unknown";
     return (*env)->NewStringUTF(env, version);
 }
 
@@ -220,16 +221,25 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeGenerateKeyPair(J
     // Create KeyPair object
     jclass keyPairClass = (*env)->FindClass(env, "my/ssdid/wallet/domain/crypto/kazsign/KeyPair");
     if (!keyPairClass) {
+        (*env)->DeleteLocalRef(env, publicKeyArray);
+        (*env)->DeleteLocalRef(env, secretKeyArray);
         return NULL;
     }
 
     jmethodID constructor = (*env)->GetMethodID(env, keyPairClass, "<init>", "([B[BI)V");
     if (!constructor) {
+        (*env)->DeleteLocalRef(env, publicKeyArray);
+        (*env)->DeleteLocalRef(env, secretKeyArray);
+        (*env)->DeleteLocalRef(env, keyPairClass);
         return NULL;
     }
 
     jobject keyPair = (*env)->NewObject(env, keyPairClass, constructor,
                                         publicKeyArray, secretKeyArray, level);
+
+    (*env)->DeleteLocalRef(env, publicKeyArray);
+    (*env)->DeleteLocalRef(env, secretKeyArray);
+    (*env)->DeleteLocalRef(env, keyPairClass);
 
     return keyPair;
 }
@@ -268,8 +278,14 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeSign(JNIEnv *env,
         return NULL;
     }
 
-    // Allocate signature buffer
-    size_t maxSigLen = params->signature_overhead + msgLen;
+    // Allocate signature buffer (guard against negative msgLen from JNI)
+    if (msgLen < 0) {
+        (*env)->ReleaseByteArrayElements(env, message, msgData, JNI_ABORT);
+        (*env)->ReleaseByteArrayElements(env, secretKey, skData, JNI_ABORT);
+        throw_exception(env, "java/lang/IllegalArgumentException", "Negative message length");
+        return NULL;
+    }
+    size_t maxSigLen = (size_t)params->signature_overhead + (size_t)msgLen;
     unsigned char *sig = malloc(maxSigLen);
     if (!sig) {
         (*env)->ReleaseByteArrayElements(env, message, msgData, JNI_ABORT);
@@ -341,10 +357,8 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeVerify(JNIEnv *en
         return NULL;
     }
 
-    // Allocate message buffer
-    size_t maxMsgLen = sigLen > (jsize)params->signature_overhead ?
-                       sigLen - params->signature_overhead : 0;
-    unsigned char *msg = malloc(maxMsgLen > 0 ? maxMsgLen : 1);
+    // Allocate message buffer (use sigLen as worst-case bound for recovered message)
+    unsigned char *msg = malloc(sigLen > 0 ? (size_t)sigLen : 1);
 
     if (!msg) {
         (*env)->ReleaseByteArrayElements(env, signature, sigData, JNI_ABORT);
@@ -372,6 +386,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeVerify(JNIEnv *en
     jmethodID constructor = (*env)->GetMethodID(env, resultClass, "<init>", "(Z[BI)V");
     if (!constructor) {
         free(msg);
+        (*env)->DeleteLocalRef(env, resultClass);
         return NULL;
     }
 
@@ -389,6 +404,9 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeVerify(JNIEnv *en
 
     jobject verificationResult = (*env)->NewObject(env, resultClass, constructor,
                                                    isValid, messageArray, level);
+
+    if (messageArray) (*env)->DeleteLocalRef(env, messageArray);
+    (*env)->DeleteLocalRef(env, resultClass);
 
     return verificationResult;
 }
@@ -774,6 +792,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativePrivateKeyToDer(J
     }
 
     (*env)->SetByteArrayRegion(env, derArray, 0, (jsize)derLen, (jbyte *)der);
+    kaz_secure_zero(der, (size_t)derLen);
     free(der);
 
     return derArray;
@@ -1154,7 +1173,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeCreateP12(JNIEnv 
         certData = (*env)->GetByteArrayElements(env, cert, NULL);
     }
 
-    if (!skData || !pkData || !passwordStr || !nameStr) {
+    if (!skData || !pkData || !passwordStr || !nameStr || (cert != NULL && !certData)) {
         if (skData) (*env)->ReleaseByteArrayElements(env, secretKey, skData, JNI_ABORT);
         if (pkData) (*env)->ReleaseByteArrayElements(env, publicKey, pkData, JNI_ABORT);
         if (certData) (*env)->ReleaseByteArrayElements(env, cert, certData, JNI_ABORT);
@@ -1307,16 +1326,28 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeLoadP12(JNIEnv *e
     // Create P12Contents object
     jclass p12Class = (*env)->FindClass(env, "my/ssdid/wallet/domain/crypto/kazsign/P12Contents");
     if (!p12Class) {
+        (*env)->DeleteLocalRef(env, skArray);
+        (*env)->DeleteLocalRef(env, pkArray);
+        if (certArray) (*env)->DeleteLocalRef(env, certArray);
         return NULL;
     }
 
     jmethodID constructor = (*env)->GetMethodID(env, p12Class, "<init>", "([B[B[BI)V");
     if (!constructor) {
+        (*env)->DeleteLocalRef(env, skArray);
+        (*env)->DeleteLocalRef(env, pkArray);
+        if (certArray) (*env)->DeleteLocalRef(env, certArray);
+        (*env)->DeleteLocalRef(env, p12Class);
         return NULL;
     }
 
     jobject p12Contents = (*env)->NewObject(env, p12Class, constructor,
                                             skArray, pkArray, certArray, level);
+
+    (*env)->DeleteLocalRef(env, skArray);
+    (*env)->DeleteLocalRef(env, pkArray);
+    if (certArray) (*env)->DeleteLocalRef(env, certArray);
+    (*env)->DeleteLocalRef(env, p12Class);
 
     return p12Contents;
 }

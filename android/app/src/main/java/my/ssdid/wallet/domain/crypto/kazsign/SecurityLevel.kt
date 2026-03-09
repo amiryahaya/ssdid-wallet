@@ -38,7 +38,7 @@ enum class SecurityLevel(
     ),
 
     /**
-     * 192-bit security level (SHA-384)
+     * 192-bit security level (SHA-256 zero-padded to 48 bytes)
      */
     LEVEL_192(
         value = 192,
@@ -50,7 +50,7 @@ enum class SecurityLevel(
     ),
 
     /**
-     * 256-bit security level (SHA-512)
+     * 256-bit security level (SHA-256 zero-padded to 64 bytes)
      */
     LEVEL_256(
         value = 256,

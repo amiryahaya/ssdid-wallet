@@ -140,4 +140,51 @@ class ClassicalProviderTest {
         val valid = provider.verify(Algorithm.ED25519, kp2.publicKey, sig, message)
         assertThat(valid).isFalse()
     }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `verify throws for unsupported algorithm`() {
+        provider.verify(Algorithm.KAZ_SIGN_128, ByteArray(54), ByteArray(162), ByteArray(10))
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `sign throws for unsupported algorithm`() {
+        provider.sign(Algorithm.KAZ_SIGN_128, ByteArray(32), ByteArray(10))
+    }
+
+    @Test
+    fun `ed25519 key wrapping produces valid JCA keys`() {
+        // Multiple keygen+sign+verify round-trips exercise DER wrapping correctness
+        repeat(3) {
+            val kp = provider.generateKeyPair(Algorithm.ED25519)
+            val msg = "DER round-trip $it".toByteArray()
+            val sig = provider.sign(Algorithm.ED25519, kp.privateKey, msg)
+            assertThat(provider.verify(Algorithm.ED25519, kp.publicKey, sig, msg)).isTrue()
+        }
+    }
+
+    @Test
+    fun `ecdsa p256 key sizes are correct`() {
+        val kp = provider.generateKeyPair(Algorithm.ECDSA_P256)
+        // Uncompressed EC point: 0x04 || x(32) || y(32) = 65 bytes
+        assertThat(kp.publicKey).hasLength(65)
+        // Raw scalar: 32 bytes
+        assertThat(kp.privateKey).hasLength(32)
+    }
+
+    @Test
+    fun `ecdsa p384 key sizes are correct`() {
+        val kp = provider.generateKeyPair(Algorithm.ECDSA_P384)
+        // Uncompressed EC point: 0x04 || x(48) || y(48) = 97 bytes
+        assertThat(kp.publicKey).hasLength(97)
+        // Raw scalar: 48 bytes
+        assertThat(kp.privateKey).hasLength(48)
+    }
+
+    @Test
+    fun `BouncyCastle provider is installed after construction`() {
+        // ClassicalProvider init calls BouncyCastleInstaller.ensureInstalled()
+        val bc = java.security.Security.getProvider("BC")
+        assertThat(bc).isNotNull()
+        assertThat(bc.javaClass.name).contains("BouncyCastle")
+    }
 }

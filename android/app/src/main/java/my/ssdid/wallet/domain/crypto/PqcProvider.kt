@@ -3,7 +3,6 @@ package my.ssdid.wallet.domain.crypto
 import my.ssdid.wallet.domain.crypto.kazsign.KazSigner
 import my.ssdid.wallet.domain.crypto.kazsign.SecurityLevel
 import my.ssdid.wallet.domain.model.Algorithm
-import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.*
 import java.security.spec.PKCS8EncodedKeySpec
 import java.security.spec.X509EncodedKeySpec
@@ -11,10 +10,7 @@ import java.security.spec.X509EncodedKeySpec
 class PqcProvider : CryptoProvider {
 
     init {
-        // Android ships a stripped BouncyCastle that lacks PQC algorithms (ML-DSA, SLH-DSA).
-        // Replace it with the full bcprov-jdk18on provider.
-        Security.removeProvider("BC")
-        Security.addProvider(BouncyCastleProvider())
+        BouncyCastleInstaller.ensureInstalled()
     }
 
     override fun supportsAlgorithm(algorithm: Algorithm): Boolean = algorithm.isPostQuantum
@@ -45,7 +41,7 @@ class PqcProvider : CryptoProvider {
             algorithm.isKazSign -> verifyKazSign(publicKey, signature, data)
             algorithm.isMlDsa -> verifyJca("ML-DSA", publicKey, signature, data)
             algorithm.isSlhDsa -> verifyJca("SLH-DSA", publicKey, signature, data)
-            else -> false
+            else -> throw IllegalArgumentException("Unsupported PQC algorithm for verify: $algorithm")
         }
     }
 

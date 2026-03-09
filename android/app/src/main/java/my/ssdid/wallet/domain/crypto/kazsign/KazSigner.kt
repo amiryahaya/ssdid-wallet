@@ -42,7 +42,9 @@ class KazSigner(
     val level: SecurityLevel
 ) : Closeable {
 
+    @Volatile
     private var isInitialized = false
+    @Volatile
     private var isClosed = false
 
     /**
@@ -102,14 +104,16 @@ class KazSigner(
      * @throws KazSignException if initialization fails
      */
     private fun initialize() {
-        check(!isClosed) { "KazSigner has been closed" }
-        if (isInitialized) return
+        synchronized(this) {
+            check(!isClosed) { "KazSigner has been closed" }
+            if (isInitialized) return
 
-        val result = KazSignNative.nativeInitLevel(level.value)
-        if (result != 0) {
-            throw KazSignException.fromErrorCode(result)
+            val result = KazSignNative.nativeInitLevel(level.value)
+            if (result != 0) {
+                throw KazSignException.fromErrorCode(result)
+            }
+            isInitialized = true
         }
-        isInitialized = true
     }
 
     /**
@@ -494,11 +498,13 @@ class KazSigner(
      * After calling close(), this signer instance cannot be used.
      */
     override fun close() {
-        if (!isClosed && isInitialized) {
-            KazSignNative.nativeClearLevel(level.value)
-            isInitialized = false
+        synchronized(this) {
+            if (!isClosed && isInitialized) {
+                KazSignNative.nativeClearLevel(level.value)
+                isInitialized = false
+            }
+            isClosed = true
         }
-        isClosed = true
     }
 
     // ========================================================================
@@ -530,12 +536,12 @@ class KazSigner(
         }
 
         /**
-         * Compute SHA-256 hash of data.
+         * Compute SHA3-256 hash of data.
          *
          * This is a standalone function that does not require a KazSigner instance.
          *
          * @param data The data to hash
-         * @return 32-byte SHA-256 hash
+         * @return 32-byte SHA3-256 hash
          * @throws KazSignException if hashing fails
          */
         fun sha3_256(data: ByteArray): ByteArray {
