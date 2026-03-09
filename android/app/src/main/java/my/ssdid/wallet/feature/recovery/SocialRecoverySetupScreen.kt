@@ -11,6 +11,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -25,6 +28,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
+import my.ssdid.wallet.R
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.recovery.social.SocialRecoveryManager
 import my.ssdid.wallet.domain.vault.Vault
@@ -69,8 +74,21 @@ class SocialRecoverySetupViewModel @Inject constructor(
     private val _threshold = MutableStateFlow(2)
     val threshold = _threshold.asStateFlow()
 
+    private val _hasExistingConfig = MutableStateFlow(false)
+    val hasExistingConfig = _hasExistingConfig.asStateFlow()
+
     init {
-        viewModelScope.launch { _identity.value = vault.getIdentity(keyId) }
+        viewModelScope.launch {
+            try {
+                val id = vault.getIdentity(keyId)
+                _identity.value = id
+                if (id != null) {
+                    _hasExistingConfig.value = socialRecoveryManager.hasSocialRecovery(id.did)
+                }
+            } catch (_: Exception) {
+                // Identity load failed — leave as null
+            }
+        }
     }
 
     fun updateGuardian(index: Int, entry: GuardianEntry) {
@@ -83,7 +101,6 @@ class SocialRecoverySetupViewModel @Inject constructor(
 
     fun addGuardian() {
         _guardians.value = _guardians.value + GuardianEntry()
-        // Ensure threshold does not exceed new guardian count
         if (_threshold.value > _guardians.value.size) {
             _threshold.value = _guardians.value.size
         }
@@ -94,15 +111,13 @@ class SocialRecoverySetupViewModel @Inject constructor(
         val list = _guardians.value.toMutableList()
         list.removeAt(index)
         _guardians.value = list
-        // Clamp threshold
         if (_threshold.value > list.size) {
             _threshold.value = list.size
         }
     }
 
     fun setThreshold(value: Int) {
-        val clamped = value.coerceIn(2, _guardians.value.size)
-        _threshold.value = clamped
+        _threshold.value = value.coerceIn(2, _guardians.value.size)
     }
 
     fun createShares() {
@@ -110,7 +125,6 @@ class SocialRecoverySetupViewModel @Inject constructor(
         val guardianList = _guardians.value
         val thresh = _threshold.value
 
-        // Validation
         if (guardianList.any { it.name.isBlank() || it.did.isBlank() }) {
             _state.value = SocialSetupState.Error("All guardians must have a name and DID")
             return
@@ -118,31 +132,41 @@ class SocialRecoverySetupViewModel @Inject constructor(
 
         viewModelScope.launch {
             _state.value = SocialSetupState.Creating
-            val guardianPairs = guardianList.map { it.name to it.did }
-            socialRecoveryManager.setupSocialRecovery(id, guardianPairs, thresh)
-                .onSuccess { sharesById ->
-                    // Use stored config to match guardian IDs to shares deterministically
-                    val config = socialRecoveryManager.getConfig(id.did)
-                    val guardianShares = if (config != null) {
-                        config.guardians.mapNotNull { guardian ->
-                            sharesById[guardian.id]?.let { share -> guardian.name to share }
+            try {
+                withTimeout(OPERATION_TIMEOUT_MS) {
+                    val guardianPairs = guardianList.map { it.name to it.did }
+                    socialRecoveryManager.setupSocialRecovery(id, guardianPairs, thresh)
+                        .onSuccess { sharesById ->
+                            val config = socialRecoveryManager.getConfig(id.did)
+                            val guardianShares = if (config != null) {
+                                config.guardians.mapNotNull { guardian ->
+                                    sharesById[guardian.id]?.let { share -> guardian.name to share }
+                                }
+                            } else {
+                                sharesById.entries.zip(guardianList).map { (entry, guardian) ->
+                                    guardian.name to entry.value
+                                }
+                            }
+                            _state.value = SocialSetupState.Success(guardianShares = guardianShares)
                         }
-                    } else {
-                        // Fallback: map entries preserve insertion order in Kotlin
-                        sharesById.entries.zip(guardianList).map { (entry, guardian) ->
-                            guardian.name to entry.value
+                        .onFailure {
+                            _state.value = SocialSetupState.Error(it.message ?: "Failed to create shares")
                         }
-                    }
-                    _state.value = SocialSetupState.Success(guardianShares = guardianShares)
                 }
-                .onFailure {
-                    _state.value = SocialSetupState.Error(it.message ?: "Failed to create shares")
-                }
+            } catch (_: kotlinx.coroutines.TimeoutCancellationException) {
+                _state.value = SocialSetupState.Error("Operation timed out. Please try again.")
+            }
         }
     }
 
     fun resetState() {
         _state.value = SocialSetupState.Idle
+    }
+
+    companion object {
+        private const val OPERATION_TIMEOUT_MS = 30_000L
+        const val MAX_NAME_LENGTH = 100
+        const val MAX_DID_LENGTH = 256
     }
 }
 
@@ -156,7 +180,28 @@ fun SocialRecoverySetupScreen(
     val state by viewModel.state.collectAsState()
     val guardians by viewModel.guardians.collectAsState()
     val threshold by viewModel.threshold.collectAsState()
+    val hasExistingConfig by viewModel.hasExistingConfig.collectAsState()
     val clipboardManager = LocalClipboardManager.current
+    var showConfirmDialog by remember { mutableStateOf(false) }
+
+    if (showConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showConfirmDialog = false },
+            title = { Text(stringResource(R.string.social_confirm_overwrite_title)) },
+            text = { Text(stringResource(R.string.social_confirm_overwrite_message)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showConfirmDialog = false
+                    viewModel.createShares()
+                }) { Text(stringResource(R.string.confirm)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showConfirmDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -164,11 +209,13 @@ fun SocialRecoverySetupScreen(
             .background(BgPrimary)
             .statusBarsPadding()
     ) {
-        // Header
         Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
+            TextButton(
+                onClick = onBack,
+                modifier = Modifier.semantics { contentDescription = "Navigate back" }
+            ) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
             Spacer(Modifier.width(12.dp))
-            Text("Social Recovery", style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.social_setup_title), style = MaterialTheme.typography.titleLarge)
         }
 
         when (val currentState = state) {
@@ -184,11 +231,15 @@ fun SocialRecoverySetupScreen(
                     guardians = guardians,
                     threshold = threshold,
                     state = state,
+                    hasExistingConfig = hasExistingConfig,
                     onUpdateGuardian = viewModel::updateGuardian,
                     onAddGuardian = viewModel::addGuardian,
                     onRemoveGuardian = viewModel::removeGuardian,
                     onSetThreshold = viewModel::setThreshold,
-                    onCreateShares = viewModel::createShares
+                    onCreateShares = {
+                        if (hasExistingConfig) showConfirmDialog = true
+                        else viewModel.createShares()
+                    }
                 )
             }
         }
@@ -200,6 +251,7 @@ private fun SetupFormContent(
     guardians: List<GuardianEntry>,
     threshold: Int,
     state: SocialSetupState,
+    hasExistingConfig: Boolean,
     onUpdateGuardian: (Int, GuardianEntry) -> Unit,
     onAddGuardian: () -> Unit,
     onRemoveGuardian: (Int) -> Unit,
@@ -214,7 +266,6 @@ private fun SetupFormContent(
             .padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Threshold selector
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -222,7 +273,7 @@ private fun SetupFormContent(
                 colors = CardDefaults.cardColors(containerColor = BgCard)
             ) {
                 Column(Modifier.padding(18.dp)) {
-                    Text("Threshold", fontSize = 14.sp, color = TextSecondary)
+                    Text(stringResource(R.string.social_threshold), fontSize = 14.sp, color = TextSecondary)
                     Spacer(Modifier.height(8.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -232,13 +283,14 @@ private fun SetupFormContent(
                         OutlinedButton(
                             onClick = { onSetThreshold(threshold - 1) },
                             enabled = threshold > 2 && !isCreating,
-                            shape = RoundedCornerShape(8.dp)
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.semantics { contentDescription = "Decrease threshold" }
                         ) {
                             Text("\u2212", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                         }
                         Spacer(Modifier.width(16.dp))
                         Text(
-                            "$threshold of ${guardians.size}",
+                            stringResource(R.string.social_threshold_display, threshold, guardians.size),
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextPrimary
@@ -247,14 +299,15 @@ private fun SetupFormContent(
                         OutlinedButton(
                             onClick = { onSetThreshold(threshold + 1) },
                             enabled = threshold < guardians.size && !isCreating,
-                            shape = RoundedCornerShape(8.dp)
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.semantics { contentDescription = "Increase threshold" }
                         ) {
                             Text("+", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        "Minimum $threshold guardian(s) needed to recover",
+                        stringResource(R.string.social_threshold_info, threshold),
                         fontSize = 12.sp,
                         color = TextTertiary
                     )
@@ -262,7 +315,6 @@ private fun SetupFormContent(
             }
         }
 
-        // Guardian cards
         itemsIndexed(guardians) { index, guardian ->
             GuardianCard(
                 index = index,
@@ -274,7 +326,6 @@ private fun SetupFormContent(
             )
         }
 
-        // Add guardian button
         item {
             OutlinedButton(
                 onClick = onAddGuardian,
@@ -282,11 +333,10 @@ private fun SetupFormContent(
                 enabled = !isCreating,
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("+ Add Guardian", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.social_add_guardian), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
             }
         }
 
-        // Error card
         if (state is SocialSetupState.Error) {
             item {
                 Card(
@@ -304,7 +354,6 @@ private fun SetupFormContent(
             }
         }
 
-        // Create shares button
         item {
             Button(
                 onClick = onCreateShares,
@@ -315,14 +364,14 @@ private fun SetupFormContent(
             ) {
                 if (isCreating) {
                     CircularProgressIndicator(
-                        Modifier.size(20.dp),
+                        Modifier.size(20.dp).semantics { contentDescription = "Loading" },
                         color = BgPrimary,
                         strokeWidth = 2.dp
                     )
                     Spacer(Modifier.width(10.dp))
-                    Text("Creating Shares...", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.social_creating_shares), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                 } else {
-                    Text("Create Shares", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.social_create_shares), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
         }
@@ -352,7 +401,7 @@ private fun GuardianCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "Guardian ${index + 1}",
+                    stringResource(R.string.social_guardian_label, index + 1),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = TextPrimary
@@ -360,17 +409,20 @@ private fun GuardianCard(
                 if (canRemove) {
                     TextButton(
                         onClick = onRemove,
-                        enabled = !isCreating
+                        enabled = !isCreating,
+                        modifier = Modifier.semantics {
+                            contentDescription = "Remove guardian ${index + 1}"
+                        }
                     ) {
-                        Text("Remove", fontSize = 12.sp, color = Danger)
+                        Text(stringResource(R.string.social_remove), fontSize = 12.sp, color = Danger)
                     }
                 }
             }
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
                 value = guardian.name,
-                onValueChange = { onUpdate(guardian.copy(name = it)) },
-                label = { Text("Name") },
+                onValueChange = { onUpdate(guardian.copy(name = it.take(SocialRecoverySetupViewModel.MAX_NAME_LENGTH))) },
+                label = { Text(stringResource(R.string.social_guardian_name_label)) },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isCreating,
                 singleLine = true,
@@ -385,8 +437,8 @@ private fun GuardianCard(
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
                 value = guardian.did,
-                onValueChange = { onUpdate(guardian.copy(did = it)) },
-                label = { Text("DID") },
+                onValueChange = { onUpdate(guardian.copy(did = it.take(SocialRecoverySetupViewModel.MAX_DID_LENGTH))) },
+                label = { Text(stringResource(R.string.social_guardian_did_label)) },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isCreating,
                 singleLine = true,
@@ -414,7 +466,6 @@ private fun SuccessContent(
             .padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Success banner
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -428,7 +479,7 @@ private fun SuccessContent(
                     Text("\u2713", fontSize = 18.sp, color = Success, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.width(12.dp))
                     Text(
-                        "Social recovery created successfully",
+                        stringResource(R.string.social_success_message),
                         fontSize = 14.sp,
                         color = Success,
                         fontWeight = FontWeight.SemiBold
@@ -437,7 +488,6 @@ private fun SuccessContent(
             }
         }
 
-        // Warning about distributing shares
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -451,13 +501,11 @@ private fun SuccessContent(
                             .background(WarningDim)
                             .padding(horizontal = 10.dp, vertical = 3.dp)
                     ) {
-                        Text("Important", fontSize = 11.sp, color = Warning)
+                        Text(stringResource(R.string.recovery_important), fontSize = 11.sp, color = Warning)
                     }
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        "Distribute each share to the corresponding guardian securely. " +
-                            "Do not store multiple shares together. " +
-                            "Each guardian should only receive their own share.",
+                        stringResource(R.string.social_distribute_warning),
                         fontSize = 13.sp,
                         color = Warning
                     )
@@ -465,7 +513,6 @@ private fun SuccessContent(
             }
         }
 
-        // Per-guardian share cards
         itemsIndexed(state.guardianShares) { index, (guardianName, share) ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -473,15 +520,10 @@ private fun SuccessContent(
                 colors = CardDefaults.cardColors(containerColor = BgCard)
             ) {
                 Column(Modifier.padding(18.dp)) {
-                    Text(
-                        guardianName,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = TextPrimary
-                    )
+                    Text(guardianName, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary)
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        "SHARE ${index + 1}",
+                        stringResource(R.string.social_share_label, index + 1),
                         style = MaterialTheme.typography.labelSmall,
                         color = TextTertiary
                     )
@@ -501,17 +543,12 @@ private fun SuccessContent(
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Accent)
                     ) {
-                        Text(
-                            "Copy Share",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
+                        Text(stringResource(R.string.social_copy_share), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
             }
         }
 
-        // Done button
         item {
             Button(
                 onClick = onDone,
@@ -519,7 +556,7 @@ private fun SuccessContent(
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Accent)
             ) {
-                Text("Done", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.done), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
             }
         }
 

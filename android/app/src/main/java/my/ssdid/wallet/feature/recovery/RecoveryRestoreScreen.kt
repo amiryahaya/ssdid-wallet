@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.recovery.RecoveryManager
@@ -52,19 +53,31 @@ class RecoveryRestoreViewModel @Inject constructor(
         }
         viewModelScope.launch {
             _state.value = RestoreState.Restoring
-            recoveryManager.restoreWithRecoveryKey(did, recoveryKey, name, algorithm)
-                .onSuccess { identity ->
-                    // Try to publish to registry (best effort — may fail if offline)
-                    try {
-                        ssdidClient.updateDidDocument(identity.keyId)
-                    } catch (_: Exception) {
-                        // Best effort: registry update may fail on new device
-                    }
-                    storage.setOnboardingCompleted()
-                    _state.value = RestoreState.Success
+            try {
+                withTimeout(OPERATION_TIMEOUT_MS) {
+                    recoveryManager.restoreWithRecoveryKey(did, recoveryKey, name, algorithm)
+                        .onSuccess { identity ->
+                            try {
+                                ssdidClient.updateDidDocument(identity.keyId)
+                            } catch (_: Exception) {
+                                // Best effort: registry update may fail on new device
+                            }
+                            storage.setOnboardingCompleted()
+                            _state.value = RestoreState.Success
+                        }
+                        .onFailure { _state.value = RestoreState.Error(it.message ?: "Restoration failed") }
                 }
-                .onFailure { _state.value = RestoreState.Error(it.message ?: "Restoration failed") }
+            } catch (_: kotlinx.coroutines.TimeoutCancellationException) {
+                _state.value = RestoreState.Error("Operation timed out. Please try again.")
+            }
         }
+    }
+
+    companion object {
+        private const val OPERATION_TIMEOUT_MS = 30_000L
+        const val MAX_DID_LENGTH = 256
+        const val MAX_NAME_LENGTH = 100
+        const val MAX_KEY_LENGTH = 10_000
     }
 }
 
@@ -207,7 +220,7 @@ fun RecoveryRestoreScreen(
                         Spacer(Modifier.height(8.dp))
                         OutlinedTextField(
                             value = did,
-                            onValueChange = { did = it },
+                            onValueChange = { did = it.take(RecoveryRestoreViewModel.MAX_DID_LENGTH) },
                             placeholder = { Text("did:ssdid:...", color = TextTertiary) },
                             modifier = Modifier.fillMaxWidth(),
                             colors = OutlinedTextFieldDefaults.colors(
@@ -226,7 +239,7 @@ fun RecoveryRestoreScreen(
                         Spacer(Modifier.height(8.dp))
                         OutlinedTextField(
                             value = name,
-                            onValueChange = { name = it },
+                            onValueChange = { name = it.take(RecoveryRestoreViewModel.MAX_NAME_LENGTH) },
                             placeholder = { Text("e.g. Personal, Work", color = TextTertiary) },
                             modifier = Modifier.fillMaxWidth(),
                             colors = OutlinedTextFieldDefaults.colors(
@@ -245,7 +258,7 @@ fun RecoveryRestoreScreen(
                         Spacer(Modifier.height(8.dp))
                         OutlinedTextField(
                             value = recoveryKey,
-                            onValueChange = { recoveryKey = it },
+                            onValueChange = { recoveryKey = it.take(RecoveryRestoreViewModel.MAX_KEY_LENGTH) },
                             placeholder = { Text("Paste your recovery private key", color = TextTertiary) },
                             modifier = Modifier.fillMaxWidth(),
                             colors = OutlinedTextFieldDefaults.colors(

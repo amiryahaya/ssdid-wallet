@@ -24,6 +24,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.recovery.RecoveryManager
 import my.ssdid.wallet.domain.recovery.social.SocialRecoveryConfig
@@ -78,13 +79,17 @@ class RecoverySetupViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val id = vault.getIdentity(keyId)
-            _identity.value = id
-            if (id != null) {
-                _hasSocialRecovery.value = socialRecoveryManager.hasSocialRecovery(id.did)
-                _socialConfig.value = socialRecoveryManager.getConfig(id.did)
-                _hasInstitutionalRecovery.value = institutionalManager.hasOrgRecovery(id.did)
-                _orgConfig.value = institutionalManager.getConfig(id.did)
+            try {
+                val id = vault.getIdentity(keyId)
+                _identity.value = id
+                if (id != null) {
+                    _hasSocialRecovery.value = socialRecoveryManager.hasSocialRecovery(id.did)
+                    _socialConfig.value = socialRecoveryManager.getConfig(id.did)
+                    _hasInstitutionalRecovery.value = institutionalManager.hasOrgRecovery(id.did)
+                    _orgConfig.value = institutionalManager.getConfig(id.did)
+                }
+            } catch (_: Exception) {
+                // Identity load failed — leave as null
             }
         }
     }
@@ -93,14 +98,23 @@ class RecoverySetupViewModel @Inject constructor(
         val id = _identity.value ?: return
         viewModelScope.launch {
             _state.value = RecoverySetupState.Generating
-            recoveryManager.generateRecoveryKey(id)
-                .onSuccess { keyBytes ->
-                    _state.value = RecoverySetupState.Success(keyBytes)
-                    // Refresh identity to reflect hasRecoveryKey = true
-                    _identity.value = vault.getIdentity(keyId)
+            try {
+                withTimeout(OPERATION_TIMEOUT_MS) {
+                    recoveryManager.generateRecoveryKey(id)
+                        .onSuccess { keyBytes ->
+                            _state.value = RecoverySetupState.Success(keyBytes)
+                            _identity.value = vault.getIdentity(keyId)
+                        }
+                        .onFailure { _state.value = RecoverySetupState.Error(it.message ?: "Generation failed") }
                 }
-                .onFailure { _state.value = RecoverySetupState.Error(it.message ?: "Generation failed") }
+            } catch (_: kotlinx.coroutines.TimeoutCancellationException) {
+                _state.value = RecoverySetupState.Error("Operation timed out. Please try again.")
+            }
         }
+    }
+
+    companion object {
+        private const val OPERATION_TIMEOUT_MS = 30_000L
     }
 }
 

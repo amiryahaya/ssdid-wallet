@@ -144,4 +144,29 @@ class InstitutionalSetupViewModelTest {
 
         assertThat(viewModel.state.value).isEqualTo(InstitutionalSetupState.Idle)
     }
+
+    @Test
+    fun `hasExistingConfig reflects institutional recovery status`() = runTest {
+        coEvery { institutionalRecoveryManager.hasOrgRecovery("did:ssdid:test") } returns true
+        val vm = InstitutionalSetupViewModel(
+            institutionalRecoveryManager = institutionalRecoveryManager,
+            vault = vault,
+            savedStateHandle = SavedStateHandle(mapOf("keyId" to "did:ssdid:test#key-1"))
+        )
+
+        assertThat(vm.hasExistingConfig.value).isTrue()
+    }
+
+    @Test
+    fun `init handles vault error gracefully`() = runTest {
+        coEvery { vault.getIdentity(any()) } throws RuntimeException("DB error")
+        val vm = InstitutionalSetupViewModel(
+            institutionalRecoveryManager = institutionalRecoveryManager,
+            vault = vault,
+            savedStateHandle = SavedStateHandle(mapOf("keyId" to "bad-key"))
+        )
+
+        assertThat(vm.identity.value).isNull()
+        assertThat(vm.state.value).isEqualTo(InstitutionalSetupState.Idle)
+    }
 }

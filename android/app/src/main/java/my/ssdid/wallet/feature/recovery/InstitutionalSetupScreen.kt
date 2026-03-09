@@ -11,6 +11,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -22,6 +25,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
+import my.ssdid.wallet.R
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.recovery.institutional.InstitutionalRecoveryManager
 import my.ssdid.wallet.domain.vault.Vault
@@ -49,8 +54,21 @@ class InstitutionalSetupViewModel @Inject constructor(
     private val _state = MutableStateFlow<InstitutionalSetupState>(InstitutionalSetupState.Idle)
     val state = _state.asStateFlow()
 
+    private val _hasExistingConfig = MutableStateFlow(false)
+    val hasExistingConfig = _hasExistingConfig.asStateFlow()
+
     init {
-        viewModelScope.launch { _identity.value = vault.getIdentity(keyId) }
+        viewModelScope.launch {
+            try {
+                val id = vault.getIdentity(keyId)
+                _identity.value = id
+                if (id != null) {
+                    _hasExistingConfig.value = institutionalRecoveryManager.hasOrgRecovery(id.did)
+                }
+            } catch (_: Exception) {
+                // Identity load failed — leave as null
+            }
+        }
     }
 
     fun enroll(orgName: String, orgDid: String, encryptedKeyBase64: String) {
@@ -67,18 +85,29 @@ class InstitutionalSetupViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = InstitutionalSetupState.Enrolling
             try {
-                val encryptedKeyBytes = JBase64.getDecoder().decode(encryptedKeyBase64.trim())
-                institutionalRecoveryManager.enrollOrganization(id, orgDid, orgName, encryptedKeyBytes)
-                    .onSuccess { _state.value = InstitutionalSetupState.Success(orgName) }
-                    .onFailure { _state.value = InstitutionalSetupState.Error(it.message ?: "Enrollment failed") }
-            } catch (e: IllegalArgumentException) {
-                _state.value = InstitutionalSetupState.Error("Invalid Base64 input: ${e.message}")
+                withTimeout(OPERATION_TIMEOUT_MS) {
+                    val encryptedKeyBytes = JBase64.getDecoder().decode(encryptedKeyBase64.trim())
+                    institutionalRecoveryManager.enrollOrganization(id, orgDid, orgName, encryptedKeyBytes)
+                        .onSuccess { _state.value = InstitutionalSetupState.Success(orgName) }
+                        .onFailure { _state.value = InstitutionalSetupState.Error(it.message ?: "Enrollment failed") }
+                }
+            } catch (_: IllegalArgumentException) {
+                _state.value = InstitutionalSetupState.Error("Invalid Base64 input")
+            } catch (_: kotlinx.coroutines.TimeoutCancellationException) {
+                _state.value = InstitutionalSetupState.Error("Operation timed out. Please try again.")
             }
         }
     }
 
     fun resetState() {
         _state.value = InstitutionalSetupState.Idle
+    }
+
+    companion object {
+        private const val OPERATION_TIMEOUT_MS = 30_000L
+        const val MAX_NAME_LENGTH = 200
+        const val MAX_DID_LENGTH = 256
+        const val MAX_BASE64_LENGTH = 10_000
     }
 }
 
@@ -89,6 +118,30 @@ fun InstitutionalSetupScreen(
 ) {
     val identity by viewModel.identity.collectAsState()
     val state by viewModel.state.collectAsState()
+    val hasExistingConfig by viewModel.hasExistingConfig.collectAsState()
+    var showConfirmDialog by remember { mutableStateOf(false) }
+    var pendingEnroll by remember { mutableStateOf<Triple<String, String, String>?>(null) }
+
+    if (showConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showConfirmDialog = false },
+            title = { Text(stringResource(R.string.institutional_confirm_overwrite_title)) },
+            text = { Text(stringResource(R.string.institutional_confirm_overwrite_message)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showConfirmDialog = false
+                    pendingEnroll?.let { (name, did, key) -> viewModel.enroll(name, did, key) }
+                    pendingEnroll = null
+                }) { Text(stringResource(R.string.confirm)) }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showConfirmDialog = false
+                    pendingEnroll = null
+                }) { Text(stringResource(R.string.cancel)) }
+            }
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -96,11 +149,13 @@ fun InstitutionalSetupScreen(
             .background(BgPrimary)
             .statusBarsPadding()
     ) {
-        // Header
         Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
+            TextButton(
+                onClick = onBack,
+                modifier = Modifier.semantics { contentDescription = "Navigate back" }
+            ) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
             Spacer(Modifier.width(12.dp))
-            Text("Institutional Recovery", style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.institutional_title), style = MaterialTheme.typography.titleLarge)
         }
 
         when (state) {
@@ -115,7 +170,12 @@ fun InstitutionalSetupScreen(
                     identity = identity,
                     state = state,
                     onEnroll = { orgName, orgDid, encryptedKey ->
-                        viewModel.enroll(orgName, orgDid, encryptedKey)
+                        if (hasExistingConfig) {
+                            pendingEnroll = Triple(orgName, orgDid, encryptedKey)
+                            showConfirmDialog = true
+                        } else {
+                            viewModel.enroll(orgName, orgDid, encryptedKey)
+                        }
                     }
                 )
             }
@@ -147,14 +207,15 @@ private fun SuccessContent(orgName: String, onDone: () -> Unit) {
                     modifier = Modifier
                         .size(56.dp)
                         .clip(RoundedCornerShape(28.dp))
-                        .background(SuccessDim),
+                        .background(SuccessDim)
+                        .semantics { contentDescription = "Success" },
                     contentAlignment = Alignment.Center
                 ) {
                     Text("\u2713", fontSize = 24.sp, color = Success, fontWeight = FontWeight.Bold)
                 }
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    "Organization Enrolled",
+                    stringResource(R.string.institutional_enrolled),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -167,7 +228,7 @@ private fun SuccessContent(orgName: String, onDone: () -> Unit) {
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Accent)
                 ) {
-                    Text("Done", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.done), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
         }
@@ -199,16 +260,12 @@ private fun FormContent(
             .padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Info text
         Text(
-            "Enroll an organization as a recovery custodian. The organization will hold " +
-                "an encrypted copy of your recovery key and can assist with identity " +
-                "recovery after verifying your identity through their KYC process.",
+            stringResource(R.string.institutional_desc),
             fontSize = 13.sp,
             color = TextSecondary
         )
 
-        // Warning if no recovery key
         if (!hasRecoveryKey) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -216,8 +273,7 @@ private fun FormContent(
                 colors = CardDefaults.cardColors(containerColor = WarningDim)
             ) {
                 Text(
-                    "A recovery key must be generated before enrolling an organization. " +
-                        "Go to Recovery Setup to generate one first.",
+                    stringResource(R.string.institutional_no_recovery_key),
                     modifier = Modifier.padding(18.dp),
                     fontSize = 13.sp,
                     color = Warning
@@ -225,11 +281,10 @@ private fun FormContent(
             }
         }
 
-        // Organization Name field
         OutlinedTextField(
             value = orgName,
-            onValueChange = { orgName = it },
-            label = { Text("Organization Name") },
+            onValueChange = { orgName = it.take(InstitutionalSetupViewModel.MAX_NAME_LENGTH) },
+            label = { Text(stringResource(R.string.institutional_org_name_label)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
@@ -243,12 +298,11 @@ private fun FormContent(
             )
         )
 
-        // Organization DID field
         OutlinedTextField(
             value = orgDid,
-            onValueChange = { orgDid = it },
-            label = { Text("Organization DID") },
-            placeholder = { Text("did:ssdid:...", color = TextTertiary) },
+            onValueChange = { orgDid = it.take(InstitutionalSetupViewModel.MAX_DID_LENGTH) },
+            label = { Text(stringResource(R.string.institutional_org_did_label)) },
+            placeholder = { Text(stringResource(R.string.institutional_org_did_hint), color = TextTertiary) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
@@ -262,12 +316,11 @@ private fun FormContent(
             )
         )
 
-        // Encrypted Recovery Key field
         OutlinedTextField(
             value = encryptedKey,
-            onValueChange = { encryptedKey = it },
-            label = { Text("Encrypted Recovery Key") },
-            placeholder = { Text("Paste encrypted recovery key", color = TextTertiary) },
+            onValueChange = { encryptedKey = it.take(InstitutionalSetupViewModel.MAX_BASE64_LENGTH) },
+            label = { Text(stringResource(R.string.institutional_encrypted_key_label)) },
+            placeholder = { Text(stringResource(R.string.institutional_encrypted_key_hint), color = TextTertiary) },
             minLines = 3,
             maxLines = 5,
             modifier = Modifier.fillMaxWidth(),
@@ -282,7 +335,6 @@ private fun FormContent(
             )
         )
 
-        // Error card
         if (state is InstitutionalSetupState.Error) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -298,7 +350,6 @@ private fun FormContent(
             }
         }
 
-        // Enroll button
         Button(
             onClick = { onEnroll(orgName, orgDid, encryptedKey) },
             modifier = Modifier.fillMaxWidth(),
@@ -310,11 +361,15 @@ private fun FormContent(
             )
         ) {
             if (isEnrolling) {
-                CircularProgressIndicator(Modifier.size(20.dp), color = BgPrimary, strokeWidth = 2.dp)
+                CircularProgressIndicator(
+                    Modifier.size(20.dp).semantics { contentDescription = "Loading" },
+                    color = BgPrimary,
+                    strokeWidth = 2.dp
+                )
                 Spacer(Modifier.width(10.dp))
-                Text("Enrolling...", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.institutional_enrolling), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
             } else {
-                Text("Enroll Organization", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.institutional_enroll_button), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
             }
         }
 

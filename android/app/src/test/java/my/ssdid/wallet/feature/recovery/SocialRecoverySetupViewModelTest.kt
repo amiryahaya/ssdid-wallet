@@ -200,12 +200,36 @@ class SocialRecoverySetupViewModelTest {
 
     @Test
     fun `resetState returns to Idle`() = runTest {
-        // Trigger an error first
         viewModel.createShares()
         assertThat(viewModel.state.value).isInstanceOf(SocialSetupState.Error::class.java)
 
         viewModel.resetState()
 
         assertThat(viewModel.state.value).isEqualTo(SocialSetupState.Idle)
+    }
+
+    @Test
+    fun `hasExistingConfig reflects social recovery status`() = runTest {
+        coEvery { socialRecoveryManager.hasSocialRecovery("did:ssdid:test") } returns true
+        val vm = SocialRecoverySetupViewModel(
+            socialRecoveryManager = socialRecoveryManager,
+            vault = vault,
+            savedStateHandle = SavedStateHandle(mapOf("keyId" to "did:ssdid:test#key-1"))
+        )
+
+        assertThat(vm.hasExistingConfig.value).isTrue()
+    }
+
+    @Test
+    fun `init handles vault error gracefully`() = runTest {
+        coEvery { vault.getIdentity(any()) } throws RuntimeException("DB error")
+        val vm = SocialRecoverySetupViewModel(
+            socialRecoveryManager = socialRecoveryManager,
+            vault = vault,
+            savedStateHandle = SavedStateHandle(mapOf("keyId" to "bad-key"))
+        )
+
+        assertThat(vm.identity.value).isNull()
+        assertThat(vm.state.value).isEqualTo(SocialSetupState.Idle)
     }
 }
