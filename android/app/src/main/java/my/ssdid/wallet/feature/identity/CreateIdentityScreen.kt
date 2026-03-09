@@ -19,11 +19,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.model.Algorithm
+import my.ssdid.wallet.domain.vault.VaultStorage
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
 
 @HiltViewModel
-class CreateIdentityViewModel @Inject constructor(private val client: SsdidClient) : ViewModel() {
+class CreateIdentityViewModel @Inject constructor(
+    private val client: SsdidClient,
+    private val storage: VaultStorage
+) : ViewModel() {
     private val _isCreating = MutableStateFlow(false)
     val isCreating = _isCreating.asStateFlow()
 
@@ -35,7 +39,10 @@ class CreateIdentityViewModel @Inject constructor(private val client: SsdidClien
             _isCreating.value = true
             _error.value = null
             client.initIdentity(name, algorithm)
-                .onSuccess { onSuccess() }
+                .onSuccess {
+                    storage.setOnboardingCompleted()
+                    onSuccess()
+                }
                 .onFailure { _error.value = it.message ?: "Failed to create identity" }
             _isCreating.value = false
         }

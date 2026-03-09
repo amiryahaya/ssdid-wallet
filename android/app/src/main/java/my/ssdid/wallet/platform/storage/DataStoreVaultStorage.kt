@@ -172,6 +172,20 @@ class DataStoreVaultStorage(private val context: Context) : VaultStorage {
         }
     }
 
+    // ---------- Onboarding state ----------
+
+    private val onboardingCompletedKey = stringPreferencesKey("onboarding_completed")
+
+    override suspend fun isOnboardingCompleted(): Boolean {
+        return context.dataStore.data.map { it[onboardingCompletedKey] }.first() == "true"
+    }
+
+    override suspend fun setOnboardingCompleted() {
+        context.dataStore.edit { prefs ->
+            prefs[onboardingCompletedKey] = "true"
+        }
+    }
+
     // ---------- Helpers ----------
 
     private fun keyFile(keyId: String): File {

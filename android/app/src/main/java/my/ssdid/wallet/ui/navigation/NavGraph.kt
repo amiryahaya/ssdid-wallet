@@ -25,8 +25,8 @@ import my.ssdid.wallet.feature.settings.SettingsScreen
 import my.ssdid.wallet.feature.transaction.TxSigningScreen
 
 @Composable
-fun SsdidNavGraph(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = Screen.Onboarding.route) {
+fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
+    NavHost(navController = navController, startDestination = startDestination) {
         composable(Screen.Onboarding.route) {
             OnboardingScreen(
                 onComplete = {
