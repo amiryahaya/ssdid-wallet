@@ -2,7 +2,9 @@ package my.ssdid.wallet.feature.transaction
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import androidx.fragment.app.FragmentActivity
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -14,9 +16,11 @@ import kotlinx.coroutines.test.setMain
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.model.Identity
+import my.ssdid.wallet.domain.transport.dto.TxChallengeResponse
 import my.ssdid.wallet.domain.transport.dto.TxSubmitResponse
 import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.platform.biometric.BiometricAuthenticator
+import my.ssdid.wallet.platform.biometric.BiometricResult
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -33,6 +37,7 @@ class TxSigningViewModelTest {
     private lateinit var client: SsdidClient
     private lateinit var vault: Vault
     private lateinit var biometricAuth: BiometricAuthenticator
+    private lateinit var activity: FragmentActivity
 
     private val testIdentity = Identity(
         name = "Test",
@@ -49,10 +54,13 @@ class TxSigningViewModelTest {
     fun setup() {
         client = mockk(relaxed = true)
         vault = mockk(relaxed = true)
-        biometricAuth = mockk(relaxed = true)
+        biometricAuth = mockk()
+        activity = mockk()
 
         // Stub fetchTransactionDetails (called in init) to succeed
-        coEvery { client.fetchTransactionDetails(any(), any()) } returns Result.success(txDetails)
+        coEvery { client.fetchTransactionDetails(any(), any()) } returns Result.success(
+            TxChallengeResponse(challenge = "test-challenge", transaction = txDetails)
+        )
 
         viewModel = TxSigningViewModel(
             client = client,
@@ -68,7 +76,7 @@ class TxSigningViewModelTest {
     fun `signTransaction transitions to Confirmed on success`() = runTest {
         coEvery { vault.listIdentities() } returns listOf(testIdentity)
         val txResponse = mockk<TxSubmitResponse>(relaxed = true)
-        coEvery { client.signTransaction("tok123", testIdentity, txDetails, "https://example.com") } returns Result.success(txResponse)
+        coEvery { client.signTransaction("tok123", testIdentity, txDetails, "test-challenge", "https://example.com") } returns Result.success(txResponse)
 
         viewModel.signTransaction()
 
@@ -78,7 +86,7 @@ class TxSigningViewModelTest {
     @Test
     fun `signTransaction transitions to Failed on failure`() = runTest {
         coEvery { vault.listIdentities() } returns listOf(testIdentity)
-        coEvery { client.signTransaction(any(), any(), any(), any()) } returns Result.failure(
+        coEvery { client.signTransaction(any(), any(), any(), any(), any()) } returns Result.failure(
             RuntimeException("Signing error")
         )
 
@@ -110,7 +118,9 @@ class TxSigningViewModelTest {
     fun `empty transaction details sets Failed state`() = runTest {
         coEvery { vault.listIdentities() } returns listOf(testIdentity)
         // Override the transactionDetails to empty via a fresh ViewModel with failed fetch
-        coEvery { client.fetchTransactionDetails(any(), any()) } returns Result.success(emptyMap())
+        coEvery { client.fetchTransactionDetails(any(), any()) } returns Result.success(
+            TxChallengeResponse(challenge = "ch", transaction = emptyMap())
+        )
 
         val vm = TxSigningViewModel(
             client = client,
@@ -125,6 +135,45 @@ class TxSigningViewModelTest {
         val state = vm.state.value
         assertThat(state).isInstanceOf(TxState.Failed::class.java)
         assertThat((state as TxState.Failed).message).isEqualTo("No transaction details available")
+    }
+
+    @Test
+    fun `requireBiometric returns true when device has no biometric`() = runTest {
+        every { biometricAuth.canAuthenticate(activity) } returns false
+
+        val result = viewModel.requireBiometric(activity)
+
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun `requireBiometric returns true on biometric success`() = runTest {
+        every { biometricAuth.canAuthenticate(activity) } returns true
+        coEvery { biometricAuth.authenticate(activity, any(), any()) } returns BiometricResult.Success
+
+        val result = viewModel.requireBiometric(activity)
+
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun `requireBiometric returns false on biometric cancellation`() = runTest {
+        every { biometricAuth.canAuthenticate(activity) } returns true
+        coEvery { biometricAuth.authenticate(activity, any(), any()) } returns BiometricResult.Cancelled
+
+        val result = viewModel.requireBiometric(activity)
+
+        assertThat(result).isFalse()
+    }
+
+    @Test
+    fun `requireBiometric returns false on biometric error`() = runTest {
+        every { biometricAuth.canAuthenticate(activity) } returns true
+        coEvery { biometricAuth.authenticate(activity, any(), any()) } returns BiometricResult.Error(1, "hardware error")
+
+        val result = viewModel.requireBiometric(activity)
+
+        assertThat(result).isFalse()
     }
 }
 
