@@ -22,6 +22,6 @@ class AlgorithmTest {
     @Test
     fun `w3c types are correct`() {
         assertThat(Algorithm.ED25519.w3cType).isEqualTo("Ed25519VerificationKey2020")
-        assertThat(Algorithm.KAZ_SIGN_192.w3cType).isEqualTo("KazSign192VerificationKey2024")
+        assertThat(Algorithm.KAZ_SIGN_192.w3cType).isEqualTo("KazSignVerificationKey2024")
     }
 }

@@ -14,7 +14,7 @@ class DidDocumentTest {
         assertThat(doc.id).isEqualTo("did:ssdid:7KmVwPq9RtXzN3Fy")
         assertThat(doc.controller).isEqualTo(doc.id)
         assertThat(doc.verificationMethod).hasSize(1)
-        assertThat(doc.verificationMethod[0].type).isEqualTo("KazSign192VerificationKey2024")
+        assertThat(doc.verificationMethod[0].type).isEqualTo("KazSignVerificationKey2024")
         assertThat(doc.verificationMethod[0].publicKeyMultibase).isEqualTo("uhaXgBZDq8R2mNvK4t")
         assertThat(doc.authentication).containsExactly(keyId)
         assertThat(doc.assertionMethod).containsExactly(keyId)
