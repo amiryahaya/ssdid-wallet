@@ -1,4 +1,4 @@
-package my.ssdid.wallet.platform.keystore
+package my.ssdid.wallet.domain.vault
 
 interface KeystoreManager {
     fun generateWrappingKey(alias: String)

@@ -1,6 +1,6 @@
 /*
  * KAZ-SIGN Android Wrapper
- * Version 3.0.0
+ * Version 2.0.0
  *
  * Post-quantum digital signature library for Android.
  * Supports security levels 128, 192, and 256 at runtime.
@@ -42,7 +42,9 @@ class KazSigner(
     val level: SecurityLevel
 ) : Closeable {
 
+    @Volatile
     private var isInitialized = false
+    @Volatile
     private var isClosed = false
 
     /**
@@ -102,14 +104,16 @@ class KazSigner(
      * @throws KazSignException if initialization fails
      */
     private fun initialize() {
-        check(!isClosed) { "KazSigner has been closed" }
-        if (isInitialized) return
+        synchronized(this) {
+            check(!isClosed) { "KazSigner has been closed" }
+            if (isInitialized) return
 
-        val result = KazSignNative.nativeInitLevel(level.value)
-        if (result != 0) {
-            throw KazSignException.fromErrorCode(result)
+            val result = KazSignNative.nativeInitLevel(level.value)
+            if (result != 0) {
+                throw KazSignException.fromErrorCode(result)
+            }
+            isInitialized = true
         }
-        isInitialized = true
     }
 
     /**
@@ -494,11 +498,13 @@ class KazSigner(
      * After calling close(), this signer instance cannot be used.
      */
     override fun close() {
-        if (!isClosed && isInitialized) {
-            KazSignNative.nativeClearLevel(level.value)
-            isInitialized = false
+        synchronized(this) {
+            if (!isClosed && isInitialized) {
+                KazSignNative.nativeClearLevel(level.value)
+                isInitialized = false
+            }
+            isClosed = true
         }
-        isClosed = true
     }
 
     // ========================================================================

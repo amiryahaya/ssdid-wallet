@@ -11,10 +11,31 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import my.ssdid.wallet.platform.i18n.LocalizationManager
 import my.ssdid.wallet.ui.theme.*
 
 @Composable
-fun SettingsScreen(onBack: () -> Unit, onBackupExport: () -> Unit = {}) {
+fun SettingsScreen(
+    onBack: () -> Unit,
+    onBackupExport: () -> Unit = {},
+    viewModel: SettingsViewModel = hiltViewModel()
+) {
+    val biometricEnabled by viewModel.biometricEnabled.collectAsState()
+    val autoLockMinutes by viewModel.autoLockMinutes.collectAsState()
+    val defaultAlgorithm by viewModel.defaultAlgorithm.collectAsState()
+    val language by viewModel.language.collectAsState()
+    var showLanguageDialog by remember { mutableStateOf(false) }
+
+    val languageDisplay = LocalizationManager.localeNames[language] ?: "English"
+
+    val algorithmDisplay = defaultAlgorithm
+        .replace("_", "-")
+        .replace("KAZ-SIGN", "KAZ-Sign")
+        .replace("ED25519", "Ed25519")
+        .replace("ECDSA-P256", "ECDSA P-256")
+        .replace("ECDSA-P384", "ECDSA P-384")
+
     Column(Modifier.fillMaxSize().background(BgPrimary).statusBarsPadding()) {
         Row(Modifier.padding(20.dp)) {
             TextButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
@@ -24,8 +45,16 @@ fun SettingsScreen(onBack: () -> Unit, onBackupExport: () -> Unit = {}) {
 
         LazyColumn(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             item { Text("SECURITY", style = MaterialTheme.typography.labelMedium); Spacer(Modifier.height(8.dp)) }
-            item { SettingsItem("Biometric Authentication", "Face ID / Fingerprint", toggle = true) }
-            item { SettingsItem("Auto-Lock", "After 5 minutes") }
+            item {
+                SettingsItem(
+                    "Biometric Authentication",
+                    "Face ID / Fingerprint",
+                    toggle = true,
+                    checked = biometricEnabled,
+                    onToggle = { viewModel.setBiometricEnabled(it) }
+                )
+            }
+            item { SettingsItem("Auto-Lock", "After $autoLockMinutes minutes") }
             item { SettingsItem("Change Password", "Update vault password") }
             item { SettingsItem("Backup & Export", "Encrypted backup of all identities", onClick = onBackupExport) }
 
@@ -34,19 +63,65 @@ fun SettingsScreen(onBack: () -> Unit, onBackupExport: () -> Unit = {}) {
 
             item { Spacer(Modifier.height(16.dp)); Text("PREFERENCES", style = MaterialTheme.typography.labelMedium); Spacer(Modifier.height(8.dp)) }
             item { SettingsItem("Appearance", "Dark") }
-            item { SettingsItem("Language", "English") }
-            item { SettingsItem("Default Algorithm", "KAZ-Sign 192") }
+            item { SettingsItem("Language", languageDisplay, onClick = { showLanguageDialog = true }) }
+            item { SettingsItem("Default Algorithm", algorithmDisplay) }
 
             item { Spacer(Modifier.height(16.dp)); Text("ABOUT", style = MaterialTheme.typography.labelMedium); Spacer(Modifier.height(8.dp)) }
             item { SettingsItem("Version", "1.0.0 (Build 1)") }
             item { SettingsItem("W3C DID 1.1", "Compliant") }
         }
     }
+
+    if (showLanguageDialog) {
+        AlertDialog(
+            onDismissRequest = { showLanguageDialog = false },
+            title = { Text("Select Language") },
+            text = {
+                Column {
+                    LocalizationManager.supportedLocales.forEach { tag ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    viewModel.setLanguage(tag)
+                                    LocalizationManager.setLocale(tag)
+                                    showLanguageDialog = false
+                                }
+                                .padding(vertical = 8.dp)
+                        ) {
+                            RadioButton(
+                                selected = language == tag,
+                                onClick = {
+                                    viewModel.setLanguage(tag)
+                                    LocalizationManager.setLocale(tag)
+                                    showLanguageDialog = false
+                                }
+                            )
+                            Text(
+                                LocalizationManager.localeNames[tag] ?: tag,
+                                modifier = Modifier.padding(start = 8.dp)
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showLanguageDialog = false }) { Text("Cancel") }
+            }
+        )
+    }
 }
 
 @Composable
-fun SettingsItem(title: String, subtitle: String, toggle: Boolean = false, onClick: (() -> Unit)? = null) {
-    var isOn by remember { mutableStateOf(true) }
+fun SettingsItem(
+    title: String,
+    subtitle: String,
+    toggle: Boolean = false,
+    checked: Boolean = false,
+    onToggle: ((Boolean) -> Unit)? = null,
+    onClick: (() -> Unit)? = null
+) {
     Card(
         Modifier.fillMaxWidth().then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         shape = RoundedCornerShape(12.dp),
@@ -62,7 +137,11 @@ fun SettingsItem(title: String, subtitle: String, toggle: Boolean = false, onCli
                 Text(subtitle, fontSize = 12.sp, color = TextTertiary)
             }
             if (toggle) {
-                Switch(checked = isOn, onCheckedChange = { isOn = it }, colors = SwitchDefaults.colors(checkedTrackColor = Accent))
+                Switch(
+                    checked = checked,
+                    onCheckedChange = { onToggle?.invoke(it) },
+                    colors = SwitchDefaults.colors(checkedTrackColor = Accent)
+                )
             } else {
                 Text("\u203A", color = TextTertiary, fontSize = 18.sp)
             }

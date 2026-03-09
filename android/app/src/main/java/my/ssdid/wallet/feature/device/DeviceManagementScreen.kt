@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -12,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -22,6 +24,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import my.ssdid.wallet.domain.device.DeviceInfo
+import my.ssdid.wallet.domain.device.DeviceManager
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.ui.theme.*
@@ -30,23 +34,58 @@ import javax.inject.Inject
 @HiltViewModel
 class DeviceManagementViewModel @Inject constructor(
     private val vault: Vault,
+    private val deviceManager: DeviceManager,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val keyId: String = savedStateHandle["keyId"] ?: ""
     private val _identity = MutableStateFlow<Identity?>(null)
     val identity = _identity.asStateFlow()
 
+    private val _devices = MutableStateFlow<List<DeviceInfo>>(emptyList())
+    val devices = _devices.asStateFlow()
+
+    private val _revokeError = MutableStateFlow<String?>(null)
+    val revokeError = _revokeError.asStateFlow()
+
     init {
-        viewModelScope.launch { _identity.value = vault.getIdentity(keyId) }
+        viewModelScope.launch {
+            val id = vault.getIdentity(keyId)
+            _identity.value = id
+            id?.let { loadDevices(it) }
+        }
+    }
+
+    private suspend fun loadDevices(identity: Identity) {
+        deviceManager.listDevices(identity)
+            .onSuccess { _devices.value = it }
+    }
+
+    fun revokeDevice(targetKeyId: String) {
+        val id = _identity.value ?: return
+        viewModelScope.launch {
+            deviceManager.revokeDevice(id, targetKeyId)
+                .onSuccess {
+                    _revokeError.value = null
+                    loadDevices(id)
+                }
+                .onFailure { _revokeError.value = it.message }
+        }
     }
 }
 
 @Composable
 fun DeviceManagementScreen(
     onBack: () -> Unit,
+    onEnrollDevice: ((String) -> Unit)? = null,
     viewModel: DeviceManagementViewModel = hiltViewModel()
 ) {
     val identity by viewModel.identity.collectAsState()
+    val devices by viewModel.devices.collectAsState()
+    val revokeError by viewModel.revokeError.collectAsState()
+
+    val primaryDevice = devices.find { it.isPrimary }
+    val otherDevices = devices.filter { !it.isPrimary }
+    var pendingRevokeKey by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = Modifier
@@ -87,7 +126,7 @@ fun DeviceManagementScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                Build.MODEL,
+                                primaryDevice?.name ?: Build.MODEL,
                                 style = MaterialTheme.typography.titleMedium,
                                 color = TextPrimary
                             )
@@ -142,16 +181,80 @@ fun DeviceManagementScreen(
                 Spacer(Modifier.height(8.dp))
             }
 
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(BgCard)
-                        .padding(24.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("No other devices enrolled", color = TextSecondary, fontSize = 14.sp)
+            if (otherDevices.isEmpty()) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(BgCard)
+                            .padding(24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("No other devices enrolled", color = TextSecondary, fontSize = 14.sp)
+                    }
+                }
+            } else {
+                items(otherDevices) { device ->
+                    Card(
+                        Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = BgCard)
+                    ) {
+                        Column(Modifier.padding(16.dp)) {
+                            Row(
+                                Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(Modifier.weight(1f)) {
+                                    Text(
+                                        device.name,
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = TextPrimary
+                                    )
+                                    Text(
+                                        device.platform,
+                                        fontSize = 11.sp,
+                                        color = TextTertiary
+                                    )
+                                }
+                                TextButton(
+                                    onClick = { pendingRevokeKey = device.keyId },
+                                    colors = ButtonDefaults.textButtonColors(contentColor = Danger)
+                                ) {
+                                    Text("Revoke", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                                }
+                            }
+                            Spacer(Modifier.height(4.dp))
+                            Text("KEY ID", fontSize = 11.sp, color = TextTertiary)
+                            Text(
+                                device.keyId,
+                                fontSize = 12.sp,
+                                color = TextSecondary,
+                                fontFamily = FontFamily.Monospace,
+                                maxLines = 1
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Revoke error
+            revokeError?.let { error ->
+                item {
+                    Card(
+                        Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = DangerDim)
+                    ) {
+                        Text(
+                            error,
+                            modifier = Modifier.padding(14.dp),
+                            fontSize = 13.sp,
+                            color = Danger
+                        )
+                    }
                 }
             }
 
@@ -159,9 +262,13 @@ fun DeviceManagementScreen(
             item {
                 Spacer(Modifier.height(16.dp))
                 Button(
-                    onClick = { },
+                    onClick = {
+                        identity?.let { id ->
+                            onEnrollDevice?.invoke(id.keyId)
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = false,
+                    enabled = onEnrollDevice != null && identity != null,
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Accent,
@@ -169,19 +276,11 @@ fun DeviceManagementScreen(
                     )
                 ) {
                     Text(
-                        "\uD83D\uDCF1  Enroll New Device",
+                        "Enroll New Device",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    "Coming Soon — requires backend multi-device protocol",
-                    fontSize = 11.sp,
-                    color = TextTertiary,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                )
             }
 
             // Info note
@@ -203,6 +302,23 @@ fun DeviceManagementScreen(
             }
 
             item { Spacer(Modifier.height(20.dp)) }
+        }
+
+        pendingRevokeKey?.let { targetKey ->
+            AlertDialog(
+                onDismissRequest = { pendingRevokeKey = null },
+                title = { Text("Revoke Device") },
+                text = { Text("This will permanently remove this device from your identity. Continue?") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        viewModel.revokeDevice(targetKey)
+                        pendingRevokeKey = null
+                    }) { Text("Revoke", color = Danger) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { pendingRevokeKey = null }) { Text("Cancel") }
+                }
+            )
         }
     }
 }

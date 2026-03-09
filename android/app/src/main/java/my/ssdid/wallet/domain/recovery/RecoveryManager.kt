@@ -1,13 +1,16 @@
 package my.ssdid.wallet.domain.recovery
 
 import my.ssdid.wallet.domain.crypto.CryptoProvider
+import my.ssdid.wallet.domain.crypto.Multibase
 import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.domain.vault.VaultStorage
-import my.ssdid.wallet.platform.keystore.KeystoreManager
+import my.ssdid.wallet.domain.vault.KeystoreManager
 import java.security.MessageDigest
+import java.time.Instant
 import java.util.Base64
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -63,6 +66,70 @@ class RecoveryManager @Inject constructor(
     suspend fun hasRecoveryKey(keyId: String): Boolean {
         val identity = storage.getIdentity(keyId)
         return identity?.hasRecoveryKey == true
+    }
+
+    /**
+     * Restore identity using offline recovery private key.
+     * Generates new primary keypair, stores locally.
+     * Caller should subsequently publish updated DID Document via SsdidClient.
+     */
+    suspend fun restoreWithRecoveryKey(
+        did: String,
+        recoveryPrivateKeyBase64: String,
+        name: String,
+        algorithm: Algorithm
+    ): Result<Identity> = runCatching {
+        val recoveryPrivateKey = Base64.getDecoder().decode(recoveryPrivateKeyBase64)
+        val provider = providerFor(algorithm)
+
+        // Verify the recovery key against stored recovery public key if available
+        val recoveryKeyId = findRecoveryKeyId(did)
+        if (recoveryKeyId != null) {
+            val encryptedRecoveryPubKey = storage.getRecoveryPublicKey(recoveryKeyId)
+            if (encryptedRecoveryPubKey != null) {
+                val wrappingAlias = "ssdid_recovery_${stableAlias(recoveryKeyId.removeSuffix("-recovery"))}"
+                val recoveryPublicKey = keystoreManager.decrypt(wrappingAlias, encryptedRecoveryPubKey)
+
+                val challenge = ByteArray(32).also { java.security.SecureRandom().nextBytes(it) }
+                val sig = provider.sign(algorithm, recoveryPrivateKey, challenge)
+                val verified = provider.verify(algorithm, recoveryPublicKey, sig, challenge)
+                require(verified) { "Recovery key verification failed: provided key does not match stored recovery public key" }
+            }
+        }
+
+        // Generate new primary keypair
+        val kp = provider.generateKeyPair(algorithm)
+
+        // Create new identity
+        val keyId = "$did#${UUID.randomUUID().toString().take(8)}"
+        val publicKeyMultibase = Multibase.encode(kp.publicKey)
+        val now = Instant.now().toString()
+        val identity = Identity(
+            name = name,
+            did = did,
+            keyId = keyId,
+            algorithm = algorithm,
+            publicKeyMultibase = publicKeyMultibase,
+            createdAt = now
+        )
+
+        // Encrypt and store new private key
+        val alias = stableAlias(keyId)
+        keystoreManager.generateWrappingKey(alias)
+        val encryptedKey = keystoreManager.encrypt(alias, kp.privateKey)
+        kp.privateKey.fill(0)
+        recoveryPrivateKey.fill(0)
+        storage.saveIdentity(identity, encryptedKey)
+
+        identity
+    }
+
+    private suspend fun findRecoveryKeyId(did: String): String? {
+        val identities = storage.listIdentities()
+        return identities
+            .filter { it.did == did && it.hasRecoveryKey && it.recoveryKeyId != null }
+            .map { it.recoveryKeyId }
+            .firstOrNull()
     }
 
     private fun stableAlias(keyId: String): String {

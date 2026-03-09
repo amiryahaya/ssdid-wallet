@@ -14,11 +14,13 @@ class SsdidHttpClient(registryUrl: String) {
     private val json = Json {
         ignoreUnknownKeys = true
         encodeDefaults = true
+        explicitNulls = false
     }
 
     private val okHttp = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.SECONDS)
         .readTimeout(10, TimeUnit.SECONDS)
+        .addInterceptor(RetryInterceptor())
         .addInterceptor(HttpLoggingInterceptor().apply {
             level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.HEADERS
                     else HttpLoggingInterceptor.Level.NONE
@@ -29,6 +31,10 @@ class SsdidHttpClient(registryUrl: String) {
 
     fun serverApi(serverUrl: String): ServerApi {
         return buildRetrofit(serverUrl).create(ServerApi::class.java)
+    }
+
+    fun issuerApi(baseUrl: String): IssuerApi {
+        return buildRetrofit(baseUrl).create(IssuerApi::class.java)
     }
 
     private fun buildRetrofit(baseUrl: String): Retrofit {

@@ -9,7 +9,9 @@ import androidx.navigation.navArgument
 import my.ssdid.wallet.feature.auth.AuthFlowScreen
 import my.ssdid.wallet.feature.backup.BackupScreen
 import my.ssdid.wallet.feature.credentials.CredentialDetailScreen
+import my.ssdid.wallet.feature.credentials.CredentialOfferScreen
 import my.ssdid.wallet.feature.credentials.CredentialsScreen
+import my.ssdid.wallet.feature.device.DeviceEnrollScreen
 import my.ssdid.wallet.feature.device.DeviceManagementScreen
 import my.ssdid.wallet.feature.history.TxHistoryScreen
 import my.ssdid.wallet.feature.identity.CreateIdentityScreen
@@ -17,6 +19,7 @@ import my.ssdid.wallet.feature.identity.IdentityDetailScreen
 import my.ssdid.wallet.feature.identity.WalletHomeScreen
 import my.ssdid.wallet.feature.onboarding.BiometricSetupScreen
 import my.ssdid.wallet.feature.onboarding.OnboardingScreen
+import my.ssdid.wallet.feature.recovery.RecoveryRestoreScreen
 import my.ssdid.wallet.feature.recovery.RecoverySetupScreen
 import my.ssdid.wallet.feature.registration.RegistrationScreen
 import my.ssdid.wallet.feature.rotation.KeyRotationScreen
@@ -25,14 +28,17 @@ import my.ssdid.wallet.feature.settings.SettingsScreen
 import my.ssdid.wallet.feature.transaction.TxSigningScreen
 
 @Composable
-fun SsdidNavGraph(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = Screen.Onboarding.route) {
+fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
+    NavHost(navController = navController, startDestination = startDestination) {
         composable(Screen.Onboarding.route) {
             OnboardingScreen(
                 onComplete = {
                     navController.navigate(Screen.CreateIdentity.route) {
                         popUpTo(Screen.Onboarding.route) { inclusive = true }
                     }
+                },
+                onRestore = {
+                    navController.navigate(Screen.RecoveryRestore.route)
                 }
             )
         }
@@ -84,11 +90,12 @@ fun SsdidNavGraph(navController: NavHostController) {
         composable(Screen.ScanQr.route) {
             ScanQrScreen(
                 onBack = { navController.popBackStack() },
-                onScanned = { serverUrl, serverDid, action, sessionToken ->
-                    when (action) {
-                        "register" -> navController.navigate(Screen.Registration.createRoute(serverUrl, serverDid))
-                        "authenticate" -> navController.navigate(Screen.AuthFlow.createRoute(serverUrl))
-                        "sign" -> navController.navigate(Screen.TxSigning.createRoute(serverUrl, sessionToken))
+                onScanned = { payload ->
+                    when (payload.action) {
+                        "register" -> navController.navigate(Screen.Registration.createRoute(payload.serverUrl, payload.serverDid))
+                        "authenticate" -> navController.navigate(Screen.AuthFlow.createRoute(payload.serverUrl))
+                        "sign" -> navController.navigate(Screen.TxSigning.createRoute(payload.serverUrl, payload.sessionToken))
+                        "credential-offer" -> navController.navigate(Screen.CredentialOffer.createRoute(payload.issuerUrl, payload.offerId))
                     }
                 }
             )
@@ -134,6 +141,20 @@ fun SsdidNavGraph(navController: NavHostController) {
                 }
             )
         }
+        composable(
+            Screen.CredentialOffer.route,
+            arguments = listOf(
+                navArgument("issuerUrl") { type = NavType.StringType; defaultValue = "" },
+                navArgument("offerId") { type = NavType.StringType; defaultValue = "" }
+            )
+        ) {
+            CredentialOfferScreen(
+                onBack = { navController.popBackStack() },
+                onComplete = {
+                    navController.popBackStack(Screen.WalletHome.route, inclusive = false)
+                }
+            )
+        }
         composable(Screen.Credentials.route) {
             CredentialsScreen(
                 onBack = { navController.popBackStack() },
@@ -169,7 +190,32 @@ fun SsdidNavGraph(navController: NavHostController) {
         }
         composable(Screen.DeviceManagement.route) { backStackEntry ->
             backStackEntry.arguments?.getString("keyId") ?: return@composable
-            DeviceManagementScreen(onBack = { navController.popBackStack() })
+            DeviceManagementScreen(
+                onBack = { navController.popBackStack() },
+                onEnrollDevice = { keyId ->
+                    navController.navigate(Screen.DeviceEnroll.createRoute(keyId, "primary"))
+                }
+            )
+        }
+        composable(
+            Screen.DeviceEnroll.route,
+            arguments = listOf(
+                navArgument("keyId") { type = NavType.StringType },
+                navArgument("mode") { type = NavType.StringType; defaultValue = "primary" }
+            )
+        ) { backStackEntry ->
+            backStackEntry.arguments?.getString("keyId") ?: return@composable
+            DeviceEnrollScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.RecoveryRestore.route) {
+            RecoveryRestoreScreen(
+                onBack = { navController.popBackStack() },
+                onComplete = {
+                    navController.navigate(Screen.WalletHome.route) {
+                        popUpTo(Screen.RecoveryRestore.route) { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }

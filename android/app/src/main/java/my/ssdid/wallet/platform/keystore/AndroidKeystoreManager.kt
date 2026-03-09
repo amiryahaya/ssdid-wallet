@@ -1,5 +1,6 @@
 package my.ssdid.wallet.platform.keystore
 
+import my.ssdid.wallet.domain.vault.KeystoreManager
 import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties

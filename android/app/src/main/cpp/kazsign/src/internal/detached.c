@@ -3,16 +3,16 @@
  * Version 3.0
  *
  * Provides detached signing and verification where the signature
- * does not include the original message. Uses level-matched SHA3
- * hashing internally.
+ * does not include the original message. Uses SHA-256 hashing
+ * internally (zero-padded to level hash_bytes).
  *
  * Detached sign:
- *   1. Hash message with level-matched SHA3
+ *   1. Hash message with SHA-256 (zero-padded to hash_bytes)
  *   2. Sign the hash using message-recovery mode (kaz_sign_signature_ex)
  *   3. Extract only S1||S2||S3 (discard embedded hash)
  *
  * Detached verify:
- *   1. Hash message with level-matched SHA3
+ *   1. Hash message with SHA-256 (zero-padded to hash_bytes)
  *   2. Reconstruct full signature as S1||S2||S3||hash
  *   3. Verify using kaz_sign_verify_ex
  *   4. Confirm recovered message matches our hash
@@ -72,7 +72,7 @@ int kaz_sign_detached_ex(kaz_sign_level_t level,
         return KAZ_SIGN_ERROR_MEMORY;
     }
 
-    /* Hash the message with level-matched SHA3 */
+    /* Hash the message with SHA-256 (zero-padded to hash_bytes) */
     ret = kaz_sign_hash_ex(level, msg, msglen, digest);
     if (ret != KAZ_SIGN_SUCCESS) {
         kaz_secure_zero(digest, params->hash_bytes);
@@ -123,7 +123,7 @@ int kaz_sign_verify_detached_ex(kaz_sign_level_t level,
         return KAZ_SIGN_ERROR_MEMORY;
     }
 
-    /* Hash the message with level-matched SHA3 */
+    /* Hash the message with SHA-256 (zero-padded to hash_bytes) */
     ret = kaz_sign_hash_ex(level, msg, msglen, digest);
     if (ret != KAZ_SIGN_SUCCESS) {
         kaz_secure_zero(digest, params->hash_bytes);
@@ -188,6 +188,13 @@ int kaz_sign_detached_prehashed_ex(kaz_sign_level_t level,
         kaz_secure_zero(full_sig, params->signature_overhead + params->hash_bytes);
         free(full_sig);
         return ret;
+    }
+
+    /* Guard: inner signing must produce at least signature_overhead bytes */
+    if (full_siglen < (unsigned long long)params->signature_overhead) {
+        kaz_secure_zero(full_sig, params->signature_overhead + params->hash_bytes);
+        free(full_sig);
+        return KAZ_SIGN_ERROR_INVALID;
     }
 
     /* Extract only S1||S2||S3 (discard the embedded hash portion) */

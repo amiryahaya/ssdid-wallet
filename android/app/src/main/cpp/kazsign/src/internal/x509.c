@@ -8,10 +8,10 @@
  * OpenSSL's X509 API cannot be used because KAZ-Sign uses custom OIDs
  * and a custom signature algorithm. All DER is built manually.
  *
- * OIDs (from der.c):
- *   KAZ-SIGN-128: 1.3.6.1.4.1.99999.1.1
- *   KAZ-SIGN-192: 1.3.6.1.4.1.99999.1.2
- *   KAZ-SIGN-256: 1.3.6.1.4.1.99999.1.3
+ * Algorithm OIDs (enterprise arc 62395):
+ *   KAZ-SIGN-128: 1.3.6.1.4.1.62395.2.2.1
+ *   KAZ-SIGN-192: 1.3.6.1.4.1.62395.2.2.2
+ *   KAZ-SIGN-256: 1.3.6.1.4.1.62395.2.2.3
  */
 
 #include <stdio.h>
@@ -23,16 +23,21 @@
 #include "kaz/security.h"
 
 /* ============================================================================
- * OID Definitions (must match der.c)
- * ============================================================================ */
+ * OID Definitions
+ * ============================================================================
+ *
+ * Algorithm OID prefix: 1.3.6.1.4.1.62395.2.2
+ *   Value bytes: 2B 06 01 04 01 83 E7 3B 02 02 (10 bytes) + level byte
+ *   Full value: 11 bytes, TLV: 13 bytes
+ */
 
 static const unsigned char OID_PREFIX_X509[] = {
-    0x2B, 0x06, 0x01, 0x04, 0x01, 0x86, 0x8D, 0x1F, 0x01
+    0x2B, 0x06, 0x01, 0x04, 0x01, 0x83, 0xE7, 0x3B, 0x02, 0x02
 };
-#define OID_PREFIX_X509_LEN  9
-#define OID_VALUE_X509_LEN  10   /* prefix + 1 level byte */
-#define OID_TLV_X509_LEN   12   /* tag(1) + length(1) + value(10) */
-#define ALGID_X509_LEN     (2 + OID_TLV_X509_LEN) /* 14 bytes */
+#define OID_PREFIX_X509_LEN  10
+#define OID_VALUE_X509_LEN   11   /* prefix + 1 level byte */
+#define OID_TLV_X509_LEN    13   /* tag(1) + length(1) + value(11) */
+#define ALGID_X509_LEN      (2 + OID_TLV_X509_LEN) /* 15 bytes */
 
 /* X.500 attribute type OIDs */
 static const unsigned char OID_CN[]  = { 0x55, 0x04, 0x03 }; /* 2.5.4.3 CommonName */
@@ -766,7 +771,13 @@ int kaz_sign_verify_csr(kaz_sign_level_t level,
     size_t bs_len;
     size_t bs_hdr = x509_der_read_length(p + 1, remain - 1, &bs_len);
     if (bs_hdr == 0 || bs_len < 1) return KAZ_SIGN_ERROR_X509;
-    p += 1 + bs_hdr;
+    {
+        size_t bs_advance = 1 + bs_hdr;
+        if (bs_advance > remain || bs_len > remain - bs_advance)
+            return KAZ_SIGN_ERROR_X509;
+        p += bs_advance;
+        remain -= bs_advance;
+    }
     /* unused bits byte */
     if (p[0] != 0x00) return KAZ_SIGN_ERROR_X509;
     p++;
@@ -889,7 +900,7 @@ int kaz_sign_issue_certificate(kaz_sign_level_t level,
 
     /* signature AlgorithmIdentifier */
     unsigned char algid_buf[ALGID_X509_LEN];
-    x509_write_algorithm_id(algid_buf, level);
+    if (x509_write_algorithm_id(algid_buf, level) == 0) return KAZ_SIGN_ERROR_X509;
 
     /* validity */
     unsigned char validity_buf[64];
@@ -1168,7 +1179,13 @@ int kaz_sign_verify_certificate(kaz_sign_level_t level,
     size_t bs_len;
     size_t bs_hdr = x509_der_read_length(p + 1, remain - 1, &bs_len);
     if (bs_hdr == 0 || bs_len < 1) return KAZ_SIGN_ERROR_X509;
-    p += 1 + bs_hdr;
+    {
+        size_t bs_advance = 1 + bs_hdr;
+        if (bs_advance > remain || bs_len > remain - bs_advance)
+            return KAZ_SIGN_ERROR_X509;
+        p += bs_advance;
+        remain -= bs_advance;
+    }
     if (p[0] != 0x00) return KAZ_SIGN_ERROR_X509;
     p++;
     const unsigned char *sig_data = p;

@@ -31,4 +31,8 @@ interface VaultStorage {
     // Rotation history
     suspend fun addRotationEntry(did: String, entry: RotationEntry)
     suspend fun getRotationHistory(did: String): List<RotationEntry>
+
+    // Onboarding state
+    suspend fun isOnboardingCompleted(): Boolean
+    suspend fun setOnboardingCompleted()
 }

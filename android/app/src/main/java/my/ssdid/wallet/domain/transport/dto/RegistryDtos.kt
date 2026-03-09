@@ -17,6 +17,17 @@ data class RegisterDidResponse(
 )
 
 @Serializable
+data class UpdateDidRequest(
+    val did_document: DidDocument,
+    val proof: Proof
+)
+
+@Serializable
+data class DeactivateDidRequest(
+    val proof: Proof
+)
+
+@Serializable
 data class ChallengeResponse(
     val challenge: String,
     val expires_at: String? = null

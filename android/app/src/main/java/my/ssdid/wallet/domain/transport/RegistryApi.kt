@@ -12,11 +12,23 @@ interface RegistryApi {
     suspend fun resolveDid(@Path("did") did: String): DidDocument
 
     @PUT("api/did/{did}")
-    suspend fun updateDid(@Path("did") did: String, @Body request: RegisterDidRequest): RegisterDidResponse
+    suspend fun updateDid(@Path("did") did: String, @Body request: UpdateDidRequest): RegisterDidResponse
 
-    @DELETE("api/did/{did}")
-    suspend fun deactivateDid(@Path("did") did: String): RegisterDidResponse
+    @HTTP(method = "DELETE", path = "api/did/{did}", hasBody = true)
+    suspend fun deactivateDid(@Path("did") did: String, @Body request: DeactivateDidRequest): RegisterDidResponse
 
     @POST("api/did/{did}/challenge")
     suspend fun createChallenge(@Path("did") did: String): ChallengeResponse
+
+    @POST("api/did/{did}/pair")
+    suspend fun initPairing(@Path("did") did: String, @Body request: PairingInitRequest): PairingInitResponse
+
+    @POST("api/did/{did}/pair/{pairingId}/join")
+    suspend fun joinPairing(@Path("did") did: String, @Path("pairingId") pairingId: String, @Body request: PairingJoinRequest): PairingJoinResponse
+
+    @GET("api/did/{did}/pair/{pairingId}")
+    suspend fun getPairingStatus(@Path("did") did: String, @Path("pairingId") pairingId: String): PairingStatusResponse
+
+    @POST("api/did/{did}/pair/{pairingId}/approve")
+    suspend fun approvePairing(@Path("did") did: String, @Path("pairingId") pairingId: String, @Body request: PairingApproveRequest)
 }

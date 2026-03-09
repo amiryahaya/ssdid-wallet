@@ -34,4 +34,8 @@ class FakeVaultStorage : VaultStorage {
         rotationHistory.getOrPut(did) { mutableListOf() }.add(entry)
     }
     override suspend fun getRotationHistory(did: String) = rotationHistory[did] ?: emptyList()
+
+    private var onboardingCompleted = false
+    override suspend fun isOnboardingCompleted(): Boolean = onboardingCompleted
+    override suspend fun setOnboardingCompleted() { onboardingCompleted = true }
 }

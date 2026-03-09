@@ -23,8 +23,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import androidx.compose.ui.platform.LocalContext
+import androidx.fragment.app.FragmentActivity
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.vault.Vault
+import my.ssdid.wallet.platform.biometric.BiometricAuthenticator
+import my.ssdid.wallet.platform.biometric.BiometricResult
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
 
@@ -39,6 +43,7 @@ sealed class TxState {
 class TxSigningViewModel @Inject constructor(
     private val client: SsdidClient,
     private val vault: Vault,
+    private val biometricAuth: BiometricAuthenticator,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     val serverUrl: String = savedStateHandle["serverUrl"] ?: ""
@@ -74,6 +79,15 @@ class TxSigningViewModel @Inject constructor(
         }
     }
 
+    suspend fun requireBiometric(activity: FragmentActivity): Boolean {
+        if (!biometricAuth.canAuthenticate(activity)) return true
+        return biometricAuth.authenticate(
+            activity,
+            "Confirm Transaction",
+            "Authenticate to sign this transaction"
+        ) is BiometricResult.Success
+    }
+
     fun signTransaction() {
         viewModelScope.launch {
             _state.value = TxState.Loading
@@ -104,6 +118,9 @@ fun TxSigningScreen(
     val state by viewModel.state.collectAsState()
     val timerSeconds by viewModel.timerSeconds.collectAsState()
     val txDetails by viewModel.transactionDetails.collectAsState()
+    val context = LocalContext.current
+    val activity = context as? FragmentActivity
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -253,7 +270,13 @@ fun TxSigningScreen(
 
                 // Sign button
                 Button(
-                    onClick = { viewModel.signTransaction() },
+                    onClick = {
+                        scope.launch {
+                            if (activity == null || viewModel.requireBiometric(activity)) {
+                                viewModel.signTransaction()
+                            }
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(20.dp),

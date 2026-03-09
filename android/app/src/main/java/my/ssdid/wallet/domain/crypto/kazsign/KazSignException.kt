@@ -1,6 +1,6 @@
 /*
  * KAZ-SIGN Android Wrapper
- * Version 3.0.0
+ * Version 2.0.0
  *
  * Exception class for KAZ-SIGN errors.
  */

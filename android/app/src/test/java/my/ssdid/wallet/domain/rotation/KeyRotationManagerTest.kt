@@ -3,13 +3,15 @@ package my.ssdid.wallet.domain.rotation
 import com.google.common.truth.Truth.assertThat
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
+import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.crypto.CryptoProvider
 import my.ssdid.wallet.domain.crypto.KeyPairResult
+import my.ssdid.wallet.domain.history.ActivityRepository
 import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.vault.PreRotatedKeyData
 import my.ssdid.wallet.domain.vault.VaultStorage
-import my.ssdid.wallet.platform.keystore.KeystoreManager
+import my.ssdid.wallet.domain.vault.KeystoreManager
 import org.junit.Before
 import org.junit.Test
 
@@ -19,6 +21,11 @@ class KeyRotationManagerTest {
     private val classicalProvider = mockk<CryptoProvider>()
     private val pqcProvider = mockk<CryptoProvider>()
     private val keystoreManager = mockk<KeystoreManager>(relaxed = true)
+    private val activityRepo = mockk<ActivityRepository>(relaxed = true)
+    private val ssdidClient = mockk<SsdidClient>(relaxed = true)
+    private val lazySsdidClient = mockk<dagger.Lazy<SsdidClient>> {
+        every { get() } returns ssdidClient
+    }
 
     private lateinit var manager: KeyRotationManager
 
@@ -33,7 +40,8 @@ class KeyRotationManagerTest {
 
     @Before
     fun setup() {
-        manager = KeyRotationManager(storage, classicalProvider, pqcProvider, keystoreManager)
+        coEvery { ssdidClient.updateDidDocument(any()) } returns Result.success(Unit)
+        manager = KeyRotationManager(storage, classicalProvider, pqcProvider, keystoreManager, activityRepo, lazySsdidClient)
     }
 
     @Test
@@ -53,6 +61,7 @@ class KeyRotationManagerTest {
 
         coVerify { storage.savePreRotatedKey(any(), any(), nextPub) }
         coVerify { storage.saveIdentity(match { it.preRotatedKeyId != null }, any()) }
+        coVerify { ssdidClient.updateDidDocument(testIdentity.keyId) }
     }
 
     @Test
@@ -83,6 +92,26 @@ class KeyRotationManagerTest {
         coVerify { storage.addRotationEntry(eq("did:ssdid:abc123"), any()) }
         coVerify { storage.deleteIdentity("did:ssdid:abc123#key-1") }
         coVerify { storage.deletePreRotatedKey("did:ssdid:abc123#key-1-prerotated") }
+        coVerify { ssdidClient.updateDidDocument(match { it != testIdentity.keyId }) }
+    }
+
+    @Test
+    fun `executeRotation preserves old identity when registry update fails`() = runTest {
+        val identityWithPreRot = testIdentity.copy(preRotatedKeyId = "did:ssdid:abc123#key-1-prerotated")
+        val preRotPub = ByteArray(32) { (it + 10).toByte() }
+        val preRotEncPriv = ByteArray(80) { (it + 20).toByte() }
+
+        coEvery { storage.getPreRotatedKey("did:ssdid:abc123#key-1-prerotated") } returns
+            PreRotatedKeyData(preRotEncPriv, preRotPub)
+        coEvery { ssdidClient.updateDidDocument(any()) } returns Result.failure(RuntimeException("registry unavailable"))
+
+        val result = manager.executeRotation(identityWithPreRot)
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()?.message).contains("registry unavailable")
+
+        // Old identity must NOT be deleted when registry update fails
+        coVerify(exactly = 0) { storage.deleteIdentity(any()) }
     }
 
     @Test

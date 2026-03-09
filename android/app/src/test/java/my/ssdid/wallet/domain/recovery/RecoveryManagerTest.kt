@@ -9,7 +9,7 @@ import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.vault.FakeVaultStorage
 import my.ssdid.wallet.domain.vault.VaultImpl
-import my.ssdid.wallet.platform.keystore.KeystoreManager
+import my.ssdid.wallet.domain.vault.KeystoreManager
 import org.junit.Before
 import org.junit.Test
 
@@ -22,8 +22,8 @@ class RecoveryManagerTest {
     @Before
     fun setup() {
         keystore = mockk(relaxed = true)
-        every { keystore.encrypt(any(), any()) } answers { secondArg<ByteArray>() }
-        every { keystore.decrypt(any(), any()) } answers { secondArg<ByteArray>() }
+        every { keystore.encrypt(any(), any()) } answers { secondArg<ByteArray>().copyOf() }
+        every { keystore.decrypt(any(), any()) } answers { secondArg<ByteArray>().copyOf() }
 
         storage = FakeVaultStorage()
         val pqcProvider = mockk<CryptoProvider>()
@@ -89,5 +89,43 @@ class RecoveryManagerTest {
     @Test
     fun `hasRecoveryKey returns false for unknown keyId`() = runTest {
         assertThat(recoveryManager.hasRecoveryKey("nonexistent")).isFalse()
+    }
+
+    @Test
+    fun `restoreWithRecoveryKey creates new identity with same DID`() = runTest {
+        val identity = vault.createIdentity("Test", Algorithm.ED25519).getOrThrow()
+        val recoveryKey = recoveryManager.generateRecoveryKey(identity).getOrThrow()
+        val recoveryKeyBase64 = java.util.Base64.getEncoder().encodeToString(recoveryKey)
+
+        val restored = recoveryManager.restoreWithRecoveryKey(
+            did = identity.did,
+            recoveryPrivateKeyBase64 = recoveryKeyBase64,
+            algorithm = Algorithm.ED25519,
+            name = "Restored"
+        ).getOrThrow()
+
+        assertThat(restored.did).isEqualTo(identity.did)
+        assertThat(restored.name).isEqualTo("Restored")
+        assertThat(restored.keyId).isNotEqualTo(identity.keyId)
+        assertThat(restored.publicKeyMultibase).isNotEqualTo(identity.publicKeyMultibase)
+    }
+
+    @Test
+    fun `restoreWithRecoveryKey fails with wrong key`() = runTest {
+        val identity = vault.createIdentity("Test", Algorithm.ED25519).getOrThrow()
+        recoveryManager.generateRecoveryKey(identity)
+
+        // Generate a different key and try to restore with it
+        val wrongKeyPair = ClassicalProvider().generateKeyPair(Algorithm.ED25519)
+        val wrongKeyBase64 = java.util.Base64.getEncoder().encodeToString(wrongKeyPair.privateKey)
+
+        val result = recoveryManager.restoreWithRecoveryKey(
+            did = identity.did,
+            recoveryPrivateKeyBase64 = wrongKeyBase64,
+            algorithm = Algorithm.ED25519,
+            name = "Restored"
+        )
+
+        assertThat(result.isFailure).isTrue()
     }
 }

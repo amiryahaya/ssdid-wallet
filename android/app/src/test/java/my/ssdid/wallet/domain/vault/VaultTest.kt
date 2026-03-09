@@ -3,10 +3,16 @@ package my.ssdid.wallet.domain.vault
 import com.google.common.truth.Truth.assertThat
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonObject
 import my.ssdid.wallet.domain.crypto.ClassicalProvider
 import my.ssdid.wallet.domain.crypto.CryptoProvider
+import my.ssdid.wallet.domain.crypto.Multibase
 import my.ssdid.wallet.domain.model.*
-import my.ssdid.wallet.platform.keystore.KeystoreManager
+import my.ssdid.wallet.domain.vault.KeystoreManager
 import org.junit.Before
 import org.junit.Test
 
@@ -18,8 +24,8 @@ class VaultTest {
     @Before
     fun setup() {
         keystore = mockk(relaxed = true)
-        every { keystore.encrypt(any(), any()) } answers { secondArg<ByteArray>() }
-        every { keystore.decrypt(any(), any()) } answers { secondArg<ByteArray>() }
+        every { keystore.encrypt(any(), any()) } answers { secondArg<ByteArray>().copyOf() }
+        every { keystore.decrypt(any(), any()) } answers { secondArg<ByteArray>().copyOf() }
 
         storage = FakeVaultStorage()
         val pqcProvider = mockk<CryptoProvider>()
@@ -51,7 +57,21 @@ class VaultTest {
         val identity = vault.createIdentity("Test", Algorithm.ED25519).getOrThrow()
         val message = "Hello".toByteArray()
         val signature = vault.sign(identity.keyId, message).getOrThrow()
-        assertThat(signature).isNotEmpty()
+
+        val publicKey = Multibase.decode(identity.publicKeyMultibase)
+        val classical = ClassicalProvider()
+        assertThat(classical.verify(Algorithm.ED25519, publicKey, signature, message)).isTrue()
+    }
+
+    @Test
+    fun `sign with ECDSA P-256 produces verifiable signature`() = runTest {
+        val identity = vault.createIdentity("Test-P256", Algorithm.ECDSA_P256).getOrThrow()
+        val message = "test data".toByteArray()
+        val signature = vault.sign(identity.keyId, message).getOrThrow()
+
+        val publicKey = Multibase.decode(identity.publicKeyMultibase)
+        val classical = ClassicalProvider()
+        assertThat(classical.verify(Algorithm.ECDSA_P256, publicKey, signature, message)).isTrue()
     }
 
     @Test
@@ -116,5 +136,63 @@ class VaultTest {
         assertThat(found).isNotNull()
         assertThat(found?.id).isEqualTo("urn:uuid:test")
         assertThat(vault.getCredentialForDid("did:ssdid:other")).isNull()
+    }
+
+    @Test
+    fun `createProof generates valid W3C Data Integrity proof`() = runTest {
+        val identity = vault.createIdentity("Test", Algorithm.ED25519).getOrThrow()
+        val doc = vault.buildDidDocument(identity.keyId).getOrThrow()
+        val docJson = Json { encodeDefaults = true }.encodeToString(doc)
+        val docObject = Json.parseToJsonElement(docJson).jsonObject
+
+        val proof = vault.createProof(identity.keyId, docObject, "assertionMethod").getOrThrow()
+
+        assertThat(proof.type).isEqualTo("Ed25519Signature2020")
+        assertThat(proof.verificationMethod).isEqualTo(identity.keyId)
+        assertThat(proof.proofPurpose).isEqualTo("assertionMethod")
+        assertThat(proof.proofValue).startsWith("u") // multibase base64url
+        assertThat(proof.created).isNotEmpty()
+        assertThat(proof.challenge).isNull()
+    }
+
+    @Test
+    fun `createProof includes challenge when provided`() = runTest {
+        val identity = vault.createIdentity("Test", Algorithm.ED25519).getOrThrow()
+        val doc = vault.buildDidDocument(identity.keyId).getOrThrow()
+        val docJson = Json { encodeDefaults = true }.encodeToString(doc)
+        val docObject = Json.parseToJsonElement(docJson).jsonObject
+
+        val proof = vault.createProof(identity.keyId, docObject, "capabilityInvocation", "test-challenge-123").getOrThrow()
+
+        assertThat(proof.proofPurpose).isEqualTo("capabilityInvocation")
+        assertThat(proof.challenge).isEqualTo("test-challenge-123")
+    }
+
+    @Test
+    fun `createProof signature verifies with public key`() = runTest {
+        val classical = ClassicalProvider()
+        val identity = vault.createIdentity("Test", Algorithm.ED25519).getOrThrow()
+        val doc = vault.buildDidDocument(identity.keyId).getOrThrow()
+        val docJson = Json { encodeDefaults = true }.encodeToString(doc)
+        val docObject = Json.parseToJsonElement(docJson).jsonObject
+
+        val proof = vault.createProof(identity.keyId, docObject, "assertionMethod").getOrThrow()
+
+        // Reconstruct the signing payload exactly as VaultImpl does
+        val proofOptions = buildMap<String, kotlinx.serialization.json.JsonElement> {
+            put("type", JsonPrimitive(proof.type))
+            put("created", JsonPrimitive(proof.created))
+            put("verificationMethod", JsonPrimitive(proof.verificationMethod))
+            put("proofPurpose", JsonPrimitive(proof.proofPurpose))
+        }
+        val sha3 = java.security.MessageDigest.getInstance("SHA3-256")
+        val optionsHash = sha3.digest(VaultImpl.canonicalJson(JsonObject(proofOptions)).toByteArray())
+        sha3.reset()
+        val docHash = sha3.digest(VaultImpl.canonicalJson(docObject).toByteArray())
+        val payload = optionsHash + docHash
+
+        val signature = Multibase.decode(proof.proofValue)
+        val publicKey = Multibase.decode(identity.publicKeyMultibase)
+        assertThat(classical.verify(Algorithm.ED25519, publicKey, signature, payload)).isTrue()
     }
 }

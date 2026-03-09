@@ -230,6 +230,7 @@ int kaz_sign_create_p12(kaz_sign_level_t level,
     size_t pk_bytes = params->public_key_bytes;
     size_t name_len = strlen(name);
     if (name_len > 0xFFFF) return KAZ_SIGN_ERROR_INVALID;
+    if (certlen > 0xFFFFFFFFULL) return KAZ_SIGN_ERROR_INVALID;
 
     /* Build plaintext: level(2) + name_len(2) + name + sk_len(2) + sk +
      *                  pk_len(2) + pk + cert_len(4) + cert */
@@ -284,12 +285,7 @@ int kaz_sign_create_p12(kaz_sign_level_t level,
     memcpy(pp, pk, pk_bytes);
     pp += pk_bytes;
 
-    /* Certificate (optional) */
-    if (certlen > 0xFFFFFFFFULL) {
-        kaz_secure_zero(plaintext, plain_len);
-        free(plaintext);
-        return KAZ_SIGN_ERROR_INVALID;
-    }
+    /* Certificate (optional — certlen already validated at function entry) */
     write_u32(pp, (uint32_t)certlen);
     pp += 4;
     if (cert && certlen > 0) {

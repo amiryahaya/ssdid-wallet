@@ -2,15 +2,21 @@ package my.ssdid.wallet.domain.backup
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import my.ssdid.wallet.domain.history.ActivityRepository
+import my.ssdid.wallet.domain.model.ActivityRecord
+import my.ssdid.wallet.domain.model.ActivityStatus
+import my.ssdid.wallet.domain.model.ActivityType
 import my.ssdid.wallet.domain.model.Did
 import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.domain.vault.VaultStorage
-import my.ssdid.wallet.platform.keystore.KeystoreManager
+import my.ssdid.wallet.domain.vault.KeystoreManager
+import java.security.MessageDigest
 import java.security.SecureRandom
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Base64
+import java.util.UUID
 import javax.crypto.Cipher
 import javax.crypto.Mac
 import javax.crypto.SecretKeyFactory
@@ -24,7 +30,8 @@ import javax.inject.Singleton
 class BackupManager @Inject constructor(
     private val vault: Vault,
     private val storage: VaultStorage,
-    private val keystoreManager: KeystoreManager
+    private val keystoreManager: KeystoreManager,
+    private val activityRepo: ActivityRepository
 ) {
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
     private val b64 = Base64.getUrlEncoder().withoutPadding()
@@ -101,7 +108,24 @@ class BackupManager @Inject constructor(
             createdAt = now,
             hmac = b64.encodeToString(hmacBytes)
         )
-        json.encodeToString(finalPackage).toByteArray(Charsets.UTF_8)
+        val result = json.encodeToString(finalPackage).toByteArray(Charsets.UTF_8)
+
+        for (identity in identities) {
+            try {
+                activityRepo.addActivity(ActivityRecord(
+                    id = UUID.randomUUID().toString(),
+                    type = ActivityType.BACKUP_CREATED,
+                    did = identity.did,
+                    timestamp = Instant.now().toString(),
+                    status = ActivityStatus.SUCCESS,
+                    details = mapOf("algorithm" to identity.algorithm.name)
+                ))
+            } catch (_: Exception) {
+                // Activity logging should never break the main flow
+            }
+        }
+
+        result
     }
 
     suspend fun restoreBackup(backupData: ByteArray, passphrase: String): Result<Int> = runCatching {
@@ -113,24 +137,29 @@ class BackupManager @Inject constructor(
         val macKey = deriveSubKey(backupKey, "mac")
         backupKey.fill(0)
 
-        // Verify HMAC over deterministic binary: salt || nonce || ciphertext
-        val nonce = b64Decoder.decode(backupPackage.nonce)
-        val ciphertext = b64Decoder.decode(backupPackage.ciphertext)
-        val mac = Mac.getInstance("HmacSHA256")
-        mac.init(SecretKeySpec(macKey, "HmacSHA256"))
-        mac.update(salt)
-        mac.update(nonce)
-        val expectedHmac = mac.doFinal(ciphertext)
-        macKey.fill(0)
+        val payloadBytes: ByteArray
+        try {
+            // Verify HMAC over deterministic binary: salt || nonce || ciphertext
+            val nonce = b64Decoder.decode(backupPackage.nonce)
+            val ciphertext = b64Decoder.decode(backupPackage.ciphertext)
+            val mac = Mac.getInstance("HmacSHA256")
+            mac.init(SecretKeySpec(macKey, "HmacSHA256"))
+            mac.update(salt)
+            mac.update(nonce)
+            val expectedHmac = mac.doFinal(ciphertext)
+            macKey.fill(0)
 
-        val actualHmac = b64Decoder.decode(backupPackage.hmac)
-        require(expectedHmac.contentEquals(actualHmac)) { "HMAC verification failed: backup may be tampered with" }
+            val actualHmac = b64Decoder.decode(backupPackage.hmac)
+            require(MessageDigest.isEqual(expectedHmac, actualHmac)) { "HMAC verification failed: backup may be tampered with" }
 
-        // Decrypt payload
-        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-        cipher.init(Cipher.DECRYPT_MODE, SecretKeySpec(encKey, "AES"), GCMParameterSpec(GCM_TAG_BITS, nonce))
-        val payloadBytes = cipher.doFinal(ciphertext)
-        encKey.fill(0)
+            // Decrypt payload
+            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+            cipher.init(Cipher.DECRYPT_MODE, SecretKeySpec(encKey, "AES"), GCMParameterSpec(GCM_TAG_BITS, nonce))
+            payloadBytes = cipher.doFinal(ciphertext)
+        } finally {
+            encKey.fill(0)
+            macKey.fill(0)
+        }
 
         val payload = json.decodeFromString<BackupPayload>(String(payloadBytes, Charsets.UTF_8))
 

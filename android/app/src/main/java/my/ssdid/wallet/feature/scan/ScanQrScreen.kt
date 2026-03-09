@@ -33,6 +33,7 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.common.InputImage
+import my.ssdid.wallet.platform.scan.QrPayload
 import my.ssdid.wallet.platform.scan.QrScanner
 import my.ssdid.wallet.ui.theme.*
 import java.util.concurrent.Executors
@@ -40,7 +41,7 @@ import java.util.concurrent.Executors
 @Composable
 fun ScanQrScreen(
     onBack: () -> Unit,
-    onScanned: (serverUrl: String, serverDid: String, action: String, sessionToken: String) -> Unit
+    onScanned: (payload: QrPayload) -> Unit
 ) {
     val context = LocalContext.current
     var hasCameraPermission by remember {
@@ -136,6 +137,8 @@ fun ScanQrScreen(
                 QrFormatRow("SSDID Authentication", "ssdid://auth?url=...&did=...")
                 Spacer(Modifier.height(6.dp))
                 QrFormatRow("SSDID Transaction", "ssdid://tx?url=...&session=...")
+                Spacer(Modifier.height(6.dp))
+                QrFormatRow("Credential Offer", "ssdid://credential-offer?...")
             }
         }
     }
@@ -144,7 +147,7 @@ fun ScanQrScreen(
 @Composable
 private fun CameraPreview(
     modifier: Modifier = Modifier,
-    onScanned: (serverUrl: String, serverDid: String, action: String, sessionToken: String) -> Unit
+    onScanned: (payload: QrPayload) -> Unit
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -178,12 +181,7 @@ private fun CameraPreview(
                         val payload = QrScanner.parsePayload(rawValue)
                         if (payload != null) {
                             hasScanned = true
-                            onScanned(
-                                payload.serverUrl,
-                                payload.serverDid,
-                                payload.action,
-                                payload.sessionToken
-                            )
+                            onScanned(payload)
                         }
                     }
                 })

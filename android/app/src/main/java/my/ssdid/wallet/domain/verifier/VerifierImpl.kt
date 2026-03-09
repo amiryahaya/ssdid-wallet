@@ -72,7 +72,7 @@ class VerifierImpl(
     }
 
     private fun algorithmFromW3cType(type: String): Algorithm {
-        return Algorithm.entries.firstOrNull { it.w3cType == type }
+        return Algorithm.fromW3cType(type)
             ?: throw IllegalArgumentException("Unknown W3C verification method type: $type")
     }
 }

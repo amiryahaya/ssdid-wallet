@@ -23,9 +23,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import androidx.compose.ui.platform.LocalContext
+import androidx.fragment.app.FragmentActivity
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.vault.Vault
+import my.ssdid.wallet.platform.biometric.BiometricAuthenticator
+import my.ssdid.wallet.platform.biometric.BiometricResult
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
 
@@ -40,6 +44,7 @@ sealed class AuthState {
 class AuthFlowViewModel @Inject constructor(
     private val client: SsdidClient,
     private val vault: Vault,
+    private val biometricAuth: BiometricAuthenticator,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     val serverUrl: String = savedStateHandle["serverUrl"] ?: ""
@@ -63,6 +68,15 @@ class AuthFlowViewModel @Inject constructor(
         _selectedCredential.value = credential
     }
 
+    suspend fun requireBiometric(activity: FragmentActivity): Boolean {
+        if (!biometricAuth.canAuthenticate(activity)) return true
+        return biometricAuth.authenticate(
+            activity,
+            "Authenticate Identity",
+            "Confirm your identity to authenticate"
+        ) is BiometricResult.Success
+    }
+
     fun authenticate() {
         val credential = _selectedCredential.value ?: return
         viewModelScope.launch {
@@ -83,6 +97,9 @@ fun AuthFlowScreen(
     val state by viewModel.state.collectAsState()
     val credentials by viewModel.credentials.collectAsState()
     val selectedCredential by viewModel.selectedCredential.collectAsState()
+    val context = LocalContext.current
+    val activity = context as? FragmentActivity
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -219,7 +236,13 @@ fun AuthFlowScreen(
                 Spacer(Modifier.height(8.dp))
 
                 Button(
-                    onClick = { viewModel.authenticate() },
+                    onClick = {
+                        scope.launch {
+                            if (activity == null || viewModel.requireBiometric(activity)) {
+                                viewModel.authenticate()
+                            }
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(20.dp),

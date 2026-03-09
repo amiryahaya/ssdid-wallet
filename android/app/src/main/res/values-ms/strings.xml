@@ -21,11 +21,11 @@
 
     <!-- Onboarding / Pengenalan -->
     <string name="onboarding_title_1">Identiti Anda, Kawalan Anda</string>
-    <string name="onboarding_desc_1">Miliki identiti digital anda dengan teknologi terdesentralisasi dan berdaulat sendiri.</string>
+    <string name="onboarding_desc_1">SSDID ialah dompet identiti berdaulat kendiri yang memberi anda kawalan penuh ke atas identiti digital anda. Tiada pihak berkuasa pusat. Tiada silo data. Hanya anda dan kunci kriptografi anda.</string>
     <string name="onboarding_title_2">Keselamatan Pasca-Kuantum</string>
-    <string name="onboarding_desc_2">Dilindungi oleh kriptografi pasca-kuantum KAZ-Sign bersama algoritma klasik.</string>
+    <string name="onboarding_desc_2">Dikuasakan oleh KAZ-Sign, algoritma kriptografi pasca-kuantum, bersama algoritma klasik seperti Ed25519 dan ECDSA. Identiti anda kekal selamat daripada ancaman semasa dan masa hadapan.</string>
     <string name="onboarding_title_3">Pengesahan Lancar</string>
-    <string name="onboarding_desc_3">Daftar dan sahkan identiti dengan perkhidmatan menggunakan kod QR dan pautan dalam.</string>
+    <string name="onboarding_desc_3">Sahkan dengan perkhidmatan serta-merta menggunakan kod QR dan pautan dalam. Daftar, buktikan identiti anda, dan tandatangani transaksi — semuanya dari peranti anda dengan pengesahan biometrik.</string>
     <string name="onboarding_next">Seterusnya</string>
     <string name="onboarding_get_started">Mula</string>
     <string name="onboarding_skip">Langkau</string>

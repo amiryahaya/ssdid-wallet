@@ -1,6 +1,6 @@
 /*
  * KAZ-SIGN Android Wrapper
- * Version 2.1.0
+ * Version 2.0.0
  *
  * Key pair data class for KAZ-SIGN.
  */

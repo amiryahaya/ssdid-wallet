@@ -23,7 +23,7 @@ extern "C" {
  * ============================================================================ */
 
 /* Maximum output length for a single HKDF-Expand call */
-#define KAZ_KDF_MAX_OUTPUT_LEN (255 * 64)  /* 255 * hash_len for SHA3-512 */
+#define KAZ_KDF_MAX_OUTPUT_LEN (255 * 32)  /* 255 * hash_len for SHA-256 (internal KDF hash) */
 
 /* Domain separation labels for different key types */
 #define KAZ_KDF_LABEL_SECRET_KEY    "KAZ-SIGN-SK"
