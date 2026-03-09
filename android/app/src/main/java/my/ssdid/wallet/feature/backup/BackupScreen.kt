@@ -1,5 +1,7 @@
 package my.ssdid.wallet.feature.backup
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -21,6 +23,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalContext
@@ -53,6 +56,12 @@ class BackupViewModel @Inject constructor(
     private val _state = MutableStateFlow<BackupState>(BackupState.Idle)
     val state = _state.asStateFlow()
 
+    var lastBackupBytes: ByteArray? = null
+        private set
+
+    private val _loadedFileBytes = MutableStateFlow<ByteArray?>(null)
+    val loadedFileBytes: StateFlow<ByteArray?> = _loadedFileBytes
+
     suspend fun requireBiometricForBackup(activity: FragmentActivity): Boolean {
         if (!biometricAuth.canAuthenticate(activity)) return true
         return biometricAuth.authenticate(
@@ -75,8 +84,32 @@ class BackupViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = BackupState.Creating
             backupManager.createBackup(passphrase)
-                .onSuccess { _state.value = BackupState.Success(it) }
+                .onSuccess { bytes ->
+                    lastBackupBytes = bytes
+                    _state.value = BackupState.Success(bytes)
+                }
                 .onFailure { _state.value = BackupState.Error(it.message ?: "Backup creation failed") }
+        }
+    }
+
+    fun onBackupSaved() {
+        lastBackupBytes = null
+    }
+
+    fun onBackupFileLoaded(bytes: ByteArray) {
+        _loadedFileBytes.value = bytes
+    }
+
+    fun restoreBackup(passphrase: String) {
+        val bytes = _loadedFileBytes.value ?: return
+        viewModelScope.launch {
+            _state.value = BackupState.Restoring
+            backupManager.restoreBackup(bytes, passphrase)
+                .onSuccess { count ->
+                    _loadedFileBytes.value = null
+                    _state.value = BackupState.RestoreSuccess(count)
+                }
+                .onFailure { _state.value = BackupState.Error(it.message ?: "Restore failed") }
         }
     }
 
@@ -100,11 +133,38 @@ fun BackupScreen(
     viewModel: BackupViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val loadedFileBytes by viewModel.loadedFileBytes.collectAsState()
     var passphrase by remember { mutableStateOf("") }
     var confirmPassphrase by remember { mutableStateOf("") }
+    var restorePassphrase by remember { mutableStateOf("") }
     val context = LocalContext.current
     val activity = context as? FragmentActivity
     val scope = rememberCoroutineScope()
+
+    // SAF launcher for saving backup to a file
+    val saveBackupLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/octet-stream")
+    ) { uri ->
+        uri?.let {
+            val bytes = viewModel.lastBackupBytes ?: return@let
+            context.contentResolver.openOutputStream(it)?.use { out ->
+                out.write(bytes)
+            }
+            viewModel.onBackupSaved()
+        }
+    }
+
+    // SAF launcher for loading backup from a file
+    val loadBackupLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let {
+            val bytes = context.contentResolver.openInputStream(it)?.use { input ->
+                input.readBytes()
+            } ?: return@let
+            viewModel.onBackupFileLoaded(bytes)
+        }
+    }
 
     val passphrasesMatch = passphrase == confirmPassphrase && passphrase.length >= 8
     val canCreate = passphrasesMatch && state !is BackupState.Creating
@@ -259,6 +319,18 @@ fun BackupScreen(
                             fontSize = 13.sp,
                             color = TextSecondary
                         )
+                        Spacer(Modifier.height(12.dp))
+                        Button(
+                            onClick = {
+                                val date = java.time.LocalDate.now().toString()
+                                saveBackupLauncher.launch("ssdid-backup-$date.enc")
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Success)
+                        ) {
+                            Text("Save to File", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                        }
                     }
                 }
                 Spacer(Modifier.height(16.dp))
@@ -327,7 +399,7 @@ fun BackupScreen(
                 onClick = {
                     scope.launch {
                         if (activity == null || viewModel.requireBiometricForRestore(activity)) {
-                            /* File picker integration handled by navigation task */
+                            loadBackupLauncher.launch(arrayOf("application/octet-stream", "*/*"))
                         }
                     }
                 },
@@ -341,6 +413,58 @@ fun BackupScreen(
                     Text("Restoring...", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                 } else {
                     Text("Import Backup File", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+
+            // Restore passphrase input (shown after file is loaded)
+            if (loadedFileBytes != null) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = BgCard)
+                ) {
+                    Column(Modifier.padding(16.dp)) {
+                        Text(
+                            "Backup file loaded",
+                            fontWeight = FontWeight.SemiBold,
+                            color = TextPrimary,
+                            fontSize = 15.sp
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            "Size: ${formatBytes(loadedFileBytes!!.size)}",
+                            fontSize = 13.sp,
+                            color = TextSecondary
+                        )
+                        Spacer(Modifier.height(12.dp))
+                        OutlinedTextField(
+                            value = restorePassphrase,
+                            onValueChange = { restorePassphrase = it },
+                            label = { Text("Restore Passphrase", color = TextTertiary) },
+                            visualTransformation = PasswordVisualTransformation(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Accent,
+                                unfocusedBorderColor = Border,
+                                focusedTextColor = TextPrimary,
+                                unfocusedTextColor = TextPrimary,
+                                cursorColor = Accent
+                            )
+                        )
+                        Spacer(Modifier.height(12.dp))
+                        Button(
+                            onClick = { viewModel.restoreBackup(restorePassphrase) },
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = restorePassphrase.length >= 8 && state !is BackupState.Restoring,
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Accent)
+                        ) {
+                            Text("Restore", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                        }
+                    }
                 }
             }
             Spacer(Modifier.height(24.dp))
