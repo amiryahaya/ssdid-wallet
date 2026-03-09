@@ -1,6 +1,7 @@
 package my.ssdid.wallet.domain.device
 
 import android.os.Build
+import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.crypto.Multibase
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.transport.SsdidHttpClient
@@ -13,7 +14,8 @@ import java.util.UUID
 
 class DeviceManager(
     private val vault: Vault,
-    private val httpClient: SsdidHttpClient
+    private val httpClient: SsdidHttpClient,
+    private val ssdidClient: dagger.Lazy<SsdidClient>
 ) {
     suspend fun initiatePairing(identity: Identity): Result<PairingData> = runCatching {
         val challenge = UUID.randomUUID().toString()
@@ -69,6 +71,8 @@ class DeviceManager(
                 signed_approval = Multibase.encode(sig)
             )
         )
+        // Sync DID Document with registry after approval adds the new device key
+        ssdidClient.get().updateDidDocument(identity.keyId).getOrThrow()
     }
 
     suspend fun listDevices(identity: Identity): Result<List<DeviceInfo>> = runCatching {
@@ -103,8 +107,9 @@ class DeviceManager(
 
     suspend fun revokeDevice(identity: Identity, targetKeyId: String): Result<Unit> = runCatching {
         require(targetKeyId != identity.keyId) { "Cannot revoke primary device key" }
-        // Remove the key from DID Document and publish update
-        // The actual DID Document update would be handled by SsdidClient.updateDidDocument()
+        // Rebuild and publish DID Document — vault only stores the primary key,
+        // so the rebuilt document excludes the revoked secondary device key
+        ssdidClient.get().updateDidDocument(identity.keyId).getOrThrow()
     }
 }
 

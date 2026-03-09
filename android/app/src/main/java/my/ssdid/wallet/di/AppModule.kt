@@ -123,8 +123,11 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideDeviceManager(vault: Vault, httpClient: SsdidHttpClient): DeviceManager =
-        DeviceManager(vault, httpClient)
+    fun provideDeviceManager(
+        vault: Vault,
+        httpClient: SsdidHttpClient,
+        ssdidClient: dagger.Lazy<SsdidClient>
+    ): DeviceManager = DeviceManager(vault, httpClient, ssdidClient)
 
     @Provides
     @Singleton

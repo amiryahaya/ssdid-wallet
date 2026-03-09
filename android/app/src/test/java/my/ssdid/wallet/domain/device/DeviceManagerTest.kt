@@ -6,6 +6,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.model.*
 import my.ssdid.wallet.domain.transport.RegistryApi
 import my.ssdid.wallet.domain.transport.SsdidHttpClient
@@ -19,6 +20,8 @@ class DeviceManagerTest {
     private lateinit var vault: Vault
     private lateinit var httpClient: SsdidHttpClient
     private lateinit var registryApi: RegistryApi
+    private lateinit var ssdidClient: SsdidClient
+    private lateinit var lazySsdidClient: dagger.Lazy<SsdidClient>
     private lateinit var manager: DeviceManager
 
     private val testIdentity = Identity(
@@ -35,8 +38,10 @@ class DeviceManagerTest {
         vault = mockk()
         httpClient = mockk()
         registryApi = mockk()
+        ssdidClient = mockk()
+        lazySsdidClient = dagger.Lazy { ssdidClient }
         every { httpClient.registry } returns registryApi
-        manager = DeviceManager(vault, httpClient)
+        manager = DeviceManager(vault, httpClient, lazySsdidClient)
     }
 
     @Test
@@ -106,10 +111,11 @@ class DeviceManagerTest {
     }
 
     @Test
-    fun `approvePairing signs approval and calls registry`() = runTest {
+    fun `approvePairing signs approval and updates DID document`() = runTest {
         val sigBytes = byteArrayOf(5, 6, 7, 8)
         coEvery { vault.sign("key-1", any()) } returns Result.success(sigBytes)
         coEvery { registryApi.approvePairing("did:ssdid:abc123", "pairing-1", any()) } returns Unit
+        coEvery { ssdidClient.updateDidDocument("key-1") } returns Result.success(Unit)
 
         val result = manager.approvePairing(testIdentity, "pairing-1")
 
@@ -121,6 +127,7 @@ class DeviceManagerTest {
                 it.key_id == "key-1"
             })
         }
+        coVerify { ssdidClient.updateDidDocument("key-1") }
     }
 
     @Test
@@ -142,10 +149,13 @@ class DeviceManagerTest {
     }
 
     @Test
-    fun `revokeDevice succeeds for non-primary key`() = runTest {
+    fun `revokeDevice succeeds for non-primary key and updates DID document`() = runTest {
+        coEvery { ssdidClient.updateDidDocument("key-1") } returns Result.success(Unit)
+
         val result = manager.revokeDevice(testIdentity, "key-2")
 
         assertThat(result.isSuccess).isTrue()
+        coVerify { ssdidClient.updateDidDocument("key-1") }
     }
 
     @Test
