@@ -126,6 +126,10 @@ class SocialRecoverySetupViewModel @Inject constructor(
             _state.value = SocialSetupState.Error("All guardians must have a name and DID")
             return
         }
+        if (guardianList.any { !it.did.startsWith("did:") }) {
+            _state.value = SocialSetupState.Error("All guardian DIDs must be valid DID format")
+            return
+        }
 
         viewModelScope.launch {
             _state.value = SocialSetupState.Creating

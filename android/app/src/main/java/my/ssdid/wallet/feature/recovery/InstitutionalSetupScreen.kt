@@ -124,7 +124,10 @@ fun InstitutionalSetupScreen(
 
     if (showConfirmDialog) {
         AlertDialog(
-            onDismissRequest = { showConfirmDialog = false },
+            onDismissRequest = {
+                showConfirmDialog = false
+                pendingEnroll = null
+            },
             title = { Text(stringResource(R.string.institutional_confirm_overwrite_title)) },
             text = { Text(stringResource(R.string.institutional_confirm_overwrite_message)) },
             confirmButton = {

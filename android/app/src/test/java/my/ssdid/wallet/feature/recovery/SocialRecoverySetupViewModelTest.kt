@@ -115,6 +115,18 @@ class SocialRecoverySetupViewModelTest {
     }
 
     @Test
+    fun `createShares with invalid guardian DID shows error`() = runTest {
+        viewModel.updateGuardian(0, GuardianEntry(name = "Alice", did = "not-a-did"))
+        viewModel.updateGuardian(1, GuardianEntry(name = "Bob", did = "did:ssdid:bob"))
+
+        viewModel.createShares()
+
+        assertThat(viewModel.state.value).isInstanceOf(SocialSetupState.Error::class.java)
+        assertThat((viewModel.state.value as SocialSetupState.Error).message)
+            .isEqualTo("All guardian DIDs must be valid DID format")
+    }
+
+    @Test
     fun `createShares with null identity returns silently`() = runTest {
         // Create VM with no identity
         coEvery { vault.getIdentity(any()) } returns null
@@ -123,6 +135,7 @@ class SocialRecoverySetupViewModelTest {
             vault = vault,
             savedStateHandle = SavedStateHandle(mapOf("keyId" to "nonexistent"))
         )
+        advanceUntilIdle()
 
         vm.createShares()
 
@@ -154,6 +167,7 @@ class SocialRecoverySetupViewModelTest {
         coEvery { socialRecoveryManager.getConfig("did:ssdid:test") } returns config
 
         viewModel.createShares()
+        advanceUntilIdle()
 
         assertThat(viewModel.state.value).isInstanceOf(SocialSetupState.Success::class.java)
         val success = viewModel.state.value as SocialSetupState.Success
@@ -176,6 +190,7 @@ class SocialRecoverySetupViewModelTest {
         coEvery { socialRecoveryManager.getConfig(any()) } returns null
 
         viewModel.createShares()
+        advanceUntilIdle()
 
         assertThat(viewModel.state.value).isInstanceOf(SocialSetupState.Success::class.java)
         val success = viewModel.state.value as SocialSetupState.Success
@@ -194,6 +209,7 @@ class SocialRecoverySetupViewModelTest {
         } returns Result.failure(RuntimeException("Shamir split failed"))
 
         viewModel.createShares()
+        advanceUntilIdle()
 
         assertThat(viewModel.state.value).isInstanceOf(SocialSetupState.Error::class.java)
         assertThat((viewModel.state.value as SocialSetupState.Error).message)

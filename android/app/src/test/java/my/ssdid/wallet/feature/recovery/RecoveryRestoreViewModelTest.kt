@@ -133,6 +133,22 @@ class RecoveryRestoreViewModelTest {
     }
 
     @Test
+    fun `restore trims recovery key before passing to manager`() = runTest {
+        coEvery {
+            recoveryManager.restoreWithRecoveryKey(any(), any(), any(), any())
+        } returns Result.success(testIdentity)
+
+        viewModel.restore("did:ssdid:test", "  myKey  ", "MyName", Algorithm.KAZ_SIGN_192)
+        advanceUntilIdle()
+
+        coVerify {
+            recoveryManager.restoreWithRecoveryKey(
+                "did:ssdid:test", "myKey", "MyName", Algorithm.KAZ_SIGN_192
+            )
+        }
+    }
+
+    @Test
     fun `restore passes correct arguments to recoveryManager`() = runTest {
         coEvery {
             recoveryManager.restoreWithRecoveryKey(any(), any(), any(), any())

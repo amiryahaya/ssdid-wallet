@@ -89,6 +89,7 @@ class InstitutionalSetupViewModelTest {
             vault = vault,
             savedStateHandle = SavedStateHandle(mapOf("keyId" to "nonexistent"))
         )
+        advanceUntilIdle()
 
         vm.enroll("OrgName", "did:ssdid:org", "dGVzdA==")
 
@@ -109,6 +110,7 @@ class InstitutionalSetupViewModelTest {
         } returns Result.success(orgConfig)
 
         viewModel.enroll("TestOrg", "did:ssdid:org", "dGVzdA==")
+        advanceUntilIdle()
 
         assertThat(viewModel.state.value).isInstanceOf(InstitutionalSetupState.Success::class.java)
         assertThat((viewModel.state.value as InstitutionalSetupState.Success).orgName)
@@ -118,6 +120,7 @@ class InstitutionalSetupViewModelTest {
     @Test
     fun `enroll with invalid Base64 transitions to Error`() = runTest {
         viewModel.enroll("TestOrg", "did:ssdid:org", "!!!invalid-base64!!!")
+        advanceUntilIdle()
 
         assertThat(viewModel.state.value).isInstanceOf(InstitutionalSetupState.Error::class.java)
         assertThat((viewModel.state.value as InstitutionalSetupState.Error).message)
@@ -131,6 +134,7 @@ class InstitutionalSetupViewModelTest {
         } returns Result.failure(RuntimeException("Enrollment rejected"))
 
         viewModel.enroll("TestOrg", "did:ssdid:org", "dGVzdA==")
+        advanceUntilIdle()
 
         assertThat(viewModel.state.value).isInstanceOf(InstitutionalSetupState.Error::class.java)
         assertThat((viewModel.state.value as InstitutionalSetupState.Error).message)

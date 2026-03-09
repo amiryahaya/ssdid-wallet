@@ -59,11 +59,12 @@ class RecoveryRestoreViewModel @Inject constructor(
             _state.value = RestoreState.Error("Invalid DID format")
             return
         }
+        val trimmedKey = recoveryKey.trim()
         viewModelScope.launch {
             _state.value = RestoreState.Restoring
             try {
                 withTimeout(OPERATION_TIMEOUT_MS) {
-                    recoveryManager.restoreWithRecoveryKey(did, recoveryKey, name, algorithm)
+                    recoveryManager.restoreWithRecoveryKey(did, trimmedKey, name, algorithm)
                         .onSuccess { identity ->
                             try {
                                 ssdidClient.updateDidDocument(identity.keyId)
@@ -75,6 +76,8 @@ class RecoveryRestoreViewModel @Inject constructor(
                         }
                         .onFailure { _state.value = RestoreState.Error(it.message ?: "Restoration failed") }
                 }
+            } catch (_: IllegalArgumentException) {
+                _state.value = RestoreState.Error("Invalid recovery key format")
             } catch (_: kotlinx.coroutines.TimeoutCancellationException) {
                 _state.value = RestoreState.Error("Operation timed out. Please try again.")
             }
