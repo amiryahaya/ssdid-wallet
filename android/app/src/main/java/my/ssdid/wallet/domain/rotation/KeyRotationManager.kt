@@ -1,6 +1,7 @@
 package my.ssdid.wallet.domain.rotation
 
 import kotlinx.serialization.Serializable
+import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.crypto.CryptoProvider
 import my.ssdid.wallet.domain.crypto.Multibase
 import my.ssdid.wallet.domain.history.ActivityRepository
@@ -42,7 +43,8 @@ class KeyRotationManager @Inject constructor(
     @Named("classical") private val classicalProvider: CryptoProvider,
     @Named("pqc") private val pqcProvider: CryptoProvider,
     private val keystoreManager: KeystoreManager,
-    private val activityRepo: ActivityRepository
+    private val activityRepo: ActivityRepository,
+    private val ssdidClient: dagger.Lazy<SsdidClient>
 ) {
     private fun providerFor(algorithm: Algorithm): CryptoProvider =
         if (algorithm.isPostQuantum) pqcProvider else classicalProvider
@@ -81,6 +83,9 @@ class KeyRotationManager @Inject constructor(
         val existingEncKey = storage.getEncryptedPrivateKey(identity.keyId)
             ?: throw IllegalStateException("Private key not found for: ${identity.keyId}")
         storage.saveIdentity(updatedIdentity, existingEncKey)
+
+        // Publish pre-commitment to registry
+        ssdidClient.get().updateDidDocument(identity.keyId).getOrThrow()
 
         nextKeyHash
     }
@@ -125,6 +130,9 @@ class KeyRotationManager @Inject constructor(
         // Clean up: delete old identity's private key and pre-rotated key
         storage.deleteIdentity(identity.keyId)
         storage.deletePreRotatedKey(preRotatedKeyId)
+
+        // Publish new key to registry
+        ssdidClient.get().updateDidDocument(newIdentity.keyId).getOrThrow()
 
         try {
             activityRepo.addActivity(ActivityRecord(

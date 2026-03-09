@@ -3,6 +3,7 @@ package my.ssdid.wallet.domain.rotation
 import com.google.common.truth.Truth.assertThat
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
+import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.crypto.CryptoProvider
 import my.ssdid.wallet.domain.crypto.KeyPairResult
 import my.ssdid.wallet.domain.history.ActivityRepository
@@ -21,6 +22,10 @@ class KeyRotationManagerTest {
     private val pqcProvider = mockk<CryptoProvider>()
     private val keystoreManager = mockk<KeystoreManager>(relaxed = true)
     private val activityRepo = mockk<ActivityRepository>(relaxed = true)
+    private val ssdidClient = mockk<SsdidClient>(relaxed = true)
+    private val lazySsdidClient = mockk<dagger.Lazy<SsdidClient>> {
+        every { get() } returns ssdidClient
+    }
 
     private lateinit var manager: KeyRotationManager
 
@@ -35,7 +40,8 @@ class KeyRotationManagerTest {
 
     @Before
     fun setup() {
-        manager = KeyRotationManager(storage, classicalProvider, pqcProvider, keystoreManager, activityRepo)
+        coEvery { ssdidClient.updateDidDocument(any()) } returns Result.success(Unit)
+        manager = KeyRotationManager(storage, classicalProvider, pqcProvider, keystoreManager, activityRepo, lazySsdidClient)
     }
 
     @Test
@@ -55,6 +61,7 @@ class KeyRotationManagerTest {
 
         coVerify { storage.savePreRotatedKey(any(), any(), nextPub) }
         coVerify { storage.saveIdentity(match { it.preRotatedKeyId != null }, any()) }
+        coVerify { ssdidClient.updateDidDocument(testIdentity.keyId) }
     }
 
     @Test
@@ -85,6 +92,7 @@ class KeyRotationManagerTest {
         coVerify { storage.addRotationEntry(eq("did:ssdid:abc123"), any()) }
         coVerify { storage.deleteIdentity("did:ssdid:abc123#key-1") }
         coVerify { storage.deletePreRotatedKey("did:ssdid:abc123#key-1-prerotated") }
+        coVerify { ssdidClient.updateDidDocument(match { it != testIdentity.keyId }) }
     }
 
     @Test

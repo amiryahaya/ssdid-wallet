@@ -99,8 +99,9 @@ object AppModule {
         @Named("classical") classical: CryptoProvider,
         @Named("pqc") pqc: CryptoProvider,
         keystoreManager: KeystoreManager,
-        activityRepo: ActivityRepository
-    ): KeyRotationManager = KeyRotationManager(storage, classical, pqc, keystoreManager, activityRepo)
+        activityRepo: ActivityRepository,
+        ssdidClient: dagger.Lazy<SsdidClient>
+    ): KeyRotationManager = KeyRotationManager(storage, classical, pqc, keystoreManager, activityRepo, ssdidClient)
 
     @Provides
     @Singleton

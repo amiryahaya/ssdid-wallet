@@ -76,12 +76,20 @@ class VaultImpl(
 
     override suspend fun buildDidDocument(keyId: String): Result<DidDocument> = runCatching {
         val identity = storage.getIdentity(keyId) ?: throw IllegalArgumentException("Identity not found: $keyId")
-        DidDocument.build(
-            did = Did(identity.did),
-            keyId = identity.keyId,
-            algorithm = identity.algorithm,
-            publicKeyMultibase = identity.publicKeyMultibase
-        )
+        val did = Did(identity.did)
+
+        // Check for pre-rotated key hash
+        val nextKeyHash = if (identity.preRotatedKeyId != null) {
+            val preRotated = storage.getPreRotatedKey(identity.preRotatedKeyId!!)
+            if (preRotated != null) {
+                val sha3 = MessageDigest.getInstance("SHA3-256")
+                val hash = sha3.digest(preRotated.publicKey)
+                my.ssdid.wallet.domain.crypto.Multibase.encode(hash)
+            } else null
+        } else null
+
+        DidDocument.build(did, identity.keyId, identity.algorithm, identity.publicKeyMultibase)
+            .copy(nextKeyHash = nextKeyHash)
     }
 
     override suspend fun createProof(keyId: String, document: JsonObject, proofPurpose: String, challenge: String?): Result<Proof> = runCatching {
