@@ -26,6 +26,7 @@ import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.recovery.social.SocialRecoveryManager
 import my.ssdid.wallet.domain.vault.VaultStorage
 import my.ssdid.wallet.ui.theme.*
+import java.util.Base64 as JBase64
 import javax.inject.Inject
 
 data class ShareEntry(val index: String = "", val data: String = "")
@@ -69,6 +70,10 @@ class SocialRecoveryRestoreViewModel @Inject constructor(
             _state.value = SocialRestoreState.Error("DID and identity name are required")
             return
         }
+        if (!did.startsWith("did:")) {
+            _state.value = SocialRestoreState.Error("Invalid DID format")
+            return
+        }
 
         val currentShares = _shares.value
         val collectedShares = mutableMapOf<Int, String>()
@@ -80,6 +85,13 @@ class SocialRecoveryRestoreViewModel @Inject constructor(
             }
             if (share.data.isBlank()) {
                 _state.value = SocialRestoreState.Error("Share ${i + 1}: data is required")
+                return
+            }
+            // Validate Base64 format
+            try {
+                JBase64.getUrlDecoder().decode(share.data.trim())
+            } catch (_: IllegalArgumentException) {
+                _state.value = SocialRestoreState.Error("Share ${i + 1}: invalid Base64 data")
                 return
             }
             collectedShares[shareIndex] = share.data.trim()
@@ -108,6 +120,10 @@ class SocialRecoveryRestoreViewModel @Inject constructor(
                     _state.value = SocialRestoreState.Error(it.message ?: "Recovery failed")
                 }
         }
+    }
+
+    fun resetState() {
+        _state.value = SocialRestoreState.Idle
     }
 }
 

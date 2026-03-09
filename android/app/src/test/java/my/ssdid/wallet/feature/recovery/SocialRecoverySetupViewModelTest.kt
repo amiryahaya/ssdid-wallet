@@ -8,6 +8,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.model.Identity
+import my.ssdid.wallet.domain.recovery.social.Guardian
+import my.ssdid.wallet.domain.recovery.social.SocialRecoveryConfig
 import my.ssdid.wallet.domain.recovery.social.SocialRecoveryManager
 import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.feature.identity.MainDispatcherRule
@@ -126,7 +128,7 @@ class SocialRecoverySetupViewModelTest {
     }
 
     @Test
-    fun `createShares success transitions to Success state`() = runTest {
+    fun `createShares success transitions to Success state with config-based matching`() = runTest {
         // Fill in guardian details
         viewModel.updateGuardian(0, GuardianEntry(name = "Alice", did = "did:ssdid:alice"))
         viewModel.updateGuardian(1, GuardianEntry(name = "Bob", did = "did:ssdid:bob"))
@@ -135,6 +137,41 @@ class SocialRecoverySetupViewModelTest {
         coEvery {
             socialRecoveryManager.setupSocialRecovery(any(), any(), any())
         } returns Result.success(sharesMap)
+
+        // Config returns guardians with IDs matching the shares map keys
+        val config = SocialRecoveryConfig(
+            did = "did:ssdid:test",
+            threshold = 2,
+            totalShares = 2,
+            guardians = listOf(
+                Guardian(id = "uuid1", name = "Alice", did = "did:ssdid:alice", shareIndex = 1, enrolledAt = "2024-01-01T00:00:00Z"),
+                Guardian(id = "uuid2", name = "Bob", did = "did:ssdid:bob", shareIndex = 2, enrolledAt = "2024-01-01T00:00:00Z")
+            ),
+            createdAt = "2024-01-01T00:00:00Z"
+        )
+        coEvery { socialRecoveryManager.getConfig("did:ssdid:test") } returns config
+
+        viewModel.createShares()
+
+        assertThat(viewModel.state.value).isInstanceOf(SocialSetupState.Success::class.java)
+        val success = viewModel.state.value as SocialSetupState.Success
+        assertThat(success.guardianShares).hasSize(2)
+        assertThat(success.guardianShares[0].first).isEqualTo("Alice")
+        assertThat(success.guardianShares[0].second).isEqualTo("share1data")
+        assertThat(success.guardianShares[1].first).isEqualTo("Bob")
+        assertThat(success.guardianShares[1].second).isEqualTo("share2data")
+    }
+
+    @Test
+    fun `createShares success falls back to entry order when config is null`() = runTest {
+        viewModel.updateGuardian(0, GuardianEntry(name = "Alice", did = "did:ssdid:alice"))
+        viewModel.updateGuardian(1, GuardianEntry(name = "Bob", did = "did:ssdid:bob"))
+
+        val sharesMap = linkedMapOf("uuid1" to "share1data", "uuid2" to "share2data")
+        coEvery {
+            socialRecoveryManager.setupSocialRecovery(any(), any(), any())
+        } returns Result.success(sharesMap)
+        coEvery { socialRecoveryManager.getConfig(any()) } returns null
 
         viewModel.createShares()
 
@@ -159,5 +196,16 @@ class SocialRecoverySetupViewModelTest {
         assertThat(viewModel.state.value).isInstanceOf(SocialSetupState.Error::class.java)
         assertThat((viewModel.state.value as SocialSetupState.Error).message)
             .isEqualTo("Shamir split failed")
+    }
+
+    @Test
+    fun `resetState returns to Idle`() = runTest {
+        // Trigger an error first
+        viewModel.createShares()
+        assertThat(viewModel.state.value).isInstanceOf(SocialSetupState.Error::class.java)
+
+        viewModel.resetState()
+
+        assertThat(viewModel.state.value).isEqualTo(SocialSetupState.Idle)
     }
 }

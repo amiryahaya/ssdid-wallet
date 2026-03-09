@@ -15,13 +15,8 @@ import my.ssdid.wallet.feature.identity.MainDispatcherRule
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(RobolectricTestRunner::class)
-@Config(sdk = [34])
 class InstitutionalSetupViewModelTest {
 
     @get:Rule
@@ -58,10 +53,30 @@ class InstitutionalSetupViewModelTest {
     }
 
     @Test
-    fun `enroll with blank orgName returns silently`() = runTest {
+    fun `enroll with blank orgName shows error`() = runTest {
         viewModel.enroll("", "did:ssdid:org", "dGVzdA==")
 
-        assertThat(viewModel.state.value).isEqualTo(InstitutionalSetupState.Idle)
+        assertThat(viewModel.state.value).isInstanceOf(InstitutionalSetupState.Error::class.java)
+        assertThat((viewModel.state.value as InstitutionalSetupState.Error).message)
+            .isEqualTo("All fields are required")
+    }
+
+    @Test
+    fun `enroll with blank orgDid shows error`() = runTest {
+        viewModel.enroll("TestOrg", "", "dGVzdA==")
+
+        assertThat(viewModel.state.value).isInstanceOf(InstitutionalSetupState.Error::class.java)
+        assertThat((viewModel.state.value as InstitutionalSetupState.Error).message)
+            .isEqualTo("All fields are required")
+    }
+
+    @Test
+    fun `enroll with invalid DID format shows error`() = runTest {
+        viewModel.enroll("TestOrg", "not-a-did", "dGVzdA==")
+
+        assertThat(viewModel.state.value).isInstanceOf(InstitutionalSetupState.Error::class.java)
+        assertThat((viewModel.state.value as InstitutionalSetupState.Error).message)
+            .isEqualTo("Invalid DID format")
     }
 
     @Test
@@ -118,5 +133,15 @@ class InstitutionalSetupViewModelTest {
         assertThat(viewModel.state.value).isInstanceOf(InstitutionalSetupState.Error::class.java)
         assertThat((viewModel.state.value as InstitutionalSetupState.Error).message)
             .isEqualTo("Enrollment rejected")
+    }
+
+    @Test
+    fun `resetState returns to Idle`() = runTest {
+        viewModel.enroll("TestOrg", "not-a-did", "dGVzdA==")
+        assertThat(viewModel.state.value).isInstanceOf(InstitutionalSetupState.Error::class.java)
+
+        viewModel.resetState()
+
+        assertThat(viewModel.state.value).isEqualTo(InstitutionalSetupState.Idle)
     }
 }
