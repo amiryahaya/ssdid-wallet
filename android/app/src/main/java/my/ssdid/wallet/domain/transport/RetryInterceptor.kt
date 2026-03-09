@@ -17,7 +17,7 @@ class RetryInterceptor(private val maxRetries: Int = 2) : Interceptor {
                 if (attempt == maxRetries) throw e
             }
             // Exponential backoff
-            Thread.sleep((1000L * (attempt + 1)).coerceAtMost(5000))
+            Thread.sleep((1000L shl attempt).coerceAtMost(5000))
         }
         throw lastException ?: IOException("Retry exhausted")
     }
