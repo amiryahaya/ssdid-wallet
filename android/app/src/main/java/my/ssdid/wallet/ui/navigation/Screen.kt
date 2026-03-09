@@ -40,6 +40,13 @@ sealed class Screen(val route: String) {
     }
     object BackupExport : Screen("backup_export")
     object RecoveryRestore : Screen("recovery_restore")
+    object SocialRecoverySetup : Screen("social_recovery_setup/{keyId}") {
+        fun createRoute(keyId: String) = "social_recovery_setup/${Uri.encode(keyId)}"
+    }
+    object InstitutionalSetup : Screen("institutional_setup/{keyId}") {
+        fun createRoute(keyId: String) = "institutional_setup/${Uri.encode(keyId)}"
+    }
+    object SocialRecoveryRestore : Screen("social_recovery_restore")
     object DeviceManagement : Screen("device_management/{keyId}") {
         fun createRoute(keyId: String) = "device_management/${Uri.encode(keyId)}"
     }
