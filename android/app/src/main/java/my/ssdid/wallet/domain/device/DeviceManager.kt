@@ -1,6 +1,5 @@
 package my.ssdid.wallet.domain.device
 
-import android.os.Build
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.crypto.Multibase
 import my.ssdid.wallet.domain.model.Identity
@@ -15,7 +14,8 @@ import java.util.UUID
 class DeviceManager(
     private val vault: Vault,
     private val httpClient: SsdidHttpClient,
-    private val ssdidClient: dagger.Lazy<SsdidClient>
+    private val ssdidClient: dagger.Lazy<SsdidClient>,
+    private val deviceInfo: DeviceInfoProvider
 ) {
     suspend fun initiatePairing(identity: Identity): Result<PairingData> = runCatching {
         val challenge = UUID.randomUUID().toString()
@@ -46,7 +46,7 @@ class DeviceManager(
                 public_key = identity.publicKeyMultibase,
                 signed_challenge = Multibase.encode(sig),
                 device_name = deviceName,
-                platform = "android"
+                platform = deviceInfo.platform
             )
         )
         resp.status
@@ -79,13 +79,13 @@ class DeviceManager(
         val docResult = vault.buildDidDocument(identity.keyId)
         val doc = docResult.getOrThrow()
         val methods = doc.verificationMethod
-        val deviceName = Build.MODEL ?: "This Device"
+        val deviceName = deviceInfo.deviceName
         if (methods.isEmpty()) {
             return@runCatching listOf(
                 DeviceInfo(
                     deviceId = identity.keyId,
                     name = deviceName,
-                    platform = "android",
+                    platform = deviceInfo.platform,
                     keyId = identity.keyId,
                     enrolledAt = identity.createdAt,
                     isPrimary = true
@@ -97,7 +97,7 @@ class DeviceManager(
             DeviceInfo(
                 deviceId = keyId,
                 name = if (keyId == identity.keyId) deviceName else "Unknown Device",
-                platform = if (keyId == identity.keyId) "android" else "unknown",
+                platform = if (keyId == identity.keyId) deviceInfo.platform else "unknown",
                 keyId = keyId,
                 enrolledAt = identity.createdAt,
                 isPrimary = keyId == identity.keyId

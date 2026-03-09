@@ -9,6 +9,7 @@ import dagger.hilt.components.SingletonComponent
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.backup.BackupManager
 import my.ssdid.wallet.domain.credential.CredentialIssuanceManager
+import my.ssdid.wallet.domain.device.DeviceInfoProvider
 import my.ssdid.wallet.domain.device.DeviceManager
 import my.ssdid.wallet.domain.crypto.ClassicalProvider
 import my.ssdid.wallet.domain.crypto.CryptoProvider
@@ -24,6 +25,7 @@ import my.ssdid.wallet.domain.verifier.Verifier
 import my.ssdid.wallet.domain.verifier.VerifierImpl
 import my.ssdid.wallet.platform.biometric.BiometricAuthenticator
 import my.ssdid.wallet.platform.keystore.AndroidKeystoreManager
+import my.ssdid.wallet.platform.device.AndroidDeviceInfoProvider
 import my.ssdid.wallet.platform.keystore.KeystoreManager
 import my.ssdid.wallet.domain.settings.SettingsRepository
 import my.ssdid.wallet.platform.storage.DataStoreSettingsRepository
@@ -123,11 +125,16 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideDeviceInfoProvider(): DeviceInfoProvider = AndroidDeviceInfoProvider()
+
+    @Provides
+    @Singleton
     fun provideDeviceManager(
         vault: Vault,
         httpClient: SsdidHttpClient,
-        ssdidClient: dagger.Lazy<SsdidClient>
-    ): DeviceManager = DeviceManager(vault, httpClient, ssdidClient)
+        ssdidClient: dagger.Lazy<SsdidClient>,
+        deviceInfoProvider: DeviceInfoProvider
+    ): DeviceManager = DeviceManager(vault, httpClient, ssdidClient, deviceInfoProvider)
 
     @Provides
     @Singleton

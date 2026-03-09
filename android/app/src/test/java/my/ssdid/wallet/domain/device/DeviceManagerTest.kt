@@ -22,6 +22,7 @@ class DeviceManagerTest {
     private lateinit var registryApi: RegistryApi
     private lateinit var ssdidClient: SsdidClient
     private lateinit var lazySsdidClient: dagger.Lazy<SsdidClient>
+    private lateinit var deviceInfoProvider: DeviceInfoProvider
     private lateinit var manager: DeviceManager
 
     private val testIdentity = Identity(
@@ -40,8 +41,12 @@ class DeviceManagerTest {
         registryApi = mockk()
         ssdidClient = mockk()
         lazySsdidClient = dagger.Lazy { ssdidClient }
+        deviceInfoProvider = object : DeviceInfoProvider {
+            override val deviceName: String get() = "Test Device"
+            override val platform: String get() = "android"
+        }
         every { httpClient.registry } returns registryApi
-        manager = DeviceManager(vault, httpClient, lazySsdidClient)
+        manager = DeviceManager(vault, httpClient, lazySsdidClient, deviceInfoProvider)
     }
 
     @Test
