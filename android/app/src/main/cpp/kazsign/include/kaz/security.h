@@ -110,8 +110,8 @@ static inline int kaz_ct_memcmp(const void *a, const void *b, size_t len)
         diff |= pa[i] ^ pb[i];
     }
 
-    /* Return 0 if equal, 1 if different (constant-time) */
-    return (1 & ((diff - 1) >> 8)) ^ 1;
+    /* Return 0 if equal, 1 if different (constant-time, portable) */
+    return (int)(((unsigned int)diff | (unsigned int)(-(int)diff)) >> 31);
 }
 
 /**

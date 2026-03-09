@@ -11,9 +11,10 @@ import java.security.spec.X509EncodedKeySpec
 class PqcProvider : CryptoProvider {
 
     init {
-        if (Security.getProvider("BC") == null) {
-            Security.addProvider(BouncyCastleProvider())
-        }
+        // Android ships a stripped BouncyCastle that lacks PQC algorithms (ML-DSA, SLH-DSA).
+        // Replace it with the full bcprov-jdk18on provider.
+        Security.removeProvider("BC")
+        Security.addProvider(BouncyCastleProvider())
     }
 
     override fun supportsAlgorithm(algorithm: Algorithm): Boolean = algorithm.isPostQuantum

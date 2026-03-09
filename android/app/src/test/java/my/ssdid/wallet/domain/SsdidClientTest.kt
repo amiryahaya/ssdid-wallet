@@ -246,7 +246,7 @@ class SsdidClientTest {
     // --- fetchTransactionDetails ---
 
     @Test
-    fun `fetchTransactionDetails returns TxChallengeResponse`() = runTest {
+    fun `fetchTransactionDetails returns transaction map`() = runTest {
         val txMap = mapOf("amount" to "100", "recipient" to "Alice")
         val response = TxChallengeResponse(challenge = "ch", transaction = txMap)
         coEvery { serverApi.requestChallenge(any()) } returns response
@@ -254,8 +254,7 @@ class SsdidClientTest {
         val result = client.fetchTransactionDetails("session-abc", "https://server.example.com")
 
         assertThat(result.isSuccess).isTrue()
-        assertThat(result.getOrThrow().challenge).isEqualTo("ch")
-        assertThat(result.getOrThrow().transaction).isEqualTo(txMap)
+        assertThat(result.getOrThrow()).isEqualTo(txMap)
     }
 
     // --- Flow 4: signTransaction ---
@@ -267,7 +266,7 @@ class SsdidClientTest {
         coEvery { serverApi.submitTransaction(any()) } returns submitResp
 
         val tx = mapOf("amount" to "500", "to" to "Bob")
-        val result = client.signTransaction("session-abc", testIdentity, tx, "fresh-challenge", "https://server.example.com")
+        val result = client.signTransaction("session-abc", testIdentity, tx, "https://server.example.com")
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrThrow().transaction_id).isEqualTo("tx-001")
@@ -290,7 +289,10 @@ class SsdidClientTest {
         coEvery { serverApi.submitTransaction(any()) } returns TxSubmitResponse("tx-1", "ok")
 
         val tx = mapOf("key" to "value")
-        client.signTransaction("session", testIdentity, tx, "test-challenge", "https://server.example.com")
+        val challengeResp = TxChallengeResponse(challenge = "test-challenge", transaction = tx)
+        coEvery { serverApi.requestChallenge(any()) } returns challengeResp
+
+        client.signTransaction("session", testIdentity, tx, "https://server.example.com")
 
         val payload = String(capturedPayload.captured)
         assertThat(payload).startsWith("test-challenge")
@@ -301,7 +303,7 @@ class SsdidClientTest {
     fun `signTransaction fails when vault sign fails`() = runTest {
         coEvery { vault.sign(any(), any()) } returns Result.failure(RuntimeException("sign failed"))
 
-        val result = client.signTransaction("session", testIdentity, mapOf("a" to "b"), "ch", "https://server.example.com")
+        val result = client.signTransaction("session", testIdentity, mapOf("a" to "b"), "https://server.example.com")
 
         assertThat(result.isFailure).isTrue()
     }

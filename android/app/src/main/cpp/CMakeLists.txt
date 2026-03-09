@@ -16,8 +16,8 @@ set(KAZSIGN_SRC "${KAZSIGN_ROOT}/src/internal")
 # OpenSSL for Android - search in multiple locations
 set(OPENSSL_FOUND FALSE)
 
-# Location 1: Project libs/openssl directory (built by script)
-set(OPENSSL_LIBS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../libs/openssl/${ANDROID_ABI}")
+# Location 1: Project libs/openssl directory (in cpp/)
+set(OPENSSL_LIBS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libs/openssl/${ANDROID_ABI}")
 # Location 2: Project jniLibs directory (pre-built)
 set(OPENSSL_JNILIBS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../jniLibs/${ANDROID_ABI}")
 # Location 3: Build output directory

@@ -1,6 +1,6 @@
 /*
  * KAZ-SIGN: Post-Quantum Digital Signature Algorithm
- * Version 3.0.0
+ * Version 2.0.0
  *
  * Unified implementation supporting security levels 128, 192, and 256
  * Uses OpenSSL BIGNUM with constant-time operations
@@ -24,25 +24,25 @@ extern "C" {
  * Version Information
  * ============================================================================ */
 
-#define KAZ_SIGN_VERSION_MAJOR     3
+#define KAZ_SIGN_VERSION_MAJOR     2
 #define KAZ_SIGN_VERSION_MINOR     0
 #define KAZ_SIGN_VERSION_PATCH     0
-#define KAZ_SIGN_VERSION_STRING    "3.0.0"
+#define KAZ_SIGN_VERSION_STRING    "2.0.0"
 
 /* Version as single integer: (major * 10000) + (minor * 100) + patch */
-#define KAZ_SIGN_VERSION_NUMBER    30000
+#define KAZ_SIGN_VERSION_NUMBER    20000
 
 /* ============================================================================
- * Runtime Security Level Selection (NEW in 2.1, extended in 3.0)
+ * Runtime level selection
  * ============================================================================ */
 
 /**
  * Security level enumeration for runtime selection
  */
 typedef enum {
-    KAZ_LEVEL_128 = 128,    /* 128-bit security (SHA-256) */
-    KAZ_LEVEL_192 = 192,    /* 192-bit security (SHA-384) */
-    KAZ_LEVEL_256 = 256     /* 256-bit security (SHA-512) */
+    KAZ_LEVEL_128 = 128,    /* 128-bit security (SHA-256, 32-byte hash) */
+    KAZ_LEVEL_192 = 192,    /* 192-bit security (SHA-256, 48-byte zero-padded) */
+    KAZ_LEVEL_256 = 256     /* 256-bit security (SHA-256, 64-byte zero-padded) */
 } kaz_sign_level_t;
 
 /**
@@ -51,15 +51,16 @@ typedef enum {
 typedef struct {
     int level;                  /* Security level (128, 192, 256) */
     const char *algorithm_name; /* Algorithm name string */
-    size_t secret_key_bytes;    /* Secret key size (SK + v1 + v2) */
-    size_t public_key_bytes;    /* Public key size (v1 + v2) */
-    size_t hash_bytes;          /* Hash output size */
-    size_t signature_overhead;  /* Signature size without message (S1 + S2) */
-    size_t sk_bytes;            /* SK (private scalar) component size */
-    size_t v1_bytes;            /* v1 public key component size */
-    size_t v2_bytes;            /* v2 public key component size */
-    size_t s1_bytes;            /* S1 signature component size */
-    size_t s2_bytes;            /* S2 signature component size */
+    size_t secret_key_bytes;    /* s + t: 32/50/64 */
+    size_t public_key_bytes;    /* v: 54/88/118 */
+    size_t hash_bytes;          /* SHA-256 digest zero-padded: 32/48/64 */
+    size_t signature_overhead;  /* S1+S2+S3: 162/264/354 */
+    size_t v_bytes;             /* v component: 54/88/118 */
+    size_t s_bytes;             /* s component: 16/25/32 */
+    size_t t_bytes;             /* t component: 16/25/32 */
+    size_t s1_bytes;            /* S1 component: 54/88/118 */
+    size_t s2_bytes;            /* S2 component: 54/88/118 */
+    size_t s3_bytes;            /* S3 component: 54/88/118 */
 } kaz_sign_level_params_t;
 
 /**
@@ -90,20 +91,20 @@ const kaz_sign_level_params_t *kaz_sign_get_level_params(kaz_sign_level_t level)
 #if KAZ_SECURITY_LEVEL == 128
 
 #define KAZ_SIGN_ALGNAME           "KAZ-SIGN-128"
-#define KAZ_SIGN_SECRETKEYBYTES    98
-#define KAZ_SIGN_PUBLICKEYBYTES    49
-#define KAZ_SIGN_BYTES             32
+#define KAZ_SIGN_SECRETKEYBYTES    32      /* s(16) + t(16) */
+#define KAZ_SIGN_PUBLICKEYBYTES    54      /* v(54) */
+#define KAZ_SIGN_BYTES             32      /* SHA-256 hash */
 
 #define KAZ_SIGN_SP_g1             "65537"
 #define KAZ_SIGN_SP_g2             "65539"
 
-#define KAZ_SIGN_SKBYTES           49
-#define KAZ_SIGN_V1BYTES           26
-#define KAZ_SIGN_V2BYTES           23
-#define KAZ_SIGN_S1BYTES           49
-#define KAZ_SIGN_S2BYTES           8
+#define KAZ_SIGN_VBYTES            54
+#define KAZ_SIGN_SBYTES            16
+#define KAZ_SIGN_TBYTES            16
+#define KAZ_SIGN_S1BYTES           54
+#define KAZ_SIGN_S2BYTES           54
+#define KAZ_SIGN_S3BYTES           54
 
-/* Hash function: SHA-256 for 128-bit security */
 #define KAZ_SIGN_HASH_ALG          "SHA-256"
 
 /* ============================================================================
@@ -112,21 +113,21 @@ const kaz_sign_level_params_t *kaz_sign_get_level_params(kaz_sign_level_t level)
 #elif KAZ_SECURITY_LEVEL == 192
 
 #define KAZ_SIGN_ALGNAME           "KAZ-SIGN-192"
-#define KAZ_SIGN_SECRETKEYBYTES    146
-#define KAZ_SIGN_PUBLICKEYBYTES    73
-#define KAZ_SIGN_BYTES             48
+#define KAZ_SIGN_SECRETKEYBYTES    50      /* s(25) + t(25) */
+#define KAZ_SIGN_PUBLICKEYBYTES    88      /* v(88) */
+#define KAZ_SIGN_BYTES             48      /* SHA-256 zero-padded to 48 */
 
 #define KAZ_SIGN_SP_g1             "65537"
 #define KAZ_SIGN_SP_g2             "65539"
 
-#define KAZ_SIGN_SKBYTES           73
-#define KAZ_SIGN_V1BYTES           34
-#define KAZ_SIGN_V2BYTES           39
-#define KAZ_SIGN_S1BYTES           73
-#define KAZ_SIGN_S2BYTES           8
+#define KAZ_SIGN_VBYTES            88
+#define KAZ_SIGN_SBYTES            25
+#define KAZ_SIGN_TBYTES            25
+#define KAZ_SIGN_S1BYTES           88
+#define KAZ_SIGN_S2BYTES           88
+#define KAZ_SIGN_S3BYTES           88
 
-/* Hash function: SHA-384 for 192-bit security */
-#define KAZ_SIGN_HASH_ALG          "SHA-384"
+#define KAZ_SIGN_HASH_ALG          "SHA-256"
 
 /* ============================================================================
  * Security Level 256 Parameters
@@ -134,21 +135,21 @@ const kaz_sign_level_params_t *kaz_sign_get_level_params(kaz_sign_level_t level)
 #elif KAZ_SECURITY_LEVEL == 256
 
 #define KAZ_SIGN_ALGNAME           "KAZ-SIGN-256"
-#define KAZ_SIGN_SECRETKEYBYTES    194
-#define KAZ_SIGN_PUBLICKEYBYTES    97
-#define KAZ_SIGN_BYTES             64
+#define KAZ_SIGN_SECRETKEYBYTES    64      /* s(32) + t(32) */
+#define KAZ_SIGN_PUBLICKEYBYTES    118     /* v(118) */
+#define KAZ_SIGN_BYTES             64      /* SHA-256 zero-padded to 64 */
 
 #define KAZ_SIGN_SP_g1             "65537"
 #define KAZ_SIGN_SP_g2             "65539"
 
-#define KAZ_SIGN_SKBYTES           97
-#define KAZ_SIGN_V1BYTES           42
-#define KAZ_SIGN_V2BYTES           55
-#define KAZ_SIGN_S1BYTES           97
-#define KAZ_SIGN_S2BYTES           8
+#define KAZ_SIGN_VBYTES            118
+#define KAZ_SIGN_SBYTES            32
+#define KAZ_SIGN_TBYTES            32
+#define KAZ_SIGN_S1BYTES           118
+#define KAZ_SIGN_S2BYTES           118
+#define KAZ_SIGN_S3BYTES           118
 
-/* Hash function: SHA-512 for 256-bit security */
-#define KAZ_SIGN_HASH_ALG          "SHA-512"
+#define KAZ_SIGN_HASH_ALG          "SHA-256"
 
 #endif /* KAZ_SECURITY_LEVEL */
 
@@ -156,8 +157,8 @@ const kaz_sign_level_params_t *kaz_sign_get_level_params(kaz_sign_level_t level)
  * Derived Constants
  * ============================================================================ */
 
-/* Total signature overhead (without message): S1 + S2 */
-#define KAZ_SIGN_SIGNATURE_OVERHEAD (KAZ_SIGN_S1BYTES + KAZ_SIGN_S2BYTES)
+/* Total signature overhead (without message): S1 + S2 + S3 */
+#define KAZ_SIGN_SIGNATURE_OVERHEAD (KAZ_SIGN_S1BYTES + KAZ_SIGN_S2BYTES + KAZ_SIGN_S3BYTES)
 
 /* Backend information */
 #define KAZ_SIGN_BACKEND "OpenSSL (constant-time)"
@@ -284,7 +285,7 @@ int kaz_sign_hash(const unsigned char *msg,
 /**
  * Get the version string
  *
- * @return Version string (e.g., "3.0.0")
+ * @return Version string (e.g., "4.0.0")
  */
 const char *kaz_sign_version(void);
 
@@ -296,7 +297,7 @@ const char *kaz_sign_version(void);
 int kaz_sign_version_number(void);
 
 /* ============================================================================
- * Runtime Security Level API (NEW in 2.1)
+ * Runtime Security Level API
  *
  * These functions allow selecting the security level at runtime.
  * Use these for applications that need to support multiple security levels.

@@ -1,6 +1,6 @@
 /*
  * KAZ-SIGN Android Wrapper
- * Version 2.1.0
+ * Version 2.0.0
  *
  * Security level enumeration for KAZ-SIGN operations.
  */
@@ -30,9 +30,9 @@ enum class SecurityLevel(
      */
     LEVEL_128(
         value = 128,
-        secretKeyBytes = 98,
-        publicKeyBytes = 49,
-        signatureOverhead = 57,
+        secretKeyBytes = 32,    // s(16) + t(16)
+        publicKeyBytes = 54,    // v
+        signatureOverhead = 162, // S1(54) + S2(54) + S3(54)
         hashBytes = 32,
         algorithmName = "KAZ-SIGN-128"
     ),
@@ -42,9 +42,9 @@ enum class SecurityLevel(
      */
     LEVEL_192(
         value = 192,
-        secretKeyBytes = 146,
-        publicKeyBytes = 73,
-        signatureOverhead = 81,
+        secretKeyBytes = 50,    // s(25) + t(25)
+        publicKeyBytes = 88,    // v
+        signatureOverhead = 264, // S1(88) + S2(88) + S3(88)
         hashBytes = 48,
         algorithmName = "KAZ-SIGN-192"
     ),
@@ -54,9 +54,9 @@ enum class SecurityLevel(
      */
     LEVEL_256(
         value = 256,
-        secretKeyBytes = 194,
-        publicKeyBytes = 97,
-        signatureOverhead = 105,
+        secretKeyBytes = 64,    // s(32) + t(32)
+        publicKeyBytes = 118,   // v
+        signatureOverhead = 354, // S1(118) + S2(118) + S3(118)
         hashBytes = 64,
         algorithmName = "KAZ-SIGN-256"
     );

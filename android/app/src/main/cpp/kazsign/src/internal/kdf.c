@@ -265,7 +265,7 @@ int kaz_kdf_derive_signing_randomness(const unsigned char *seed, size_t seed_len
         return KAZ_KDF_ERROR_NULL_PTR;
     }
 
-    if (seed_len > sizeof(combined_ikm) || sk_len > sizeof(combined_ikm) - seed_len) {
+    if (seed_len >= sizeof(combined_ikm) || sk_len > sizeof(combined_ikm) - seed_len) {
         return KAZ_KDF_ERROR_INVALID_LEN;
     }
 
@@ -290,6 +290,12 @@ int kaz_kdf_derive_signing_randomness(const unsigned char *seed, size_t seed_len
             goto cleanup;
         }
         EVP_MD_CTX_free(ctx);
+
+        /* Validate hash length before using it as memcpy size */
+        if (hash_len != KDF_HASH_LEN) {
+            ret = KAZ_KDF_ERROR_CRYPTO;
+            goto cleanup;
+        }
     } else {
         memset(msg_hash, 0, KDF_HASH_LEN);
         hash_len = KDF_HASH_LEN;

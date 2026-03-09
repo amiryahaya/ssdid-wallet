@@ -139,5 +139,15 @@ enum class Algorithm(
          */
         fun fromW3cType(type: String): Algorithm? =
             entries.firstOrNull { it.w3cType == type }
+
+        /**
+         * Disambiguate KAZ-Sign security level from public key size.
+         * KAZ-Sign v2.0 public key sizes: 128→54B, 192→88B, 256→118B
+         */
+        fun kazSignFromKeySize(keySize: Int): Algorithm = when {
+            keySize <= 54 -> KAZ_SIGN_128
+            keySize <= 88 -> KAZ_SIGN_192
+            else -> KAZ_SIGN_256
+        }
     }
 }

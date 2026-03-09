@@ -23,9 +23,9 @@ class KazSignerTest {
     fun `SecurityLevel LEVEL_128 has correct properties`() {
         val level = SecurityLevel.LEVEL_128
         assertThat(level.value).isEqualTo(128)
-        assertThat(level.secretKeyBytes).isEqualTo(98)
-        assertThat(level.publicKeyBytes).isEqualTo(49)
-        assertThat(level.signatureOverhead).isEqualTo(57)
+        assertThat(level.secretKeyBytes).isEqualTo(32)    // s(16) + t(16)
+        assertThat(level.publicKeyBytes).isEqualTo(54)     // v
+        assertThat(level.signatureOverhead).isEqualTo(162) // S1(54) + S2(54) + S3(54)
         assertThat(level.hashBytes).isEqualTo(32)
         assertThat(level.algorithmName).isEqualTo("KAZ-SIGN-128")
     }
@@ -34,9 +34,9 @@ class KazSignerTest {
     fun `SecurityLevel LEVEL_192 has correct properties`() {
         val level = SecurityLevel.LEVEL_192
         assertThat(level.value).isEqualTo(192)
-        assertThat(level.secretKeyBytes).isEqualTo(146)
-        assertThat(level.publicKeyBytes).isEqualTo(73)
-        assertThat(level.signatureOverhead).isEqualTo(81)
+        assertThat(level.secretKeyBytes).isEqualTo(50)     // s(25) + t(25)
+        assertThat(level.publicKeyBytes).isEqualTo(88)     // v
+        assertThat(level.signatureOverhead).isEqualTo(264) // S1(88) + S2(88) + S3(88)
         assertThat(level.hashBytes).isEqualTo(48)
         assertThat(level.algorithmName).isEqualTo("KAZ-SIGN-192")
     }
@@ -45,9 +45,9 @@ class KazSignerTest {
     fun `SecurityLevel LEVEL_256 has correct properties`() {
         val level = SecurityLevel.LEVEL_256
         assertThat(level.value).isEqualTo(256)
-        assertThat(level.secretKeyBytes).isEqualTo(194)
-        assertThat(level.publicKeyBytes).isEqualTo(97)
-        assertThat(level.signatureOverhead).isEqualTo(105)
+        assertThat(level.secretKeyBytes).isEqualTo(64)     // s(32) + t(32)
+        assertThat(level.publicKeyBytes).isEqualTo(118)    // v
+        assertThat(level.signatureOverhead).isEqualTo(354) // S1(118) + S2(118) + S3(118)
         assertThat(level.hashBytes).isEqualTo(64)
         assertThat(level.algorithmName).isEqualTo("KAZ-SIGN-256")
     }
@@ -103,8 +103,8 @@ class KazSignerTest {
 
     @Test
     fun `KeyPair stores keys and level correctly`() {
-        val pk = ByteArray(49) { it.toByte() }
-        val sk = ByteArray(98) { it.toByte() }
+        val pk = ByteArray(54) { it.toByte() }
+        val sk = ByteArray(32) { it.toByte() }
         val keyPair = KeyPair(publicKey = pk, secretKey = sk, level = 128)
 
         assertThat(keyPair.publicKey).isEqualTo(pk)
@@ -137,10 +137,10 @@ class KazSignerTest {
     @Test
     fun `SignatureResult computes overhead correctly`() {
         val message = "Hello".toByteArray()
-        val signature = ByteArray(57 + message.size) { 0 }
+        val signature = ByteArray(162 + message.size) { 0 }
         val result = SignatureResult(signature = signature, message = message, level = 128)
 
-        assertThat(result.overhead).isEqualTo(57)
+        assertThat(result.overhead).isEqualTo(162)
         assertThat(result.securityLevel).isEqualTo(SecurityLevel.LEVEL_128)
     }
 
