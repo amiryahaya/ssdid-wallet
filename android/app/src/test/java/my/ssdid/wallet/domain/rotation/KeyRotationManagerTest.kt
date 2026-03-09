@@ -5,6 +5,7 @@ import io.mockk.*
 import kotlinx.coroutines.test.runTest
 import my.ssdid.wallet.domain.crypto.CryptoProvider
 import my.ssdid.wallet.domain.crypto.KeyPairResult
+import my.ssdid.wallet.domain.history.ActivityRepository
 import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.vault.PreRotatedKeyData
@@ -19,6 +20,7 @@ class KeyRotationManagerTest {
     private val classicalProvider = mockk<CryptoProvider>()
     private val pqcProvider = mockk<CryptoProvider>()
     private val keystoreManager = mockk<KeystoreManager>(relaxed = true)
+    private val activityRepo = mockk<ActivityRepository>(relaxed = true)
 
     private lateinit var manager: KeyRotationManager
 
@@ -33,7 +35,7 @@ class KeyRotationManagerTest {
 
     @Before
     fun setup() {
-        manager = KeyRotationManager(storage, classicalProvider, pqcProvider, keystoreManager)
+        manager = KeyRotationManager(storage, classicalProvider, pqcProvider, keystoreManager, activityRepo)
     }
 
     @Test

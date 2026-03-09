@@ -1,6 +1,7 @@
 package my.ssdid.wallet.domain
 
 import my.ssdid.wallet.domain.crypto.Multibase
+import my.ssdid.wallet.domain.history.ActivityRepository
 import my.ssdid.wallet.domain.model.*
 import my.ssdid.wallet.domain.transport.SsdidHttpClient
 import my.ssdid.wallet.domain.transport.dto.*
@@ -12,17 +13,43 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
 import java.security.MessageDigest
+import java.time.Instant
 import java.util.Base64
+import java.util.UUID
 
 class SsdidClient(
     private val vault: Vault,
     private val verifier: Verifier,
-    private val httpClient: SsdidHttpClient
+    private val httpClient: SsdidHttpClient,
+    private val activityRepo: ActivityRepository
 ) {
     private val wireJson = Json {
         ignoreUnknownKeys = true
         encodeDefaults = true
         explicitNulls = false
+    }
+
+    private suspend fun logActivity(
+        type: ActivityType,
+        did: String,
+        serviceUrl: String? = null,
+        details: Map<String, String> = emptyMap()
+    ) {
+        try {
+            activityRepo.addActivity(
+                ActivityRecord(
+                    id = UUID.randomUUID().toString(),
+                    type = type,
+                    did = did,
+                    serviceUrl = serviceUrl,
+                    timestamp = Instant.now().toString(),
+                    status = ActivityStatus.SUCCESS,
+                    details = details
+                )
+            )
+        } catch (_: Exception) {
+            // Activity logging should never break the main flow
+        }
     }
 
     /** Flow 1: Create identity and publish DID to Registry */
@@ -37,6 +64,7 @@ class SsdidClient(
             "assertionMethod"
         ).getOrThrow()
         httpClient.registry.registerDid(RegisterDidRequest(didDoc, proof))
+        logActivity(ActivityType.IDENTITY_CREATED, identity.did, details = mapOf("algorithm" to algorithm.name))
         identity
     }
 
@@ -71,6 +99,8 @@ class SsdidClient(
         // Step 5: Store the credential
         val vc = verifyResp.credential
         vault.storeCredential(vc).getOrThrow()
+        logActivity(ActivityType.SERVICE_REGISTERED, identity.did, serverUrl)
+        logActivity(ActivityType.CREDENTIAL_RECEIVED, identity.did, serverUrl)
         vc
     }
 
@@ -89,6 +119,7 @@ class SsdidClient(
             serverSig
         ).getOrThrow()
         if (!verified) throw SecurityException("Server session token verification failed")
+        logActivity(ActivityType.AUTHENTICATED, credential.credentialSubject.id, serverUrl)
         resp
     }
 
@@ -126,7 +157,7 @@ class SsdidClient(
         val signedChallenge = Multibase.encode(signatureBytes)
 
         // Step 4: Submit signed transaction
-        serverApi.submitTransaction(
+        val response = serverApi.submitTransaction(
             TxSubmitRequest(
                 session_token = sessionToken,
                 did = identity.did,
@@ -135,5 +166,7 @@ class SsdidClient(
                 transaction = transaction
             )
         )
+        logActivity(ActivityType.TX_SIGNED, identity.did, serverUrl)
+        response
     }
 }

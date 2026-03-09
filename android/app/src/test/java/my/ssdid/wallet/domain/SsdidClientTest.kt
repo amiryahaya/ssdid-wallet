@@ -5,6 +5,7 @@ import io.mockk.*
 import kotlinx.coroutines.test.runTest
 import my.ssdid.wallet.domain.crypto.Multibase
 import my.ssdid.wallet.domain.model.*
+import my.ssdid.wallet.domain.history.ActivityRepository
 import my.ssdid.wallet.domain.transport.RegistryApi
 import my.ssdid.wallet.domain.transport.ServerApi
 import my.ssdid.wallet.domain.transport.SsdidHttpClient
@@ -22,6 +23,7 @@ class SsdidClientTest {
     private lateinit var httpClient: SsdidHttpClient
     private lateinit var registryApi: RegistryApi
     private lateinit var serverApi: ServerApi
+    private lateinit var activityRepo: ActivityRepository
 
     private val testProof = Proof(
         type = "Ed25519Signature2020",
@@ -71,11 +73,12 @@ class SsdidClientTest {
         httpClient = mockk(relaxed = true)
         registryApi = mockk(relaxed = true)
         serverApi = mockk(relaxed = true)
+        activityRepo = mockk(relaxed = true)
 
         every { httpClient.registry } returns registryApi
         every { httpClient.serverApi(any()) } returns serverApi
 
-        client = SsdidClient(vault, verifier, httpClient)
+        client = SsdidClient(vault, verifier, httpClient, activityRepo)
     }
 
     // --- Flow 1: initIdentity ---

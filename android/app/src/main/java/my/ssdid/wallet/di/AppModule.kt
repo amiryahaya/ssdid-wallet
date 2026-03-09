@@ -11,6 +11,7 @@ import my.ssdid.wallet.domain.backup.BackupManager
 import my.ssdid.wallet.domain.crypto.ClassicalProvider
 import my.ssdid.wallet.domain.crypto.CryptoProvider
 import my.ssdid.wallet.domain.crypto.PqcProvider
+import my.ssdid.wallet.domain.history.ActivityRepository
 import my.ssdid.wallet.domain.recovery.RecoveryManager
 import my.ssdid.wallet.domain.rotation.KeyRotationManager
 import my.ssdid.wallet.domain.transport.SsdidHttpClient
@@ -77,8 +78,9 @@ object AppModule {
     fun provideSsdidClient(
         vault: Vault,
         verifier: Verifier,
-        httpClient: SsdidHttpClient
-    ): SsdidClient = SsdidClient(vault, verifier, httpClient)
+        httpClient: SsdidHttpClient,
+        activityRepo: ActivityRepository
+    ): SsdidClient = SsdidClient(vault, verifier, httpClient, activityRepo)
 
     @Provides
     @Singleton
@@ -96,16 +98,18 @@ object AppModule {
         storage: VaultStorage,
         @Named("classical") classical: CryptoProvider,
         @Named("pqc") pqc: CryptoProvider,
-        keystoreManager: KeystoreManager
-    ): KeyRotationManager = KeyRotationManager(storage, classical, pqc, keystoreManager)
+        keystoreManager: KeystoreManager,
+        activityRepo: ActivityRepository
+    ): KeyRotationManager = KeyRotationManager(storage, classical, pqc, keystoreManager, activityRepo)
 
     @Provides
     @Singleton
     fun provideBackupManager(
         vault: Vault,
         storage: VaultStorage,
-        keystoreManager: KeystoreManager
-    ): BackupManager = BackupManager(vault, storage, keystoreManager)
+        keystoreManager: KeystoreManager,
+        activityRepo: ActivityRepository
+    ): BackupManager = BackupManager(vault, storage, keystoreManager, activityRepo)
 
     @Provides
     @Singleton

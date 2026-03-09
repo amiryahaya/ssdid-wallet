@@ -3,6 +3,7 @@ package my.ssdid.wallet.domain.backup
 import com.google.common.truth.Truth.assertThat
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
+import my.ssdid.wallet.domain.history.ActivityRepository
 import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.vault.Vault
@@ -17,6 +18,7 @@ class BackupManagerTest {
     private lateinit var vault: Vault
     private lateinit var storage: VaultStorage
     private lateinit var keystoreManager: KeystoreManager
+    private lateinit var activityRepo: ActivityRepository
     private lateinit var backupManager: BackupManager
 
     private val testIdentity = Identity(
@@ -35,6 +37,7 @@ class BackupManagerTest {
         vault = mockk()
         storage = mockk(relaxed = true)
         keystoreManager = mockk(relaxed = true)
+        activityRepo = mockk(relaxed = true)
 
         // Vault returns one identity
         coEvery { vault.listIdentities() } returns listOf(testIdentity)
@@ -48,7 +51,7 @@ class BackupManagerTest {
         // Keystore encrypt returns the input as-is (mock wrapping)
         every { keystoreManager.encrypt(any(), any()) } answers { secondArg<ByteArray>().copyOf() }
 
-        backupManager = BackupManager(vault, storage, keystoreManager)
+        backupManager = BackupManager(vault, storage, keystoreManager, activityRepo)
     }
 
     @Test

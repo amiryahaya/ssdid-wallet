@@ -3,6 +3,10 @@ package my.ssdid.wallet.domain.rotation
 import kotlinx.serialization.Serializable
 import my.ssdid.wallet.domain.crypto.CryptoProvider
 import my.ssdid.wallet.domain.crypto.Multibase
+import my.ssdid.wallet.domain.history.ActivityRepository
+import my.ssdid.wallet.domain.model.ActivityRecord
+import my.ssdid.wallet.domain.model.ActivityStatus
+import my.ssdid.wallet.domain.model.ActivityType
 import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.vault.VaultStorage
@@ -12,6 +16,7 @@ import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Base64
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -36,7 +41,8 @@ class KeyRotationManager @Inject constructor(
     private val storage: VaultStorage,
     @Named("classical") private val classicalProvider: CryptoProvider,
     @Named("pqc") private val pqcProvider: CryptoProvider,
-    private val keystoreManager: KeystoreManager
+    private val keystoreManager: KeystoreManager,
+    private val activityRepo: ActivityRepository
 ) {
     private fun providerFor(algorithm: Algorithm): CryptoProvider =
         if (algorithm.isPostQuantum) pqcProvider else classicalProvider
@@ -119,6 +125,19 @@ class KeyRotationManager @Inject constructor(
         // Clean up: delete old identity's private key and pre-rotated key
         storage.deleteIdentity(identity.keyId)
         storage.deletePreRotatedKey(preRotatedKeyId)
+
+        try {
+            activityRepo.addActivity(ActivityRecord(
+                id = UUID.randomUUID().toString(),
+                type = ActivityType.KEY_ROTATED,
+                did = newIdentity.did,
+                timestamp = Instant.now().toString(),
+                status = ActivityStatus.SUCCESS,
+                details = mapOf("oldKeyId" to identity.keyId, "newKeyId" to newIdentity.keyId)
+            ))
+        } catch (_: Exception) {
+            // Activity logging should never break the main flow
+        }
 
         newIdentity
     }

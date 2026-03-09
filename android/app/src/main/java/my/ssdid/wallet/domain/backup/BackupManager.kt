@@ -2,6 +2,10 @@ package my.ssdid.wallet.domain.backup
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import my.ssdid.wallet.domain.history.ActivityRepository
+import my.ssdid.wallet.domain.model.ActivityRecord
+import my.ssdid.wallet.domain.model.ActivityStatus
+import my.ssdid.wallet.domain.model.ActivityType
 import my.ssdid.wallet.domain.model.Did
 import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.domain.vault.VaultStorage
@@ -11,6 +15,7 @@ import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Base64
+import java.util.UUID
 import javax.crypto.Cipher
 import javax.crypto.Mac
 import javax.crypto.SecretKeyFactory
@@ -24,7 +29,8 @@ import javax.inject.Singleton
 class BackupManager @Inject constructor(
     private val vault: Vault,
     private val storage: VaultStorage,
-    private val keystoreManager: KeystoreManager
+    private val keystoreManager: KeystoreManager,
+    private val activityRepo: ActivityRepository
 ) {
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
     private val b64 = Base64.getUrlEncoder().withoutPadding()
@@ -101,7 +107,24 @@ class BackupManager @Inject constructor(
             createdAt = now,
             hmac = b64.encodeToString(hmacBytes)
         )
-        json.encodeToString(finalPackage).toByteArray(Charsets.UTF_8)
+        val result = json.encodeToString(finalPackage).toByteArray(Charsets.UTF_8)
+
+        for (identity in identities) {
+            try {
+                activityRepo.addActivity(ActivityRecord(
+                    id = UUID.randomUUID().toString(),
+                    type = ActivityType.BACKUP_CREATED,
+                    did = identity.did,
+                    timestamp = Instant.now().toString(),
+                    status = ActivityStatus.SUCCESS,
+                    details = mapOf("algorithm" to identity.algorithm.name)
+                ))
+            } catch (_: Exception) {
+                // Activity logging should never break the main flow
+            }
+        }
+
+        result
     }
 
     suspend fun restoreBackup(backupData: ByteArray, passphrase: String): Result<Int> = runCatching {
