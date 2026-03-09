@@ -1,4 +1,4 @@
-package my.ssdid.wallet.domain.history
+package my.ssdid.wallet.platform.storage
 
 import android.content.Context
 import android.util.Log
@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import my.ssdid.wallet.domain.history.ActivityRepository
 import my.ssdid.wallet.domain.model.ActivityRecord
 import javax.inject.Inject
 import javax.inject.Singleton
