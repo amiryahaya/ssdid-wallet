@@ -85,6 +85,13 @@ class SocialRecoveryRestoreViewModel @Inject constructor(
             collectedShares[shareIndex] = share.data.trim()
         }
 
+        // Check for duplicate indices
+        val indices = collectedShares.keys
+        if (indices.size != currentShares.size) {
+            _state.value = SocialRestoreState.Error("Duplicate share indices detected")
+            return
+        }
+
         viewModelScope.launch {
             _state.value = SocialRestoreState.Restoring
             socialRecoveryManager.recoverWithShares(did, collectedShares, name, algorithm)
@@ -355,7 +362,8 @@ fun SocialRecoveryRestoreScreen(
                     }
 
                     // Error card
-                    if (state is SocialRestoreState.Error) {
+                    val errorState = state as? SocialRestoreState.Error
+                    if (errorState != null) {
                         item {
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
@@ -363,7 +371,7 @@ fun SocialRecoveryRestoreScreen(
                                 colors = CardDefaults.cardColors(containerColor = DangerDim)
                             ) {
                                 Text(
-                                    (state as SocialRestoreState.Error).message,
+                                    errorState.message,
                                     color = Danger,
                                     fontSize = 13.sp,
                                     modifier = Modifier.padding(16.dp)

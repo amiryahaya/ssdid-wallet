@@ -42,8 +42,7 @@ sealed class SocialSetupState {
     object Idle : SocialSetupState()
     object Creating : SocialSetupState()
     data class Success(
-        val shares: Map<String, String>,
-        val guardianNames: List<String>
+        val guardianShares: List<Pair<String, String>>  // (name, shareData)
     ) : SocialSetupState()
     data class Error(val message: String) : SocialSetupState()
 }
@@ -121,11 +120,13 @@ class SocialRecoverySetupViewModel @Inject constructor(
             _state.value = SocialSetupState.Creating
             val guardianPairs = guardianList.map { it.name to it.did }
             socialRecoveryManager.setupSocialRecovery(id, guardianPairs, thresh)
-                .onSuccess { shares ->
-                    _state.value = SocialSetupState.Success(
-                        shares = shares,
-                        guardianNames = guardianList.map { it.name }
-                    )
+                .onSuccess { sharesById ->
+                    // sharesById is keyed by guardian UUID - extract values in order
+                    val shareValues = sharesById.values.toList()
+                    val guardianShares = guardianList.mapIndexed { idx, entry ->
+                        entry.name to shareValues.getOrElse(idx) { "" }
+                    }
+                    _state.value = SocialSetupState.Success(guardianShares = guardianShares)
                 }
                 .onFailure {
                     _state.value = SocialSetupState.Error(it.message ?: "Failed to create shares")
@@ -454,11 +455,7 @@ private fun SuccessContent(
         }
 
         // Per-guardian share cards
-        val shareEntries = state.shares.entries.toList()
-        val names = state.guardianNames
-
-        itemsIndexed(shareEntries) { index, (_, share) ->
-            val guardianName = names.getOrElse(index) { "Guardian ${index + 1}" }
+        itemsIndexed(state.guardianShares) { index, (guardianName, share) ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
