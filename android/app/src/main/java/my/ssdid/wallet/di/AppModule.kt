@@ -26,7 +26,7 @@ import my.ssdid.wallet.domain.verifier.VerifierImpl
 import my.ssdid.wallet.platform.biometric.BiometricAuthenticator
 import my.ssdid.wallet.platform.keystore.AndroidKeystoreManager
 import my.ssdid.wallet.platform.device.AndroidDeviceInfoProvider
-import my.ssdid.wallet.platform.keystore.KeystoreManager
+import my.ssdid.wallet.domain.vault.KeystoreManager
 import my.ssdid.wallet.domain.settings.SettingsRepository
 import my.ssdid.wallet.platform.storage.DataStoreSettingsRepository
 import javax.inject.Named

@@ -6,7 +6,7 @@ import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.domain.vault.VaultStorage
-import my.ssdid.wallet.platform.keystore.KeystoreManager
+import my.ssdid.wallet.domain.vault.KeystoreManager
 import java.security.MessageDigest
 import java.time.Instant
 import java.util.Base64
@@ -80,9 +80,24 @@ class RecoveryManager @Inject constructor(
         algorithm: Algorithm
     ): Result<Identity> = runCatching {
         val recoveryPrivateKey = Base64.getDecoder().decode(recoveryPrivateKeyBase64)
+        val provider = providerFor(algorithm)
+
+        // Verify the recovery key against stored recovery public key if available
+        val recoveryKeyId = findRecoveryKeyId(did)
+        if (recoveryKeyId != null) {
+            val encryptedRecoveryPubKey = storage.getRecoveryPublicKey(recoveryKeyId)
+            if (encryptedRecoveryPubKey != null) {
+                val wrappingAlias = "ssdid_recovery_${stableAlias(recoveryKeyId.removeSuffix("-recovery"))}"
+                val recoveryPublicKey = keystoreManager.decrypt(wrappingAlias, encryptedRecoveryPubKey)
+
+                val challenge = ByteArray(32).also { java.security.SecureRandom().nextBytes(it) }
+                val sig = provider.sign(algorithm, recoveryPrivateKey, challenge)
+                val verified = provider.verify(algorithm, recoveryPublicKey, sig, challenge)
+                require(verified) { "Recovery key verification failed: provided key does not match stored recovery public key" }
+            }
+        }
 
         // Generate new primary keypair
-        val provider = providerFor(algorithm)
         val kp = provider.generateKeyPair(algorithm)
 
         // Create new identity
@@ -107,6 +122,14 @@ class RecoveryManager @Inject constructor(
         storage.saveIdentity(identity, encryptedKey)
 
         identity
+    }
+
+    private suspend fun findRecoveryKeyId(did: String): String? {
+        val identities = storage.listIdentities()
+        return identities
+            .filter { it.did == did && it.hasRecoveryKey && it.recoveryKeyId != null }
+            .map { it.recoveryKeyId }
+            .firstOrNull()
     }
 
     private fun stableAlias(keyId: String): String {

@@ -11,7 +11,7 @@ import my.ssdid.wallet.domain.model.ActivityType
 import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.vault.VaultStorage
-import my.ssdid.wallet.platform.keystore.KeystoreManager
+import my.ssdid.wallet.domain.vault.KeystoreManager
 import java.security.MessageDigest
 import java.time.Instant
 import java.time.ZoneOffset
@@ -105,7 +105,7 @@ class KeyRotationManager @Inject constructor(
         val now = DateTimeFormatter.ISO_INSTANT.format(Instant.now().atOffset(ZoneOffset.UTC))
 
         // Create new identity entry with the pre-rotated key as active
-        val newKeyId = identity.did + "#key-${System.currentTimeMillis()}"
+        val newKeyId = identity.did + "#key-${UUID.randomUUID().toString().take(8)}"
         val publicKeyMultibase = Multibase.encode(preRotatedData.publicKey)
 
         val newIdentity = identity.copy(
@@ -127,12 +127,12 @@ class KeyRotationManager @Inject constructor(
             )
         )
 
-        // Clean up: delete old identity's private key and pre-rotated key
+        // Publish new key to registry BEFORE deleting old key (crash-safe ordering)
+        ssdidClient.get().updateDidDocument(newIdentity.keyId).getOrThrow()
+
+        // Clean up: delete old identity's private key and pre-rotated key (safe to lose on crash)
         storage.deleteIdentity(identity.keyId)
         storage.deletePreRotatedKey(preRotatedKeyId)
-
-        // Publish new key to registry
-        ssdidClient.get().updateDidDocument(newIdentity.keyId).getOrThrow()
 
         try {
             activityRepo.addActivity(ActivityRecord(

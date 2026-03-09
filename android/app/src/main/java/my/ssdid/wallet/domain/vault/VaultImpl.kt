@@ -3,7 +3,6 @@ package my.ssdid.wallet.domain.vault
 import my.ssdid.wallet.domain.crypto.CryptoProvider
 import my.ssdid.wallet.domain.crypto.Multibase
 import my.ssdid.wallet.domain.model.*
-import my.ssdid.wallet.platform.keystore.KeystoreManager
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive

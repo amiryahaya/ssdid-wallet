@@ -6,7 +6,7 @@ import kotlinx.coroutines.test.runTest
 import my.ssdid.wallet.domain.crypto.ClassicalProvider
 import my.ssdid.wallet.domain.crypto.CryptoProvider
 import my.ssdid.wallet.domain.model.*
-import my.ssdid.wallet.platform.keystore.KeystoreManager
+import my.ssdid.wallet.domain.vault.KeystoreManager
 import org.junit.Before
 import org.junit.Test
 

@@ -11,7 +11,7 @@ import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.vault.PreRotatedKeyData
 import my.ssdid.wallet.domain.vault.VaultStorage
-import my.ssdid.wallet.platform.keystore.KeystoreManager
+import my.ssdid.wallet.domain.vault.KeystoreManager
 import org.junit.Before
 import org.junit.Test
 
@@ -93,6 +93,25 @@ class KeyRotationManagerTest {
         coVerify { storage.deleteIdentity("did:ssdid:abc123#key-1") }
         coVerify { storage.deletePreRotatedKey("did:ssdid:abc123#key-1-prerotated") }
         coVerify { ssdidClient.updateDidDocument(match { it != testIdentity.keyId }) }
+    }
+
+    @Test
+    fun `executeRotation preserves old identity when registry update fails`() = runTest {
+        val identityWithPreRot = testIdentity.copy(preRotatedKeyId = "did:ssdid:abc123#key-1-prerotated")
+        val preRotPub = ByteArray(32) { (it + 10).toByte() }
+        val preRotEncPriv = ByteArray(80) { (it + 20).toByte() }
+
+        coEvery { storage.getPreRotatedKey("did:ssdid:abc123#key-1-prerotated") } returns
+            PreRotatedKeyData(preRotEncPriv, preRotPub)
+        coEvery { ssdidClient.updateDidDocument(any()) } returns Result.failure(RuntimeException("registry unavailable"))
+
+        val result = manager.executeRotation(identityWithPreRot)
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()?.message).contains("registry unavailable")
+
+        // Old identity must NOT be deleted when registry update fails
+        coVerify(exactly = 0) { storage.deleteIdentity(any()) }
     }
 
     @Test
