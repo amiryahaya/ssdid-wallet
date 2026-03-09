@@ -19,8 +19,11 @@ import my.ssdid.wallet.feature.identity.IdentityDetailScreen
 import my.ssdid.wallet.feature.identity.WalletHomeScreen
 import my.ssdid.wallet.feature.onboarding.BiometricSetupScreen
 import my.ssdid.wallet.feature.onboarding.OnboardingScreen
+import my.ssdid.wallet.feature.recovery.InstitutionalSetupScreen
 import my.ssdid.wallet.feature.recovery.RecoveryRestoreScreen
 import my.ssdid.wallet.feature.recovery.RecoverySetupScreen
+import my.ssdid.wallet.feature.recovery.SocialRecoveryRestoreScreen
+import my.ssdid.wallet.feature.recovery.SocialRecoverySetupScreen
 import my.ssdid.wallet.feature.registration.RegistrationScreen
 import my.ssdid.wallet.feature.rotation.KeyRotationScreen
 import my.ssdid.wallet.feature.scan.ScanQrScreen
@@ -179,7 +182,15 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
         }
         composable(Screen.RecoverySetup.route) { backStackEntry ->
             backStackEntry.arguments?.getString("keyId") ?: return@composable
-            RecoverySetupScreen(onBack = { navController.popBackStack() })
+            RecoverySetupScreen(
+                onBack = { navController.popBackStack() },
+                onNavigateToSocialSetup = { keyId ->
+                    navController.navigate(Screen.SocialRecoverySetup.createRoute(keyId))
+                },
+                onNavigateToInstitutionalSetup = { keyId ->
+                    navController.navigate(Screen.InstitutionalSetup.createRoute(keyId))
+                }
+            )
         }
         composable(Screen.KeyRotation.route) { backStackEntry ->
             backStackEntry.arguments?.getString("keyId") ?: return@composable
@@ -213,6 +224,27 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
                 onComplete = {
                     navController.navigate(Screen.WalletHome.route) {
                         popUpTo(Screen.RecoveryRestore.route) { inclusive = true }
+                    }
+                },
+                onNavigateToSocialRestore = {
+                    navController.navigate(Screen.SocialRecoveryRestore.route)
+                }
+            )
+        }
+        composable(Screen.SocialRecoverySetup.route) { backStackEntry ->
+            backStackEntry.arguments?.getString("keyId") ?: return@composable
+            SocialRecoverySetupScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.InstitutionalSetup.route) { backStackEntry ->
+            backStackEntry.arguments?.getString("keyId") ?: return@composable
+            InstitutionalSetupScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.SocialRecoveryRestore.route) {
+            SocialRecoveryRestoreScreen(
+                onBack = { navController.popBackStack() },
+                onComplete = {
+                    navController.navigate(Screen.WalletHome.route) {
+                        popUpTo(Screen.SocialRecoveryRestore.route) { inclusive = true }
                     }
                 }
             )

@@ -16,6 +16,10 @@ import my.ssdid.wallet.domain.crypto.CryptoProvider
 import my.ssdid.wallet.domain.crypto.PqcProvider
 import my.ssdid.wallet.domain.history.ActivityRepository
 import my.ssdid.wallet.domain.recovery.RecoveryManager
+import my.ssdid.wallet.domain.recovery.social.SocialRecoveryManager
+import my.ssdid.wallet.domain.recovery.social.SocialRecoveryStorage
+import my.ssdid.wallet.domain.recovery.institutional.InstitutionalRecoveryManager
+import my.ssdid.wallet.domain.recovery.institutional.InstitutionalRecoveryStorage
 import my.ssdid.wallet.domain.revocation.HttpStatusListFetcher
 import my.ssdid.wallet.domain.revocation.RevocationManager
 import my.ssdid.wallet.domain.rotation.KeyRotationManager
@@ -106,6 +110,20 @@ object AppModule {
         @Named("pqc") pqc: CryptoProvider,
         keystoreManager: KeystoreManager
     ): RecoveryManager = RecoveryManager(vault, storage, classical, pqc, keystoreManager)
+
+    @Provides
+    @Singleton
+    fun provideSocialRecoveryManager(
+        recoveryManager: RecoveryManager,
+        storage: SocialRecoveryStorage
+    ): SocialRecoveryManager = SocialRecoveryManager(recoveryManager, storage)
+
+    @Provides
+    @Singleton
+    fun provideInstitutionalRecoveryManager(
+        recoveryManager: RecoveryManager,
+        storage: InstitutionalRecoveryStorage
+    ): InstitutionalRecoveryManager = InstitutionalRecoveryManager(recoveryManager, storage)
 
     @Provides
     @Singleton

@@ -3,9 +3,9 @@ package my.ssdid.wallet.feature.recovery
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,61 +23,96 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.model.Algorithm
-import my.ssdid.wallet.domain.recovery.RecoveryManager
+import my.ssdid.wallet.domain.recovery.social.SocialRecoveryManager
 import my.ssdid.wallet.domain.vault.VaultStorage
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
 
-sealed class RestoreState {
-    object Idle : RestoreState()
-    object Restoring : RestoreState()
-    object Success : RestoreState()
-    data class Error(val message: String) : RestoreState()
+data class ShareEntry(val index: String = "", val data: String = "")
+
+sealed class SocialRestoreState {
+    object Idle : SocialRestoreState()
+    object Restoring : SocialRestoreState()
+    object Success : SocialRestoreState()
+    data class Error(val message: String) : SocialRestoreState()
 }
 
 @HiltViewModel
-class RecoveryRestoreViewModel @Inject constructor(
-    private val recoveryManager: RecoveryManager,
+class SocialRecoveryRestoreViewModel @Inject constructor(
+    private val socialRecoveryManager: SocialRecoveryManager,
     private val ssdidClient: SsdidClient,
     private val storage: VaultStorage
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<RestoreState>(RestoreState.Idle)
-    val state: StateFlow<RestoreState> = _state.asStateFlow()
+    private val _state = MutableStateFlow<SocialRestoreState>(SocialRestoreState.Idle)
+    val state: StateFlow<SocialRestoreState> = _state.asStateFlow()
 
-    fun restore(did: String, recoveryKey: String, name: String, algorithm: Algorithm) {
-        if (did.isBlank() || recoveryKey.isBlank() || name.isBlank()) {
-            _state.value = RestoreState.Error("All fields are required")
+    private val _shares = MutableStateFlow(listOf(ShareEntry(), ShareEntry()))
+    val shares: StateFlow<List<ShareEntry>> = _shares.asStateFlow()
+
+    fun updateShare(index: Int, entry: ShareEntry) {
+        _shares.value = _shares.value.toMutableList().also { it[index] = entry }
+    }
+
+    fun addShare() {
+        _shares.value = _shares.value + ShareEntry()
+    }
+
+    fun removeShare(index: Int) {
+        if (_shares.value.size > 2) {
+            _shares.value = _shares.value.toMutableList().also { it.removeAt(index) }
+        }
+    }
+
+    fun restore(did: String, name: String, algorithm: Algorithm) {
+        if (did.isBlank() || name.isBlank()) {
+            _state.value = SocialRestoreState.Error("DID and identity name are required")
             return
         }
+
+        val currentShares = _shares.value
+        val collectedShares = mutableMapOf<Int, String>()
+        for ((i, share) in currentShares.withIndex()) {
+            val shareIndex = share.index.trim().toIntOrNull()
+            if (shareIndex == null) {
+                _state.value = SocialRestoreState.Error("Share ${i + 1}: index must be a number")
+                return
+            }
+            if (share.data.isBlank()) {
+                _state.value = SocialRestoreState.Error("Share ${i + 1}: data is required")
+                return
+            }
+            collectedShares[shareIndex] = share.data.trim()
+        }
+
         viewModelScope.launch {
-            _state.value = RestoreState.Restoring
-            recoveryManager.restoreWithRecoveryKey(did, recoveryKey, name, algorithm)
+            _state.value = SocialRestoreState.Restoring
+            socialRecoveryManager.recoverWithShares(did, collectedShares, name, algorithm)
                 .onSuccess { identity ->
-                    // Try to publish to registry (best effort — may fail if offline)
                     try {
                         ssdidClient.updateDidDocument(identity.keyId)
                     } catch (_: Exception) {
                         // Best effort: registry update may fail on new device
                     }
                     storage.setOnboardingCompleted()
-                    _state.value = RestoreState.Success
+                    _state.value = SocialRestoreState.Success
                 }
-                .onFailure { _state.value = RestoreState.Error(it.message ?: "Restoration failed") }
+                .onFailure {
+                    _state.value = SocialRestoreState.Error(it.message ?: "Recovery failed")
+                }
         }
     }
 }
 
 @Composable
-fun RecoveryRestoreScreen(
+fun SocialRecoveryRestoreScreen(
     onBack: () -> Unit,
     onComplete: () -> Unit,
-    onNavigateToSocialRestore: () -> Unit = {},
-    viewModel: RecoveryRestoreViewModel = hiltViewModel()
+    viewModel: SocialRecoveryRestoreViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val shares by viewModel.shares.collectAsState()
     var did by remember { mutableStateOf("") }
-    var recoveryKey by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var selectedAlgorithm by remember { mutableStateOf(Algorithm.KAZ_SIGN_192) }
 
@@ -91,12 +126,11 @@ fun RecoveryRestoreScreen(
         Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
             Spacer(Modifier.width(12.dp))
-            Text("Restore Identity", style = MaterialTheme.typography.titleLarge)
+            Text("Social Recovery", style = MaterialTheme.typography.titleLarge)
         }
 
         when (state) {
-            is RestoreState.Success -> {
-                // Success card
+            is SocialRestoreState.Success -> {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -131,7 +165,7 @@ fun RecoveryRestoreScreen(
                             )
                             Spacer(Modifier.height(8.dp))
                             Text(
-                                "Your identity has been recovered successfully.",
+                                "Your identity has been recovered using guardian shares.",
                                 fontSize = 14.sp,
                                 color = TextSecondary
                             )
@@ -162,44 +196,12 @@ fun RecoveryRestoreScreen(
                 ) {
                     item {
                         Text(
-                            "Enter your DID and recovery key to restore access on this device.",
+                            "Collect shares from your guardians to recover your identity. " +
+                                "You need the minimum threshold of shares to reconstruct your recovery key.",
                             fontSize = 14.sp,
                             color = TextSecondary,
                             lineHeight = 20.sp
                         )
-                    }
-
-                    item {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(containerColor = BgCard),
-                            onClick = onNavigateToSocialRestore
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(18.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text("\uD83D\uDC65", fontSize = 24.sp)
-                                Spacer(Modifier.width(12.dp))
-                                Column(Modifier.weight(1f)) {
-                                    Text("Social Recovery", style = MaterialTheme.typography.titleMedium)
-                                    Text("Recover using guardian shares", fontSize = 12.sp, color = TextSecondary)
-                                }
-                                Text("\u203A", fontSize = 20.sp, color = TextTertiary)
-                            }
-                        }
-                    }
-
-                    item {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            HorizontalDivider(Modifier.weight(1f), color = Border)
-                            Text("  or use recovery key  ", fontSize = 12.sp, color = TextTertiary)
-                            HorizontalDivider(Modifier.weight(1f), color = Border)
-                        }
                     }
 
                     item {
@@ -241,26 +243,6 @@ fun RecoveryRestoreScreen(
                     }
 
                     item {
-                        Text("RECOVERY KEY (BASE64)", style = MaterialTheme.typography.labelMedium)
-                        Spacer(Modifier.height(8.dp))
-                        OutlinedTextField(
-                            value = recoveryKey,
-                            onValueChange = { recoveryKey = it },
-                            placeholder = { Text("Paste your recovery private key", color = TextTertiary) },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Accent,
-                                unfocusedBorderColor = Border,
-                                cursorColor = Accent,
-                                focusedTextColor = TextPrimary,
-                                unfocusedTextColor = TextPrimary
-                            ),
-                            minLines = 3,
-                            maxLines = 5
-                        )
-                    }
-
-                    item {
                         Text("SIGNATURE ALGORITHM", style = MaterialTheme.typography.labelMedium)
                         Spacer(Modifier.height(8.dp))
                     }
@@ -296,40 +278,126 @@ fun RecoveryRestoreScreen(
                             }
                         }
                     }
-                }
 
-                // Error display
-                if (state is RestoreState.Error) {
-                    Text(
-                        (state as RestoreState.Error).message,
-                        color = Danger,
-                        fontSize = 13.sp,
-                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
-                    )
+                    item {
+                        Spacer(Modifier.height(4.dp))
+                        Text("GUARDIAN SHARES", style = MaterialTheme.typography.labelMedium)
+                        Spacer(Modifier.height(8.dp))
+                    }
+
+                    itemsIndexed(shares) { index, share ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = BgCard)
+                        ) {
+                            Column(Modifier.padding(16.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        "Share ${index + 1}",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = TextPrimary,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                    if (shares.size > 2) {
+                                        TextButton(onClick = { viewModel.removeShare(index) }) {
+                                            Text("Remove", color = Danger, fontSize = 13.sp)
+                                        }
+                                    }
+                                }
+                                Spacer(Modifier.height(8.dp))
+                                OutlinedTextField(
+                                    value = share.index,
+                                    onValueChange = {
+                                        viewModel.updateShare(index, share.copy(index = it))
+                                    },
+                                    placeholder = { Text("Share index (number)", color = TextTertiary) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedBorderColor = Accent,
+                                        unfocusedBorderColor = Border,
+                                        cursorColor = Accent,
+                                        focusedTextColor = TextPrimary,
+                                        unfocusedTextColor = TextPrimary
+                                    ),
+                                    singleLine = true
+                                )
+                                Spacer(Modifier.height(8.dp))
+                                OutlinedTextField(
+                                    value = share.data,
+                                    onValueChange = {
+                                        viewModel.updateShare(index, share.copy(data = it))
+                                    },
+                                    placeholder = { Text("Paste Base64 share data", color = TextTertiary) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedBorderColor = Accent,
+                                        unfocusedBorderColor = Border,
+                                        cursorColor = Accent,
+                                        focusedTextColor = TextPrimary,
+                                        unfocusedTextColor = TextPrimary
+                                    ),
+                                    minLines = 2,
+                                    maxLines = 4
+                                )
+                            }
+                        }
+                    }
+
+                    item {
+                        TextButton(onClick = { viewModel.addShare() }) {
+                            Text("+ Add Share", color = Accent, fontSize = 14.sp)
+                        }
+                    }
+
+                    // Error card
+                    if (state is SocialRestoreState.Error) {
+                        item {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(containerColor = DangerDim)
+                            ) {
+                                Text(
+                                    (state as SocialRestoreState.Error).message,
+                                    color = Danger,
+                                    fontSize = 13.sp,
+                                    modifier = Modifier.padding(16.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    item { Spacer(Modifier.height(8.dp)) }
                 }
 
                 // Footer button
                 Button(
-                    onClick = { viewModel.restore(did, recoveryKey, name, selectedAlgorithm) },
+                    onClick = { viewModel.restore(did, name, selectedAlgorithm) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(20.dp),
-                    enabled = did.isNotBlank() && recoveryKey.isNotBlank() && name.isNotBlank() &&
-                        state !is RestoreState.Restoring,
+                    enabled = did.isNotBlank() && name.isNotBlank() &&
+                        shares.all { it.index.isNotBlank() && it.data.isNotBlank() } &&
+                        state !is SocialRestoreState.Restoring,
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Accent)
                 ) {
-                    if (state is RestoreState.Restoring) {
+                    if (state is SocialRestoreState.Restoring) {
                         CircularProgressIndicator(
                             Modifier.size(20.dp),
                             color = BgPrimary,
                             strokeWidth = 2.dp
                         )
                         Spacer(Modifier.width(10.dp))
-                        Text("Restoring...", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                        Text("Recovering...", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                     } else {
                         Text(
-                            "Restore Identity",
+                            "Recover Identity",
                             fontSize = 15.sp,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.padding(vertical = 4.dp)
