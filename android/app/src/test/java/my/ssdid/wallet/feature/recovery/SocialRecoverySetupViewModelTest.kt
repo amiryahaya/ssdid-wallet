@@ -3,8 +3,10 @@ package my.ssdid.wallet.feature.recovery
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.model.Identity
@@ -216,6 +218,7 @@ class SocialRecoverySetupViewModelTest {
             vault = vault,
             savedStateHandle = SavedStateHandle(mapOf("keyId" to "did:ssdid:test#key-1"))
         )
+        advanceUntilIdle()
 
         assertThat(vm.hasExistingConfig.value).isTrue()
     }
@@ -228,8 +231,32 @@ class SocialRecoverySetupViewModelTest {
             vault = vault,
             savedStateHandle = SavedStateHandle(mapOf("keyId" to "bad-key"))
         )
+        advanceUntilIdle()
 
         assertThat(vm.identity.value).isNull()
         assertThat(vm.state.value).isEqualTo(SocialSetupState.Idle)
+    }
+
+    @Test
+    fun `createShares passes correct arguments to setupSocialRecovery`() = runTest {
+        viewModel.updateGuardian(0, GuardianEntry(name = "Alice", did = "did:ssdid:alice"))
+        viewModel.updateGuardian(1, GuardianEntry(name = "Bob", did = "did:ssdid:bob"))
+
+        val sharesMap = mapOf("uuid1" to "share1data", "uuid2" to "share2data")
+        coEvery {
+            socialRecoveryManager.setupSocialRecovery(any(), any(), any())
+        } returns Result.success(sharesMap)
+        coEvery { socialRecoveryManager.getConfig(any()) } returns null
+
+        viewModel.createShares()
+        advanceUntilIdle()
+
+        coVerify {
+            socialRecoveryManager.setupSocialRecovery(
+                testIdentity,
+                listOf("Alice" to "did:ssdid:alice", "Bob" to "did:ssdid:bob"),
+                2
+            )
+        }
     }
 }

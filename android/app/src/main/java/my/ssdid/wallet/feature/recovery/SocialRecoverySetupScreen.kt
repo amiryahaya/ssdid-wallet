@@ -101,9 +101,6 @@ class SocialRecoverySetupViewModel @Inject constructor(
 
     fun addGuardian() {
         _guardians.value = _guardians.value + GuardianEntry()
-        if (_threshold.value > _guardians.value.size) {
-            _threshold.value = _guardians.value.size
-        }
     }
 
     fun removeGuardian(index: Int) {

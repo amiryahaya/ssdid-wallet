@@ -11,6 +11,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -25,6 +28,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import my.ssdid.wallet.R
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.recovery.RecoveryManager
 import my.ssdid.wallet.domain.recovery.social.SocialRecoveryConfig
@@ -141,9 +145,12 @@ fun RecoverySetupScreen(
     ) {
         // Header
         Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
+            TextButton(
+                onClick = onBack,
+                modifier = Modifier.semantics { contentDescription = "Navigate back" }
+            ) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
             Spacer(Modifier.width(12.dp))
-            Text("Recovery Setup", style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.recovery_setup_title), style = MaterialTheme.typography.titleLarge)
         }
 
         LazyColumn(
@@ -156,13 +163,13 @@ fun RecoverySetupScreen(
             item {
                 RecoveryTierCard(
                     emoji = "\uD83D\uDD11",
-                    title = "Recovery Key",
-                    description = "Generate offline recovery keypair",
-                    badgeText = "Recommended",
+                    title = stringResource(R.string.recovery_key_title),
+                    description = stringResource(R.string.recovery_key_desc),
+                    badgeText = stringResource(R.string.recovery_key_badge),
                     badgeColor = Success,
                     badgeBgColor = SuccessDim,
                     isConfigured = identity?.hasRecoveryKey == true,
-                    buttonText = "Generate Recovery Key",
+                    buttonText = stringResource(R.string.recovery_generate_button),
                     buttonEnabled = identity != null && state !is RecoverySetupState.Generating,
                     isLoading = state is RecoverySetupState.Generating,
                     onClick = { viewModel.generateRecoveryKey() }
@@ -187,18 +194,18 @@ fun RecoverySetupScreen(
                                         .background(WarningDim)
                                         .padding(horizontal = 10.dp, vertical = 3.dp)
                                 ) {
-                                    Text("Important", fontSize = 11.sp, color = Warning)
+                                    Text(stringResource(R.string.recovery_important), fontSize = 11.sp, color = Warning)
                                 }
                             }
                             Spacer(Modifier.height(12.dp))
                             Text(
-                                "Store this key offline. It cannot be recovered.",
+                                stringResource(R.string.recovery_key_store_offline),
                                 fontSize = 13.sp,
                                 color = Warning
                             )
                             Spacer(Modifier.height(12.dp))
                             Text(
-                                "RECOVERY KEY",
+                                stringResource(R.string.recovery_key_label),
                                 style = MaterialTheme.typography.labelSmall
                             )
                             Spacer(Modifier.height(4.dp))
@@ -215,7 +222,7 @@ fun RecoverySetupScreen(
                                 shape = RoundedCornerShape(12.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = Accent)
                             ) {
-                                Text("Copy to Clipboard", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                                Text(stringResource(R.string.recovery_copy_clipboard), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                             }
                         }
                     }
@@ -242,46 +249,44 @@ fun RecoverySetupScreen(
 
             // Tier 2: Social Recovery
             item {
-                val keyId = identity?.keyId ?: ""
                 RecoveryTierCard(
                     emoji = "\uD83D\uDC65",
-                    title = "Social Recovery",
+                    title = stringResource(R.string.recovery_social_title),
                     description = if (hasSocialRecovery) {
                         val config = socialConfig
-                        "${config?.threshold}-of-${config?.totalShares} guardians"
+                        stringResource(R.string.recovery_social_config, config?.threshold ?: 0, config?.totalShares ?: 0)
                     } else {
-                        "Split recovery secret among trusted contacts"
+                        stringResource(R.string.recovery_social_desc)
                     },
-                    badgeText = "Advanced",
+                    badgeText = stringResource(R.string.recovery_social_badge),
                     badgeColor = Accent,
                     badgeBgColor = AccentDim,
                     isConfigured = hasSocialRecovery,
-                    buttonText = "Set Up Social Recovery",
+                    buttonText = stringResource(R.string.recovery_social_button),
                     buttonEnabled = identity?.hasRecoveryKey == true,
                     isLoading = false,
-                    onClick = { onNavigateToSocialSetup(keyId) }
+                    onClick = { identity?.keyId?.let { onNavigateToSocialSetup(it) } }
                 )
             }
 
             // Tier 3: Institutional
             item {
-                val keyId = identity?.keyId ?: ""
                 RecoveryTierCard(
                     emoji = "\uD83C\uDFE2",
-                    title = "Institutional",
+                    title = stringResource(R.string.recovery_institutional_title),
                     description = if (hasInstitutionalRecovery) {
-                        orgConfig?.orgName ?: "Organization enrolled"
+                        orgConfig?.orgName ?: stringResource(R.string.recovery_institutional_desc)
                     } else {
-                        "Organization holds recovery authority"
+                        stringResource(R.string.recovery_institutional_desc)
                     },
-                    badgeText = "Enterprise",
+                    badgeText = stringResource(R.string.recovery_institutional_badge),
                     badgeColor = Pqc,
                     badgeBgColor = PqcDim,
                     isConfigured = hasInstitutionalRecovery,
-                    buttonText = "Enroll Organization",
+                    buttonText = stringResource(R.string.recovery_institutional_button),
                     buttonEnabled = identity?.hasRecoveryKey == true,
                     isLoading = false,
-                    onClick = { onNavigateToInstitutionalSetup(keyId) }
+                    onClick = { identity?.keyId?.let { onNavigateToInstitutionalSetup(it) } }
                 )
             }
 
@@ -345,7 +350,7 @@ private fun RecoveryTierCard(
                 ) {
                     Text("\u2713", fontSize = 16.sp, color = Success, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.width(8.dp))
-                    Text("Configured", fontSize = 14.sp, color = Success, fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.recovery_configured), fontSize = 14.sp, color = Success, fontWeight = FontWeight.SemiBold)
                 }
             } else {
                 Button(
@@ -359,9 +364,13 @@ private fun RecoveryTierCard(
                     )
                 ) {
                     if (isLoading) {
-                        CircularProgressIndicator(Modifier.size(20.dp), color = BgPrimary, strokeWidth = 2.dp)
+                        CircularProgressIndicator(
+                            Modifier.size(20.dp).semantics { contentDescription = "Loading" },
+                            color = BgPrimary,
+                            strokeWidth = 2.dp
+                        )
                         Spacer(Modifier.width(10.dp))
-                        Text("Generating...", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                        Text(stringResource(R.string.recovery_generating), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                     } else {
                         Text(buttonText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                     }

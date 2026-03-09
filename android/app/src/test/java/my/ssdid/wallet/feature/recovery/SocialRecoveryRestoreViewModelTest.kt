@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.model.Algorithm
@@ -175,9 +176,27 @@ class SocialRecoveryRestoreViewModelTest {
         coEvery { storage.setOnboardingCompleted() } returns Unit
 
         viewModel.restore("did:ssdid:test", "Test", Algorithm.ED25519)
+        advanceUntilIdle()
 
         assertThat(viewModel.state.value).isEqualTo(SocialRestoreState.Success)
         coVerify { ssdidClient.updateDidDocument(testIdentity.keyId) }
+        coVerify { storage.setOnboardingCompleted() }
+    }
+
+    @Test
+    fun `restore success still succeeds when updateDidDocument fails`() = runTest {
+        viewModel.updateShare(0, ShareEntry(index = "1", data = "dGVzdA"))
+        viewModel.updateShare(1, ShareEntry(index = "2", data = "dGVzdA"))
+
+        coEvery {
+            socialRecoveryManager.recoverWithShares(any(), any(), any(), any())
+        } returns Result.success(testIdentity)
+        coEvery { ssdidClient.updateDidDocument(any()) } throws RuntimeException("Network error")
+
+        viewModel.restore("did:ssdid:test", "Test", Algorithm.ED25519)
+        advanceUntilIdle()
+
+        assertThat(viewModel.state.value).isEqualTo(SocialRestoreState.Success)
         coVerify { storage.setOnboardingCompleted() }
     }
 
@@ -191,6 +210,7 @@ class SocialRecoveryRestoreViewModelTest {
         } returns Result.failure(RuntimeException("Recovery failed"))
 
         viewModel.restore("did:ssdid:test", "Test", Algorithm.ED25519)
+        advanceUntilIdle()
 
         assertThat(viewModel.state.value).isInstanceOf(SocialRestoreState.Error::class.java)
         assertThat((viewModel.state.value as SocialRestoreState.Error).message)

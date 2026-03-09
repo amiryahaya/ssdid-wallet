@@ -86,7 +86,7 @@ class InstitutionalSetupViewModel @Inject constructor(
             _state.value = InstitutionalSetupState.Enrolling
             try {
                 withTimeout(OPERATION_TIMEOUT_MS) {
-                    val encryptedKeyBytes = JBase64.getDecoder().decode(encryptedKeyBase64.trim())
+                    val encryptedKeyBytes = JBase64.getUrlDecoder().decode(encryptedKeyBase64.trim())
                     institutionalRecoveryManager.enrollOrganization(id, orgDid, orgName, encryptedKeyBytes)
                         .onSuccess { _state.value = InstitutionalSetupState.Success(orgName) }
                         .onFailure { _state.value = InstitutionalSetupState.Error(it.message ?: "Enrollment failed") }
