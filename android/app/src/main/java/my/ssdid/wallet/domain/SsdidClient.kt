@@ -64,7 +64,7 @@ class SsdidClient(
         } catch (e: SocketTimeoutException) {
             NetworkResult.Timeout
         } catch (e: retrofit2.HttpException) {
-            NetworkResult.ServerError(e.code(), e.message())
+            NetworkResult.fromHttpError(e.code(), e.message())
         } catch (e: IOException) {
             NetworkResult.NetworkError(e)
         }

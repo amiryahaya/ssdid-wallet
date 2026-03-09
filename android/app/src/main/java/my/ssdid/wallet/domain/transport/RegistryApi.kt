@@ -5,6 +5,9 @@ import my.ssdid.wallet.domain.transport.dto.*
 import retrofit2.http.*
 
 interface RegistryApi {
+    @GET("api/registry/info")
+    suspend fun getRegistryInfo(): RegistryInfoResponse
+
     @POST("api/did")
     suspend fun registerDid(@Body request: RegisterDidRequest): RegisterDidResponse
 
