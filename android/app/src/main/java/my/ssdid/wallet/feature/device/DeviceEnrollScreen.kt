@@ -72,12 +72,21 @@ class DeviceEnrollViewModel @Inject constructor(
 
     private fun pollPairingStatus(identity: Identity, pairingId: String) {
         viewModelScope.launch {
+            var consecutiveFailures = 0
             repeat(60) {
                 delay(3000)
                 deviceManager.checkPairingStatus(identity.did, pairingId)
                     .onSuccess { resp ->
+                        consecutiveFailures = 0
                         if (resp.status == "joined") {
                             _state.value = EnrollState.PairingJoined(pairingId, resp.device_name)
+                            return@launch
+                        }
+                    }
+                    .onFailure {
+                        consecutiveFailures++
+                        if (consecutiveFailures >= 3) {
+                            _state.value = EnrollState.Error("Lost connection during pairing")
                             return@launch
                         }
                     }

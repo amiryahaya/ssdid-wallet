@@ -37,7 +37,7 @@ class DeviceManager(
         identity: Identity,
         deviceName: String
     ): Result<String> = runCatching {
-        val sig = vault.sign(identity.keyId, challenge.toByteArray()).getOrThrow()
+        val sig = vault.sign(identity.keyId, "join:$challenge".toByteArray()).getOrThrow()
         val resp = httpClient.registry.joinPairing(
             did = did,
             pairingId = pairingId,

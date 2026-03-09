@@ -85,6 +85,7 @@ fun DeviceManagementScreen(
 
     val primaryDevice = devices.find { it.isPrimary }
     val otherDevices = devices.filter { !it.isPrimary }
+    var pendingRevokeKey by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = Modifier
@@ -219,7 +220,7 @@ fun DeviceManagementScreen(
                                     )
                                 }
                                 TextButton(
-                                    onClick = { viewModel.revokeDevice(device.keyId) },
+                                    onClick = { pendingRevokeKey = device.keyId },
                                     colors = ButtonDefaults.textButtonColors(contentColor = Danger)
                                 ) {
                                     Text("Revoke", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
@@ -301,6 +302,23 @@ fun DeviceManagementScreen(
             }
 
             item { Spacer(Modifier.height(20.dp)) }
+        }
+
+        pendingRevokeKey?.let { targetKey ->
+            AlertDialog(
+                onDismissRequest = { pendingRevokeKey = null },
+                title = { Text("Revoke Device") },
+                text = { Text("This will permanently remove this device from your identity. Continue?") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        viewModel.revokeDevice(targetKey)
+                        pendingRevokeKey = null
+                    }) { Text("Revoke", color = Danger) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { pendingRevokeKey = null }) { Text("Cancel") }
+                }
+            )
         }
     }
 }

@@ -83,7 +83,7 @@ class DeviceManagerTest {
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrThrow()).isEqualTo("joined")
-        coVerify { vault.sign("key-1", "test-challenge".toByteArray()) }
+        coVerify { vault.sign("key-1", "join:test-challenge".toByteArray()) }
         coVerify {
             registryApi.joinPairing("did:ssdid:abc123", "pairing-1", match {
                 it.pairing_id == "pairing-1" &&
@@ -228,5 +228,38 @@ class DeviceManagerTest {
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrThrow().status).isEqualTo("pending")
+    }
+
+    @Test
+    fun `listDevices falls back to identity when verificationMethod is empty`() = runTest {
+        val didDoc = DidDocument(
+            id = "did:ssdid:abc123",
+            controller = "did:ssdid:abc123",
+            verificationMethod = emptyList(),
+            authentication = emptyList(),
+            assertionMethod = emptyList()
+        )
+        coEvery { vault.buildDidDocument("key-1") } returns Result.success(didDoc)
+
+        val result = manager.listDevices(testIdentity)
+
+        assertThat(result.isSuccess).isTrue()
+        val devices = result.getOrThrow()
+        assertThat(devices).hasSize(1)
+        assertThat(devices.first().isPrimary).isTrue()
+        assertThat(devices.first().keyId).isEqualTo("key-1")
+    }
+
+    @Test
+    fun `approvePairing returns failure when updateDidDocument fails`() = runTest {
+        val sigBytes = byteArrayOf(5, 6, 7, 8)
+        coEvery { vault.sign("key-1", any()) } returns Result.success(sigBytes)
+        coEvery { registryApi.approvePairing("did:ssdid:abc123", "pairing-1", any()) } returns Unit
+        coEvery { ssdidClient.updateDidDocument("key-1") } returns Result.failure(RuntimeException("Registry unreachable"))
+
+        val result = manager.approvePairing(testIdentity, "pairing-1")
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()?.message).isEqualTo("Registry unreachable")
     }
 }
