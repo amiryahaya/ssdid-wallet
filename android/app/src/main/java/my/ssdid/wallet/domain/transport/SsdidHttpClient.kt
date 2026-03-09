@@ -20,6 +20,7 @@ class SsdidHttpClient(registryUrl: String) {
     private val okHttp = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.SECONDS)
         .readTimeout(10, TimeUnit.SECONDS)
+        .addInterceptor(RetryInterceptor())
         .addInterceptor(HttpLoggingInterceptor().apply {
             level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.HEADERS
                     else HttpLoggingInterceptor.Level.NONE

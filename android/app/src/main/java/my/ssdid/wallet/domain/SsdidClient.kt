@@ -3,6 +3,7 @@ package my.ssdid.wallet.domain
 import my.ssdid.wallet.domain.crypto.Multibase
 import my.ssdid.wallet.domain.history.ActivityRepository
 import my.ssdid.wallet.domain.model.*
+import my.ssdid.wallet.domain.transport.NetworkResult
 import my.ssdid.wallet.domain.transport.SsdidHttpClient
 import my.ssdid.wallet.domain.transport.dto.*
 import my.ssdid.wallet.domain.vault.Vault
@@ -12,6 +13,8 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
+import java.io.IOException
+import java.net.SocketTimeoutException
 import java.security.MessageDigest
 import java.time.Instant
 import java.util.Base64
@@ -49,6 +52,18 @@ class SsdidClient(
             )
         } catch (_: Exception) {
             // Activity logging should never break the main flow
+        }
+    }
+
+    private suspend fun <T> safeApiCall(block: suspend () -> T): NetworkResult<T> {
+        return try {
+            NetworkResult.Success(block())
+        } catch (e: SocketTimeoutException) {
+            NetworkResult.Timeout
+        } catch (e: retrofit2.HttpException) {
+            NetworkResult.ServerError(e.code(), e.message())
+        } catch (e: IOException) {
+            NetworkResult.NetworkError(e)
         }
     }
 
