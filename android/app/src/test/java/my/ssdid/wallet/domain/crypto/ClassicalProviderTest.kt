@@ -46,6 +46,8 @@ class ClassicalProviderTest {
         val keyPair = provider.generateKeyPair(Algorithm.ECDSA_P256)
         val message = "Hello SSDID".toByteArray()
         val signature = provider.sign(Algorithm.ECDSA_P256, keyPair.privateKey, message)
+        // DER-encoded ECDSA signature (variable length, typically 70-72 bytes for P-256)
+        assertThat(signature.size).isIn(68..73)
         val valid = provider.verify(Algorithm.ECDSA_P256, keyPair.publicKey, signature, message)
         assertThat(valid).isTrue()
     }
@@ -55,6 +57,8 @@ class ClassicalProviderTest {
         val keyPair = provider.generateKeyPair(Algorithm.ECDSA_P384)
         val message = "Hello SSDID".toByteArray()
         val signature = provider.sign(Algorithm.ECDSA_P384, keyPair.privateKey, message)
+        // DER-encoded ECDSA signature (variable length, typically 102-104 bytes for P-384)
+        assertThat(signature.size).isIn(100..106)
         val valid = provider.verify(Algorithm.ECDSA_P384, keyPair.publicKey, signature, message)
         assertThat(valid).isTrue()
     }

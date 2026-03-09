@@ -93,6 +93,47 @@ class PqcProviderTest {
         assertThat(provider.verify(Algorithm.SLH_DSA_SHAKE_128F, kp.publicKey, sig, data)).isTrue()
     }
 
+    // --- Remaining SLH-DSA variants ---
+
+    @Test
+    fun `SLH-DSA-SHA2-128f round-trip`() = slhDsaRoundTrip(Algorithm.SLH_DSA_SHA2_128F)
+
+    @Test
+    fun `SLH-DSA-SHA2-192s round-trip`() = slhDsaRoundTrip(Algorithm.SLH_DSA_SHA2_192S)
+
+    @Test
+    fun `SLH-DSA-SHA2-192f round-trip`() = slhDsaRoundTrip(Algorithm.SLH_DSA_SHA2_192F)
+
+    @Test
+    fun `SLH-DSA-SHA2-256s round-trip`() = slhDsaRoundTrip(Algorithm.SLH_DSA_SHA2_256S)
+
+    @Test
+    fun `SLH-DSA-SHA2-256f round-trip`() = slhDsaRoundTrip(Algorithm.SLH_DSA_SHA2_256F)
+
+    @Test
+    fun `SLH-DSA-SHAKE-128s round-trip`() = slhDsaRoundTrip(Algorithm.SLH_DSA_SHAKE_128S)
+
+    @Test
+    fun `SLH-DSA-SHAKE-192s round-trip`() = slhDsaRoundTrip(Algorithm.SLH_DSA_SHAKE_192S)
+
+    @Test
+    fun `SLH-DSA-SHAKE-192f round-trip`() = slhDsaRoundTrip(Algorithm.SLH_DSA_SHAKE_192F)
+
+    @Test
+    fun `SLH-DSA-SHAKE-256s round-trip`() = slhDsaRoundTrip(Algorithm.SLH_DSA_SHAKE_256S)
+
+    @Test
+    fun `SLH-DSA-SHAKE-256f round-trip`() = slhDsaRoundTrip(Algorithm.SLH_DSA_SHAKE_256F)
+
+    private fun slhDsaRoundTrip(algorithm: Algorithm) {
+        val kp = provider.generateKeyPair(algorithm)
+        assertThat(kp.publicKey).isNotEmpty()
+        assertThat(kp.privateKey).isNotEmpty()
+        val data = "$algorithm round-trip".toByteArray()
+        val sig = provider.sign(algorithm, kp.privateKey, data)
+        assertThat(provider.verify(algorithm, kp.publicKey, sig, data)).isTrue()
+    }
+
     @Test(expected = IllegalArgumentException::class)
     fun `verify throws for unsupported classical algorithm`() {
         provider.verify(Algorithm.ED25519, ByteArray(32), ByteArray(64), ByteArray(10))
