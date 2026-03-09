@@ -9,6 +9,7 @@ import dagger.hilt.components.SingletonComponent
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.backup.BackupManager
 import my.ssdid.wallet.domain.credential.CredentialIssuanceManager
+import my.ssdid.wallet.domain.device.DeviceManager
 import my.ssdid.wallet.domain.crypto.ClassicalProvider
 import my.ssdid.wallet.domain.crypto.CryptoProvider
 import my.ssdid.wallet.domain.crypto.PqcProvider
@@ -119,6 +120,11 @@ object AppModule {
         vault: Vault,
         httpClient: SsdidHttpClient
     ): CredentialIssuanceManager = CredentialIssuanceManager(vault, httpClient)
+
+    @Provides
+    @Singleton
+    fun provideDeviceManager(vault: Vault, httpClient: SsdidHttpClient): DeviceManager =
+        DeviceManager(vault, httpClient)
 
     @Provides
     @Singleton

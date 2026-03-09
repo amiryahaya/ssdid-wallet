@@ -43,4 +43,8 @@ sealed class Screen(val route: String) {
     object DeviceManagement : Screen("device_management/{keyId}") {
         fun createRoute(keyId: String) = "device_management/${Uri.encode(keyId)}"
     }
+    object DeviceEnroll : Screen("device_enroll/{keyId}?mode={mode}") {
+        fun createRoute(keyId: String, mode: String) =
+            "device_enroll/${Uri.encode(keyId)}?mode=$mode"
+    }
 }

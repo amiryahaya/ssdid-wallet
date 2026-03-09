@@ -11,6 +11,7 @@ import my.ssdid.wallet.feature.backup.BackupScreen
 import my.ssdid.wallet.feature.credentials.CredentialDetailScreen
 import my.ssdid.wallet.feature.credentials.CredentialOfferScreen
 import my.ssdid.wallet.feature.credentials.CredentialsScreen
+import my.ssdid.wallet.feature.device.DeviceEnrollScreen
 import my.ssdid.wallet.feature.device.DeviceManagementScreen
 import my.ssdid.wallet.feature.history.TxHistoryScreen
 import my.ssdid.wallet.feature.identity.CreateIdentityScreen
@@ -189,7 +190,22 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
         }
         composable(Screen.DeviceManagement.route) { backStackEntry ->
             backStackEntry.arguments?.getString("keyId") ?: return@composable
-            DeviceManagementScreen(onBack = { navController.popBackStack() })
+            DeviceManagementScreen(
+                onBack = { navController.popBackStack() },
+                onEnrollDevice = { keyId ->
+                    navController.navigate(Screen.DeviceEnroll.createRoute(keyId, "primary"))
+                }
+            )
+        }
+        composable(
+            Screen.DeviceEnroll.route,
+            arguments = listOf(
+                navArgument("keyId") { type = NavType.StringType },
+                navArgument("mode") { type = NavType.StringType; defaultValue = "primary" }
+            )
+        ) { backStackEntry ->
+            backStackEntry.arguments?.getString("keyId") ?: return@composable
+            DeviceEnrollScreen(onBack = { navController.popBackStack() })
         }
         composable(Screen.RecoveryRestore.route) {
             RecoveryRestoreScreen(
