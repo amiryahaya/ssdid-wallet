@@ -28,7 +28,7 @@ private data class OnboardingSlide(
 )
 
 @Composable
-fun OnboardingScreen(onComplete: () -> Unit) {
+fun OnboardingScreen(onComplete: () -> Unit, onRestore: () -> Unit = {}) {
     val slides = listOf(
         OnboardingSlide(
             icon = "\uD83D\uDD10",
@@ -130,8 +130,7 @@ fun OnboardingScreen(onComplete: () -> Unit) {
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp)
-                .padding(bottom = 32.dp),
+                .padding(horizontal = 20.dp),
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Accent)
         ) {
@@ -140,6 +139,20 @@ fun OnboardingScreen(onComplete: () -> Unit) {
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(vertical = 4.dp)
+            )
+        }
+
+        TextButton(
+            onClick = onRestore,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 32.dp)
+        ) {
+            Text(
+                "Restore from Recovery Key",
+                fontSize = 14.sp,
+                color = TextSecondary
             )
         }
     }

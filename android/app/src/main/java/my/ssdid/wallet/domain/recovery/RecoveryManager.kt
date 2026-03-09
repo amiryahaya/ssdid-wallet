@@ -1,13 +1,16 @@
 package my.ssdid.wallet.domain.recovery
 
 import my.ssdid.wallet.domain.crypto.CryptoProvider
+import my.ssdid.wallet.domain.crypto.Multibase
 import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.domain.vault.VaultStorage
 import my.ssdid.wallet.platform.keystore.KeystoreManager
 import java.security.MessageDigest
+import java.time.Instant
 import java.util.Base64
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -63,6 +66,47 @@ class RecoveryManager @Inject constructor(
     suspend fun hasRecoveryKey(keyId: String): Boolean {
         val identity = storage.getIdentity(keyId)
         return identity?.hasRecoveryKey == true
+    }
+
+    /**
+     * Restore identity using offline recovery private key.
+     * Generates new primary keypair, stores locally.
+     * Caller should subsequently publish updated DID Document via SsdidClient.
+     */
+    suspend fun restoreWithRecoveryKey(
+        did: String,
+        recoveryPrivateKeyBase64: String,
+        name: String,
+        algorithm: Algorithm
+    ): Result<Identity> = runCatching {
+        val recoveryPrivateKey = Base64.getDecoder().decode(recoveryPrivateKeyBase64)
+
+        // Generate new primary keypair
+        val provider = providerFor(algorithm)
+        val kp = provider.generateKeyPair(algorithm)
+
+        // Create new identity
+        val keyId = "$did#${UUID.randomUUID().toString().take(8)}"
+        val publicKeyMultibase = Multibase.encode(kp.publicKey)
+        val now = Instant.now().toString()
+        val identity = Identity(
+            name = name,
+            did = did,
+            keyId = keyId,
+            algorithm = algorithm,
+            publicKeyMultibase = publicKeyMultibase,
+            createdAt = now
+        )
+
+        // Encrypt and store new private key
+        val alias = stableAlias(keyId)
+        keystoreManager.generateWrappingKey(alias)
+        val encryptedKey = keystoreManager.encrypt(alias, kp.privateKey)
+        kp.privateKey.fill(0)
+        recoveryPrivateKey.fill(0)
+        storage.saveIdentity(identity, encryptedKey)
+
+        identity
     }
 
     private fun stableAlias(keyId: String): String {

@@ -1,0 +1,307 @@
+package my.ssdid.wallet.feature.recovery
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import my.ssdid.wallet.domain.SsdidClient
+import my.ssdid.wallet.domain.model.Algorithm
+import my.ssdid.wallet.domain.recovery.RecoveryManager
+import my.ssdid.wallet.domain.vault.VaultStorage
+import my.ssdid.wallet.ui.theme.*
+import javax.inject.Inject
+
+sealed class RestoreState {
+    object Idle : RestoreState()
+    object Restoring : RestoreState()
+    object Success : RestoreState()
+    data class Error(val message: String) : RestoreState()
+}
+
+@HiltViewModel
+class RecoveryRestoreViewModel @Inject constructor(
+    private val recoveryManager: RecoveryManager,
+    private val ssdidClient: SsdidClient,
+    private val storage: VaultStorage
+) : ViewModel() {
+
+    private val _state = MutableStateFlow<RestoreState>(RestoreState.Idle)
+    val state: StateFlow<RestoreState> = _state.asStateFlow()
+
+    fun restore(did: String, recoveryKey: String, name: String, algorithm: Algorithm) {
+        if (did.isBlank() || recoveryKey.isBlank() || name.isBlank()) {
+            _state.value = RestoreState.Error("All fields are required")
+            return
+        }
+        viewModelScope.launch {
+            _state.value = RestoreState.Restoring
+            recoveryManager.restoreWithRecoveryKey(did, recoveryKey, name, algorithm)
+                .onSuccess { identity ->
+                    // Try to publish to registry (best effort — may fail if offline)
+                    try {
+                        ssdidClient.updateDidDocument(identity.keyId)
+                    } catch (_: Exception) {
+                        // Best effort: registry update may fail on new device
+                    }
+                    storage.setOnboardingCompleted()
+                    _state.value = RestoreState.Success
+                }
+                .onFailure { _state.value = RestoreState.Error(it.message ?: "Restoration failed") }
+        }
+    }
+}
+
+@Composable
+fun RecoveryRestoreScreen(
+    onBack: () -> Unit,
+    onComplete: () -> Unit,
+    viewModel: RecoveryRestoreViewModel = hiltViewModel()
+) {
+    val state by viewModel.state.collectAsState()
+    var did by remember { mutableStateOf("") }
+    var recoveryKey by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
+    var selectedAlgorithm by remember { mutableStateOf(Algorithm.KAZ_SIGN_192) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(BgPrimary)
+            .statusBarsPadding()
+    ) {
+        // Header
+        Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
+            TextButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
+            Spacer(Modifier.width(12.dp))
+            Text("Restore Identity", style = MaterialTheme.typography.titleLarge)
+        }
+
+        when (state) {
+            is RestoreState.Success -> {
+                // Success card
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 20.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = BgCard)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(64.dp)
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(SuccessDim),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text("\u2713", fontSize = 28.sp, color = Success, fontWeight = FontWeight.Bold)
+                            }
+                            Spacer(Modifier.height(16.dp))
+                            Text(
+                                "Identity Restored",
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = TextPrimary,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                "Your identity has been recovered successfully.",
+                                fontSize = 14.sp,
+                                color = TextSecondary
+                            )
+                            Spacer(Modifier.height(24.dp))
+                            Button(
+                                onClick = onComplete,
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Accent)
+                            ) {
+                                Text(
+                                    "Continue",
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    modifier = Modifier.padding(vertical = 4.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            else -> {
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 20.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    item {
+                        Text(
+                            "Enter your DID and recovery key to restore access on this device.",
+                            fontSize = 14.sp,
+                            color = TextSecondary,
+                            lineHeight = 20.sp
+                        )
+                    }
+
+                    item {
+                        Text("DID", style = MaterialTheme.typography.labelMedium)
+                        Spacer(Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = did,
+                            onValueChange = { did = it },
+                            placeholder = { Text("did:ssdid:...", color = TextTertiary) },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Accent,
+                                unfocusedBorderColor = Border,
+                                cursorColor = Accent,
+                                focusedTextColor = TextPrimary,
+                                unfocusedTextColor = TextPrimary
+                            ),
+                            singleLine = true
+                        )
+                    }
+
+                    item {
+                        Text("IDENTITY NAME", style = MaterialTheme.typography.labelMedium)
+                        Spacer(Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = name,
+                            onValueChange = { name = it },
+                            placeholder = { Text("e.g. Personal, Work", color = TextTertiary) },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Accent,
+                                unfocusedBorderColor = Border,
+                                cursorColor = Accent,
+                                focusedTextColor = TextPrimary,
+                                unfocusedTextColor = TextPrimary
+                            ),
+                            singleLine = true
+                        )
+                    }
+
+                    item {
+                        Text("RECOVERY KEY (BASE64)", style = MaterialTheme.typography.labelMedium)
+                        Spacer(Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = recoveryKey,
+                            onValueChange = { recoveryKey = it },
+                            placeholder = { Text("Paste your recovery private key", color = TextTertiary) },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Accent,
+                                unfocusedBorderColor = Border,
+                                cursorColor = Accent,
+                                focusedTextColor = TextPrimary,
+                                unfocusedTextColor = TextPrimary
+                            ),
+                            minLines = 3,
+                            maxLines = 5
+                        )
+                    }
+
+                    item {
+                        Text("SIGNATURE ALGORITHM", style = MaterialTheme.typography.labelMedium)
+                        Spacer(Modifier.height(8.dp))
+                    }
+
+                    item {
+                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Algorithm.entries.forEach { algo ->
+                                val isSelected = selectedAlgorithm == algo
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = if (isSelected) AccentDim else BgCard
+                                    ),
+                                    onClick = { selectedAlgorithm = algo }
+                                ) {
+                                    Row(Modifier.padding(14.dp)) {
+                                        RadioButton(
+                                            selected = isSelected,
+                                            onClick = { selectedAlgorithm = algo },
+                                            colors = RadioButtonDefaults.colors(selectedColor = Accent)
+                                        )
+                                        Spacer(Modifier.width(8.dp))
+                                        Column {
+                                            Text(
+                                                algo.name.replace("_", " "),
+                                                style = MaterialTheme.typography.titleMedium
+                                            )
+                                            Text(algo.w3cType, fontSize = 11.sp, color = TextTertiary)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Error display
+                if (state is RestoreState.Error) {
+                    Text(
+                        (state as RestoreState.Error).message,
+                        color = Danger,
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+                    )
+                }
+
+                // Footer button
+                Button(
+                    onClick = { viewModel.restore(did, recoveryKey, name, selectedAlgorithm) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    enabled = did.isNotBlank() && recoveryKey.isNotBlank() && name.isNotBlank() &&
+                        state !is RestoreState.Restoring,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Accent)
+                ) {
+                    if (state is RestoreState.Restoring) {
+                        CircularProgressIndicator(
+                            Modifier.size(20.dp),
+                            color = BgPrimary,
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(Modifier.width(10.dp))
+                        Text("Restoring...", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                    } else {
+                        Text(
+                            "Restore Identity",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}

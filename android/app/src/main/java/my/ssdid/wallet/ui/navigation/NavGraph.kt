@@ -17,6 +17,7 @@ import my.ssdid.wallet.feature.identity.IdentityDetailScreen
 import my.ssdid.wallet.feature.identity.WalletHomeScreen
 import my.ssdid.wallet.feature.onboarding.BiometricSetupScreen
 import my.ssdid.wallet.feature.onboarding.OnboardingScreen
+import my.ssdid.wallet.feature.recovery.RecoveryRestoreScreen
 import my.ssdid.wallet.feature.recovery.RecoverySetupScreen
 import my.ssdid.wallet.feature.registration.RegistrationScreen
 import my.ssdid.wallet.feature.rotation.KeyRotationScreen
@@ -33,6 +34,9 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
                     navController.navigate(Screen.CreateIdentity.route) {
                         popUpTo(Screen.Onboarding.route) { inclusive = true }
                     }
+                },
+                onRestore = {
+                    navController.navigate(Screen.RecoveryRestore.route)
                 }
             )
         }
@@ -170,6 +174,16 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
         composable(Screen.DeviceManagement.route) { backStackEntry ->
             backStackEntry.arguments?.getString("keyId") ?: return@composable
             DeviceManagementScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.RecoveryRestore.route) {
+            RecoveryRestoreScreen(
+                onBack = { navController.popBackStack() },
+                onComplete = {
+                    navController.navigate(Screen.WalletHome.route) {
+                        popUpTo(Screen.RecoveryRestore.route) { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }

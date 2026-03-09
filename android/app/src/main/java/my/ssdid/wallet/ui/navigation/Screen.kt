@@ -35,6 +35,7 @@ sealed class Screen(val route: String) {
         fun createRoute(keyId: String) = "key_rotation/${Uri.encode(keyId)}"
     }
     object BackupExport : Screen("backup_export")
+    object RecoveryRestore : Screen("recovery_restore")
     object DeviceManagement : Screen("device_management/{keyId}") {
         fun createRoute(keyId: String) = "device_management/${Uri.encode(keyId)}"
     }
