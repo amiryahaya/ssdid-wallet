@@ -39,7 +39,9 @@ data class AuthenticateResponse(
     val session_token: String,
     val server_did: String,
     val server_key_id: String,
-    val server_signature: String? = null
+    val server_signature: String? = null,
+    val status: String? = null,
+    val did: String? = null
 )
 
 @Serializable
@@ -50,7 +52,8 @@ data class TxChallengeRequest(
 @Serializable
 data class TxChallengeResponse(
     val challenge: String,
-    val transaction: Map<String, String> = emptyMap()
+    val transaction: Map<String, String> = emptyMap(),
+    val did: String? = null
 )
 
 @Serializable

@@ -209,4 +209,71 @@ class DtoSerializationTest {
         assertThat(decoded.transaction_id).isEqualTo("tx-001")
         assertThat(decoded.status).isEqualTo("confirmed")
     }
+
+    // --- Spec compliance additions ---
+
+    @Test
+    fun `RegistryInfoResponse deserializes from server JSON`() {
+        val serverJson = """
+            {
+                "name": "SSDID Registry",
+                "version": "1.0.0",
+                "did_method": "ssdid",
+                "supported_algorithms": ["Ed25519VerificationKey2020", "MlDsa44VerificationKey2024"],
+                "supported_proof_types": ["Ed25519Signature2020"],
+                "policies": {"proof_max_age_seconds": 300}
+            }
+        """.trimIndent()
+        val decoded = json.decodeFromString<RegistryInfoResponse>(serverJson)
+        assertThat(decoded.name).isEqualTo("SSDID Registry")
+        assertThat(decoded.version).isEqualTo("1.0.0")
+        assertThat(decoded.did_method).isEqualTo("ssdid")
+        assertThat(decoded.supported_algorithms).hasSize(2)
+        assertThat(decoded.policies?.proof_max_age_seconds).isEqualTo(300)
+    }
+
+    @Test
+    fun `AuthenticateResponse includes optional status and did fields`() {
+        val serverJson = """
+            {
+                "session_token": "tok",
+                "server_did": "did:ssdid:server",
+                "server_key_id": "did:ssdid:server#key-1",
+                "server_signature": "uSig",
+                "status": "authenticated",
+                "did": "did:ssdid:client"
+            }
+        """.trimIndent()
+        val decoded = json.decodeFromString<AuthenticateResponse>(serverJson)
+        assertThat(decoded.status).isEqualTo("authenticated")
+        assertThat(decoded.did).isEqualTo("did:ssdid:client")
+    }
+
+    @Test
+    fun `AuthenticateResponse works without status and did fields`() {
+        val serverJson = """
+            {
+                "session_token": "tok",
+                "server_did": "did:ssdid:server",
+                "server_key_id": "did:ssdid:server#key-1"
+            }
+        """.trimIndent()
+        val decoded = json.decodeFromString<AuthenticateResponse>(serverJson)
+        assertThat(decoded.status).isNull()
+        assertThat(decoded.did).isNull()
+    }
+
+    @Test
+    fun `TxChallengeResponse includes optional did field`() {
+        val serverJson = """{"challenge":"ch","did":"did:ssdid:client"}"""
+        val decoded = json.decodeFromString<TxChallengeResponse>(serverJson)
+        assertThat(decoded.did).isEqualTo("did:ssdid:client")
+    }
+
+    @Test
+    fun `ChallengeResponse includes optional domain field`() {
+        val serverJson = """{"challenge":"abc","expires_at":"2026-01-01T00:05:00Z","domain":"registry.ssdid.my"}"""
+        val decoded = json.decodeFromString<ChallengeResponse>(serverJson)
+        assertThat(decoded.domain).isEqualTo("registry.ssdid.my")
+    }
 }
