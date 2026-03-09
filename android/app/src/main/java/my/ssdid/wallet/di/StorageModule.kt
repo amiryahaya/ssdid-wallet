@@ -6,8 +6,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import my.ssdid.wallet.domain.recovery.institutional.InstitutionalRecoveryStorage
 import my.ssdid.wallet.domain.recovery.social.SocialRecoveryStorage
 import my.ssdid.wallet.domain.vault.VaultStorage
+import my.ssdid.wallet.platform.storage.DataStoreInstitutionalRecoveryStorage
 import my.ssdid.wallet.platform.storage.DataStoreSocialRecoveryStorage
 import my.ssdid.wallet.platform.storage.DataStoreVaultStorage
 import javax.inject.Singleton
@@ -25,4 +27,9 @@ object StorageModule {
     @Singleton
     fun provideSocialRecoveryStorage(@ApplicationContext context: Context): SocialRecoveryStorage =
         DataStoreSocialRecoveryStorage(context)
+
+    @Provides
+    @Singleton
+    fun provideInstitutionalRecoveryStorage(@ApplicationContext context: Context): InstitutionalRecoveryStorage =
+        DataStoreInstitutionalRecoveryStorage(context)
 }
