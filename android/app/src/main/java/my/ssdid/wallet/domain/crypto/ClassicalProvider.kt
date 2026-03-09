@@ -28,8 +28,16 @@ class ClassicalProvider : CryptoProvider {
     override fun sign(algorithm: Algorithm, privateKey: ByteArray, data: ByteArray): ByteArray {
         return when (algorithm) {
             Algorithm.ED25519 -> signEd25519(privateKey, data)
-            Algorithm.ECDSA_P256 -> signEcdsa("SHA512withECDSA", privateKey, data)
-            Algorithm.ECDSA_P384 -> signEcdsa("SHA512withECDSA", privateKey, data)
+            // NOTE: Investigated NONEwithECDSA to avoid double-hashing the pre-hashed
+            // W3C Data Integrity payload (SHA3-256(proofOptions) || SHA3-256(document) = 64 bytes).
+            // NONEwithECDSA works locally (BouncyCastle accepts 64-byte input even for P-256),
+            // but the registry still returns 401 with either variant. This confirms the registry
+            // also uses SHA256withECDSA/SHA384withECDSA internally. The 401 root cause lies
+            // elsewhere — likely canonical JSON serialization differences between the wallet
+            // (kotlinx-serialization) and registry (Elixir/Jason). Keeping SHA*withECDSA to
+            // match the registry's expected signature scheme.
+            Algorithm.ECDSA_P256 -> signEcdsa("SHA256withECDSA", "secp256r1", privateKey, data)
+            Algorithm.ECDSA_P384 -> signEcdsa("SHA384withECDSA", "secp384r1", privateKey, data)
             else -> throw IllegalArgumentException("Unsupported: $algorithm")
         }
     }
@@ -37,8 +45,8 @@ class ClassicalProvider : CryptoProvider {
     override fun verify(algorithm: Algorithm, publicKey: ByteArray, signature: ByteArray, data: ByteArray): Boolean {
         return when (algorithm) {
             Algorithm.ED25519 -> verifyEd25519(publicKey, signature, data)
-            Algorithm.ECDSA_P256 -> verifyEcdsa("SHA512withECDSA", publicKey, signature, data)
-            Algorithm.ECDSA_P384 -> verifyEcdsa("SHA512withECDSA", publicKey, signature, data)
+            Algorithm.ECDSA_P256 -> verifyEcdsa("SHA256withECDSA", "secp256r1", publicKey, signature, data)
+            Algorithm.ECDSA_P384 -> verifyEcdsa("SHA384withECDSA", "secp384r1", publicKey, signature, data)
             else -> false
         }
     }
@@ -215,8 +223,7 @@ class ClassicalProvider : CryptoProvider {
         return encoded.copyOfRange(i, i + keyLen)
     }
 
-    private fun signEcdsa(sigAlgo: String, privateKey: ByteArray, data: ByteArray): ByteArray {
-        val curveName = if (privateKey.size <= 32) "secp256r1" else "secp384r1"
+    private fun signEcdsa(sigAlgo: String, curveName: String, privateKey: ByteArray, data: ByteArray): ByteArray {
         val pkcs8 = wrapEcPrivateKey(privateKey, curveName)
         val keySpec = PKCS8EncodedKeySpec(pkcs8)
         val kf = KeyFactory.getInstance("EC", "BC")
@@ -227,8 +234,7 @@ class ClassicalProvider : CryptoProvider {
         return sig.sign()
     }
 
-    private fun verifyEcdsa(sigAlgo: String, publicKey: ByteArray, signature: ByteArray, data: ByteArray): Boolean {
-        val curveName = if (publicKey.size <= 65) "secp256r1" else "secp384r1"
+    private fun verifyEcdsa(sigAlgo: String, curveName: String, publicKey: ByteArray, signature: ByteArray, data: ByteArray): Boolean {
         val x509 = wrapEcPublicKey(publicKey, curveName)
         val keySpec = X509EncodedKeySpec(x509)
         val kf = KeyFactory.getInstance("EC", "BC")

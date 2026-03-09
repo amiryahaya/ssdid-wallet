@@ -60,6 +60,68 @@ class ClassicalProviderTest {
     }
 
     @Test
+    fun `ecdsa p256 sign-verify round trip with 64-byte pre-hashed payload`() {
+        // Simulates the real W3C Data Integrity proof payload:
+        // SHA3-256(proofOptions) || SHA3-256(document) = 64 bytes.
+        // Verified that both SHA256withECDSA and NONEwithECDSA produce valid
+        // round-trip signatures locally for this payload size.
+        val keyPair = provider.generateKeyPair(Algorithm.ECDSA_P256)
+        val payload = ByteArray(64) { it.toByte() }
+        val signature = provider.sign(Algorithm.ECDSA_P256, keyPair.privateKey, payload)
+        val valid = provider.verify(Algorithm.ECDSA_P256, keyPair.publicKey, signature, payload)
+        assertThat(valid).isTrue()
+    }
+
+    @Test
+    fun `ecdsa p384 sign-verify round trip with 64-byte pre-hashed payload`() {
+        // Simulates the real W3C Data Integrity proof payload:
+        // SHA3-256(proofOptions) || SHA3-256(document) = 64 bytes.
+        val keyPair = provider.generateKeyPair(Algorithm.ECDSA_P384)
+        val payload = ByteArray(64) { it.toByte() }
+        val signature = provider.sign(Algorithm.ECDSA_P384, keyPair.privateKey, payload)
+        val valid = provider.verify(Algorithm.ECDSA_P384, keyPair.publicKey, signature, payload)
+        assertThat(valid).isTrue()
+    }
+
+    @Test
+    fun `ecdsa p384 verify rejects tampered message`() {
+        val keyPair = provider.generateKeyPair(Algorithm.ECDSA_P384)
+        val message = "Hello SSDID".toByteArray()
+        val signature = provider.sign(Algorithm.ECDSA_P384, keyPair.privateKey, message)
+        val valid = provider.verify(Algorithm.ECDSA_P384, keyPair.publicKey, signature, "Tampered".toByteArray())
+        assertThat(valid).isFalse()
+    }
+
+    @Test
+    fun `ecdsa p384 cross-key verification fails`() {
+        val kp1 = provider.generateKeyPair(Algorithm.ECDSA_P384)
+        val kp2 = provider.generateKeyPair(Algorithm.ECDSA_P384)
+        val message = "Test".toByteArray()
+        val sig = provider.sign(Algorithm.ECDSA_P384, kp1.privateKey, message)
+        val valid = provider.verify(Algorithm.ECDSA_P384, kp2.publicKey, sig, message)
+        assertThat(valid).isFalse()
+    }
+
+    @Test
+    fun `ecdsa p256 verify rejects tampered message`() {
+        val keyPair = provider.generateKeyPair(Algorithm.ECDSA_P256)
+        val message = "Hello SSDID".toByteArray()
+        val signature = provider.sign(Algorithm.ECDSA_P256, keyPair.privateKey, message)
+        val valid = provider.verify(Algorithm.ECDSA_P256, keyPair.publicKey, signature, "Tampered".toByteArray())
+        assertThat(valid).isFalse()
+    }
+
+    @Test
+    fun `ecdsa p256 cross-key verification fails`() {
+        val kp1 = provider.generateKeyPair(Algorithm.ECDSA_P256)
+        val kp2 = provider.generateKeyPair(Algorithm.ECDSA_P256)
+        val message = "Test".toByteArray()
+        val sig = provider.sign(Algorithm.ECDSA_P256, kp1.privateKey, message)
+        val valid = provider.verify(Algorithm.ECDSA_P256, kp2.publicKey, sig, message)
+        assertThat(valid).isFalse()
+    }
+
+    @Test
     fun `different keys produce different signatures`() {
         val kp1 = provider.generateKeyPair(Algorithm.ED25519)
         val kp2 = provider.generateKeyPair(Algorithm.ED25519)
