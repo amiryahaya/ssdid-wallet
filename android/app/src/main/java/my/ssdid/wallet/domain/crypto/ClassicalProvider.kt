@@ -26,16 +26,9 @@ class ClassicalProvider : CryptoProvider {
         require(supportsAlgorithm(algorithm)) { "Unsupported: $algorithm" }
         return when (algorithm) {
             Algorithm.ED25519 -> signEd25519(privateKey, data)
-            // NOTE: Investigated NONEwithECDSA to avoid double-hashing the pre-hashed
-            // W3C Data Integrity payload (SHA3-256(proofOptions) || SHA3-256(document) = 64 bytes).
-            // NONEwithECDSA works locally (BouncyCastle accepts 64-byte input even for P-256),
-            // but the registry still returns 401 with either variant. This confirms the registry
-            // also uses SHA256withECDSA/SHA384withECDSA internally. The 401 root cause lies
-            // elsewhere — likely canonical JSON serialization differences between the wallet
-            // (kotlinx-serialization) and registry (Elixir/Jason). Keeping SHA*withECDSA to
-            // match the registry's expected signature scheme.
-            Algorithm.ECDSA_P256 -> signEcdsa("SHA256withECDSA", "secp256r1", privateKey, data)
-            Algorithm.ECDSA_P384 -> signEcdsa("SHA384withECDSA", "secp384r1", privateKey, data)
+            // Registry uses SHA-512 for all ECDSA curves (Erlang :public_key default)
+            Algorithm.ECDSA_P256 -> signEcdsa("SHA512withECDSA", "secp256r1", privateKey, data)
+            Algorithm.ECDSA_P384 -> signEcdsa("SHA512withECDSA", "secp384r1", privateKey, data)
             else -> throw IllegalArgumentException("Unsupported: $algorithm")
         }
     }
@@ -44,8 +37,8 @@ class ClassicalProvider : CryptoProvider {
         require(supportsAlgorithm(algorithm)) { "Unsupported: $algorithm" }
         return when (algorithm) {
             Algorithm.ED25519 -> verifyEd25519(publicKey, signature, data)
-            Algorithm.ECDSA_P256 -> verifyEcdsa("SHA256withECDSA", "secp256r1", publicKey, signature, data)
-            Algorithm.ECDSA_P384 -> verifyEcdsa("SHA384withECDSA", "secp384r1", publicKey, signature, data)
+            Algorithm.ECDSA_P256 -> verifyEcdsa("SHA512withECDSA", "secp256r1", publicKey, signature, data)
+            Algorithm.ECDSA_P384 -> verifyEcdsa("SHA512withECDSA", "secp384r1", publicKey, signature, data)
             else -> throw IllegalArgumentException("Unsupported classical algorithm for verify: $algorithm")
         }
     }
@@ -246,7 +239,7 @@ class ClassicalProvider : CryptoProvider {
         val sig = Signature.getInstance(sigAlgo, "BC")
         sig.initSign(privKey)
         sig.update(data)
-        return sig.sign()
+        return sig.sign() // DER-encoded — matches Erlang :public_key format
     }
 
     private fun verifyEcdsa(sigAlgo: String, curveName: String, publicKey: ByteArray, signature: ByteArray, data: ByteArray): Boolean {
@@ -257,7 +250,7 @@ class ClassicalProvider : CryptoProvider {
         val sig = Signature.getInstance(sigAlgo, "BC")
         sig.initVerify(pubKey)
         sig.update(data)
-        return sig.verify(signature)
+        return sig.verify(signature) // DER-encoded
     }
 
     // EC ASN.1 DER wrapping — curve OID bytes
