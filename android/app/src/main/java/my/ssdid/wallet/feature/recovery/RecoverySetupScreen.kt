@@ -26,6 +26,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.recovery.RecoveryManager
+import my.ssdid.wallet.domain.recovery.social.SocialRecoveryConfig
+import my.ssdid.wallet.domain.recovery.social.SocialRecoveryManager
+import my.ssdid.wallet.domain.recovery.institutional.InstitutionalRecoveryManager
+import my.ssdid.wallet.domain.recovery.institutional.OrgRecoveryConfig
 import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
@@ -47,6 +51,8 @@ sealed class RecoverySetupState {
 @HiltViewModel
 class RecoverySetupViewModel @Inject constructor(
     private val recoveryManager: RecoveryManager,
+    private val socialRecoveryManager: SocialRecoveryManager,
+    private val institutionalManager: InstitutionalRecoveryManager,
     private val vault: Vault,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -58,8 +64,29 @@ class RecoverySetupViewModel @Inject constructor(
     private val _state = MutableStateFlow<RecoverySetupState>(RecoverySetupState.Idle)
     val state = _state.asStateFlow()
 
+    private val _hasSocialRecovery = MutableStateFlow(false)
+    val hasSocialRecovery = _hasSocialRecovery.asStateFlow()
+
+    private val _socialConfig = MutableStateFlow<SocialRecoveryConfig?>(null)
+    val socialConfig = _socialConfig.asStateFlow()
+
+    private val _hasInstitutionalRecovery = MutableStateFlow(false)
+    val hasInstitutionalRecovery = _hasInstitutionalRecovery.asStateFlow()
+
+    private val _orgConfig = MutableStateFlow<OrgRecoveryConfig?>(null)
+    val orgConfig = _orgConfig.asStateFlow()
+
     init {
-        viewModelScope.launch { _identity.value = vault.getIdentity(keyId) }
+        viewModelScope.launch {
+            val id = vault.getIdentity(keyId)
+            _identity.value = id
+            if (id != null) {
+                _hasSocialRecovery.value = socialRecoveryManager.hasSocialRecovery(id.did)
+                _socialConfig.value = socialRecoveryManager.getConfig(id.did)
+                _hasInstitutionalRecovery.value = institutionalManager.hasOrgRecovery(id.did)
+                _orgConfig.value = institutionalManager.getConfig(id.did)
+            }
+        }
     }
 
     fun generateRecoveryKey() {
@@ -80,10 +107,16 @@ class RecoverySetupViewModel @Inject constructor(
 @Composable
 fun RecoverySetupScreen(
     onBack: () -> Unit,
+    onNavigateToSocialSetup: (String) -> Unit = {},
+    onNavigateToInstitutionalSetup: (String) -> Unit = {},
     viewModel: RecoverySetupViewModel = hiltViewModel()
 ) {
     val identity by viewModel.identity.collectAsState()
     val state by viewModel.state.collectAsState()
+    val hasSocialRecovery by viewModel.hasSocialRecovery.collectAsState()
+    val socialConfig by viewModel.socialConfig.collectAsState()
+    val hasInstitutionalRecovery by viewModel.hasInstitutionalRecovery.collectAsState()
+    val orgConfig by viewModel.orgConfig.collectAsState()
     val clipboardManager = LocalClipboardManager.current
 
     Column(
@@ -195,35 +228,46 @@ fun RecoverySetupScreen(
 
             // Tier 2: Social Recovery
             item {
+                val keyId = identity?.keyId ?: ""
                 RecoveryTierCard(
                     emoji = "\uD83D\uDC65",
                     title = "Social Recovery",
-                    description = "Split recovery secret among trusted contacts",
+                    description = if (hasSocialRecovery) {
+                        val config = socialConfig
+                        "${config?.threshold}-of-${config?.totalShares} guardians"
+                    } else {
+                        "Split recovery secret among trusted contacts"
+                    },
                     badgeText = "Advanced",
                     badgeColor = Accent,
                     badgeBgColor = AccentDim,
-                    isConfigured = false,
-                    buttonText = "Coming Soon",
-                    buttonEnabled = false,
+                    isConfigured = hasSocialRecovery,
+                    buttonText = "Set Up Social Recovery",
+                    buttonEnabled = identity?.hasRecoveryKey == true,
                     isLoading = false,
-                    onClick = {}
+                    onClick = { onNavigateToSocialSetup(keyId) }
                 )
             }
 
             // Tier 3: Institutional
             item {
+                val keyId = identity?.keyId ?: ""
                 RecoveryTierCard(
                     emoji = "\uD83C\uDFE2",
                     title = "Institutional",
-                    description = "Organization holds recovery authority",
+                    description = if (hasInstitutionalRecovery) {
+                        orgConfig?.orgName ?: "Organization enrolled"
+                    } else {
+                        "Organization holds recovery authority"
+                    },
                     badgeText = "Enterprise",
                     badgeColor = Pqc,
                     badgeBgColor = PqcDim,
-                    isConfigured = false,
-                    buttonText = "Coming Soon",
-                    buttonEnabled = false,
+                    isConfigured = hasInstitutionalRecovery,
+                    buttonText = "Enroll Organization",
+                    buttonEnabled = identity?.hasRecoveryKey == true,
                     isLoading = false,
-                    onClick = {}
+                    onClick = { onNavigateToInstitutionalSetup(keyId) }
                 )
             }
 
