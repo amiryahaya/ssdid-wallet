@@ -4,8 +4,10 @@ import my.ssdid.wallet.domain.crypto.CryptoProvider
 import my.ssdid.wallet.domain.crypto.Multibase
 import my.ssdid.wallet.domain.model.*
 import my.ssdid.wallet.platform.keystore.KeystoreManager
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import java.security.MessageDigest
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -82,16 +84,28 @@ class VaultImpl(
         )
     }
 
-    override suspend fun createProof(keyId: String, document: Map<String, String>, proofPurpose: String, challenge: String?): Result<Proof> = runCatching {
+    override suspend fun createProof(keyId: String, document: JsonObject, proofPurpose: String, challenge: String?): Result<Proof> = runCatching {
         val identity = storage.getIdentity(keyId) ?: throw IllegalArgumentException("Identity not found: $keyId")
-        val canonicalJson = Json.encodeToString(document)
-        val dataToSign = if (challenge != null) {
-            challenge.toByteArray() + canonicalJson.toByteArray()
-        } else {
-            canonicalJson.toByteArray()
-        }
-        val signature = sign(keyId, dataToSign).getOrThrow()
         val now = DateTimeFormatter.ISO_INSTANT.format(Instant.now().atOffset(ZoneOffset.UTC))
+
+        // Build proof options (without proofValue — that's what we're computing)
+        val proofOptions = buildMap<String, kotlinx.serialization.json.JsonElement> {
+            put("type", JsonPrimitive(identity.algorithm.proofType))
+            put("created", JsonPrimitive(now))
+            put("verificationMethod", JsonPrimitive(identity.keyId))
+            put("proofPurpose", JsonPrimitive(proofPurpose))
+            if (challenge != null) put("challenge", JsonPrimitive(challenge))
+        }
+
+        // W3C Data Integrity signing payload:
+        // SHA3-256(canonical_json(proof_options)) || SHA3-256(canonical_json(document))
+        val sha3 = MessageDigest.getInstance("SHA3-256")
+        val optionsHash = sha3.digest(canonicalJson(JsonObject(proofOptions)).toByteArray(Charsets.UTF_8))
+        sha3.reset()
+        val docHash = sha3.digest(canonicalJson(document).toByteArray(Charsets.UTF_8))
+        val payload = optionsHash + docHash
+
+        val signature = sign(keyId, payload).getOrThrow()
         Proof(
             type = identity.algorithm.proofType,
             created = now,
@@ -100,6 +114,35 @@ class VaultImpl(
             proofValue = Multibase.encode(signature),
             challenge = challenge
         )
+    }
+
+    companion object {
+        /**
+         * Produces deterministic JSON by recursively sorting map keys.
+         * Matches the registry's canonical_json implementation.
+         */
+        fun canonicalJson(element: kotlinx.serialization.json.JsonElement): String {
+            return when (element) {
+                is JsonObject -> {
+                    val members = element.entries
+                        .sortedBy { it.key }
+                        .joinToString(",") { (k, v) ->
+                            "\"${escapeJsonString(k)}\":${canonicalJson(v)}"
+                        }
+                    "{$members}"
+                }
+                is kotlinx.serialization.json.JsonArray -> {
+                    val members = element.joinToString(",") { canonicalJson(it) }
+                    "[$members]"
+                }
+                else -> element.toString() // JsonPrimitive (string, number, bool, null)
+            }
+        }
+
+        private fun escapeJsonString(s: String): String {
+            return s.replace("\\", "\\\\").replace("\"", "\\\"")
+                .replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t")
+        }
     }
 
     override suspend fun storeCredential(credential: VerifiableCredential): Result<Unit> = runCatching {

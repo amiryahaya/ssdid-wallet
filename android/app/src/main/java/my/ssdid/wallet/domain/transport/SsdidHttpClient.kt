@@ -14,6 +14,7 @@ class SsdidHttpClient(registryUrl: String) {
     private val json = Json {
         ignoreUnknownKeys = true
         encodeDefaults = true
+        explicitNulls = false
     }
 
     private val okHttp = OkHttpClient.Builder()

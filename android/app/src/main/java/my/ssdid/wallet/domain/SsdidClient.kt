@@ -6,9 +6,11 @@ import my.ssdid.wallet.domain.transport.SsdidHttpClient
 import my.ssdid.wallet.domain.transport.dto.*
 import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.domain.verifier.Verifier
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonObject
 import java.security.MessageDigest
 import java.util.Base64
 
@@ -17,13 +19,21 @@ class SsdidClient(
     private val verifier: Verifier,
     private val httpClient: SsdidHttpClient
 ) {
+    private val wireJson = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+        explicitNulls = false
+    }
+
     /** Flow 1: Create identity and publish DID to Registry */
     suspend fun initIdentity(name: String, algorithm: Algorithm): Result<Identity> = runCatching {
         val identity = vault.createIdentity(name, algorithm).getOrThrow()
         val didDoc = vault.buildDidDocument(identity.keyId).getOrThrow()
+        val didDocJson = wireJson.encodeToString(didDoc)
+        val didDocJsonObject = wireJson.parseToJsonElement(didDocJson).jsonObject
         val proof = vault.createProof(
             identity.keyId,
-            mapOf("id" to didDoc.id),
+            didDocJsonObject,
             "assertionMethod"
         ).getOrThrow()
         httpClient.registry.registerDid(RegisterDidRequest(didDoc, proof))
