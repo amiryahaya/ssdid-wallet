@@ -530,12 +530,12 @@ class KazSigner(
         }
 
         /**
-         * Compute SHA3-256 hash of data.
+         * Compute SHA-256 hash of data.
          *
          * This is a standalone function that does not require a KazSigner instance.
          *
          * @param data The data to hash
-         * @return 32-byte SHA3-256 hash
+         * @return 32-byte SHA-256 hash
          * @throws KazSignException if hashing fails
          */
         fun sha3_256(data: ByteArray): ByteArray {

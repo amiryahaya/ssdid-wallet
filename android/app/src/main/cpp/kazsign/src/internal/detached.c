@@ -3,17 +3,17 @@
  * Version 3.0
  *
  * Provides detached signing and verification where the signature
- * does not include the original message. Uses level-matched SHA3
- * hashing internally.
+ * does not include the original message. Uses level-matched SHA-2
+ * hashing internally (SHA-256/384/512 to match Java reference).
  *
  * Detached sign:
- *   1. Hash message with level-matched SHA3
+ *   1. Hash message with level-matched hash (SHA-256/384/512)
  *   2. Sign the hash using message-recovery mode (kaz_sign_signature_ex)
- *   3. Extract only S1||S2||S3 (discard embedded hash)
+ *   3. Extract only S1||S2 (discard embedded hash)
  *
  * Detached verify:
- *   1. Hash message with level-matched SHA3
- *   2. Reconstruct full signature as S1||S2||S3||hash
+ *   1. Hash message with level-matched hash (SHA-256/384/512)
+ *   2. Reconstruct full signature as S1||S2||hash
  *   3. Verify using kaz_sign_verify_ex
  *   4. Confirm recovered message matches our hash
  */
@@ -72,7 +72,7 @@ int kaz_sign_detached_ex(kaz_sign_level_t level,
         return KAZ_SIGN_ERROR_MEMORY;
     }
 
-    /* Hash the message with level-matched SHA3 */
+    /* Hash the message with level-matched SHA-2 */
     ret = kaz_sign_hash_ex(level, msg, msglen, digest);
     if (ret != KAZ_SIGN_SUCCESS) {
         kaz_secure_zero(digest, params->hash_bytes);
@@ -123,7 +123,7 @@ int kaz_sign_verify_detached_ex(kaz_sign_level_t level,
         return KAZ_SIGN_ERROR_MEMORY;
     }
 
-    /* Hash the message with level-matched SHA3 */
+    /* Hash the message with level-matched SHA-2 */
     ret = kaz_sign_hash_ex(level, msg, msglen, digest);
     if (ret != KAZ_SIGN_SUCCESS) {
         kaz_secure_zero(digest, params->hash_bytes);
@@ -174,14 +174,14 @@ int kaz_sign_detached_prehashed_ex(kaz_sign_level_t level,
         return KAZ_SIGN_ERROR_INVALID;
     }
 
-    /* Allocate buffer for full signature (S1||S2||S3||hash) */
+    /* Allocate buffer for full signature (S1||S2||hash) */
     full_sig = malloc(params->signature_overhead + params->hash_bytes);
     if (!full_sig) {
         return KAZ_SIGN_ERROR_MEMORY;
     }
 
     /* Sign the hash as a message using message-recovery mode.
-     * This produces: S1||S2||S3||hash (the hash is the "message") */
+     * This produces: S1||S2||hash (the hash is the "message") */
     ret = kaz_sign_signature_ex(level, full_sig, &full_siglen,
                                  hash, params->hash_bytes, sk);
     if (ret != KAZ_SIGN_SUCCESS) {
@@ -190,7 +190,7 @@ int kaz_sign_detached_prehashed_ex(kaz_sign_level_t level,
         return ret;
     }
 
-    /* Extract only S1||S2||S3 (discard the embedded hash portion) */
+    /* Extract only S1||S2 (discard the embedded hash portion) */
     memcpy(sig, full_sig, params->signature_overhead);
     *siglen = params->signature_overhead;
 
@@ -235,7 +235,7 @@ int kaz_sign_verify_detached_prehashed_ex(kaz_sign_level_t level,
         return KAZ_SIGN_ERROR_INVALID;
     }
 
-    /* Reconstruct full signature: S1||S2||S3||hash */
+    /* Reconstruct full signature: S1||S2||hash */
     full_sig = malloc(params->signature_overhead + params->hash_bytes);
     if (!full_sig) {
         return KAZ_SIGN_ERROR_MEMORY;

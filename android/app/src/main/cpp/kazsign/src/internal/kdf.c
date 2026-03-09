@@ -13,9 +13,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* Use SHA3-512 as the default hash for KDF */
-#define KDF_HASH_ALG EVP_sha3_512()
-#define KDF_HASH_LEN 64
+/* Use SHA-256 as the default hash for KDF (aligned with JCAJCE) */
+#define KDF_HASH_ALG EVP_sha256()
+#define KDF_HASH_LEN 32
 
 /* ============================================================================
  * HKDF-Extract Implementation

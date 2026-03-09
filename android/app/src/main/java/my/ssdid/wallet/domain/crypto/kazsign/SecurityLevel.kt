@@ -30,9 +30,9 @@ enum class SecurityLevel(
      */
     LEVEL_128(
         value = 128,
-        secretKeyBytes = 32,
-        publicKeyBytes = 54,
-        signatureOverhead = 162,
+        secretKeyBytes = 98,
+        publicKeyBytes = 49,
+        signatureOverhead = 57,
         hashBytes = 32,
         algorithmName = "KAZ-SIGN-128"
     ),
@@ -42,9 +42,9 @@ enum class SecurityLevel(
      */
     LEVEL_192(
         value = 192,
-        secretKeyBytes = 50,
-        publicKeyBytes = 88,
-        signatureOverhead = 264,
+        secretKeyBytes = 146,
+        publicKeyBytes = 73,
+        signatureOverhead = 81,
         hashBytes = 48,
         algorithmName = "KAZ-SIGN-192"
     ),
@@ -54,9 +54,9 @@ enum class SecurityLevel(
      */
     LEVEL_256(
         value = 256,
-        secretKeyBytes = 64,
-        publicKeyBytes = 118,
-        signatureOverhead = 356,
+        secretKeyBytes = 194,
+        publicKeyBytes = 97,
+        signatureOverhead = 105,
         hashBytes = 64,
         algorithmName = "KAZ-SIGN-256"
     );

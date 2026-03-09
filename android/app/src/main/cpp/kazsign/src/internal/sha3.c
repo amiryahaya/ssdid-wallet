@@ -1,7 +1,10 @@
 /*
- * KAZ-SIGN Standalone SHA3-256 Implementation
+ * KAZ-SIGN Standalone SHA-256 Implementation
  *
- * Provides one-shot and incremental SHA3-256 hashing using OpenSSL EVP.
+ * Provides one-shot and incremental SHA-256 hashing using OpenSSL EVP.
+ * Function names retain kaz_sha3_256 prefix for API compatibility.
+ *
+ * Aligned with kaz-pqc-jcajce-v2.0 which uses SHA-256 for all levels.
  */
 
 #include "kaz/sign.h"
@@ -9,8 +12,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* SHA3-256 output length in bytes */
-#define SHA3_256_DIGEST_LEN 32
+/* SHA-256 output length in bytes */
+#define SHA256_DIGEST_LEN 32
 
 /* ============================================================================
  * Internal context structure
@@ -21,7 +24,7 @@ struct kaz_sha3_ctx_st {
 };
 
 /* ============================================================================
- * One-shot SHA3-256
+ * One-shot SHA-256 (API-compatible: kaz_sha3_256)
  * ============================================================================ */
 
 int kaz_sha3_256(const unsigned char *msg,
@@ -41,7 +44,7 @@ int kaz_sha3_256(const unsigned char *msg,
         return KAZ_SIGN_ERROR_HASH;
     }
 
-    if (EVP_DigestInit_ex(ctx, EVP_sha3_256(), NULL) != 1) {
+    if (EVP_DigestInit_ex(ctx, EVP_sha256(), NULL) != 1) {
         goto cleanup;
     }
 
@@ -62,7 +65,7 @@ int kaz_sha3_256(const unsigned char *msg,
         goto cleanup;
     }
 
-    if (out_len != SHA3_256_DIGEST_LEN) {
+    if (out_len != SHA256_DIGEST_LEN) {
         goto cleanup;
     }
 
@@ -74,7 +77,7 @@ cleanup:
 }
 
 /* ============================================================================
- * Incremental SHA3-256: Init
+ * Incremental SHA-256: Init
  * ============================================================================ */
 
 kaz_sha3_ctx_t *kaz_sha3_256_init(void)
@@ -90,7 +93,7 @@ kaz_sha3_ctx_t *kaz_sha3_256_init(void)
         return NULL;
     }
 
-    if (EVP_DigestInit_ex(ctx->md_ctx, EVP_sha3_256(), NULL) != 1) {
+    if (EVP_DigestInit_ex(ctx->md_ctx, EVP_sha256(), NULL) != 1) {
         EVP_MD_CTX_free(ctx->md_ctx);
         free(ctx);
         return NULL;
@@ -100,7 +103,7 @@ kaz_sha3_ctx_t *kaz_sha3_256_init(void)
 }
 
 /* ============================================================================
- * Incremental SHA3-256: Update
+ * Incremental SHA-256: Update
  * ============================================================================ */
 
 int kaz_sha3_256_update(kaz_sha3_ctx_t *ctx,
@@ -131,7 +134,7 @@ int kaz_sha3_256_update(kaz_sha3_ctx_t *ctx,
 }
 
 /* ============================================================================
- * Incremental SHA3-256: Final
+ * Incremental SHA-256: Final
  * ============================================================================ */
 
 int kaz_sha3_256_final(kaz_sha3_ctx_t *ctx,
@@ -149,7 +152,7 @@ int kaz_sha3_256_final(kaz_sha3_ctx_t *ctx,
         return KAZ_SIGN_ERROR_HASH;
     }
 
-    if (out_len != SHA3_256_DIGEST_LEN) {
+    if (out_len != SHA256_DIGEST_LEN) {
         EVP_MD_CTX_free(ctx->md_ctx);
         ctx->md_ctx = NULL;
         return KAZ_SIGN_ERROR_HASH;
@@ -163,7 +166,7 @@ int kaz_sha3_256_final(kaz_sha3_ctx_t *ctx,
 }
 
 /* ============================================================================
- * Incremental SHA3-256: Free
+ * Incremental SHA-256: Free
  * ============================================================================ */
 
 void kaz_sha3_256_free(kaz_sha3_ctx_t *ctx)
