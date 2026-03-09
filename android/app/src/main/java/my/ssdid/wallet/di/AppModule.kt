@@ -8,6 +8,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.backup.BackupManager
+import my.ssdid.wallet.domain.credential.CredentialIssuanceManager
 import my.ssdid.wallet.domain.crypto.ClassicalProvider
 import my.ssdid.wallet.domain.crypto.CryptoProvider
 import my.ssdid.wallet.domain.crypto.PqcProvider
@@ -111,6 +112,13 @@ object AppModule {
         keystoreManager: KeystoreManager,
         activityRepo: ActivityRepository
     ): BackupManager = BackupManager(vault, storage, keystoreManager, activityRepo)
+
+    @Provides
+    @Singleton
+    fun provideCredentialIssuanceManager(
+        vault: Vault,
+        httpClient: SsdidHttpClient
+    ): CredentialIssuanceManager = CredentialIssuanceManager(vault, httpClient)
 
     @Provides
     @Singleton

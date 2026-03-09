@@ -9,6 +9,7 @@ import androidx.navigation.navArgument
 import my.ssdid.wallet.feature.auth.AuthFlowScreen
 import my.ssdid.wallet.feature.backup.BackupScreen
 import my.ssdid.wallet.feature.credentials.CredentialDetailScreen
+import my.ssdid.wallet.feature.credentials.CredentialOfferScreen
 import my.ssdid.wallet.feature.credentials.CredentialsScreen
 import my.ssdid.wallet.feature.device.DeviceManagementScreen
 import my.ssdid.wallet.feature.history.TxHistoryScreen
@@ -88,11 +89,12 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
         composable(Screen.ScanQr.route) {
             ScanQrScreen(
                 onBack = { navController.popBackStack() },
-                onScanned = { serverUrl, serverDid, action, sessionToken ->
-                    when (action) {
-                        "register" -> navController.navigate(Screen.Registration.createRoute(serverUrl, serverDid))
-                        "authenticate" -> navController.navigate(Screen.AuthFlow.createRoute(serverUrl))
-                        "sign" -> navController.navigate(Screen.TxSigning.createRoute(serverUrl, sessionToken))
+                onScanned = { payload ->
+                    when (payload.action) {
+                        "register" -> navController.navigate(Screen.Registration.createRoute(payload.serverUrl, payload.serverDid))
+                        "authenticate" -> navController.navigate(Screen.AuthFlow.createRoute(payload.serverUrl))
+                        "sign" -> navController.navigate(Screen.TxSigning.createRoute(payload.serverUrl, payload.sessionToken))
+                        "credential-offer" -> navController.navigate(Screen.CredentialOffer.createRoute(payload.issuerUrl, payload.offerId))
                     }
                 }
             )
@@ -132,6 +134,20 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
             )
         ) {
             TxSigningScreen(
+                onBack = { navController.popBackStack() },
+                onComplete = {
+                    navController.popBackStack(Screen.WalletHome.route, inclusive = false)
+                }
+            )
+        }
+        composable(
+            Screen.CredentialOffer.route,
+            arguments = listOf(
+                navArgument("issuerUrl") { type = NavType.StringType; defaultValue = "" },
+                navArgument("offerId") { type = NavType.StringType; defaultValue = "" }
+            )
+        ) {
+            CredentialOfferScreen(
                 onBack = { navController.popBackStack() },
                 onComplete = {
                     navController.popBackStack(Screen.WalletHome.route, inclusive = false)

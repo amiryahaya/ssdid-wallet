@@ -32,6 +32,10 @@ class SsdidHttpClient(registryUrl: String) {
         return buildRetrofit(serverUrl).create(ServerApi::class.java)
     }
 
+    fun issuerApi(baseUrl: String): IssuerApi {
+        return buildRetrofit(baseUrl).create(IssuerApi::class.java)
+    }
+
     private fun buildRetrofit(baseUrl: String): Retrofit {
         return Retrofit.Builder()
             .baseUrl(baseUrl.trimEnd('/') + "/")

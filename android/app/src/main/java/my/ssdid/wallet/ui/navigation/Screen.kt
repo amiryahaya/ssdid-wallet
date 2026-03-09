@@ -26,6 +26,10 @@ sealed class Screen(val route: String) {
     object CredentialDetail : Screen("credential_detail/{credentialId}") {
         fun createRoute(credentialId: String) = "credential_detail/${Uri.encode(credentialId)}"
     }
+    object CredentialOffer : Screen("credential_offer?issuerUrl={issuerUrl}&offerId={offerId}") {
+        fun createRoute(issuerUrl: String, offerId: String) =
+            "credential_offer?issuerUrl=${Uri.encode(issuerUrl)}&offerId=${Uri.encode(offerId)}"
+    }
     object Settings : Screen("settings")
     object TxHistory : Screen("tx_history")
     object RecoverySetup : Screen("recovery_setup/{keyId}") {
