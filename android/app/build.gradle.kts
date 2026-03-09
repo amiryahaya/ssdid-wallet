@@ -66,6 +66,9 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
+    // AppCompat (for LocalizationManager / AppCompatDelegate locale support)
+    implementation("androidx.appcompat:appcompat:1.7.0")
+
     // Biometric
     implementation("androidx.biometric:biometric:1.2.0-alpha05")
 

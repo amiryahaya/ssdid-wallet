@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import my.ssdid.wallet.platform.i18n.LocalizationManager
 import my.ssdid.wallet.ui.theme.*
 
 @Composable
@@ -24,12 +25,9 @@ fun SettingsScreen(
     val autoLockMinutes by viewModel.autoLockMinutes.collectAsState()
     val defaultAlgorithm by viewModel.defaultAlgorithm.collectAsState()
     val language by viewModel.language.collectAsState()
+    var showLanguageDialog by remember { mutableStateOf(false) }
 
-    val languageDisplay = when (language) {
-        "ms" -> "Bahasa Melayu"
-        "zh" -> "\u4E2D\u6587"
-        else -> "English"
-    }
+    val languageDisplay = LocalizationManager.localeNames[language] ?: "English"
 
     val algorithmDisplay = defaultAlgorithm
         .replace("_", "-")
@@ -65,13 +63,53 @@ fun SettingsScreen(
 
             item { Spacer(Modifier.height(16.dp)); Text("PREFERENCES", style = MaterialTheme.typography.labelMedium); Spacer(Modifier.height(8.dp)) }
             item { SettingsItem("Appearance", "Dark") }
-            item { SettingsItem("Language", languageDisplay) }
+            item { SettingsItem("Language", languageDisplay, onClick = { showLanguageDialog = true }) }
             item { SettingsItem("Default Algorithm", algorithmDisplay) }
 
             item { Spacer(Modifier.height(16.dp)); Text("ABOUT", style = MaterialTheme.typography.labelMedium); Spacer(Modifier.height(8.dp)) }
             item { SettingsItem("Version", "1.0.0 (Build 1)") }
             item { SettingsItem("W3C DID 1.1", "Compliant") }
         }
+    }
+
+    if (showLanguageDialog) {
+        AlertDialog(
+            onDismissRequest = { showLanguageDialog = false },
+            title = { Text("Select Language") },
+            text = {
+                Column {
+                    LocalizationManager.supportedLocales.forEach { tag ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    viewModel.setLanguage(tag)
+                                    LocalizationManager.setLocale(tag)
+                                    showLanguageDialog = false
+                                }
+                                .padding(vertical = 8.dp)
+                        ) {
+                            RadioButton(
+                                selected = language == tag,
+                                onClick = {
+                                    viewModel.setLanguage(tag)
+                                    LocalizationManager.setLocale(tag)
+                                    showLanguageDialog = false
+                                }
+                            )
+                            Text(
+                                LocalizationManager.localeNames[tag] ?: tag,
+                                modifier = Modifier.padding(start = 8.dp)
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showLanguageDialog = false }) { Text("Cancel") }
+            }
+        )
     }
 }
 
