@@ -25,6 +25,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import my.ssdid.wallet.domain.model.VerifiableCredential
+import my.ssdid.wallet.domain.revocation.RevocationManager
+import my.ssdid.wallet.domain.revocation.RevocationStatus
 import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
@@ -32,6 +34,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CredentialDetailViewModel @Inject constructor(
     private val vault: Vault,
+    private val revocationManager: RevocationManager,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     val credentialId: String = savedStateHandle["credentialId"] ?: ""
@@ -39,12 +42,19 @@ class CredentialDetailViewModel @Inject constructor(
     private val _credential = MutableStateFlow<VerifiableCredential?>(null)
     val credential = _credential.asStateFlow()
 
+    private val _revocationStatus = MutableStateFlow<RevocationStatus?>(null)
+    val revocationStatus = _revocationStatus.asStateFlow()
+
     private val _deleted = MutableStateFlow(false)
     val deleted = _deleted.asStateFlow()
 
     init {
         viewModelScope.launch {
-            _credential.value = vault.listCredentials().find { it.id == credentialId }
+            val vc = vault.listCredentials().find { it.id == credentialId }
+            _credential.value = vc
+            if (vc != null) {
+                _revocationStatus.value = revocationManager.checkRevocation(vc)
+            }
         }
     }
 
@@ -64,6 +74,7 @@ fun CredentialDetailScreen(
 ) {
     val credential by viewModel.credential.collectAsState()
     val deleted by viewModel.deleted.collectAsState()
+    val revocationStatus by viewModel.revocationStatus.collectAsState()
     var showRawJson by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
 
@@ -120,16 +131,36 @@ fun CredentialDetailScreen(
                                 val isExpired = vc.expirationDate?.let {
                                     try { Instant.now().isAfter(Instant.parse(it)) } catch (_: Exception) { false }
                                 } ?: false
+                                val isRevoked = revocationStatus == RevocationStatus.REVOKED
+                                val statusUnknown = revocationStatus == RevocationStatus.UNKNOWN
+
+                                val statusText = when {
+                                    isRevoked -> "Revoked"
+                                    isExpired -> "Expired"
+                                    statusUnknown -> "Status Unknown"
+                                    else -> "Valid"
+                                }
+                                val statusColor = when {
+                                    isRevoked || isExpired -> Danger
+                                    statusUnknown -> Warning
+                                    else -> Success
+                                }
+                                val statusBg = when {
+                                    isRevoked || isExpired -> DangerDim
+                                    statusUnknown -> WarningDim
+                                    else -> SuccessDim
+                                }
+
                                 Box(
                                     Modifier
                                         .clip(RoundedCornerShape(4.dp))
-                                        .background(if (isExpired) DangerDim else SuccessDim)
+                                        .background(statusBg)
                                         .padding(horizontal = 10.dp, vertical = 3.dp)
                                 ) {
                                     Text(
-                                        if (isExpired) "Expired" else "Valid",
+                                        statusText,
                                         fontSize = 11.sp,
-                                        color = if (isExpired) Danger else Success,
+                                        color = statusColor,
                                         fontWeight = FontWeight.Medium
                                     )
                                 }

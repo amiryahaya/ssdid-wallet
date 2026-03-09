@@ -3,6 +3,8 @@ package my.ssdid.wallet.domain
 import my.ssdid.wallet.domain.crypto.Multibase
 import my.ssdid.wallet.domain.history.ActivityRepository
 import my.ssdid.wallet.domain.model.*
+import my.ssdid.wallet.domain.revocation.RevocationManager
+import my.ssdid.wallet.domain.revocation.RevocationStatus
 import my.ssdid.wallet.domain.transport.NetworkResult
 import my.ssdid.wallet.domain.transport.SsdidHttpClient
 import my.ssdid.wallet.domain.transport.dto.*
@@ -24,7 +26,8 @@ class SsdidClient(
     private val vault: Vault,
     private val verifier: Verifier,
     private val httpClient: SsdidHttpClient,
-    private val activityRepo: ActivityRepository
+    private val activityRepo: ActivityRepository,
+    private val revocationManager: RevocationManager
 ) {
     private val wireJson = Json {
         ignoreUnknownKeys = true
@@ -145,6 +148,12 @@ class SsdidClient(
 
     /** Flow 3: Authenticate with a service */
     suspend fun authenticate(credential: VerifiableCredential, serverUrl: String): Result<AuthenticateResponse> = runCatching {
+        // Check revocation status before presenting credential
+        val revocationStatus = revocationManager.checkRevocation(credential)
+        if (revocationStatus == RevocationStatus.REVOKED) {
+            throw SecurityException("Credential has been revoked")
+        }
+
         val serverApi = httpClient.serverApi(serverUrl)
         val resp = serverApi.authenticate(AuthenticateRequest(credential))
 

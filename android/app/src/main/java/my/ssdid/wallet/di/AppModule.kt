@@ -16,8 +16,11 @@ import my.ssdid.wallet.domain.crypto.CryptoProvider
 import my.ssdid.wallet.domain.crypto.PqcProvider
 import my.ssdid.wallet.domain.history.ActivityRepository
 import my.ssdid.wallet.domain.recovery.RecoveryManager
+import my.ssdid.wallet.domain.revocation.HttpStatusListFetcher
+import my.ssdid.wallet.domain.revocation.RevocationManager
 import my.ssdid.wallet.domain.rotation.KeyRotationManager
 import my.ssdid.wallet.domain.transport.SsdidHttpClient
+import kotlinx.serialization.json.Json
 import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.domain.vault.VaultImpl
 import my.ssdid.wallet.domain.vault.VaultStorage
@@ -79,12 +82,20 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideRevocationManager(): RevocationManager {
+        val json = Json { ignoreUnknownKeys = true }
+        return RevocationManager(HttpStatusListFetcher(json))
+    }
+
+    @Provides
+    @Singleton
     fun provideSsdidClient(
         vault: Vault,
         verifier: Verifier,
         httpClient: SsdidHttpClient,
-        activityRepo: ActivityRepository
-    ): SsdidClient = SsdidClient(vault, verifier, httpClient, activityRepo)
+        activityRepo: ActivityRepository,
+        revocationManager: RevocationManager
+    ): SsdidClient = SsdidClient(vault, verifier, httpClient, activityRepo, revocationManager)
 
     @Provides
     @Singleton

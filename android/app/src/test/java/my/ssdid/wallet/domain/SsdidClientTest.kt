@@ -6,6 +6,8 @@ import kotlinx.coroutines.test.runTest
 import my.ssdid.wallet.domain.crypto.Multibase
 import my.ssdid.wallet.domain.model.*
 import my.ssdid.wallet.domain.history.ActivityRepository
+import my.ssdid.wallet.domain.revocation.RevocationManager
+import my.ssdid.wallet.domain.revocation.RevocationStatus
 import my.ssdid.wallet.domain.transport.RegistryApi
 import my.ssdid.wallet.domain.transport.ServerApi
 import my.ssdid.wallet.domain.transport.SsdidHttpClient
@@ -24,6 +26,7 @@ class SsdidClientTest {
     private lateinit var registryApi: RegistryApi
     private lateinit var serverApi: ServerApi
     private lateinit var activityRepo: ActivityRepository
+    private lateinit var revocationManager: RevocationManager
 
     private val testProof = Proof(
         type = "Ed25519Signature2020",
@@ -74,11 +77,13 @@ class SsdidClientTest {
         registryApi = mockk(relaxed = true)
         serverApi = mockk(relaxed = true)
         activityRepo = mockk(relaxed = true)
+        revocationManager = mockk(relaxed = true)
+        coEvery { revocationManager.checkRevocation(any()) } returns RevocationStatus.VALID
 
         every { httpClient.registry } returns registryApi
         every { httpClient.serverApi(any()) } returns serverApi
 
-        client = SsdidClient(vault, verifier, httpClient, activityRepo)
+        client = SsdidClient(vault, verifier, httpClient, activityRepo, revocationManager)
     }
 
     // --- Flow 1: initIdentity ---
@@ -314,5 +319,35 @@ class SsdidClientTest {
         val result = client.signTransaction("session", testIdentity, mapOf("a" to "b"), "https://server.example.com")
 
         assertThat(result.isFailure).isTrue()
+    }
+
+    // --- Revocation ---
+
+    @Test
+    fun `authenticate fails when credential is revoked`() = runTest {
+        coEvery { revocationManager.checkRevocation(testVc) } returns RevocationStatus.REVOKED
+
+        val result = client.authenticate(testVc, "https://server.example.com")
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(SecurityException::class.java)
+        assertThat(result.exceptionOrNull()?.message).contains("revoked")
+    }
+
+    @Test
+    fun `authenticate proceeds when revocation status is UNKNOWN`() = runTest {
+        coEvery { revocationManager.checkRevocation(testVc) } returns RevocationStatus.UNKNOWN
+        val authResp = AuthenticateResponse(
+            session_token = "session-abc",
+            server_did = "did:ssdid:server",
+            server_key_id = "did:ssdid:server#key-1",
+            server_signature = "uSessionSig"
+        )
+        coEvery { serverApi.authenticate(any()) } returns authResp
+        coEvery { verifier.verifyChallengeResponse("did:ssdid:server", "did:ssdid:server#key-1", "session-abc", "uSessionSig") } returns Result.success(true)
+
+        val result = client.authenticate(testVc, "https://server.example.com")
+
+        assertThat(result.isSuccess).isTrue()
     }
 }
