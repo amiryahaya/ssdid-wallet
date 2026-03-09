@@ -68,6 +68,30 @@ class SsdidClient(
         identity
     }
 
+    /** Update DID Document on Registry (used by rotation and recovery) */
+    suspend fun updateDidDocument(keyId: String): Result<Unit> = runCatching {
+        val identity = vault.getIdentity(keyId)
+            ?: throw IllegalArgumentException("Identity not found: $keyId")
+        val didDoc = vault.buildDidDocument(keyId).getOrThrow()
+        val didDocJson = wireJson.encodeToString(didDoc)
+        val didDocJsonObject = wireJson.parseToJsonElement(didDocJson).jsonObject
+        val proof = vault.createProof(keyId, didDocJsonObject, "capabilityInvocation").getOrThrow()
+        httpClient.registry.updateDid(identity.did, UpdateDidRequest(didDoc, proof))
+    }
+
+    /** Deactivate DID — irreversible */
+    suspend fun deactivateDid(keyId: String): Result<Unit> = runCatching {
+        val identity = vault.getIdentity(keyId)
+            ?: throw IllegalArgumentException("Identity not found: $keyId")
+        val deactivateData = wireJson.parseToJsonElement(
+            """{"id":"${identity.did}","deactivated":true}"""
+        ).jsonObject
+        val proof = vault.createProof(keyId, deactivateData, "capabilityInvocation").getOrThrow()
+        httpClient.registry.deactivateDid(identity.did, DeactivateDidRequest(proof))
+        vault.deleteIdentity(keyId).getOrThrow()
+        logActivity(ActivityType.IDENTITY_CREATED, identity.did, details = mapOf("action" to "deactivated"))
+    }
+
     /** Flow 2: Register with a service (mutual auth) */
     suspend fun registerWithService(identity: Identity, serverUrl: String): Result<VerifiableCredential> = runCatching {
         val serverApi = httpClient.serverApi(serverUrl)

@@ -14,6 +14,7 @@ import my.ssdid.wallet.domain.crypto.PqcProvider
 import my.ssdid.wallet.domain.model.*
 import my.ssdid.wallet.domain.transport.RegistryApi
 import my.ssdid.wallet.domain.transport.dto.RegisterDidRequest
+import my.ssdid.wallet.domain.transport.dto.UpdateDidRequest
 import my.ssdid.wallet.domain.vault.VaultImpl
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -248,7 +249,7 @@ class RegistryIntegrationTest {
             challenge = challengeResp.challenge,
             domain = "registry.ssdid.example"
         )
-        val updateResp = registryApi.updateDid(did.value, RegisterDidRequest(updatedDoc, updateProof))
+        val updateResp = registryApi.updateDid(did.value, UpdateDidRequest(updatedDoc, updateProof))
         assertThat(updateResp.did).isEqualTo(did.value)
 
         val resolved = registryApi.resolveDid(did.value)

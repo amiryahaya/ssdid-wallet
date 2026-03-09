@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -22,6 +23,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.ui.theme.*
@@ -30,14 +32,26 @@ import javax.inject.Inject
 @HiltViewModel
 class IdentityDetailViewModel @Inject constructor(
     private val vault: Vault,
+    private val ssdidClient: SsdidClient,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val keyId: String = savedStateHandle["keyId"] ?: ""
     private val _identity = MutableStateFlow<Identity?>(null)
     val identity = _identity.asStateFlow()
 
+    private val _error = MutableStateFlow<String?>(null)
+    val error = _error.asStateFlow()
+
     init {
         viewModelScope.launch { _identity.value = vault.getIdentity(keyId) }
+    }
+
+    fun deactivateIdentity(onComplete: () -> Unit) {
+        viewModelScope.launch {
+            ssdidClient.deactivateDid(keyId)
+                .onSuccess { onComplete() }
+                .onFailure { _error.value = it.message ?: "Deactivation failed" }
+        }
     }
 }
 
@@ -100,6 +114,56 @@ fun IdentityDetailScreen(
                         ActionCard("\uD83D\uDD04", "Rotate Key", Modifier.weight(1f)) { onKeyRotation(keyId) }
                         ActionCard("\uD83D\uDCF1", "Devices", Modifier.weight(1f)) { onDeviceManagement(keyId) }
                     }
+                }
+
+                // Danger zone
+                item {
+                    Spacer(Modifier.height(24.dp))
+                    Text("DANGER ZONE", style = MaterialTheme.typography.labelMedium, color = Danger)
+                    Spacer(Modifier.height(8.dp))
+
+                    var showDeactivateDialog by remember { mutableStateOf(false) }
+
+                    Button(
+                        onClick = { showDeactivateDialog = true },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Danger),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("Deactivate Identity", color = Color.White)
+                    }
+
+                    if (showDeactivateDialog) {
+                        AlertDialog(
+                            onDismissRequest = { showDeactivateDialog = false },
+                            title = { Text("Deactivate Identity?") },
+                            text = {
+                                Text(
+                                    "This is irreversible. Your DID will be permanently " +
+                                        "deactivated on the registry and all associated " +
+                                        "data will be deleted."
+                                )
+                            },
+                            confirmButton = {
+                                Button(
+                                    onClick = {
+                                        showDeactivateDialog = false
+                                        viewModel.deactivateIdentity { onBack() }
+                                    },
+                                    colors = ButtonDefaults.buttonColors(containerColor = Danger)
+                                ) {
+                                    Text("Deactivate", color = Color.White)
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { showDeactivateDialog = false }) {
+                                    Text("Cancel")
+                                }
+                            }
+                        )
+                    }
+
+                    Spacer(Modifier.height(24.dp))
                 }
             }
         }
