@@ -21,11 +21,11 @@
 
     <!-- Onboarding -->
     <string name="onboarding_title_1">您的身份，由您掌控</string>
-    <string name="onboarding_desc_1">通过去中心化的自主主权技术掌控您的数字身份。</string>
+    <string name="onboarding_desc_1">SSDID 是一款自主主权身份钱包，让您完全掌控自己的数字身份。没有中央机构。没有数据孤岛。只有您和您的密码密钥。</string>
     <string name="onboarding_title_2">后量子安全</string>
-    <string name="onboarding_desc_2">受 KAZ-Sign 后量子密码学与经典算法的双重保护。</string>
+    <string name="onboarding_desc_2">采用 KAZ-Sign 后量子密码算法，配合 Ed25519 和 ECDSA 等经典算法。您的身份在当前和未来的威胁面前都安全无忧。</string>
     <string name="onboarding_title_3">无缝验证</string>
-    <string name="onboarding_desc_3">使用二维码和深度链接向服务进行注册和身份验证。</string>
+    <string name="onboarding_desc_3">使用二维码和深度链接即时向服务验证身份。注册、证明您的身份并签署交易 — 一切都在您的设备上通过生物识别确认完成。</string>
     <string name="onboarding_next">下一步</string>
     <string name="onboarding_get_started">开始使用</string>
     <string name="onboarding_skip">跳过</string>

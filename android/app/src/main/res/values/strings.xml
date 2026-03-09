@@ -21,11 +21,11 @@
 
     <!-- Onboarding -->
     <string name="onboarding_title_1">Your Identity, Your Control</string>
-    <string name="onboarding_desc_1">Take ownership of your digital identity with decentralized, self-sovereign technology.</string>
+    <string name="onboarding_desc_1">SSDID is a self-sovereign identity wallet that puts you in full control of your digital identity. No central authority. No data silos. Just you and your cryptographic keys.</string>
     <string name="onboarding_title_2">Post-Quantum Security</string>
-    <string name="onboarding_desc_2">Protected by KAZ-Sign post-quantum cryptography alongside classical algorithms.</string>
+    <string name="onboarding_desc_2">Powered by KAZ-Sign, a post-quantum cryptographic algorithm, alongside classical algorithms like Ed25519 and ECDSA. Your identity stays secure against both current and future threats.</string>
     <string name="onboarding_title_3">Seamless Verification</string>
-    <string name="onboarding_desc_3">Register and authenticate with services using QR codes and deep links.</string>
+    <string name="onboarding_desc_3">Authenticate with services instantly using QR codes and deep links. Register, prove your identity, and sign transactions — all from your device with biometric confirmation.</string>
     <string name="onboarding_next">Next</string>
     <string name="onboarding_get_started">Get Started</string>
     <string name="onboarding_skip">Skip</string>
