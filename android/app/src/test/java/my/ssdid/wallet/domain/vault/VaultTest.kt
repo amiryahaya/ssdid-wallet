@@ -57,7 +57,21 @@ class VaultTest {
         val identity = vault.createIdentity("Test", Algorithm.ED25519).getOrThrow()
         val message = "Hello".toByteArray()
         val signature = vault.sign(identity.keyId, message).getOrThrow()
-        assertThat(signature).isNotEmpty()
+
+        val publicKey = Multibase.decode(identity.publicKeyMultibase)
+        val classical = ClassicalProvider()
+        assertThat(classical.verify(Algorithm.ED25519, publicKey, signature, message)).isTrue()
+    }
+
+    @Test
+    fun `sign with ECDSA P-256 produces verifiable signature`() = runTest {
+        val identity = vault.createIdentity("Test-P256", Algorithm.ECDSA_P256).getOrThrow()
+        val message = "test data".toByteArray()
+        val signature = vault.sign(identity.keyId, message).getOrThrow()
+
+        val publicKey = Multibase.decode(identity.publicKeyMultibase)
+        val classical = ClassicalProvider()
+        assertThat(classical.verify(Algorithm.ECDSA_P256, publicKey, signature, message)).isTrue()
     }
 
     @Test
