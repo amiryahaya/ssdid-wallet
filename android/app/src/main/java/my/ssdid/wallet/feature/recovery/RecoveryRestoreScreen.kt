@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -71,6 +72,7 @@ class RecoveryRestoreViewModel @Inject constructor(
 fun RecoveryRestoreScreen(
     onBack: () -> Unit,
     onComplete: () -> Unit,
+    onNavigateToSocialRestore: () -> Unit = {},
     viewModel: RecoveryRestoreViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -165,6 +167,39 @@ fun RecoveryRestoreScreen(
                             color = TextSecondary,
                             lineHeight = 20.sp
                         )
+                    }
+
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = BgCard),
+                            onClick = onNavigateToSocialRestore
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(18.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("\uD83D\uDC65", fontSize = 24.sp)
+                                Spacer(Modifier.width(12.dp))
+                                Column(Modifier.weight(1f)) {
+                                    Text("Social Recovery", style = MaterialTheme.typography.titleMedium)
+                                    Text("Recover using guardian shares", fontSize = 12.sp, color = TextSecondary)
+                                }
+                                Text("\u203A", fontSize = 20.sp, color = TextTertiary)
+                            }
+                        }
+                    }
+
+                    item {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            HorizontalDivider(Modifier.weight(1f), color = Border)
+                            Text("  or use recovery key  ", fontSize = 12.sp, color = TextTertiary)
+                            HorizontalDivider(Modifier.weight(1f), color = Border)
+                        }
                     }
 
                     item {
