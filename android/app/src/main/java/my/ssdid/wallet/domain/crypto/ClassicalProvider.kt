@@ -28,8 +28,8 @@ class ClassicalProvider : CryptoProvider {
     override fun sign(algorithm: Algorithm, privateKey: ByteArray, data: ByteArray): ByteArray {
         return when (algorithm) {
             Algorithm.ED25519 -> signEd25519(privateKey, data)
-            Algorithm.ECDSA_P256 -> signEcdsa("SHA256withECDSA", privateKey, data)
-            Algorithm.ECDSA_P384 -> signEcdsa("SHA384withECDSA", privateKey, data)
+            Algorithm.ECDSA_P256 -> signEcdsa("SHA512withECDSA", privateKey, data)
+            Algorithm.ECDSA_P384 -> signEcdsa("SHA512withECDSA", privateKey, data)
             else -> throw IllegalArgumentException("Unsupported: $algorithm")
         }
     }
@@ -37,8 +37,8 @@ class ClassicalProvider : CryptoProvider {
     override fun verify(algorithm: Algorithm, publicKey: ByteArray, signature: ByteArray, data: ByteArray): Boolean {
         return when (algorithm) {
             Algorithm.ED25519 -> verifyEd25519(publicKey, signature, data)
-            Algorithm.ECDSA_P256 -> verifyEcdsa("SHA256withECDSA", publicKey, signature, data)
-            Algorithm.ECDSA_P384 -> verifyEcdsa("SHA384withECDSA", publicKey, signature, data)
+            Algorithm.ECDSA_P256 -> verifyEcdsa("SHA512withECDSA", publicKey, signature, data)
+            Algorithm.ECDSA_P384 -> verifyEcdsa("SHA512withECDSA", publicKey, signature, data)
             else -> false
         }
     }
@@ -165,11 +165,60 @@ class ClassicalProvider : CryptoProvider {
         val kpg = KeyPairGenerator.getInstance("EC", "BC")
         kpg.initialize(ECGenParameterSpec(curveName))
         val kp = kpg.generateKeyPair()
-        return KeyPairResult(publicKey = kp.public.encoded, privateKey = kp.private.encoded)
+        val pubBytes = extractEcPublicKeyRaw(kp.public.encoded)
+        val privBytes = extractEcPrivateKeyRaw(kp.private.encoded)
+        return KeyPairResult(publicKey = pubBytes, privateKey = privBytes)
+    }
+
+    /**
+     * X.509 SubjectPublicKeyInfo for EC:
+     * SEQUENCE { SEQUENCE { OID ecPublicKey, OID curve }, BIT STRING { 0x00, 0x04 || x || y } }
+     * Extracts the raw uncompressed EC point (65 bytes P-256, 97 bytes P-384).
+     */
+    private fun extractEcPublicKeyRaw(encoded: ByteArray): ByteArray {
+        var i = 0
+        require(encoded[i] == 0x30.toByte()) { "Expected SEQUENCE" }
+        i++; i += derLengthSize(encoded, i)
+        require(encoded[i] == 0x30.toByte()) { "Expected algorithm SEQUENCE" }
+        i++; val algoLen = derReadLength(encoded, i); i += derLengthSize(encoded, i) + algoLen
+        require(encoded[i] == 0x03.toByte()) { "Expected BIT STRING" }
+        i++; val bsLen = derReadLength(encoded, i); i += derLengthSize(encoded, i)
+        require(encoded[i] == 0x00.toByte()) { "Expected 0x00 BIT STRING padding" }
+        i++
+        val keyLen = bsLen - 1
+        return encoded.copyOfRange(i, i + keyLen)
+    }
+
+    /**
+     * PKCS#8 for EC:
+     * SEQUENCE { INTEGER(0), SEQUENCE { OID ecPublicKey, OID curve }, OCTET STRING { ECPrivateKey } }
+     * ECPrivateKey: SEQUENCE { INTEGER(1), OCTET STRING { raw secret } [, context-tagged public key] }
+     * Extracts the raw secret scalar (32 bytes P-256, 48 bytes P-384).
+     */
+    private fun extractEcPrivateKeyRaw(encoded: ByteArray): ByteArray {
+        var i = 0
+        require(encoded[i] == 0x30.toByte()) { "Expected outer SEQUENCE" }
+        i++; i += derLengthSize(encoded, i)
+        require(encoded[i] == 0x02.toByte()) { "Expected INTEGER (version)" }
+        i++; val intLen = derReadLength(encoded, i); i += derLengthSize(encoded, i) + intLen
+        require(encoded[i] == 0x30.toByte()) { "Expected algorithm SEQUENCE" }
+        i++; val algoLen = derReadLength(encoded, i); i += derLengthSize(encoded, i) + algoLen
+        require(encoded[i] == 0x04.toByte()) { "Expected OCTET STRING (ECPrivateKey wrapper)" }
+        i++; i += derLengthSize(encoded, i)
+        // Now inside ECPrivateKey SEQUENCE
+        require(encoded[i] == 0x30.toByte()) { "Expected ECPrivateKey SEQUENCE" }
+        i++; i += derLengthSize(encoded, i)
+        require(encoded[i] == 0x02.toByte()) { "Expected INTEGER (version 1)" }
+        i++; val verLen = derReadLength(encoded, i); i += derLengthSize(encoded, i) + verLen
+        require(encoded[i] == 0x04.toByte()) { "Expected OCTET STRING (private key)" }
+        i++; val keyLen = derReadLength(encoded, i); i += derLengthSize(encoded, i)
+        return encoded.copyOfRange(i, i + keyLen)
     }
 
     private fun signEcdsa(sigAlgo: String, privateKey: ByteArray, data: ByteArray): ByteArray {
-        val keySpec = PKCS8EncodedKeySpec(privateKey)
+        val curveName = if (privateKey.size <= 32) "secp256r1" else "secp384r1"
+        val pkcs8 = wrapEcPrivateKey(privateKey, curveName)
+        val keySpec = PKCS8EncodedKeySpec(pkcs8)
         val kf = KeyFactory.getInstance("EC", "BC")
         val privKey = kf.generatePrivate(keySpec)
         val sig = Signature.getInstance(sigAlgo, "BC")
@@ -179,12 +228,51 @@ class ClassicalProvider : CryptoProvider {
     }
 
     private fun verifyEcdsa(sigAlgo: String, publicKey: ByteArray, signature: ByteArray, data: ByteArray): Boolean {
-        val keySpec = X509EncodedKeySpec(publicKey)
+        val curveName = if (publicKey.size <= 65) "secp256r1" else "secp384r1"
+        val x509 = wrapEcPublicKey(publicKey, curveName)
+        val keySpec = X509EncodedKeySpec(x509)
         val kf = KeyFactory.getInstance("EC", "BC")
         val pubKey = kf.generatePublic(keySpec)
         val sig = Signature.getInstance(sigAlgo, "BC")
         sig.initVerify(pubKey)
         sig.update(data)
         return sig.verify(signature)
+    }
+
+    // EC ASN.1 DER wrapping — curve OID bytes
+    private val secp256r1Oid = byteArrayOf(0x06, 0x08, 0x2a, 0x86.toByte(), 0x48, 0xce.toByte(), 0x3d, 0x03, 0x01, 0x07)
+    private val secp384r1Oid = byteArrayOf(0x06, 0x05, 0x2b, 0x81.toByte(), 0x04, 0x00, 0x22)
+    private val ecPublicKeyOid = byteArrayOf(0x06, 0x07, 0x2a, 0x86.toByte(), 0x48, 0xce.toByte(), 0x3d, 0x02, 0x01)
+
+    private fun curveOid(curveName: String): ByteArray = when (curveName) {
+        "secp256r1" -> secp256r1Oid
+        "secp384r1" -> secp384r1Oid
+        else -> throw IllegalArgumentException("Unsupported curve: $curveName")
+    }
+
+    private fun wrapEcPublicKey(raw: ByteArray, curveName: String): ByteArray {
+        // X.509: SEQUENCE { SEQUENCE { OID ecPublicKey, OID curve }, BIT STRING { 0x00, raw } }
+        val curveOidBytes = curveOid(curveName)
+        val algoSeqContent = ecPublicKeyOid + curveOidBytes
+        val algoSeq = byteArrayOf(0x30, algoSeqContent.size.toByte()) + algoSeqContent
+        val bitString = byteArrayOf(0x03, (raw.size + 1).toByte(), 0x00) + raw
+        val total = algoSeq + bitString
+        return byteArrayOf(0x30, total.size.toByte()) + total
+    }
+
+    private fun wrapEcPrivateKey(raw: ByteArray, curveName: String): ByteArray {
+        // PKCS#8: SEQUENCE { INTEGER(0), SEQUENCE { OID ecPublicKey, OID curve }, OCTET STRING { ECPrivateKey } }
+        // ECPrivateKey: SEQUENCE { INTEGER(1), OCTET STRING { raw } }
+        val version = byteArrayOf(0x02, 0x01, 0x00)
+        val curveOidBytes = curveOid(curveName)
+        val algoSeqContent = ecPublicKeyOid + curveOidBytes
+        val algoSeq = byteArrayOf(0x30, algoSeqContent.size.toByte()) + algoSeqContent
+        val ecVersion = byteArrayOf(0x02, 0x01, 0x01)
+        val privOctet = byteArrayOf(0x04, raw.size.toByte()) + raw
+        val ecPrivKeyContent = ecVersion + privOctet
+        val ecPrivKey = byteArrayOf(0x30, ecPrivKeyContent.size.toByte()) + ecPrivKeyContent
+        val outerOctet = byteArrayOf(0x04, ecPrivKey.size.toByte()) + ecPrivKey
+        val total = version + algoSeq + outerOctet
+        return byteArrayOf(0x30, total.size.toByte()) + total
     }
 }
