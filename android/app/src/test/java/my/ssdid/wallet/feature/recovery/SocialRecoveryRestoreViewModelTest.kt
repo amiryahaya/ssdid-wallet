@@ -117,9 +117,57 @@ class SocialRecoveryRestoreViewModelTest {
     }
 
     @Test
-    fun `restore success transitions to Success and calls setOnboardingCompleted`() = runTest {
-        viewModel.updateShare(0, ShareEntry(index = "1", data = "sharedata1"))
-        viewModel.updateShare(1, ShareEntry(index = "2", data = "sharedata2"))
+    fun `restore with invalid DID format shows error`() = runTest {
+        viewModel.updateShare(0, ShareEntry(index = "1", data = "dGVzdA"))
+        viewModel.updateShare(1, ShareEntry(index = "2", data = "dGVzdA"))
+
+        viewModel.restore("not-a-did", "Test", Algorithm.ED25519)
+
+        assertThat(viewModel.state.value).isInstanceOf(SocialRestoreState.Error::class.java)
+        assertThat((viewModel.state.value as SocialRestoreState.Error).message)
+            .isEqualTo("Invalid DID format")
+    }
+
+    @Test
+    fun `restore with blank name shows error`() = runTest {
+        viewModel.updateShare(0, ShareEntry(index = "1", data = "dGVzdA"))
+        viewModel.updateShare(1, ShareEntry(index = "2", data = "dGVzdA"))
+
+        viewModel.restore("did:ssdid:test", "", Algorithm.ED25519)
+
+        assertThat(viewModel.state.value).isInstanceOf(SocialRestoreState.Error::class.java)
+        assertThat((viewModel.state.value as SocialRestoreState.Error).message)
+            .isEqualTo("DID and identity name are required")
+    }
+
+    @Test
+    fun `restore with blank share data shows error`() = runTest {
+        viewModel.updateShare(0, ShareEntry(index = "1", data = "dGVzdA"))
+        viewModel.updateShare(1, ShareEntry(index = "2", data = ""))
+
+        viewModel.restore("did:ssdid:test", "Test", Algorithm.ED25519)
+
+        assertThat(viewModel.state.value).isInstanceOf(SocialRestoreState.Error::class.java)
+        assertThat((viewModel.state.value as SocialRestoreState.Error).message)
+            .isEqualTo("Share 2: data is required")
+    }
+
+    @Test
+    fun `restore with invalid Base64 share data shows error`() = runTest {
+        viewModel.updateShare(0, ShareEntry(index = "1", data = "!!!invalid!!!"))
+        viewModel.updateShare(1, ShareEntry(index = "2", data = "dGVzdA"))
+
+        viewModel.restore("did:ssdid:test", "Test", Algorithm.ED25519)
+
+        assertThat(viewModel.state.value).isInstanceOf(SocialRestoreState.Error::class.java)
+        assertThat((viewModel.state.value as SocialRestoreState.Error).message)
+            .isEqualTo("Share 1: invalid Base64 data")
+    }
+
+    @Test
+    fun `restore success transitions to Success and calls updateDidDocument and setOnboardingCompleted`() = runTest {
+        viewModel.updateShare(0, ShareEntry(index = "1", data = "dGVzdA"))
+        viewModel.updateShare(1, ShareEntry(index = "2", data = "dGVzdA"))
 
         coEvery {
             socialRecoveryManager.recoverWithShares(any(), any(), any(), any())
@@ -129,13 +177,14 @@ class SocialRecoveryRestoreViewModelTest {
         viewModel.restore("did:ssdid:test", "Test", Algorithm.ED25519)
 
         assertThat(viewModel.state.value).isEqualTo(SocialRestoreState.Success)
+        coVerify { ssdidClient.updateDidDocument(testIdentity.keyId) }
         coVerify { storage.setOnboardingCompleted() }
     }
 
     @Test
     fun `restore failure transitions to Error`() = runTest {
-        viewModel.updateShare(0, ShareEntry(index = "1", data = "sharedata1"))
-        viewModel.updateShare(1, ShareEntry(index = "2", data = "sharedata2"))
+        viewModel.updateShare(0, ShareEntry(index = "1", data = "dGVzdA"))
+        viewModel.updateShare(1, ShareEntry(index = "2", data = "dGVzdA"))
 
         coEvery {
             socialRecoveryManager.recoverWithShares(any(), any(), any(), any())
@@ -146,5 +195,17 @@ class SocialRecoveryRestoreViewModelTest {
         assertThat(viewModel.state.value).isInstanceOf(SocialRestoreState.Error::class.java)
         assertThat((viewModel.state.value as SocialRestoreState.Error).message)
             .isEqualTo("Recovery failed")
+    }
+
+    @Test
+    fun `resetState returns to Idle`() = runTest {
+        viewModel.updateShare(0, ShareEntry(index = "1", data = "dGVzdA"))
+        viewModel.updateShare(1, ShareEntry(index = "2", data = "dGVzdA"))
+        viewModel.restore("did:ssdid:test", "", Algorithm.ED25519)
+        assertThat(viewModel.state.value).isInstanceOf(SocialRestoreState.Error::class.java)
+
+        viewModel.resetState()
+
+        assertThat(viewModel.state.value).isEqualTo(SocialRestoreState.Idle)
     }
 }

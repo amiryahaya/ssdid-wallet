@@ -1,6 +1,6 @@
 package my.ssdid.wallet.feature.recovery
 
-import android.util.Base64
+import java.util.Base64 as JBase64
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -55,12 +55,19 @@ class InstitutionalSetupViewModel @Inject constructor(
 
     fun enroll(orgName: String, orgDid: String, encryptedKeyBase64: String) {
         val id = _identity.value ?: return
-        if (orgName.isBlank() || orgDid.isBlank() || encryptedKeyBase64.isBlank()) return
+        if (orgName.isBlank() || orgDid.isBlank() || encryptedKeyBase64.isBlank()) {
+            _state.value = InstitutionalSetupState.Error("All fields are required")
+            return
+        }
+        if (!orgDid.startsWith("did:")) {
+            _state.value = InstitutionalSetupState.Error("Invalid DID format")
+            return
+        }
 
         viewModelScope.launch {
             _state.value = InstitutionalSetupState.Enrolling
             try {
-                val encryptedKeyBytes = Base64.decode(encryptedKeyBase64, Base64.DEFAULT)
+                val encryptedKeyBytes = JBase64.getDecoder().decode(encryptedKeyBase64.trim())
                 institutionalRecoveryManager.enrollOrganization(id, orgDid, orgName, encryptedKeyBytes)
                     .onSuccess { _state.value = InstitutionalSetupState.Success(orgName) }
                     .onFailure { _state.value = InstitutionalSetupState.Error(it.message ?: "Enrollment failed") }
@@ -68,6 +75,10 @@ class InstitutionalSetupViewModel @Inject constructor(
                 _state.value = InstitutionalSetupState.Error("Invalid Base64 input: ${e.message}")
             }
         }
+    }
+
+    fun resetState() {
+        _state.value = InstitutionalSetupState.Idle
     }
 }
 

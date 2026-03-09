@@ -121,10 +121,17 @@ class SocialRecoverySetupViewModel @Inject constructor(
             val guardianPairs = guardianList.map { it.name to it.did }
             socialRecoveryManager.setupSocialRecovery(id, guardianPairs, thresh)
                 .onSuccess { sharesById ->
-                    // sharesById is keyed by guardian UUID - extract values in order
-                    val shareValues = sharesById.values.toList()
-                    val guardianShares = guardianList.mapIndexed { idx, entry ->
-                        entry.name to shareValues.getOrElse(idx) { "" }
+                    // Use stored config to match guardian IDs to shares deterministically
+                    val config = socialRecoveryManager.getConfig(id.did)
+                    val guardianShares = if (config != null) {
+                        config.guardians.mapNotNull { guardian ->
+                            sharesById[guardian.id]?.let { share -> guardian.name to share }
+                        }
+                    } else {
+                        // Fallback: map entries preserve insertion order in Kotlin
+                        sharesById.entries.zip(guardianList).map { (entry, guardian) ->
+                            guardian.name to entry.value
+                        }
                     }
                     _state.value = SocialSetupState.Success(guardianShares = guardianShares)
                 }
@@ -132,6 +139,10 @@ class SocialRecoverySetupViewModel @Inject constructor(
                     _state.value = SocialSetupState.Error(it.message ?: "Failed to create shares")
                 }
         }
+    }
+
+    fun resetState() {
+        _state.value = SocialSetupState.Idle
     }
 }
 
