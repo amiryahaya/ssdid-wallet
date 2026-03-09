@@ -23,7 +23,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import androidx.compose.ui.platform.LocalContext
+import androidx.fragment.app.FragmentActivity
 import my.ssdid.wallet.domain.backup.BackupManager
+import my.ssdid.wallet.platform.biometric.BiometricAuthenticator
+import my.ssdid.wallet.platform.biometric.BiometricResult
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
 
@@ -42,11 +46,30 @@ sealed class BackupState {
 
 @HiltViewModel
 class BackupViewModel @Inject constructor(
-    private val backupManager: BackupManager
+    private val backupManager: BackupManager,
+    private val biometricAuth: BiometricAuthenticator
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<BackupState>(BackupState.Idle)
     val state = _state.asStateFlow()
+
+    suspend fun requireBiometricForBackup(activity: FragmentActivity): Boolean {
+        if (!biometricAuth.canAuthenticate(activity)) return true
+        return biometricAuth.authenticate(
+            activity,
+            "Backup Wallet",
+            "Authenticate to proceed"
+        ) is BiometricResult.Success
+    }
+
+    suspend fun requireBiometricForRestore(activity: FragmentActivity): Boolean {
+        if (!biometricAuth.canAuthenticate(activity)) return true
+        return biometricAuth.authenticate(
+            activity,
+            "Restore Wallet",
+            "Authenticate to proceed"
+        ) is BiometricResult.Success
+    }
 
     fun createBackup(passphrase: String) {
         viewModelScope.launch {
@@ -79,6 +102,9 @@ fun BackupScreen(
     val state by viewModel.state.collectAsState()
     var passphrase by remember { mutableStateOf("") }
     var confirmPassphrase by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val activity = context as? FragmentActivity
+    val scope = rememberCoroutineScope()
 
     val passphrasesMatch = passphrase == confirmPassphrase && passphrase.length >= 8
     val canCreate = passphrasesMatch && state !is BackupState.Creating
@@ -190,7 +216,13 @@ fun BackupScreen(
 
             // Create Backup button
             Button(
-                onClick = { viewModel.createBackup(passphrase) },
+                onClick = {
+                    scope.launch {
+                        if (activity == null || viewModel.requireBiometricForBackup(activity)) {
+                            viewModel.createBackup(passphrase)
+                        }
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = canCreate,
                 shape = RoundedCornerShape(12.dp),
@@ -292,7 +324,13 @@ fun BackupScreen(
             Spacer(Modifier.height(12.dp))
 
             OutlinedButton(
-                onClick = { /* File picker integration handled by navigation task */ },
+                onClick = {
+                    scope.launch {
+                        if (activity == null || viewModel.requireBiometricForRestore(activity)) {
+                            /* File picker integration handled by navigation task */
+                        }
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = Accent)
