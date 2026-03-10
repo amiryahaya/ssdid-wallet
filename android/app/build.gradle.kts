@@ -37,6 +37,14 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions { jvmTarget = "17" }
+    testOptions {
+        unitTests.all {
+            it.useJUnit()
+            if (System.getenv("CI") != null) {
+                it.exclude("my/ssdid/wallet/integration/**")
+            }
+        }
+    }
     packaging {
         resources {
             excludes += "META-INF/versions/9/OSGI-INF/MANIFEST.MF"
