@@ -160,10 +160,8 @@ fun BackupScreen(
                     viewModel.onBackupFileLoaded(bytes)
                 }
             } catch (e: SecurityException) {
-                viewModel.resetState()
                 Log.w("BackupScreen", "Permission denied reading shared backup file", e)
             } catch (e: Exception) {
-                viewModel.resetState()
                 Log.w("BackupScreen", "Failed to load shared backup file", e)
             }
         }
@@ -382,7 +380,7 @@ fun BackupScreen(
                                     }
                                     context.startActivity(sendIntent)
                                 } catch (_: android.content.ActivityNotFoundException) {
-                                    // SSDID Drive app not installed
+                                    backupFile.delete()
                                 }
                             },
                             modifier = Modifier.fillMaxWidth(),
