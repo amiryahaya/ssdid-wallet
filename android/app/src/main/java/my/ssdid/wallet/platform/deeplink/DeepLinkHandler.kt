@@ -1,6 +1,9 @@
 package my.ssdid.wallet.platform.deeplink
 
 import android.net.Uri
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import my.ssdid.wallet.domain.transport.dto.ClaimRequest
 import my.ssdid.wallet.platform.security.UrlValidator
 import my.ssdid.wallet.ui.navigation.Screen
 
@@ -11,7 +14,10 @@ data class DeepLinkAction(
     val sessionToken: String = "",
     val issuerUrl: String = "",
     val offerId: String = "",
-    val callbackUrl: String = ""
+    val callbackUrl: String = "",
+    val sessionId: String = "",
+    val requestedClaims: List<ClaimRequest> = emptyList(),
+    val acceptedAlgorithms: List<String> = emptyList()
 ) {
     /**
      * Returns the navigation route for this deep link action,
@@ -19,7 +25,16 @@ data class DeepLinkAction(
      */
     fun toNavRoute(): String? = when (action) {
         "register" -> Screen.Registration.createRoute(serverUrl, serverDid)
-        "authenticate" -> Screen.AuthFlow.createRoute(serverUrl, callbackUrl)
+        "authenticate" -> {
+            if (requestedClaims.isNotEmpty()) {
+                val claimsJson = Json.encodeToString(requestedClaims)
+                val algosJson = if (acceptedAlgorithms.isNotEmpty())
+                    Json.encodeToString(acceptedAlgorithms) else ""
+                Screen.Consent.createRoute(serverUrl, callbackUrl, sessionId, claimsJson, algosJson)
+            } else {
+                Screen.AuthFlow.createRoute(serverUrl, callbackUrl)
+            }
+        }
         "sign" -> Screen.TxSigning.createRoute(serverUrl, sessionToken)
         "credential-offer" -> Screen.CredentialOffer.createRoute(issuerUrl, offerId)
         else -> null
@@ -33,11 +48,21 @@ object DeepLinkHandler {
      * Returns null if the URI is not a valid SSDID deep link.
      */
     private val VALID_ACTIONS = setOf("register", "authenticate", "sign", "credential-offer")
+    private val json = Json { ignoreUnknownKeys = true }
 
-    private fun isValidCallbackUrl(url: String): Boolean {
+    private val ALLOWED_CALLBACK_SCHEMES = setOf("https")
+
+    fun isValidCallbackUrl(url: String): Boolean {
         if (url.isEmpty()) return false
-        val parsed = Uri.parse(url)
-        return parsed.scheme?.lowercase() == "ssdiddrive" && parsed.host == "auth"
+        val parsed = try { Uri.parse(url) } catch (_: Exception) { return false }
+        val scheme = parsed.scheme?.lowercase() ?: return false
+        if (scheme in ALLOWED_CALLBACK_SCHEMES) {
+            return !parsed.host.isNullOrBlank()
+        }
+        // Allow registered custom app schemes (letters, digits, +, -, .)
+        // but reject anything that looks like a well-known dangerous scheme
+        return scheme.matches(Regex("^[a-z][a-z0-9+\\-.]*$"))
+            && scheme !in setOf("javascript", "data", "file", "blob", "vbscript", "intent", "android-app", "content", "http")
     }
 
     fun parse(uri: Uri): DeepLinkAction? {
@@ -65,12 +90,31 @@ object DeepLinkHandler {
             if (isValidCallbackUrl(rawCallbackUrl)) rawCallbackUrl else ""
         } else ""
 
+        val sessionId = uri.getQueryParameter("session_id") ?: ""
+
+        val requestedClaims = try {
+            val raw = uri.getQueryParameter("requested_claims") ?: ""
+            if (raw.isNotEmpty()) json.decodeFromString<List<ClaimRequest>>(raw) else emptyList()
+        } catch (_: Exception) {
+            emptyList()
+        }
+
+        val acceptedAlgorithms = try {
+            val raw = uri.getQueryParameter("accepted_algorithms") ?: ""
+            if (raw.isNotEmpty()) json.decodeFromString<List<String>>(raw) else emptyList()
+        } catch (_: Exception) {
+            emptyList()
+        }
+
         return DeepLinkAction(
             action = action,
             serverUrl = serverUrl,
             serverDid = uri.getQueryParameter("server_did") ?: "",
             sessionToken = uri.getQueryParameter("session_token") ?: "",
-            callbackUrl = callbackUrl
+            callbackUrl = callbackUrl,
+            sessionId = sessionId,
+            requestedClaims = requestedClaims,
+            acceptedAlgorithms = acceptedAlgorithms
         )
     }
 }

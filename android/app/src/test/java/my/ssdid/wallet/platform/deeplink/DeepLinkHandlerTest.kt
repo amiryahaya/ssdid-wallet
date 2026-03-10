@@ -235,19 +235,35 @@ class DeepLinkHandlerTest {
     }
 
     @Test
-    fun `parse authenticate rejects non-ssdiddrive callback_url scheme`() {
+    fun `parse authenticate accepts https callback_url`() {
         val uri = mockUri(
             scheme = "ssdid",
             host = "authenticate",
             queryParams = mapOf(
                 "server_url" to "https://demo.ssdid.my",
-                "callback_url" to "https://evil.com/steal"
+                "callback_url" to "https://app.example.com/callback"
             )
         )
         val result = DeepLinkHandler.parse(uri)
 
         assertThat(result).isNotNull()
-        assertThat(result!!.callbackUrl).isEmpty()
+        assertThat(result!!.callbackUrl).isEqualTo("https://app.example.com/callback")
+    }
+
+    @Test
+    fun `parse authenticate accepts custom scheme callback_url`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "authenticate",
+            queryParams = mapOf(
+                "server_url" to "https://demo.ssdid.my",
+                "callback_url" to "myapp://auth-callback"
+            )
+        )
+        val result = DeepLinkHandler.parse(uri)
+
+        assertThat(result).isNotNull()
+        assertThat(result!!.callbackUrl).isEqualTo("myapp://auth-callback")
     }
 
     @Test
@@ -258,6 +274,54 @@ class DeepLinkHandlerTest {
             queryParams = mapOf(
                 "server_url" to "https://demo.ssdid.my",
                 "callback_url" to "javascript:alert(1)"
+            )
+        )
+        val result = DeepLinkHandler.parse(uri)
+
+        assertThat(result).isNotNull()
+        assertThat(result!!.callbackUrl).isEmpty()
+    }
+
+    @Test
+    fun `parse authenticate rejects data callback_url scheme`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "authenticate",
+            queryParams = mapOf(
+                "server_url" to "https://demo.ssdid.my",
+                "callback_url" to "data:text/html,<script>alert(1)</script>"
+            )
+        )
+        val result = DeepLinkHandler.parse(uri)
+
+        assertThat(result).isNotNull()
+        assertThat(result!!.callbackUrl).isEmpty()
+    }
+
+    @Test
+    fun `parse authenticate rejects file callback_url scheme`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "authenticate",
+            queryParams = mapOf(
+                "server_url" to "https://demo.ssdid.my",
+                "callback_url" to "file:///etc/passwd"
+            )
+        )
+        val result = DeepLinkHandler.parse(uri)
+
+        assertThat(result).isNotNull()
+        assertThat(result!!.callbackUrl).isEmpty()
+    }
+
+    @Test
+    fun `parse authenticate rejects non-localhost http callback_url`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "authenticate",
+            queryParams = mapOf(
+                "server_url" to "https://demo.ssdid.my",
+                "callback_url" to "http://evil.com/steal"
             )
         )
         val result = DeepLinkHandler.parse(uri)
@@ -378,5 +442,82 @@ class DeepLinkHandlerTest {
         assertThat(route).isNotNull()
         assertThat(route).contains("auth_flow")
         assertThat(route).contains("callbackUrl")
+    }
+
+    // --- Android-specific dangerous scheme tests ---
+
+    @Test
+    fun `parse authenticate rejects intent callback_url scheme`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "authenticate",
+            queryParams = mapOf(
+                "server_url" to "https://demo.ssdid.my",
+                "callback_url" to "intent://example.com#Intent;scheme=https;end"
+            )
+        )
+        val result = DeepLinkHandler.parse(uri)
+        assertThat(result).isNotNull()
+        assertThat(result!!.callbackUrl).isEmpty()
+    }
+
+    @Test
+    fun `parse authenticate rejects content callback_url scheme`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "authenticate",
+            queryParams = mapOf(
+                "server_url" to "https://demo.ssdid.my",
+                "callback_url" to "content://com.example.provider/data"
+            )
+        )
+        val result = DeepLinkHandler.parse(uri)
+        assertThat(result).isNotNull()
+        assertThat(result!!.callbackUrl).isEmpty()
+    }
+
+    @Test
+    fun `parse authenticate rejects android-app callback_url scheme`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "authenticate",
+            queryParams = mapOf(
+                "server_url" to "https://demo.ssdid.my",
+                "callback_url" to "android-app://com.attacker.app/callback"
+            )
+        )
+        val result = DeepLinkHandler.parse(uri)
+        assertThat(result).isNotNull()
+        assertThat(result!!.callbackUrl).isEmpty()
+    }
+
+    @Test
+    fun `parse authenticate rejects blob callback_url scheme`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "authenticate",
+            queryParams = mapOf(
+                "server_url" to "https://demo.ssdid.my",
+                "callback_url" to "blob:https://evil.com/uuid"
+            )
+        )
+        val result = DeepLinkHandler.parse(uri)
+        assertThat(result).isNotNull()
+        assertThat(result!!.callbackUrl).isEmpty()
+    }
+
+    @Test
+    fun `isValidCallbackUrl rejects https with blank host`() {
+        assertThat(DeepLinkHandler.isValidCallbackUrl("https://")).isFalse()
+    }
+
+    @Test
+    fun `isValidCallbackUrl accepts ssdiddrive scheme`() {
+        assertThat(DeepLinkHandler.isValidCallbackUrl("ssdiddrive://auth/callback")).isTrue()
+    }
+
+    @Test
+    fun `isValidCallbackUrl accepts https with valid host`() {
+        assertThat(DeepLinkHandler.isValidCallbackUrl("https://app.example.com/cb")).isTrue()
     }
 }

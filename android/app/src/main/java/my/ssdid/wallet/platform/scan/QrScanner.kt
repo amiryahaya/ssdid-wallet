@@ -3,6 +3,7 @@ package my.ssdid.wallet.platform.scan
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import my.ssdid.wallet.domain.transport.dto.ClaimRequest
 import my.ssdid.wallet.platform.security.UrlValidator
 
 @Serializable
@@ -12,7 +13,11 @@ data class QrPayload(
     val action: String,
     @SerialName("session_token") val sessionToken: String = "",
     @SerialName("issuer_url") val issuerUrl: String = "",
-    @SerialName("offer_id") val offerId: String = ""
+    @SerialName("offer_id") val offerId: String = "",
+    @SerialName("session_id") val sessionId: String = "",
+    @SerialName("callback_url") val callbackUrl: String = "",
+    @SerialName("requested_claims") val requestedClaims: List<ClaimRequest> = emptyList(),
+    @SerialName("accepted_algorithms") val acceptedAlgorithms: List<String> = emptyList()
 )
 
 object QrScanner {
