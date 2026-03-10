@@ -1,31 +1,18 @@
 package my.ssdid.wallet.domain.transport
 
 import kotlinx.serialization.json.Json
-import my.ssdid.wallet.BuildConfig
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
-import java.util.concurrent.TimeUnit
 
-class SsdidHttpClient(registryUrl: String) {
+class SsdidHttpClient(registryUrl: String, private val okHttp: OkHttpClient) {
 
     private val json = Json {
         ignoreUnknownKeys = true
         encodeDefaults = true
         explicitNulls = false
     }
-
-    private val okHttp = OkHttpClient.Builder()
-        .connectTimeout(10, TimeUnit.SECONDS)
-        .readTimeout(10, TimeUnit.SECONDS)
-        .addInterceptor(RetryInterceptor())
-        .addInterceptor(HttpLoggingInterceptor().apply {
-            level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.HEADERS
-                    else HttpLoggingInterceptor.Level.NONE
-        })
-        .build()
 
     val registry: RegistryApi = buildRetrofit(registryUrl).create(RegistryApi::class.java)
 

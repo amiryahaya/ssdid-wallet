@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -6,7 +8,24 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
     kotlin("kapt")
     id("org.jetbrains.kotlinx.kover")
+    id("io.sentry.android.gradle")
 }
+
+val localProps = Properties()
+val localPropsFile = rootProject.file("local.properties")
+if (localPropsFile.exists()) {
+    localPropsFile.inputStream().use { localProps.load(it) }
+}
+
+val sentryDsn = localProps.getProperty("sentry.dsn", System.getenv("SENTRY_DSN") ?: "")
+if (sentryDsn.isBlank() && System.getenv("CI") != null) {
+    logger.warn("WARNING: SENTRY_DSN is not set. Release build will have no crash reporting.")
+}
+
+val sentryEnv = localProps.getProperty(
+    "sentry.environment",
+    System.getenv("SENTRY_ENVIRONMENT") ?: "production"
+)
 
 android {
     namespace = "my.ssdid.wallet"
@@ -21,6 +40,8 @@ android {
         ndk {
             abiFilters += listOf("arm64-v8a", "x86_64")
         }
+        buildConfigField("String", "SENTRY_DSN", "\"$sentryDsn\"")
+        buildConfigField("String", "SENTRY_ENVIRONMENT", "\"$sentryEnv\"")
     }
     externalNativeBuild {
         cmake {
@@ -96,6 +117,10 @@ dependencies {
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
+    // Sentry
+    implementation("io.sentry:sentry-android:7.22.0")
+    implementation("io.sentry:sentry-okhttp:7.22.0")
+
     // Testing
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
@@ -109,4 +134,24 @@ dependencies {
     androidTestImplementation("com.google.truth:truth:1.4.4")
     androidTestImplementation(composeBom)
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+}
+
+sentry {
+    org.set("ssdid")
+    projectName.set("ssdid-wallet-android")
+    includeProguardMapping.set(true)
+    autoUploadProguardMapping.set(
+        System.getenv("SENTRY_AUTH_TOKEN") != null
+    )
+    includeNativeSources.set(false)
+    includeSourceContext.set(true)
+    autoUploadSourceContext.set(
+        System.getenv("SENTRY_AUTH_TOKEN") != null
+    )
+    tracingInstrumentation {
+        enabled.set(true)
+    }
+    autoInstallation {
+        enabled.set(false)
+    }
 }
