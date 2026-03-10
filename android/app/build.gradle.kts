@@ -180,14 +180,10 @@ sentry {
     org.set("ssdid")
     projectName.set("ssdid-wallet-android")
     includeProguardMapping.set(true)
-    autoUploadProguardMapping.set(
-        System.getenv("SENTRY_AUTH_TOKEN") != null
-    )
+    autoUploadProguardMapping.set(false)
     includeNativeSources.set(false)
     includeSourceContext.set(true)
-    autoUploadSourceContext.set(
-        System.getenv("SENTRY_AUTH_TOKEN") != null
-    )
+    autoUploadSourceContext.set(false)
     tracingInstrumentation {
         enabled.set(true)
     }
