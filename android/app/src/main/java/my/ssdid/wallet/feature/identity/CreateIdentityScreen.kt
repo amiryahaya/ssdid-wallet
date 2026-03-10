@@ -12,12 +12,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.vault.VaultStorage
@@ -27,8 +29,21 @@ import javax.inject.Inject
 @HiltViewModel
 class CreateIdentityViewModel @Inject constructor(
     private val client: SsdidClient,
-    private val storage: VaultStorage
+    private val storage: VaultStorage,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+    val acceptedAlgorithms: List<Algorithm> = run {
+        val raw = savedStateHandle.get<String>("acceptedAlgorithms") ?: ""
+        if (raw.isBlank()) Algorithm.entries.toList()
+        else {
+            val names = try {
+                Json.decodeFromString<List<String>>(raw)
+            } catch (_: Exception) { emptyList() }
+            if (names.isEmpty()) Algorithm.entries.toList()
+            else Algorithm.entries.filter { it.name in names }
+        }
+    }
+
     private val _isCreating = MutableStateFlow(false)
     val isCreating = _isCreating.asStateFlow()
 
@@ -60,7 +75,7 @@ fun CreateIdentityScreen(
     viewModel: CreateIdentityViewModel = hiltViewModel()
 ) {
     var name by remember { mutableStateOf("") }
-    var selectedAlgo by remember { mutableStateOf(Algorithm.KAZ_SIGN_192) }
+    var selectedAlgo by remember { mutableStateOf(viewModel.acceptedAlgorithms.first()) }
     val isCreating by viewModel.isCreating.collectAsState()
     val error by viewModel.error.collectAsState()
 
@@ -108,7 +123,7 @@ fun CreateIdentityScreen(
             // Algorithm options
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Algorithm.entries.forEach { algo ->
+                    viewModel.acceptedAlgorithms.forEach { algo ->
                         val isSelected = selectedAlgo == algo
                         Card(
                             modifier = Modifier.fillMaxWidth(),

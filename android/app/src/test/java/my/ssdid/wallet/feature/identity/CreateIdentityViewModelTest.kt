@@ -11,6 +11,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import androidx.lifecycle.SavedStateHandle
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.model.Identity
@@ -45,7 +46,7 @@ class CreateIdentityViewModelTest {
     fun setup() {
         client = mockk(relaxed = true)
         storage = mockk(relaxed = true)
-        viewModel = CreateIdentityViewModel(client, storage)
+        viewModel = CreateIdentityViewModel(client, storage, SavedStateHandle())
     }
 
     @Test
