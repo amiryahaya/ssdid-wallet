@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -71,9 +72,12 @@ fun CreateIdentityScreen(
         modifier = Modifier.fillMaxSize().background(BgPrimary).statusBarsPadding()
     ) {
         // Header
-        Row(Modifier.padding(20.dp)) {
-            TextButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
-            Spacer(Modifier.width(12.dp))
+        Row(
+            Modifier.padding(start = 8.dp, end = 20.dp, top = 12.dp, bottom = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
+            Spacer(Modifier.width(4.dp))
             Text("Create Identity", style = MaterialTheme.typography.titleLarge)
         }
 

@@ -92,13 +92,13 @@ fun CredentialDetailScreen(
         Row(
             Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(start = 8.dp, end = 20.dp, top = 12.dp, bottom = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
-                Spacer(Modifier.width(12.dp))
+                IconButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
+                Spacer(Modifier.width(4.dp))
                 Text("Credential Details", style = MaterialTheme.typography.titleLarge)
             }
             TextButton(onClick = { showDeleteDialog = true }) {
