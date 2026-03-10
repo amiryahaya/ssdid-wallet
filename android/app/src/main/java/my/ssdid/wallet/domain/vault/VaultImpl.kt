@@ -26,6 +26,9 @@ class VaultImpl(
     }
 
     override suspend fun createIdentity(name: String, algorithm: Algorithm): Result<Identity> = runCatching {
+        val existing = storage.listIdentities().any { it.name.equals(name, ignoreCase = true) }
+        require(!existing) { "An identity with the name \"$name\" already exists" }
+
         Sentry.addBreadcrumb(Breadcrumb().apply {
             category = "vault"; message = "Generating key pair"; level = SentryLevel.INFO
             data["algorithm"] = algorithm.name; data["isPostQuantum"] = algorithm.isPostQuantum.toString()

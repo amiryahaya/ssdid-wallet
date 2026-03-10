@@ -83,6 +83,21 @@ class VaultTest {
     }
 
     @Test
+    fun `createIdentity rejects duplicate name`() = runTest {
+        vault.createIdentity("Personal", Algorithm.ED25519).getOrThrow()
+        val result = vault.createIdentity("Personal", Algorithm.ECDSA_P256)
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()?.message).contains("already exists")
+    }
+
+    @Test
+    fun `createIdentity rejects duplicate name case insensitive`() = runTest {
+        vault.createIdentity("Work", Algorithm.ED25519).getOrThrow()
+        val result = vault.createIdentity("work", Algorithm.ECDSA_P256)
+        assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
     fun `deleteIdentity removes from storage and keystore`() = runTest {
         val identity = vault.createIdentity("Test", Algorithm.ED25519).getOrThrow()
         vault.deleteIdentity(identity.keyId)
