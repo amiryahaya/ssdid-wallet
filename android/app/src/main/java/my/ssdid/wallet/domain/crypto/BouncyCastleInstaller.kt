@@ -18,7 +18,10 @@ internal object BouncyCastleInstaller {
         synchronized(this) {
             if (installed) return
             Security.removeProvider("BC")
-            Security.insertProviderAt(BouncyCastleProvider(), 1)
+            // Insert at end so Android's default provider (Conscrypt) handles
+            // AES/GCM for hardware-backed AndroidKeyStore keys, while BC still
+            // provides PQC algorithms (ML-DSA, SLH-DSA).
+            Security.addProvider(BouncyCastleProvider())
             installed = true
         }
     }

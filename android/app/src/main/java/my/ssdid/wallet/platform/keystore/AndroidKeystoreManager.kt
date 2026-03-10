@@ -1,7 +1,6 @@
 package my.ssdid.wallet.platform.keystore
 
 import my.ssdid.wallet.domain.vault.KeystoreManager
-import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import java.security.KeyStore
@@ -21,17 +20,9 @@ class AndroidKeystoreManager : KeystoreManager {
             .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
             .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
             .setKeySize(256)
-            .setUserAuthenticationRequired(true)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            builder.setUserAuthenticationParameters(
-                300,
-                KeyProperties.AUTH_BIOMETRIC_STRONG or KeyProperties.AUTH_DEVICE_CREDENTIAL
-            )
-        } else {
-            @Suppress("DEPRECATION")
-            builder.setUserAuthenticationValidityDurationSeconds(300)
-        }
+        // TODO: Re-enable with proper BiometricPrompt flow before encrypt/decrypt
+        // .setUserAuthenticationRequired(true)
 
         val spec = builder.build()
         val keyGen = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
@@ -41,6 +32,7 @@ class AndroidKeystoreManager : KeystoreManager {
 
     override fun encrypt(alias: String, data: ByteArray): ByteArray {
         val key = keyStore.getKey(alias, null)
+            ?: throw IllegalStateException("Wrapping key not found: $alias")
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
         cipher.init(Cipher.ENCRYPT_MODE, key)
         val iv = cipher.iv // 12 bytes
@@ -50,6 +42,7 @@ class AndroidKeystoreManager : KeystoreManager {
 
     override fun decrypt(alias: String, encryptedData: ByteArray): ByteArray {
         val key = keyStore.getKey(alias, null)
+            ?: throw IllegalStateException("Wrapping key not found: $alias")
         val iv = encryptedData.copyOfRange(0, 12)
         val ciphertext = encryptedData.copyOfRange(12, encryptedData.size)
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")

@@ -51,26 +51,45 @@ class PqcProvider : CryptoProvider {
         val level = algorithm.toSecurityLevel()
         KazSigner(level).use { signer ->
             val kp = signer.generateKeyPair()
-            return KeyPairResult(publicKey = kp.publicKey, privateKey = kp.secretKey)
+            val derPublicKey = signer.publicKeyToDer(kp.publicKey)
+            val derPrivateKey = signer.privateKeyToDer(kp.secretKey)
+            return KeyPairResult(publicKey = derPublicKey, privateKey = derPrivateKey)
         }
     }
 
     private fun signKazSign(algorithm: Algorithm, privateKey: ByteArray, data: ByteArray): ByteArray {
         val level = algorithm.toSecurityLevel()
         KazSigner(level).use { signer ->
-            return signer.signDetached(data, privateKey)
+            val rawPrivateKey = signer.privateKeyFromDer(privateKey)
+            // Use non-detached sign (single SHA-256) to match Java verifier.
+            // signDetached does double SHA-256 which the registry's KAZSIGNVerifier cannot verify.
+            val result = signer.sign(data, rawPrivateKey)
+            // Extract only S1||S2||S3 (signature_overhead bytes), discard appended message
+            val sigOnly = result.signature.copyOfRange(0, signer.signatureOverhead)
+            return signer.signatureToWire(sigOnly)
         }
     }
 
     /**
-     * Verifies KAZ-Sign signature, detecting security level from public key size.
+     * Verifies KAZ-Sign signature, detecting security level from DER-encoded public key.
      */
     private fun verifyKazSign(publicKey: ByteArray, signature: ByteArray, data: ByteArray): Boolean {
-        val level = SecurityLevel.entries.firstOrNull { it.publicKeyBytes == publicKey.size }
-            ?: throw IllegalArgumentException("Unknown KAZ-Sign public key size: ${publicKey.size}")
-        KazSigner(level).use { signer ->
-            return signer.verifyDetached(data, signature, publicKey)
+        for (level in SecurityLevel.entries) {
+            try {
+                KazSigner(level).use { signer ->
+                    val rawPublicKey = signer.publicKeyFromDer(publicKey)
+                    if (rawPublicKey.size == level.publicKeyBytes) {
+                        // Non-detached verify: reconstruct S1||S2||S3||message
+                        val fullSig = signature + data
+                        val result = signer.verify(fullSig, rawPublicKey)
+                        return result.isValid
+                    }
+                }
+            } catch (_: Exception) {
+                continue
+            }
         }
+        throw IllegalArgumentException("Unable to determine KAZ-Sign security level from public key")
     }
 
     // --- ML-DSA / SLH-DSA (BouncyCastle PQC via JCA) ---

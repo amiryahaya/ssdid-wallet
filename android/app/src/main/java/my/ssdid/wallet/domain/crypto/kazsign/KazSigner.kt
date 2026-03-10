@@ -276,6 +276,23 @@ class KazSigner(
     }
 
     // ========================================================================
+    // Signature Wire Encoding
+    // ========================================================================
+
+    /**
+     * Encode a raw detached signature to KazWire format.
+     *
+     * @param signature Raw detached signature bytes (S1||S2||S3)
+     * @return KazWire-encoded signature
+     * @throws KazSignException if encoding fails
+     * @throws IllegalStateException if the signer is closed
+     */
+    fun signatureToWire(signature: ByteArray): ByteArray {
+        ensureInitialized()
+        return KazSignNative.nativeSigToWire(level.value, signature)
+    }
+
+    // ========================================================================
     // DER Key Encoding
     // ========================================================================
 

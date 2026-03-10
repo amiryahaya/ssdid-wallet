@@ -17,6 +17,13 @@
     kotlinx.serialization.KSerializer serializer(...);
 }
 
+# KAZ-Sign JNI (native code creates these via reflection)
+-keep class my.ssdid.wallet.domain.crypto.kazsign.KeyPair { *; }
+-keep class my.ssdid.wallet.domain.crypto.kazsign.VerificationResult { *; }
+-keep class my.ssdid.wallet.domain.crypto.kazsign.P12Contents { *; }
+-keep class my.ssdid.wallet.domain.crypto.kazsign.KazSignException { *; }
+-keep class my.ssdid.wallet.domain.crypto.kazsign.KazSignNative { *; }
+
 # BouncyCastle
 -keep class org.bouncycastle.** { *; }
 -dontwarn org.bouncycastle.**

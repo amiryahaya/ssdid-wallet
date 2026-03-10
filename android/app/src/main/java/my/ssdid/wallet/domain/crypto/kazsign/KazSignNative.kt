@@ -244,6 +244,21 @@ internal object KazSignNative {
     external fun nativePrivateKeyFromDer(level: Int, der: ByteArray): ByteArray
 
     // ========================================================================
+    // Signature Wire Encoding API
+    // ========================================================================
+
+    /**
+     * Encode a raw detached signature to KazWire format.
+     *
+     * @param level Security level
+     * @param signature Raw detached signature (S1||S2||S3)
+     * @return KazWire-encoded signature
+     * @throws KazSignException if encoding fails
+     */
+    @JvmStatic
+    external fun nativeSigToWire(level: Int, signature: ByteArray): ByteArray
+
+    // ========================================================================
     // X.509 Certificate API
     // ========================================================================
 

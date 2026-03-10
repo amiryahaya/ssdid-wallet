@@ -1353,6 +1353,71 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeLoadP12(JNIEnv *e
 }
 
 /* ============================================================================
+ * Signature Wire Encoding API
+ * ============================================================================ */
+
+JNIEXPORT jbyteArray JNICALL
+Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeSigToWire(JNIEnv *env, jclass clazz,
+                                                      jint level, jbyteArray signature) {
+    (void)clazz;
+
+    const kaz_sign_level_params_t *params = kaz_sign_get_level_params(int_to_level(level));
+    if (!params) {
+        throw_exception(env, "java/lang/IllegalArgumentException", "Invalid security level");
+        return NULL;
+    }
+
+    jsize sigLen = (*env)->GetArrayLength(env, signature);
+    jbyte *sigData = (*env)->GetByteArrayElements(env, signature, NULL);
+    if (!sigData) {
+        throw_exception(env, "java/lang/OutOfMemoryError", "Failed to get array elements");
+        return NULL;
+    }
+
+    /* Query required output size */
+    size_t outLen = 0;
+    int result = kaz_sign_sig_to_wire(int_to_level(level),
+                                       (unsigned char *)sigData, sigLen,
+                                       NULL, &outLen);
+    if (result != KAZ_SIGN_SUCCESS) {
+        (*env)->ReleaseByteArrayElements(env, signature, sigData, JNI_ABORT);
+        throw_kazsign_exception(env, result);
+        return NULL;
+    }
+
+    unsigned char *out = malloc(outLen);
+    if (!out) {
+        (*env)->ReleaseByteArrayElements(env, signature, sigData, JNI_ABORT);
+        throw_kazsign_exception(env, KAZ_SIGN_ERROR_MEMORY);
+        return NULL;
+    }
+
+    result = kaz_sign_sig_to_wire(int_to_level(level),
+                                   (unsigned char *)sigData, sigLen,
+                                   out, &outLen);
+
+    (*env)->ReleaseByteArrayElements(env, signature, sigData, JNI_ABORT);
+
+    if (result != KAZ_SIGN_SUCCESS) {
+        free(out);
+        throw_kazsign_exception(env, result);
+        return NULL;
+    }
+
+    jbyteArray outArray = (*env)->NewByteArray(env, (jsize)outLen);
+    if (!outArray) {
+        free(out);
+        throw_exception(env, "java/lang/OutOfMemoryError", "Failed to allocate wire array");
+        return NULL;
+    }
+
+    (*env)->SetByteArrayRegion(env, outArray, 0, (jsize)outLen, (jbyte *)out);
+    free(out);
+
+    return outArray;
+}
+
+/* ============================================================================
  * JNI OnLoad
  * ============================================================================ */
 

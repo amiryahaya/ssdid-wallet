@@ -81,7 +81,53 @@ class SsdidClient(
             didDocJsonObject,
             "assertionMethod"
         ).getOrThrow()
-        httpClient.registry.registerDid(RegisterDidRequest(didDoc, proof))
+        val request = RegisterDidRequest(didDoc, proof)
+        val reqJson = wireJson.encodeToString(request)
+
+        // === DEBUG: Simulate what the registry will compute ===
+        val registrySimDebug = try {
+            // Parse the request JSON as the registry would receive it
+            val reqObj = wireJson.parseToJsonElement(reqJson).jsonObject
+            val regDidDoc = reqObj["did_document"]!!.jsonObject
+            val regProof = reqObj["proof"]!!.jsonObject
+
+            // Registry removes "proof" from document (no-op here) and "proofValue" from proof
+            val regDocForSign = JsonObject(regDidDoc.filterKeys { it != "proof" })
+            val regOptsForSign = JsonObject(regProof.filterKeys { it != "proofValue" })
+
+            // Registry computes canonical JSON
+            val regDocCanonical = my.ssdid.wallet.domain.vault.VaultImpl.canonicalJson(regDocForSign)
+            val regOptsCanonical = my.ssdid.wallet.domain.vault.VaultImpl.canonicalJson(regOptsForSign)
+
+            // Registry computes SHA3-256 hashes
+            val sha3 = MessageDigest.getInstance("SHA3-256")
+            val regOptsHash = sha3.digest(regOptsCanonical.toByteArray(Charsets.UTF_8))
+            sha3.reset()
+            val regDocHash = sha3.digest(regDocCanonical.toByteArray(Charsets.UTF_8))
+            val regPayload = regOptsHash + regDocHash
+
+            // Compare with wallet's original payload
+            val walletPayload = my.ssdid.wallet.domain.vault.VaultImpl.lastPayloadDebug
+            val match = walletPayload.contentEquals(regPayload)
+
+            buildString {
+                appendLine("REG_OPTS_JSON=$regOptsCanonical")
+                appendLine("REG_DOC_JSON=${regDocCanonical.take(500)}")
+                appendLine("REG_OPTS_HASH=${regOptsHash.joinToString("") { "%02x".format(it) }}")
+                appendLine("REG_DOC_HASH=${regDocHash.joinToString("") { "%02x".format(it) }}")
+                appendLine("REG_PAYLOAD(${regPayload.size})=${regPayload.joinToString("") { "%02x".format(it) }}")
+                appendLine("PAYLOAD_MATCH=$match")
+            }
+        } catch (e: Exception) {
+            "REG_SIM_ERR=${e.message}"
+        }
+
+        try {
+            httpClient.registry.registerDid(request)
+        } catch (e: Exception) {
+            val proofDebug = my.ssdid.wallet.domain.vault.VaultImpl.lastProofDebug
+            throw RuntimeException("Registry rejected:\n$proofDebug\n$registrySimDebug", e)
+        }
         logActivity(ActivityType.IDENTITY_CREATED, identity.did, details = mapOf("algorithm" to algorithm.name))
         identity
     }
