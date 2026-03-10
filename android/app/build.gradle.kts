@@ -31,6 +31,27 @@ val sentryEnv = localProps.getProperty(
 android {
     namespace = "my.ssdid.wallet"
     compileSdk = 35
+
+    signingConfigs {
+        create("release") {
+            val keystoreFile = System.getenv("KEYSTORE_FILE")
+            if (keystoreFile != null) {
+                storeFile = file(keystoreFile)
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+            } else {
+                val ksFile = localProps.getProperty("signing.storeFile")
+                if (ksFile != null) {
+                    storeFile = file(ksFile)
+                    storePassword = localProps.getProperty("signing.storePassword")
+                    keyAlias = localProps.getProperty("signing.keyAlias")
+                    keyPassword = localProps.getProperty("signing.keyPassword")
+                }
+            }
+        }
+    }
+
     defaultConfig {
         applicationId = "my.ssdid.wallet"
         minSdk = 26
@@ -58,6 +79,17 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signingConfigs.getByName("release")
+        }
     }
     kotlinOptions { jvmTarget = "17" }
     testOptions {
