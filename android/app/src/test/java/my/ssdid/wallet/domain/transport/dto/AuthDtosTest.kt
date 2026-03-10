@@ -39,20 +39,34 @@ class AuthDtosTest {
         """.trimIndent()
         val response = json.decodeFromString<AuthChallengeResponse>(jsonStr)
         assertThat(response.challenge).isEqualTo("abc123")
-        assertThat(response.server_name).isEqualTo("Demo Service")
-        assertThat(response.server_did).isEqualTo("did:ssdid:server1")
-        assertThat(response.server_key_id).isEqualTo("key-1")
+        assertThat(response.serverName).isEqualTo("Demo Service")
+        assertThat(response.serverDid).isEqualTo("did:ssdid:server1")
+        assertThat(response.serverKeyId).isEqualTo("key-1")
+    }
+
+    @Test
+    fun `AuthChallengeResponse serializes with snake_case`() {
+        val resp = AuthChallengeResponse(
+            challenge = "abc",
+            serverName = "Test",
+            serverDid = "did:ssdid:s1",
+            serverKeyId = "k1"
+        )
+        val encoded = json.encodeToString(resp)
+        assertThat(encoded).contains("\"server_name\"")
+        assertThat(encoded).contains("\"server_did\"")
+        assertThat(encoded).contains("\"server_key_id\"")
     }
 
     @Test
     fun `AuthVerifyRequest serialization includes all fields including amr list`() {
         val request = AuthVerifyRequest(
             did = "did:ssdid:user1",
-            key_id = "key-1",
-            signed_challenge = "sig123",
-            shared_claims = mapOf("email" to "user@example.com"),
+            keyId = "key-1",
+            signedChallenge = "sig123",
+            sharedClaims = mapOf("email" to "user@example.com"),
             amr = listOf("pqc", "biometric"),
-            session_id = "sess-1"
+            sessionId = "sess-1"
         )
         val encoded = json.encodeToString(request)
         assertThat(encoded).contains("\"did\":\"did:ssdid:user1\"")
@@ -70,9 +84,9 @@ class AuthDtosTest {
     fun `AuthVerifyRequest with null session_id omits it from JSON`() {
         val request = AuthVerifyRequest(
             did = "did:ssdid:user1",
-            key_id = "key-1",
-            signed_challenge = "sig123",
-            shared_claims = emptyMap(),
+            keyId = "key-1",
+            signedChallenge = "sig123",
+            sharedClaims = emptyMap(),
             amr = listOf("pqc")
         )
         val encoded = jsonNoNulls.encodeToString(request)
@@ -90,9 +104,9 @@ class AuthDtosTest {
             }
         """.trimIndent()
         val response = json.decodeFromString<AuthVerifyResponse>(jsonStr)
-        assertThat(response.session_token).isEqualTo("token-xyz")
-        assertThat(response.server_did).isEqualTo("did:ssdid:server1")
-        assertThat(response.server_key_id).isEqualTo("key-2")
-        assertThat(response.server_signature).isEqualTo("sig-abc")
+        assertThat(response.sessionToken).isEqualTo("token-xyz")
+        assertThat(response.serverDid).isEqualTo("did:ssdid:server1")
+        assertThat(response.serverKeyId).isEqualTo("key-2")
+        assertThat(response.serverSignature).isEqualTo("sig-abc")
     }
 }

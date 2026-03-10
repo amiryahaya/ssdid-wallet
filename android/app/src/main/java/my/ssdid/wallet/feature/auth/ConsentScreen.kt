@@ -41,6 +41,7 @@ fun ConsentScreen(
     val activity = context as? FragmentActivity
     val scope = rememberCoroutineScope()
     val isSubmitting = state is ConsentState.Submitting
+    val canApprove = selectedIdentity != null && !isSubmitting
 
     // Handle success
     LaunchedEffect(state) {
@@ -202,7 +203,7 @@ fun ConsentScreen(
             }
 
             items(viewModel.requestedClaims) { claim ->
-                val isSelected = selectedClaims[claim.key] == true
+                val isSelected = claim.key in selectedClaims
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
@@ -306,13 +307,14 @@ fun ConsentScreen(
         ) {
             Button(
                 onClick = {
+                    val fragmentActivity = activity ?: return@Button
                     scope.launch {
-                        val bioUsed = viewModel.requireBiometric(activity!!)
+                        val bioUsed = viewModel.requireBiometric(fragmentActivity)
                         if (bioUsed) viewModel.approve(biometricUsed = true)
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = selectedIdentity != null && !isSubmitting,
+                enabled = canApprove,
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Accent)
             ) {

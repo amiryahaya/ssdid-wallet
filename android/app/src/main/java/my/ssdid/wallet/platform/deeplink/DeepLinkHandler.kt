@@ -50,10 +50,19 @@ object DeepLinkHandler {
     private val VALID_ACTIONS = setOf("register", "authenticate", "sign", "credential-offer")
     private val json = Json { ignoreUnknownKeys = true }
 
-    private fun isValidCallbackUrl(url: String): Boolean {
+    private val ALLOWED_CALLBACK_SCHEMES = setOf("https")
+
+    fun isValidCallbackUrl(url: String): Boolean {
         if (url.isEmpty()) return false
-        val parsed = Uri.parse(url)
-        return parsed.scheme?.lowercase() == "ssdiddrive" && parsed.host == "auth"
+        val parsed = try { Uri.parse(url) } catch (_: Exception) { return false }
+        val scheme = parsed.scheme?.lowercase() ?: return false
+        if (scheme in ALLOWED_CALLBACK_SCHEMES) {
+            return !parsed.host.isNullOrBlank()
+        }
+        // Allow registered custom app schemes (letters, digits, +, -, .)
+        // but reject anything that looks like a well-known dangerous scheme
+        return scheme.matches(Regex("^[a-z][a-z0-9+\\-.]*$"))
+            && scheme !in setOf("javascript", "data", "file", "blob", "vbscript", "intent", "android-app", "content", "http")
     }
 
     fun parse(uri: Uri): DeepLinkAction? {

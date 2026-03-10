@@ -40,4 +40,54 @@ class QrScannerAuthTest {
         assertThat(payload).isNotNull()
         assertThat(payload!!.callbackUrl).isEqualTo("myapp://cb")
     }
+
+    // --- Security validation tests ---
+
+    @Test
+    fun `parsePayload rejects http server_url`() {
+        val raw = """{"action":"authenticate","server_url":"http://evil.example.com"}"""
+        assertThat(QrScanner.parsePayload(raw)).isNull()
+    }
+
+    @Test
+    fun `parsePayload rejects private IP server_url`() {
+        val raw = """{"action":"authenticate","server_url":"https://192.168.1.1"}"""
+        assertThat(QrScanner.parsePayload(raw)).isNull()
+    }
+
+    @Test
+    fun `parsePayload rejects localhost server_url`() {
+        val raw = """{"action":"authenticate","server_url":"https://localhost"}"""
+        assertThat(QrScanner.parsePayload(raw)).isNull()
+    }
+
+    @Test
+    fun `parsePayload rejects unknown action`() {
+        val raw = """{"action":"evil","server_url":"https://demo.ssdid.my"}"""
+        assertThat(QrScanner.parsePayload(raw)).isNull()
+    }
+
+    @Test
+    fun `parsePayload rejects oversized payload`() {
+        val padding = "x".repeat(4097)
+        val raw = """{"action":"authenticate","server_url":"https://demo.ssdid.my","padding":"$padding"}"""
+        assertThat(QrScanner.parsePayload(raw)).isNull()
+    }
+
+    @Test
+    fun `parsePayload rejects malformed JSON`() {
+        assertThat(QrScanner.parsePayload("{not valid json")).isNull()
+    }
+
+    @Test
+    fun `parsePayload rejects credential-offer with blank offer_id`() {
+        val raw = """{"action":"credential-offer","issuer_url":"https://issuer.ssdid.my","offer_id":""}"""
+        assertThat(QrScanner.parsePayload(raw)).isNull()
+    }
+
+    @Test
+    fun `parsePayload rejects credential-offer with http issuer_url`() {
+        val raw = """{"action":"credential-offer","issuer_url":"http://evil.com","offer_id":"offer-1"}"""
+        assertThat(QrScanner.parsePayload(raw)).isNull()
+    }
 }

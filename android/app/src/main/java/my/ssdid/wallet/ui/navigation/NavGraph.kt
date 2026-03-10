@@ -167,9 +167,7 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
             ConsentScreen(
                 onBack = { navController.popBackStack() },
                 onComplete = {
-                    navController.navigate(Screen.WalletHome.route) {
-                        popUpTo(Screen.WalletHome.route) { inclusive = true }
-                    }
+                    navController.popBackStack(Screen.WalletHome.route, inclusive = false)
                 },
                 onCreateIdentity = { acceptedAlgos ->
                     navController.navigate(Screen.CreateIdentity.createRoute(acceptedAlgos))
