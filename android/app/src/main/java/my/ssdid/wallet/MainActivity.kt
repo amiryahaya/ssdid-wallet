@@ -82,8 +82,12 @@ class MainActivity : ComponentActivity() {
     private fun handleShareIntent(intent: Intent, navController: NavHostController) {
         @Suppress("DEPRECATION")
         val uri = intent.getParcelableExtra<android.net.Uri>(Intent.EXTRA_STREAM) ?: return
+        if (uri.scheme != "content") {
+            Log.w(TAG, "Rejected share intent with non-content URI scheme: ${uri.scheme}")
+            return
+        }
         navController.navigate(Screen.BackupExport.createRoute(uri.toString()))
-        intent.action = null
+        setIntent(Intent())
     }
 
     private fun handleDeepLink(intent: Intent, navController: NavHostController) {
@@ -97,7 +101,7 @@ class MainActivity : ComponentActivity() {
             return
         }
         navController.navigate(route)
-        intent.data = null
+        setIntent(Intent())
     }
 
     companion object {

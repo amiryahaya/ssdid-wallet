@@ -267,6 +267,106 @@ class DeepLinkHandlerTest {
     }
 
     @Test
+    fun `parse register action does not parse callback_url`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "register",
+            queryParams = mapOf(
+                "server_url" to "https://demo.ssdid.my",
+                "server_did" to "did:ssdid:server:demo",
+                "callback_url" to "ssdiddrive://auth/callback"
+            )
+        )
+        val result = DeepLinkHandler.parse(uri)
+        assertThat(result).isNotNull()
+        assertThat(result!!.callbackUrl).isEmpty()
+    }
+
+    @Test
+    fun `parse sign action does not parse callback_url`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "sign",
+            queryParams = mapOf(
+                "server_url" to "https://demo.ssdid.my",
+                "session_token" to "abc123",
+                "callback_url" to "ssdiddrive://auth/callback"
+            )
+        )
+        val result = DeepLinkHandler.parse(uri)
+        assertThat(result).isNotNull()
+        assertThat(result!!.callbackUrl).isEmpty()
+    }
+
+    @Test
+    fun `parse authenticate with explicitly empty callback_url has empty callbackUrl`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "authenticate",
+            queryParams = mapOf(
+                "server_url" to "https://demo.ssdid.my",
+                "callback_url" to ""
+            )
+        )
+        val result = DeepLinkHandler.parse(uri)
+        assertThat(result).isNotNull()
+        assertThat(result!!.callbackUrl).isEmpty()
+    }
+
+    @Test
+    fun `parse credential-offer deep link returns correct action`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "credential-offer",
+            queryParams = mapOf(
+                "issuer_url" to "https://issuer.ssdid.my",
+                "offer_id" to "offer-xyz-123"
+            )
+        )
+        val result = DeepLinkHandler.parse(uri)
+        assertThat(result).isNotNull()
+        assertThat(result!!.action).isEqualTo("credential-offer")
+        assertThat(result.issuerUrl).isEqualTo("https://issuer.ssdid.my")
+        assertThat(result.offerId).isEqualTo("offer-xyz-123")
+    }
+
+    @Test
+    fun `parse credential-offer returns null when issuer_url missing`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "credential-offer",
+            queryParams = mapOf("offer_id" to "offer-xyz-123")
+        )
+        assertThat(DeepLinkHandler.parse(uri)).isNull()
+    }
+
+    @Test
+    fun `parse credential-offer rejects HTTP issuer_url`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "credential-offer",
+            queryParams = mapOf(
+                "issuer_url" to "http://issuer.evil.com",
+                "offer_id" to "offer-xyz"
+            )
+        )
+        assertThat(DeepLinkHandler.parse(uri)).isNull()
+    }
+
+    @Test
+    fun `toNavRoute returns credential offer route`() {
+        val deepLink = DeepLinkAction(
+            action = "credential-offer",
+            serverUrl = "",
+            issuerUrl = "https://issuer.ssdid.my",
+            offerId = "offer-xyz"
+        )
+        val route = deepLink.toNavRoute()
+        assertThat(route).isNotNull()
+        assertThat(route).contains("credential_offer")
+    }
+
+    @Test
     fun `toNavRoute for authenticate with callbackUrl includes callbackUrl param`() {
         val deepLink = DeepLinkAction(
             action = "authenticate",

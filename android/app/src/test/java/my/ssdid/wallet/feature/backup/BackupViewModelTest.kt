@@ -140,6 +140,34 @@ class BackupViewModelTest {
         // State should remain Idle since the method returns early
         assertThat(viewModel.state.value).isEqualTo(BackupState.Idle)
     }
+
+    @Test
+    fun `restoreUri is extracted from SavedStateHandle when provided`() {
+        val vm = BackupViewModel(
+            backupManager,
+            biometricAuth,
+            SavedStateHandle(mapOf("restoreUri" to "content://my.ssdid.drive.fileprovider/backups/x.enc"))
+        )
+        assertThat(vm.restoreUri).isEqualTo("content://my.ssdid.drive.fileprovider/backups/x.enc")
+    }
+
+    @Test
+    fun `restoreUri defaults to empty when not in SavedStateHandle`() {
+        assertThat(viewModel.restoreUri).isEmpty()
+    }
+
+    @Test
+    fun `restoreBackup with explicit bytes does not clear loadedFileBytes`() = runTest {
+        val fileBytes = byteArrayOf(5, 6, 7)
+        val restoreBytes = byteArrayOf(9, 10, 11)
+        coEvery { backupManager.restoreBackup(restoreBytes, "pass") } returns Result.success(1)
+
+        viewModel.onBackupFileLoaded(fileBytes)
+        viewModel.restoreBackup(restoreBytes, "pass")
+
+        // The explicit-bytes overload does NOT clear loadedFileBytes
+        assertThat(viewModel.loadedFileBytes.value).isEqualTo(fileBytes)
+    }
 }
 
 class BackupMainDispatcherRule(

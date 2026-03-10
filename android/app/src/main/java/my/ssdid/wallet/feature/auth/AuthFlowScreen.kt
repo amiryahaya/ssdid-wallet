@@ -301,8 +301,12 @@ fun AuthFlowScreen(
                 Button(
                     onClick = {
                         if (callbackUri != null) {
-                            val intent = Intent(Intent.ACTION_VIEW, callbackUri)
-                            context.startActivity(intent)
+                            try {
+                                val intent = Intent(Intent.ACTION_VIEW, callbackUri)
+                                context.startActivity(intent)
+                            } catch (_: android.content.ActivityNotFoundException) {
+                                // Drive app not installed or unable to handle callback
+                            }
                         }
                         onComplete()
                     },

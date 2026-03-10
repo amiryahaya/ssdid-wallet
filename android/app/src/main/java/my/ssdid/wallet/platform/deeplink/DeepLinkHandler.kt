@@ -34,6 +34,12 @@ object DeepLinkHandler {
      */
     private val VALID_ACTIONS = setOf("register", "authenticate", "sign", "credential-offer")
 
+    private fun isValidCallbackUrl(url: String): Boolean {
+        if (url.isEmpty()) return false
+        val parsed = Uri.parse(url)
+        return parsed.scheme?.lowercase() == "ssdiddrive" && parsed.host == "auth"
+    }
+
     fun parse(uri: Uri): DeepLinkAction? {
         if (uri.scheme != "ssdid") return null
         val action = uri.host ?: return null
@@ -54,8 +60,10 @@ object DeepLinkHandler {
         val serverUrl = uri.getQueryParameter("server_url") ?: return null
         if (!UrlValidator.isValidServerUrl(serverUrl)) return null
 
-        val rawCallbackUrl = uri.getQueryParameter("callback_url") ?: ""
-        val callbackUrl = if (rawCallbackUrl.startsWith("ssdiddrive://")) rawCallbackUrl else ""
+        val callbackUrl = if (action == "authenticate") {
+            val rawCallbackUrl = uri.getQueryParameter("callback_url") ?: ""
+            if (isValidCallbackUrl(rawCallbackUrl)) rawCallbackUrl else ""
+        } else ""
 
         return DeepLinkAction(
             action = action,

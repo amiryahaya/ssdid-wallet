@@ -30,6 +30,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.FragmentActivity
 import android.content.Intent
+import android.util.Log
 import androidx.core.content.FileProvider
 import java.io.File
 import androidx.compose.ui.res.stringResource
@@ -154,12 +155,16 @@ fun BackupScreen(
         if (viewModel.restoreUri.isNotEmpty()) {
             try {
                 val uri = android.net.Uri.parse(viewModel.restoreUri)
-                val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytesLimited() }
                 if (bytes != null) {
                     viewModel.onBackupFileLoaded(bytes)
                 }
+            } catch (e: SecurityException) {
+                viewModel.resetState()
+                Log.w("BackupScreen", "Permission denied reading shared backup file", e)
             } catch (e: Exception) {
-                // URI read failed — user can still manually load
+                viewModel.resetState()
+                Log.w("BackupScreen", "Failed to load shared backup file", e)
             }
         }
     }
@@ -183,7 +188,7 @@ fun BackupScreen(
     ) { uri ->
         uri?.let {
             val bytes = context.contentResolver.openInputStream(it)?.use { input ->
-                input.readBytes()
+                input.readBytesLimited()
             } ?: return@let
             viewModel.onBackupFileLoaded(bytes)
         }
@@ -362,19 +367,23 @@ fun BackupScreen(
                                 cacheDir.mkdirs()
                                 val date = java.time.LocalDate.now().toString()
                                 val backupFile = File(cacheDir, "ssdid-backup-$date.enc")
-                                backupFile.writeBytes(bytes)
-                                val fileUri = FileProvider.getUriForFile(
-                                    context,
-                                    "${context.packageName}.fileprovider",
-                                    backupFile
-                                )
-                                val sendIntent = Intent(Intent.ACTION_SEND).apply {
-                                    type = "application/octet-stream"
-                                    putExtra(Intent.EXTRA_STREAM, fileUri)
-                                    setPackage("my.ssdid.drive")
-                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                try {
+                                    backupFile.writeBytes(bytes)
+                                    val fileUri = FileProvider.getUriForFile(
+                                        context,
+                                        "${context.packageName}.fileprovider",
+                                        backupFile
+                                    )
+                                    val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                                        type = "application/octet-stream"
+                                        putExtra(Intent.EXTRA_STREAM, fileUri)
+                                        setPackage("my.ssdid.drive")
+                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                    }
+                                    context.startActivity(sendIntent)
+                                } catch (_: android.content.ActivityNotFoundException) {
+                                    // SSDID Drive app not installed
                                 }
-                                context.startActivity(sendIntent)
                             },
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
@@ -546,4 +555,19 @@ private fun formatBytes(bytes: Int): String {
         bytes < 1024 * 1024 -> "${bytes / 1024} KB"
         else -> "${"%.1f".format(bytes / (1024.0 * 1024.0))} MB"
     }
+}
+
+private const val MAX_BACKUP_FILE_SIZE = 10L * 1024 * 1024 // 10 MB
+
+private fun java.io.InputStream.readBytesLimited(maxBytes: Long = MAX_BACKUP_FILE_SIZE): ByteArray? {
+    val buffer = java.io.ByteArrayOutputStream()
+    val chunk = ByteArray(8192)
+    var totalRead = 0L
+    var bytesRead: Int
+    while (read(chunk).also { bytesRead = it } != -1) {
+        totalRead += bytesRead
+        if (totalRead > maxBytes) return null
+        buffer.write(chunk, 0, bytesRead)
+    }
+    return buffer.toByteArray()
 }
