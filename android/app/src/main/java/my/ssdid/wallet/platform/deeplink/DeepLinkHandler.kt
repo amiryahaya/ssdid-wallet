@@ -1,6 +1,8 @@
 package my.ssdid.wallet.platform.deeplink
 
 import android.net.Uri
+import kotlinx.serialization.json.Json
+import my.ssdid.wallet.domain.transport.dto.ClaimRequest
 import my.ssdid.wallet.platform.security.UrlValidator
 import my.ssdid.wallet.ui.navigation.Screen
 
@@ -11,7 +13,10 @@ data class DeepLinkAction(
     val sessionToken: String = "",
     val issuerUrl: String = "",
     val offerId: String = "",
-    val callbackUrl: String = ""
+    val callbackUrl: String = "",
+    val sessionId: String = "",
+    val requestedClaims: List<ClaimRequest> = emptyList(),
+    val acceptedAlgorithms: List<String> = emptyList()
 ) {
     /**
      * Returns the navigation route for this deep link action,
@@ -33,6 +38,7 @@ object DeepLinkHandler {
      * Returns null if the URI is not a valid SSDID deep link.
      */
     private val VALID_ACTIONS = setOf("register", "authenticate", "sign", "credential-offer")
+    private val json = Json { ignoreUnknownKeys = true }
 
     private fun isValidCallbackUrl(url: String): Boolean {
         if (url.isEmpty()) return false
@@ -65,12 +71,31 @@ object DeepLinkHandler {
             if (isValidCallbackUrl(rawCallbackUrl)) rawCallbackUrl else ""
         } else ""
 
+        val sessionId = uri.getQueryParameter("session_id") ?: ""
+
+        val requestedClaims = try {
+            val raw = uri.getQueryParameter("requested_claims") ?: ""
+            if (raw.isNotEmpty()) json.decodeFromString<List<ClaimRequest>>(raw) else emptyList()
+        } catch (_: Exception) {
+            emptyList()
+        }
+
+        val acceptedAlgorithms = try {
+            val raw = uri.getQueryParameter("accepted_algorithms") ?: ""
+            if (raw.isNotEmpty()) json.decodeFromString<List<String>>(raw) else emptyList()
+        } catch (_: Exception) {
+            emptyList()
+        }
+
         return DeepLinkAction(
             action = action,
             serverUrl = serverUrl,
             serverDid = uri.getQueryParameter("server_did") ?: "",
             sessionToken = uri.getQueryParameter("session_token") ?: "",
-            callbackUrl = callbackUrl
+            callbackUrl = callbackUrl,
+            sessionId = sessionId,
+            requestedClaims = requestedClaims,
+            acceptedAlgorithms = acceptedAlgorithms
         )
     }
 }
