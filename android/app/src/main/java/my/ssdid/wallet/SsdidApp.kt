@@ -1,15 +1,45 @@
 package my.ssdid.wallet
 
 import android.app.Application
+import android.content.Intent
+import com.onesignal.OneSignal
+import com.onesignal.notifications.INotificationClickEvent
+import com.onesignal.notifications.INotificationClickListener
 import dagger.hilt.android.HiltAndroidApp
 import io.sentry.android.core.SentryAndroid
+import my.ssdid.wallet.platform.deeplink.DeepLinkHandler
 
 @HiltAndroidApp
 class SsdidApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        initOneSignal()
         initSentry()
+    }
+
+    private fun initOneSignal() {
+        if (BuildConfig.DEBUG) return
+
+        val appId = BuildConfig.ONESIGNAL_APP_ID
+        if (appId.isBlank()) return
+
+        OneSignal.consentRequired = true
+        OneSignal.initWithContext(this, appId)
+
+        OneSignal.Notifications.addClickListener(object : INotificationClickListener {
+            override fun onClick(event: INotificationClickEvent) {
+                val url = event.notification.launchURL ?: return
+                val uri = android.net.Uri.parse(url)
+                if (uri.scheme == "ssdid" && DeepLinkHandler.parse(uri) != null) {
+                    val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+                        setPackage(packageName)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    startActivity(intent)
+                }
+            }
+        })
     }
 
     private fun initSentry() {

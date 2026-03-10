@@ -86,15 +86,16 @@ The auth token is used by the Gradle plugin to upload ProGuard mappings and sour
 
 ### Local Development (Optional)
 
-To enable Sentry locally, add the DSN to `android/local.properties`:
+To enable Sentry and OneSignal locally, add the values to `android/local.properties`:
 
 ```properties
 sentry.dsn=https://your-key@o0.ingest.sentry.io/0
+onesignal.appId=your-onesignal-app-id
 ```
 
-This file is already in `.gitignore` so your DSN won't be committed. Without a DSN, the SDK is a no-op — no data is sent and the app runs normally.
+This file is already in `.gitignore` so your keys won't be committed. Without these values, both SDKs are no-ops — no data is sent and the app runs normally. OneSignal is also disabled in debug builds regardless of the app ID.
 
-In CI, the `SENTRY_DSN` environment variable is used instead (set via GitHub secrets).
+In CI, the `SENTRY_DSN` and `ONESIGNAL_APP_ID` environment variables are used instead (set via GitHub secrets).
 
 ---
 
@@ -110,7 +111,7 @@ In CI, the `SENTRY_DSN` environment variable is used instead (set via GitHub sec
 
 ### Add Each Secret
 
-Add these 6 secrets one at a time:
+Add these 7 secrets one at a time:
 
 #### Secret 1: `ANDROID_KEYSTORE_FILE`
 
@@ -136,13 +137,19 @@ Add these 6 secrets one at a time:
 - **Value:** The key password you used in Step 1 (e.g., `YOUR_KEY_PASSWORD`)
 - Click **Add secret**
 
-#### Secret 5: `SENTRY_DSN`
+#### Secret 5: `ONESIGNAL_APP_ID`
+
+- **Name:** `ONESIGNAL_APP_ID`
+- **Value:** Your OneSignal App ID (found in **OneSignal Dashboard → Settings → Keys & IDs**)
+- Click **Add secret**
+
+#### Secret 6: `SENTRY_DSN`
 
 - **Name:** `SENTRY_DSN`
 - **Value:** Your Sentry project DSN (see [Step 2b](#step-2b-get-sentry-credentials) below)
 - Click **Add secret**
 
-#### Secret 6: `SENTRY_AUTH_TOKEN`
+#### Secret 7: `SENTRY_AUTH_TOKEN`
 
 - **Name:** `SENTRY_AUTH_TOKEN`
 - **Value:** Your Sentry auth token (see [Step 2b](#step-2b-get-sentry-credentials) below)
@@ -150,13 +157,14 @@ Add these 6 secrets one at a time:
 
 ### Verify
 
-After adding all 6 secrets, the **Actions secrets** page should show:
+After adding all 7 secrets, the **Actions secrets** page should show:
 
 ```
 ANDROID_KEYSTORE_FILE      Updated just now
 ANDROID_KEYSTORE_PASSWORD  Updated just now
 ANDROID_KEY_ALIAS          Updated just now
 ANDROID_KEY_PASSWORD       Updated just now
+ONESIGNAL_APP_ID           Updated just now
 SENTRY_DSN                 Updated just now
 SENTRY_AUTH_TOKEN           Updated just now
 ```
@@ -288,6 +296,9 @@ sentry-cli upload-proguard \
 - Rotate the keystore password periodically
 - Consider using [Google Play App Signing](https://developer.android.com/studio/publish/app-signing#app-signing-google-play) for additional protection
 - Delete `keystore-base64.txt` from your local machine after uploading to GitHub
+- OneSignal `consentRequired` is set to `true` — no user data is collected until explicit opt-in via `OneSignal.consentGiven = true` in the app's privacy settings
+- OneSignal is disabled entirely in debug builds to prevent test data polluting production analytics
+- OneSignal notification click handler validates deep links through `DeepLinkHandler.parse()` before navigation, preventing open-redirect attacks
 - The Sentry DSN is embedded in the APK. It is write-only (cannot read events), but an adversary who extracts it could flood your project with fake events. Mitigate by enabling [rate limits](https://docs.sentry.io/product/accounts/quotas/) in your Sentry project settings
 - The Sentry auth token (`SENTRY_AUTH_TOKEN`) is sensitive — it grants write access to your Sentry project. Keep it in GitHub secrets only
 - The app scrubs PII (email, IP, name) from Sentry events, redacts DID identifiers from exception messages and transaction names, strips query strings from breadcrumb URLs, and filters breadcrumbs containing sensitive keywords (session_token, private_key, password, mnemonic, seed_phrase, did:)

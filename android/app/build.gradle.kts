@@ -17,6 +17,7 @@ if (localPropsFile.exists()) {
     localPropsFile.inputStream().use { localProps.load(it) }
 }
 
+val onesignalAppId = localProps.getProperty("onesignal.appId", System.getenv("ONESIGNAL_APP_ID") ?: "")
 val sentryDsn = localProps.getProperty("sentry.dsn", System.getenv("SENTRY_DSN") ?: "")
 if (sentryDsn.isBlank() && System.getenv("CI") != null) {
     logger.warn("WARNING: SENTRY_DSN is not set. Release build will have no crash reporting.")
@@ -61,6 +62,7 @@ android {
         ndk {
             abiFilters += listOf("arm64-v8a", "x86_64")
         }
+        buildConfigField("String", "ONESIGNAL_APP_ID", "\"$onesignalAppId\"")
         buildConfigField("String", "SENTRY_DSN", "\"$sentryDsn\"")
         buildConfigField("String", "SENTRY_ENVIRONMENT", "\"$sentryEnv\"")
     }
@@ -97,6 +99,9 @@ android {
                 it.exclude("my/ssdid/wallet/integration/**")
             }
         }
+    }
+    lint {
+        baseline = file("lint-baseline.xml")
     }
     packaging {
         resources {
@@ -148,6 +153,9 @@ dependencies {
 
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.1.1")
+
+    // OneSignal
+    implementation("com.onesignal:OneSignal:5.1.20")
 
     // Sentry
     implementation("io.sentry:sentry-android:7.22.0")
