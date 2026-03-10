@@ -49,13 +49,13 @@ class MainActivity : ComponentActivity() {
                     SsdidNavGraph(navController = navController, startDestination = startDestination!!)
 
                     LaunchedEffect(Unit) {
-                        // Handle cold start deep link
+                        // Handle cold start deep link or share intent
                         if (savedInstanceState == null) {
-                            intent?.data?.let { handleDeepLink(intent, navController) }
+                            handleIntent(intent, navController)
                         }
                         // Handle warm start deep links via flow
                         pendingDeepLinks.collectLatest { newIntent ->
-                            handleDeepLink(newIntent, navController)
+                            handleIntent(newIntent, navController)
                         }
                     }
                 }
@@ -65,9 +65,29 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        if (intent.data != null) {
-            pendingDeepLinks.tryEmit(intent)
+        when {
+            intent.data != null -> pendingDeepLinks.tryEmit(intent)
+            intent.action == Intent.ACTION_SEND -> pendingDeepLinks.tryEmit(intent)
         }
+    }
+
+    private fun handleIntent(intent: Intent, navController: NavHostController) {
+        if (intent.action == Intent.ACTION_SEND) {
+            handleShareIntent(intent, navController)
+            return
+        }
+        handleDeepLink(intent, navController)
+    }
+
+    private fun handleShareIntent(intent: Intent, navController: NavHostController) {
+        @Suppress("DEPRECATION")
+        val uri = intent.getParcelableExtra<android.net.Uri>(Intent.EXTRA_STREAM) ?: return
+        if (uri.scheme != "content") {
+            Log.w(TAG, "Rejected share intent with non-content URI scheme: ${uri.scheme}")
+            return
+        }
+        navController.navigate(Screen.BackupExport.createRoute(uri.toString()))
+        setIntent(Intent())
     }
 
     private fun handleDeepLink(intent: Intent, navController: NavHostController) {
@@ -81,7 +101,7 @@ class MainActivity : ComponentActivity() {
             return
         }
         navController.navigate(route)
-        intent.data = null
+        setIntent(Intent())
     }
 
     companion object {

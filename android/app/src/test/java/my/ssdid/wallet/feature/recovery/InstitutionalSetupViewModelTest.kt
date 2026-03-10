@@ -3,8 +3,10 @@ package my.ssdid.wallet.feature.recovery
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.model.Identity
@@ -87,6 +89,7 @@ class InstitutionalSetupViewModelTest {
             vault = vault,
             savedStateHandle = SavedStateHandle(mapOf("keyId" to "nonexistent"))
         )
+        advanceUntilIdle()
 
         vm.enroll("OrgName", "did:ssdid:org", "dGVzdA==")
 
@@ -107,6 +110,7 @@ class InstitutionalSetupViewModelTest {
         } returns Result.success(orgConfig)
 
         viewModel.enroll("TestOrg", "did:ssdid:org", "dGVzdA==")
+        advanceUntilIdle()
 
         assertThat(viewModel.state.value).isInstanceOf(InstitutionalSetupState.Success::class.java)
         assertThat((viewModel.state.value as InstitutionalSetupState.Success).orgName)
@@ -116,6 +120,7 @@ class InstitutionalSetupViewModelTest {
     @Test
     fun `enroll with invalid Base64 transitions to Error`() = runTest {
         viewModel.enroll("TestOrg", "did:ssdid:org", "!!!invalid-base64!!!")
+        advanceUntilIdle()
 
         assertThat(viewModel.state.value).isInstanceOf(InstitutionalSetupState.Error::class.java)
         assertThat((viewModel.state.value as InstitutionalSetupState.Error).message)
@@ -129,6 +134,7 @@ class InstitutionalSetupViewModelTest {
         } returns Result.failure(RuntimeException("Enrollment rejected"))
 
         viewModel.enroll("TestOrg", "did:ssdid:org", "dGVzdA==")
+        advanceUntilIdle()
 
         assertThat(viewModel.state.value).isInstanceOf(InstitutionalSetupState.Error::class.java)
         assertThat((viewModel.state.value as InstitutionalSetupState.Error).message)
@@ -143,5 +149,64 @@ class InstitutionalSetupViewModelTest {
         viewModel.resetState()
 
         assertThat(viewModel.state.value).isEqualTo(InstitutionalSetupState.Idle)
+    }
+
+    @Test
+    fun `hasExistingConfig reflects institutional recovery status`() = runTest {
+        coEvery { institutionalRecoveryManager.hasOrgRecovery("did:ssdid:test") } returns true
+        val vm = InstitutionalSetupViewModel(
+            institutionalRecoveryManager = institutionalRecoveryManager,
+            vault = vault,
+            savedStateHandle = SavedStateHandle(mapOf("keyId" to "did:ssdid:test#key-1"))
+        )
+        advanceUntilIdle()
+
+        assertThat(vm.hasExistingConfig.value).isTrue()
+    }
+
+    @Test
+    fun `init handles vault error gracefully`() = runTest {
+        coEvery { vault.getIdentity(any()) } throws RuntimeException("DB error")
+        val vm = InstitutionalSetupViewModel(
+            institutionalRecoveryManager = institutionalRecoveryManager,
+            vault = vault,
+            savedStateHandle = SavedStateHandle(mapOf("keyId" to "bad-key"))
+        )
+        advanceUntilIdle()
+
+        assertThat(vm.identity.value).isNull()
+        assertThat(vm.state.value).isEqualTo(InstitutionalSetupState.Idle)
+    }
+
+    @Test
+    fun `enroll with blank encryptedKeyBase64 shows error`() = runTest {
+        viewModel.enroll("TestOrg", "did:ssdid:org", "")
+
+        assertThat(viewModel.state.value).isInstanceOf(InstitutionalSetupState.Error::class.java)
+        assertThat((viewModel.state.value as InstitutionalSetupState.Error).message)
+            .isEqualTo("All fields are required")
+    }
+
+    @Test
+    fun `enroll passes correct arguments to enrollOrganization`() = runTest {
+        val orgConfig = OrgRecoveryConfig(
+            userDid = "did:ssdid:test",
+            orgDid = "did:ssdid:org",
+            orgName = "TestOrg",
+            encryptedRecoveryKey = "dGVzdA",
+            enrolledAt = "2024-01-01T00:00:00Z"
+        )
+        coEvery {
+            institutionalRecoveryManager.enrollOrganization(any(), any(), any(), any())
+        } returns Result.success(orgConfig)
+
+        viewModel.enroll("TestOrg", "did:ssdid:org", "dGVzdA")
+        advanceUntilIdle()
+
+        coVerify {
+            institutionalRecoveryManager.enrollOrganization(
+                testIdentity, "did:ssdid:org", "TestOrg", any()
+            )
+        }
     }
 }

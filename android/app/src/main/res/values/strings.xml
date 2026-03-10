@@ -12,6 +12,7 @@
     <string name="confirm">Confirm</string>
     <string name="retry">Retry</string>
     <string name="close">Close</string>
+    <string name="continue_button">Continue</string>
     <string name="save">Save</string>
     <string name="copy">Copy</string>
     <string name="share">Share</string>
@@ -180,4 +181,106 @@
     <string name="step_mutual_auth">Mutual Auth</string>
     <string name="step_identity_select">Identity Select</string>
     <string name="step_complete">Complete</string>
+
+    <!-- Recovery Common -->
+    <string name="recovery_operation_timeout">Operation timed out. Please try again.</string>
+    <string name="recovery_configured">Configured</string>
+    <string name="recovery_important">Important</string>
+
+    <!-- Recovery Setup -->
+    <string name="recovery_setup_title">Recovery Setup</string>
+    <string name="recovery_key_title">Recovery Key</string>
+    <string name="recovery_key_desc">Generate offline recovery keypair</string>
+    <string name="recovery_key_badge">Recommended</string>
+    <string name="recovery_generate_button">Generate Recovery Key</string>
+    <string name="recovery_generating">Generating\u2026</string>
+    <string name="recovery_key_store_offline">Store this key offline. It cannot be recovered.</string>
+    <string name="recovery_key_label">RECOVERY KEY</string>
+    <string name="recovery_copy_clipboard">Copy to Clipboard</string>
+    <string name="recovery_social_title">Social Recovery</string>
+    <string name="recovery_social_desc">Split recovery secret among trusted contacts</string>
+    <string name="recovery_social_badge">Advanced</string>
+    <string name="recovery_social_button">Set Up Social Recovery</string>
+    <string name="recovery_social_config">%1$d-of-%2$d guardians</string>
+    <string name="recovery_institutional_title">Institutional</string>
+    <string name="recovery_institutional_desc">Organization holds recovery authority</string>
+    <string name="recovery_institutional_badge">Enterprise</string>
+    <string name="recovery_institutional_button">Enroll Organization</string>
+
+    <!-- Social Recovery Setup -->
+    <string name="social_setup_title">Social Recovery</string>
+    <string name="social_threshold">Threshold</string>
+    <string name="social_threshold_display">%1$d of %2$d</string>
+    <string name="social_threshold_info">Minimum %1$d guardian(s) needed to recover</string>
+    <string name="social_guardian_label">Guardian %1$d</string>
+    <string name="social_guardian_name_label">Name</string>
+    <string name="social_guardian_did_label">DID</string>
+    <string name="social_remove">Remove</string>
+    <string name="social_add_guardian">+ Add Guardian</string>
+    <string name="social_create_shares">Create Shares</string>
+    <string name="social_creating_shares">Creating Shares\u2026</string>
+    <string name="social_success_message">Social recovery created successfully</string>
+    <string name="social_distribute_warning">Distribute each share to the corresponding guardian securely. Do not store multiple shares together. Each guardian should only receive their own share.</string>
+    <string name="social_share_label">SHARE %1$d</string>
+    <string name="social_copy_share">Copy Share</string>
+    <string name="social_confirm_overwrite_title">Overwrite Social Recovery?</string>
+    <string name="social_confirm_overwrite_message">Social recovery is already configured. Creating new shares will overwrite the existing configuration. Continue?</string>
+
+    <!-- Institutional Setup -->
+    <string name="institutional_title">Institutional Recovery</string>
+    <string name="institutional_desc">Enroll an organization as a recovery custodian. The organization will hold an encrypted copy of your recovery key and can assist with identity recovery after verifying your identity through their KYC process.</string>
+    <string name="institutional_no_recovery_key">A recovery key must be generated before enrolling an organization. Go to Recovery Setup to generate one first.</string>
+    <string name="institutional_org_name_label">Organization Name</string>
+    <string name="institutional_org_did_label">Organization DID</string>
+    <string name="institutional_org_did_hint">did:ssdid:\u2026</string>
+    <string name="institutional_encrypted_key_label">Encrypted Recovery Key</string>
+    <string name="institutional_encrypted_key_hint">Paste encrypted recovery key</string>
+    <string name="institutional_enroll_button">Enroll Organization</string>
+    <string name="institutional_enrolling">Enrolling\u2026</string>
+    <string name="institutional_enrolled">Organization Enrolled</string>
+    <string name="institutional_confirm_overwrite_title">Overwrite Enrollment?</string>
+    <string name="institutional_confirm_overwrite_message">An organization is already enrolled for recovery. Re-enrolling will overwrite the existing configuration. Continue?</string>
+
+    <!-- Social Recovery Restore -->
+    <string name="social_restore_title">Social Recovery</string>
+    <string name="social_restore_desc">Collect shares from your guardians to recover your identity. You need the minimum threshold of shares to reconstruct your recovery key.</string>
+    <string name="social_restore_did_label">DID</string>
+    <string name="social_restore_name_label">IDENTITY NAME</string>
+    <string name="social_restore_algorithm_label">SIGNATURE ALGORITHM</string>
+    <string name="social_restore_shares_label">GUARDIAN SHARES</string>
+    <string name="social_restore_share_label">Share %1$d</string>
+    <string name="social_restore_share_index_hint">Share index (number)</string>
+    <string name="social_restore_share_data_hint">Paste Base64 share data</string>
+    <string name="social_restore_add_share">+ Add Share</string>
+    <string name="social_restore_recovering">Recovering\u2026</string>
+    <string name="social_restore_recover_button">Recover Identity</string>
+    <string name="social_restore_success_title">Identity Restored</string>
+    <string name="social_restore_success_desc">Your identity has been recovered using guardian shares.</string>
+
+    <!-- Recovery Restore -->
+    <string name="restore_title">Restore Identity</string>
+    <string name="restore_desc">Enter your DID and recovery key to restore access on this device.</string>
+    <string name="restore_social_title">Social Recovery</string>
+    <string name="restore_social_desc">Recover using guardian shares</string>
+    <string name="restore_or_recovery_key">or use recovery key</string>
+    <string name="restore_recovery_key_label">RECOVERY KEY (BASE64)</string>
+    <string name="restore_recovery_key_hint">Paste your recovery private key</string>
+    <string name="restore_restoring">Restoring\u2026</string>
+    <string name="restore_button">Restore Identity</string>
+    <string name="restore_success_title">Identity Restored</string>
+    <string name="restore_success_desc">Your identity has been recovered successfully.</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_navigate_back">Navigate back</string>
+    <string name="cd_decrease_threshold">Decrease threshold</string>
+    <string name="cd_increase_threshold">Increase threshold</string>
+    <string name="cd_remove_guardian">Remove guardian %1$d</string>
+    <string name="cd_remove_share">Remove share %1$d</string>
+    <string name="cd_select_algorithm">Select %1$s algorithm</string>
+    <string name="cd_success_icon">Success</string>
+    <string name="cd_loading">Loading</string>
+
+    <!-- Backup & Drive -->
+    <string name="backup_to_cloud">Backup to Cloud</string>
+    <string name="return_to_drive">Return to SSDID Drive</string>
 </resources>

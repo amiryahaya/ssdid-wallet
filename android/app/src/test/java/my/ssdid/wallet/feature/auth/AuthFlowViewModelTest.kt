@@ -23,8 +23,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(RobolectricTestRunner::class)
 class AuthFlowViewModelTest {
 
     @get:Rule
@@ -50,6 +53,20 @@ class AuthFlowViewModelTest {
         )
     )
 
+    private fun createViewModel(
+        serverUrl: String = "https://example.com",
+        callbackUrl: String = ""
+    ): AuthFlowViewModel {
+        val map = mutableMapOf<String, Any>("serverUrl" to serverUrl)
+        if (callbackUrl.isNotEmpty()) map["callbackUrl"] = callbackUrl
+        return AuthFlowViewModel(
+            client = client,
+            vault = vault,
+            biometricAuth = biometricAuth,
+            savedStateHandle = SavedStateHandle(map)
+        )
+    }
+
     @Before
     fun setup() {
         client = mockk(relaxed = true)
@@ -72,13 +89,19 @@ class AuthFlowViewModelTest {
 
     @Test
     fun `authenticate with valid credential transitions to Success`() = runTest {
-        val authResponse = mockk<AuthenticateResponse>(relaxed = true)
+        val authResponse = AuthenticateResponse(
+            session_token = "tok_test",
+            server_did = "did:ssdid:server",
+            server_key_id = "did:ssdid:server#key-1"
+        )
         coEvery { client.authenticate(testCredential, "https://example.com") } returns Result.success(authResponse)
 
         viewModel.selectCredential(testCredential)
         viewModel.authenticate()
 
-        assertThat(viewModel.state.value).isEqualTo(AuthState.Success)
+        assertThat(viewModel.state.value).isInstanceOf(AuthState.Success::class.java)
+        val success = viewModel.state.value as AuthState.Success
+        assertThat(success.sessionToken).isEqualTo("tok_test")
     }
 
     @Test
@@ -119,6 +142,133 @@ class AuthFlowViewModelTest {
     @Test
     fun `credentials are loaded from vault on init`() {
         assertThat(viewModel.credentials.value).containsExactly(testCredential)
+    }
+
+    @Test
+    fun `callbackUrl is extracted from SavedStateHandle`() {
+        val vm = AuthFlowViewModel(
+            client = client,
+            vault = vault,
+            biometricAuth = biometricAuth,
+            savedStateHandle = SavedStateHandle(mapOf(
+                "serverUrl" to "https://example.com",
+                "callbackUrl" to "ssdiddrive://auth/callback"
+            ))
+        )
+        assertThat(vm.callbackUrl).isEqualTo("ssdiddrive://auth/callback")
+    }
+
+    @Test
+    fun `callbackUrl defaults to empty when not provided`() {
+        assertThat(viewModel.callbackUrl).isEmpty()
+    }
+
+    @Test
+    fun `hasCallback is true when callbackUrl is non-empty`() {
+        val vm = AuthFlowViewModel(
+            client = client,
+            vault = vault,
+            biometricAuth = biometricAuth,
+            savedStateHandle = SavedStateHandle(mapOf(
+                "serverUrl" to "https://example.com",
+                "callbackUrl" to "ssdiddrive://auth/callback"
+            ))
+        )
+        assertThat(vm.hasCallback).isTrue()
+    }
+
+    @Test
+    fun `hasCallback is false when callbackUrl is empty`() {
+        assertThat(viewModel.hasCallback).isFalse()
+    }
+
+    @Test
+    fun `buildCallbackUri appends session_token to callbackUrl`() {
+        val vm = AuthFlowViewModel(
+            client = client,
+            vault = vault,
+            biometricAuth = biometricAuth,
+            savedStateHandle = SavedStateHandle(mapOf(
+                "serverUrl" to "https://example.com",
+                "callbackUrl" to "ssdiddrive://auth/callback"
+            ))
+        )
+        val uri = vm.buildCallbackUri("mytoken123")
+        assertThat(uri).isNotNull()
+        assertThat(uri.toString()).isEqualTo("ssdiddrive://auth/callback?session_token=mytoken123")
+    }
+
+    @Test
+    fun `buildCallbackUri returns null when no callbackUrl`() {
+        val uri = viewModel.buildCallbackUri("mytoken123")
+        assertThat(uri).isNull()
+    }
+
+    @Test
+    fun `buildCallbackUri URL-encodes special characters in session token`() {
+        val vm = createViewModel(callbackUrl = "ssdiddrive://auth/callback")
+        val uri = vm.buildCallbackUri("tok+abc=def&ghi")
+
+        assertThat(uri).isNotNull()
+        // The query parameter value must be properly encoded
+        assertThat(uri!!.getQueryParameter("session_token")).isEqualTo("tok+abc=def&ghi")
+    }
+
+    @Test
+    fun `buildCallbackUri handles callbackUrl with existing query parameters`() {
+        val vm = createViewModel(callbackUrl = "ssdiddrive://auth/callback?source=wallet")
+        val uri = vm.buildCallbackUri("tok123")
+
+        assertThat(uri).isNotNull()
+        assertThat(uri!!.getQueryParameter("source")).isEqualTo("wallet")
+        assertThat(uri.getQueryParameter("session_token")).isEqualTo("tok123")
+    }
+
+    @Test
+    fun `authenticate success with callback produces valid callback URI`() = runTest {
+        val response = AuthenticateResponse(
+            session_token = "tok_abc",
+            server_did = "did:ssdid:server",
+            server_key_id = "did:ssdid:server#key-1"
+        )
+        val cred = mockk<VerifiableCredential>(relaxed = true)
+        coEvery { vault.listCredentials() } returns listOf(cred)
+        coEvery { client.authenticate(any(), any()) } returns Result.success(response)
+
+        val vm = createViewModel(callbackUrl = "ssdiddrive://auth/callback")
+        vm.selectCredential(cred)
+        vm.authenticate()
+
+        val success = vm.state.value as AuthState.Success
+        val callbackUri = vm.buildCallbackUri(success.sessionToken)
+        assertThat(callbackUri).isNotNull()
+        assertThat(callbackUri!!.getQueryParameter("session_token")).isEqualTo("tok_abc")
+    }
+
+    @Test
+    fun `authenticate success captures session token in state`() = runTest {
+        val response = AuthenticateResponse(
+            session_token = "tok_abc",
+            server_did = "did:ssdid:server",
+            server_key_id = "did:ssdid:server#key-1"
+        )
+        coEvery { client.authenticate(testCredential, "https://example.com") } returns Result.success(response)
+
+        val vm = AuthFlowViewModel(
+            client = client,
+            vault = vault,
+            biometricAuth = biometricAuth,
+            savedStateHandle = SavedStateHandle(mapOf(
+                "serverUrl" to "https://example.com",
+                "callbackUrl" to "ssdiddrive://auth/callback"
+            ))
+        )
+        vm.selectCredential(testCredential)
+        vm.authenticate()
+
+        assertThat(vm.state.value).isInstanceOf(AuthState.Success::class.java)
+        val success = vm.state.value as AuthState.Success
+        assertThat(success.sessionToken).isEqualTo("tok_abc")
     }
 }
 

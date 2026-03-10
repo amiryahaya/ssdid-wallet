@@ -3,8 +3,10 @@ package my.ssdid.wallet.feature.recovery
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.model.Identity
@@ -113,6 +115,18 @@ class SocialRecoverySetupViewModelTest {
     }
 
     @Test
+    fun `createShares with invalid guardian DID shows error`() = runTest {
+        viewModel.updateGuardian(0, GuardianEntry(name = "Alice", did = "not-a-did"))
+        viewModel.updateGuardian(1, GuardianEntry(name = "Bob", did = "did:ssdid:bob"))
+
+        viewModel.createShares()
+
+        assertThat(viewModel.state.value).isInstanceOf(SocialSetupState.Error::class.java)
+        assertThat((viewModel.state.value as SocialSetupState.Error).message)
+            .isEqualTo("All guardian DIDs must be valid DID format")
+    }
+
+    @Test
     fun `createShares with null identity returns silently`() = runTest {
         // Create VM with no identity
         coEvery { vault.getIdentity(any()) } returns null
@@ -121,6 +135,7 @@ class SocialRecoverySetupViewModelTest {
             vault = vault,
             savedStateHandle = SavedStateHandle(mapOf("keyId" to "nonexistent"))
         )
+        advanceUntilIdle()
 
         vm.createShares()
 
@@ -152,6 +167,7 @@ class SocialRecoverySetupViewModelTest {
         coEvery { socialRecoveryManager.getConfig("did:ssdid:test") } returns config
 
         viewModel.createShares()
+        advanceUntilIdle()
 
         assertThat(viewModel.state.value).isInstanceOf(SocialSetupState.Success::class.java)
         val success = viewModel.state.value as SocialSetupState.Success
@@ -174,6 +190,7 @@ class SocialRecoverySetupViewModelTest {
         coEvery { socialRecoveryManager.getConfig(any()) } returns null
 
         viewModel.createShares()
+        advanceUntilIdle()
 
         assertThat(viewModel.state.value).isInstanceOf(SocialSetupState.Success::class.java)
         val success = viewModel.state.value as SocialSetupState.Success
@@ -192,6 +209,7 @@ class SocialRecoverySetupViewModelTest {
         } returns Result.failure(RuntimeException("Shamir split failed"))
 
         viewModel.createShares()
+        advanceUntilIdle()
 
         assertThat(viewModel.state.value).isInstanceOf(SocialSetupState.Error::class.java)
         assertThat((viewModel.state.value as SocialSetupState.Error).message)
@@ -200,12 +218,61 @@ class SocialRecoverySetupViewModelTest {
 
     @Test
     fun `resetState returns to Idle`() = runTest {
-        // Trigger an error first
         viewModel.createShares()
         assertThat(viewModel.state.value).isInstanceOf(SocialSetupState.Error::class.java)
 
         viewModel.resetState()
 
         assertThat(viewModel.state.value).isEqualTo(SocialSetupState.Idle)
+    }
+
+    @Test
+    fun `hasExistingConfig reflects social recovery status`() = runTest {
+        coEvery { socialRecoveryManager.hasSocialRecovery("did:ssdid:test") } returns true
+        val vm = SocialRecoverySetupViewModel(
+            socialRecoveryManager = socialRecoveryManager,
+            vault = vault,
+            savedStateHandle = SavedStateHandle(mapOf("keyId" to "did:ssdid:test#key-1"))
+        )
+        advanceUntilIdle()
+
+        assertThat(vm.hasExistingConfig.value).isTrue()
+    }
+
+    @Test
+    fun `init handles vault error gracefully`() = runTest {
+        coEvery { vault.getIdentity(any()) } throws RuntimeException("DB error")
+        val vm = SocialRecoverySetupViewModel(
+            socialRecoveryManager = socialRecoveryManager,
+            vault = vault,
+            savedStateHandle = SavedStateHandle(mapOf("keyId" to "bad-key"))
+        )
+        advanceUntilIdle()
+
+        assertThat(vm.identity.value).isNull()
+        assertThat(vm.state.value).isEqualTo(SocialSetupState.Idle)
+    }
+
+    @Test
+    fun `createShares passes correct arguments to setupSocialRecovery`() = runTest {
+        viewModel.updateGuardian(0, GuardianEntry(name = "Alice", did = "did:ssdid:alice"))
+        viewModel.updateGuardian(1, GuardianEntry(name = "Bob", did = "did:ssdid:bob"))
+
+        val sharesMap = mapOf("uuid1" to "share1data", "uuid2" to "share2data")
+        coEvery {
+            socialRecoveryManager.setupSocialRecovery(any(), any(), any())
+        } returns Result.success(sharesMap)
+        coEvery { socialRecoveryManager.getConfig(any()) } returns null
+
+        viewModel.createShares()
+        advanceUntilIdle()
+
+        coVerify {
+            socialRecoveryManager.setupSocialRecovery(
+                testIdentity,
+                listOf("Alice" to "did:ssdid:alice", "Bob" to "did:ssdid:bob"),
+                2
+            )
+        }
     }
 }

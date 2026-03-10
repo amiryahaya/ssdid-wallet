@@ -10,6 +10,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -21,6 +24,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
+import my.ssdid.wallet.R
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.recovery.RecoveryManager
@@ -50,21 +55,40 @@ class RecoveryRestoreViewModel @Inject constructor(
             _state.value = RestoreState.Error("All fields are required")
             return
         }
+        if (!did.startsWith("did:")) {
+            _state.value = RestoreState.Error("Invalid DID format")
+            return
+        }
+        val trimmedKey = recoveryKey.trim()
         viewModelScope.launch {
             _state.value = RestoreState.Restoring
-            recoveryManager.restoreWithRecoveryKey(did, recoveryKey, name, algorithm)
-                .onSuccess { identity ->
-                    // Try to publish to registry (best effort — may fail if offline)
-                    try {
-                        ssdidClient.updateDidDocument(identity.keyId)
-                    } catch (_: Exception) {
-                        // Best effort: registry update may fail on new device
-                    }
-                    storage.setOnboardingCompleted()
-                    _state.value = RestoreState.Success
+            try {
+                withTimeout(OPERATION_TIMEOUT_MS) {
+                    recoveryManager.restoreWithRecoveryKey(did, trimmedKey, name, algorithm)
+                        .onSuccess { identity ->
+                            try {
+                                ssdidClient.updateDidDocument(identity.keyId)
+                            } catch (_: Exception) {
+                                // Best effort: registry update may fail on new device
+                            }
+                            storage.setOnboardingCompleted()
+                            _state.value = RestoreState.Success
+                        }
+                        .onFailure { _state.value = RestoreState.Error(it.message ?: "Restoration failed") }
                 }
-                .onFailure { _state.value = RestoreState.Error(it.message ?: "Restoration failed") }
+            } catch (_: IllegalArgumentException) {
+                _state.value = RestoreState.Error("Invalid recovery key format")
+            } catch (_: kotlinx.coroutines.TimeoutCancellationException) {
+                _state.value = RestoreState.Error("Operation timed out. Please try again.")
+            }
         }
+    }
+
+    companion object {
+        private const val OPERATION_TIMEOUT_MS = 30_000L
+        const val MAX_DID_LENGTH = 256
+        const val MAX_NAME_LENGTH = 100
+        const val MAX_KEY_LENGTH = 10_000
     }
 }
 
@@ -89,9 +113,12 @@ fun RecoveryRestoreScreen(
     ) {
         // Header
         Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
+            TextButton(
+                onClick = onBack,
+                modifier = Modifier.semantics { contentDescription = "Navigate back" }
+            ) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
             Spacer(Modifier.width(12.dp))
-            Text("Restore Identity", style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.restore_title), style = MaterialTheme.typography.titleLarge)
         }
 
         when (state) {
@@ -124,14 +151,14 @@ fun RecoveryRestoreScreen(
                             }
                             Spacer(Modifier.height(16.dp))
                             Text(
-                                "Identity Restored",
+                                stringResource(R.string.restore_success_title),
                                 style = MaterialTheme.typography.headlineSmall,
                                 color = TextPrimary,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(Modifier.height(8.dp))
                             Text(
-                                "Your identity has been recovered successfully.",
+                                stringResource(R.string.restore_success_desc),
                                 fontSize = 14.sp,
                                 color = TextSecondary
                             )
@@ -143,7 +170,7 @@ fun RecoveryRestoreScreen(
                                 colors = ButtonDefaults.buttonColors(containerColor = Accent)
                             ) {
                                 Text(
-                                    "Continue",
+                                    stringResource(R.string.done),
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     modifier = Modifier.padding(vertical = 4.dp)
@@ -162,7 +189,7 @@ fun RecoveryRestoreScreen(
                 ) {
                     item {
                         Text(
-                            "Enter your DID and recovery key to restore access on this device.",
+                            stringResource(R.string.restore_desc),
                             fontSize = 14.sp,
                             color = TextSecondary,
                             lineHeight = 20.sp
@@ -183,8 +210,8 @@ fun RecoveryRestoreScreen(
                                 Text("\uD83D\uDC65", fontSize = 24.sp)
                                 Spacer(Modifier.width(12.dp))
                                 Column(Modifier.weight(1f)) {
-                                    Text("Social Recovery", style = MaterialTheme.typography.titleMedium)
-                                    Text("Recover using guardian shares", fontSize = 12.sp, color = TextSecondary)
+                                    Text(stringResource(R.string.restore_social_title), style = MaterialTheme.typography.titleMedium)
+                                    Text(stringResource(R.string.restore_social_desc), fontSize = 12.sp, color = TextSecondary)
                                 }
                                 Text("\u203A", fontSize = 20.sp, color = TextTertiary)
                             }
@@ -197,17 +224,17 @@ fun RecoveryRestoreScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             HorizontalDivider(Modifier.weight(1f), color = Border)
-                            Text("  or use recovery key  ", fontSize = 12.sp, color = TextTertiary)
+                            Text("  ${stringResource(R.string.restore_or_recovery_key)}  ", fontSize = 12.sp, color = TextTertiary)
                             HorizontalDivider(Modifier.weight(1f), color = Border)
                         }
                     }
 
                     item {
-                        Text("DID", style = MaterialTheme.typography.labelMedium)
+                        Text(stringResource(R.string.social_restore_did_label), style = MaterialTheme.typography.labelMedium)
                         Spacer(Modifier.height(8.dp))
                         OutlinedTextField(
                             value = did,
-                            onValueChange = { did = it },
+                            onValueChange = { did = it.take(RecoveryRestoreViewModel.MAX_DID_LENGTH) },
                             placeholder = { Text("did:ssdid:...", color = TextTertiary) },
                             modifier = Modifier.fillMaxWidth(),
                             colors = OutlinedTextFieldDefaults.colors(
@@ -222,11 +249,11 @@ fun RecoveryRestoreScreen(
                     }
 
                     item {
-                        Text("IDENTITY NAME", style = MaterialTheme.typography.labelMedium)
+                        Text(stringResource(R.string.social_restore_name_label), style = MaterialTheme.typography.labelMedium)
                         Spacer(Modifier.height(8.dp))
                         OutlinedTextField(
                             value = name,
-                            onValueChange = { name = it },
+                            onValueChange = { name = it.take(RecoveryRestoreViewModel.MAX_NAME_LENGTH) },
                             placeholder = { Text("e.g. Personal, Work", color = TextTertiary) },
                             modifier = Modifier.fillMaxWidth(),
                             colors = OutlinedTextFieldDefaults.colors(
@@ -241,12 +268,12 @@ fun RecoveryRestoreScreen(
                     }
 
                     item {
-                        Text("RECOVERY KEY (BASE64)", style = MaterialTheme.typography.labelMedium)
+                        Text(stringResource(R.string.restore_recovery_key_label), style = MaterialTheme.typography.labelMedium)
                         Spacer(Modifier.height(8.dp))
                         OutlinedTextField(
                             value = recoveryKey,
-                            onValueChange = { recoveryKey = it },
-                            placeholder = { Text("Paste your recovery private key", color = TextTertiary) },
+                            onValueChange = { recoveryKey = it.take(RecoveryRestoreViewModel.MAX_KEY_LENGTH) },
+                            placeholder = { Text(stringResource(R.string.restore_recovery_key_hint), color = TextTertiary) },
                             modifier = Modifier.fillMaxWidth(),
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = Accent,
@@ -261,7 +288,7 @@ fun RecoveryRestoreScreen(
                     }
 
                     item {
-                        Text("SIGNATURE ALGORITHM", style = MaterialTheme.typography.labelMedium)
+                        Text(stringResource(R.string.social_restore_algorithm_label), style = MaterialTheme.typography.labelMedium)
                         Spacer(Modifier.height(8.dp))
                     }
 
@@ -277,7 +304,11 @@ fun RecoveryRestoreScreen(
                                     ),
                                     onClick = { selectedAlgorithm = algo }
                                 ) {
-                                    Row(Modifier.padding(14.dp)) {
+                                    Row(
+                                        Modifier
+                                            .padding(14.dp)
+                                            .semantics { contentDescription = "Select ${algo.name.replace("_", " ")} algorithm" }
+                                    ) {
                                         RadioButton(
                                             selected = isSelected,
                                             onClick = { selectedAlgorithm = algo },
@@ -300,12 +331,20 @@ fun RecoveryRestoreScreen(
 
                 // Error display
                 if (state is RestoreState.Error) {
-                    Text(
-                        (state as RestoreState.Error).message,
-                        color = Danger,
-                        fontSize = 13.sp,
-                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
-                    )
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 4.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = DangerDim)
+                    ) {
+                        Text(
+                            (state as RestoreState.Error).message,
+                            modifier = Modifier.padding(18.dp),
+                            fontSize = 13.sp,
+                            color = Danger
+                        )
+                    }
                 }
 
                 // Footer button
@@ -321,15 +360,15 @@ fun RecoveryRestoreScreen(
                 ) {
                     if (state is RestoreState.Restoring) {
                         CircularProgressIndicator(
-                            Modifier.size(20.dp),
+                            Modifier.size(20.dp).semantics { contentDescription = "Loading" },
                             color = BgPrimary,
                             strokeWidth = 2.dp
                         )
                         Spacer(Modifier.width(10.dp))
-                        Text("Restoring...", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                        Text(stringResource(R.string.restore_restoring), fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                     } else {
                         Text(
-                            "Restore Identity",
+                            stringResource(R.string.restore_button),
                             fontSize = 15.sp,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.padding(vertical = 4.dp)

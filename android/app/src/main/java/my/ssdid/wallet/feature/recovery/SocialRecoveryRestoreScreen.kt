@@ -10,6 +10,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -21,6 +24,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
+import my.ssdid.wallet.R
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.recovery.social.SocialRecoveryManager
@@ -87,7 +92,6 @@ class SocialRecoveryRestoreViewModel @Inject constructor(
                 _state.value = SocialRestoreState.Error("Share ${i + 1}: data is required")
                 return
             }
-            // Validate Base64 format
             try {
                 JBase64.getUrlDecoder().decode(share.data.trim())
             } catch (_: IllegalArgumentException) {
@@ -97,33 +101,45 @@ class SocialRecoveryRestoreViewModel @Inject constructor(
             collectedShares[shareIndex] = share.data.trim()
         }
 
-        // Check for duplicate indices
-        val indices = collectedShares.keys
-        if (indices.size != currentShares.size) {
+        if (collectedShares.keys.size != currentShares.size) {
             _state.value = SocialRestoreState.Error("Duplicate share indices detected")
             return
         }
 
         viewModelScope.launch {
             _state.value = SocialRestoreState.Restoring
-            socialRecoveryManager.recoverWithShares(did, collectedShares, name, algorithm)
-                .onSuccess { identity ->
-                    try {
-                        ssdidClient.updateDidDocument(identity.keyId)
-                    } catch (_: Exception) {
-                        // Best effort: registry update may fail on new device
-                    }
-                    storage.setOnboardingCompleted()
-                    _state.value = SocialRestoreState.Success
+            try {
+                withTimeout(OPERATION_TIMEOUT_MS) {
+                    socialRecoveryManager.recoverWithShares(did, collectedShares, name, algorithm)
+                        .onSuccess { identity ->
+                            try {
+                                ssdidClient.updateDidDocument(identity.keyId)
+                            } catch (_: Exception) {
+                                // Best effort: registry update may fail on new device
+                            }
+                            storage.setOnboardingCompleted()
+                            _state.value = SocialRestoreState.Success
+                        }
+                        .onFailure {
+                            _state.value = SocialRestoreState.Error(it.message ?: "Recovery failed")
+                        }
                 }
-                .onFailure {
-                    _state.value = SocialRestoreState.Error(it.message ?: "Recovery failed")
-                }
+            } catch (_: kotlinx.coroutines.TimeoutCancellationException) {
+                _state.value = SocialRestoreState.Error("Operation timed out. Please try again.")
+            }
         }
     }
 
     fun resetState() {
         _state.value = SocialRestoreState.Idle
+    }
+
+    companion object {
+        private const val OPERATION_TIMEOUT_MS = 30_000L
+        const val MAX_DID_LENGTH = 256
+        const val MAX_NAME_LENGTH = 100
+        const val MAX_SHARE_INDEX_LENGTH = 5
+        const val MAX_SHARE_DATA_LENGTH = 10_000
     }
 }
 
@@ -145,11 +161,13 @@ fun SocialRecoveryRestoreScreen(
             .background(BgPrimary)
             .statusBarsPadding()
     ) {
-        // Header
         Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
+            TextButton(
+                onClick = onBack,
+                modifier = Modifier.semantics { contentDescription = "Navigate back" }
+            ) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
             Spacer(Modifier.width(12.dp))
-            Text("Social Recovery", style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.social_restore_title), style = MaterialTheme.typography.titleLarge)
         }
 
         when (state) {
@@ -174,21 +192,22 @@ fun SocialRecoveryRestoreScreen(
                                 modifier = Modifier
                                     .size(64.dp)
                                     .clip(RoundedCornerShape(16.dp))
-                                    .background(SuccessDim),
+                                    .background(SuccessDim)
+                                    .semantics { contentDescription = "Success" },
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text("\u2713", fontSize = 28.sp, color = Success, fontWeight = FontWeight.Bold)
                             }
                             Spacer(Modifier.height(16.dp))
                             Text(
-                                "Identity Restored",
+                                stringResource(R.string.social_restore_success_title),
                                 style = MaterialTheme.typography.headlineSmall,
                                 color = TextPrimary,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(Modifier.height(8.dp))
                             Text(
-                                "Your identity has been recovered using guardian shares.",
+                                stringResource(R.string.social_restore_success_desc),
                                 fontSize = 14.sp,
                                 color = TextSecondary
                             )
@@ -200,7 +219,7 @@ fun SocialRecoveryRestoreScreen(
                                 colors = ButtonDefaults.buttonColors(containerColor = Accent)
                             ) {
                                 Text(
-                                    "Continue",
+                                    stringResource(R.string.done),
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     modifier = Modifier.padding(vertical = 4.dp)
@@ -219,8 +238,7 @@ fun SocialRecoveryRestoreScreen(
                 ) {
                     item {
                         Text(
-                            "Collect shares from your guardians to recover your identity. " +
-                                "You need the minimum threshold of shares to reconstruct your recovery key.",
+                            stringResource(R.string.social_restore_desc),
                             fontSize = 14.sp,
                             color = TextSecondary,
                             lineHeight = 20.sp
@@ -228,11 +246,11 @@ fun SocialRecoveryRestoreScreen(
                     }
 
                     item {
-                        Text("DID", style = MaterialTheme.typography.labelMedium)
+                        Text(stringResource(R.string.social_restore_did_label), style = MaterialTheme.typography.labelMedium)
                         Spacer(Modifier.height(8.dp))
                         OutlinedTextField(
                             value = did,
-                            onValueChange = { did = it },
+                            onValueChange = { did = it.take(SocialRecoveryRestoreViewModel.MAX_DID_LENGTH) },
                             placeholder = { Text("did:ssdid:...", color = TextTertiary) },
                             modifier = Modifier.fillMaxWidth(),
                             colors = OutlinedTextFieldDefaults.colors(
@@ -247,11 +265,11 @@ fun SocialRecoveryRestoreScreen(
                     }
 
                     item {
-                        Text("IDENTITY NAME", style = MaterialTheme.typography.labelMedium)
+                        Text(stringResource(R.string.social_restore_name_label), style = MaterialTheme.typography.labelMedium)
                         Spacer(Modifier.height(8.dp))
                         OutlinedTextField(
                             value = name,
-                            onValueChange = { name = it },
+                            onValueChange = { name = it.take(SocialRecoveryRestoreViewModel.MAX_NAME_LENGTH) },
                             placeholder = { Text("e.g. Personal, Work", color = TextTertiary) },
                             modifier = Modifier.fillMaxWidth(),
                             colors = OutlinedTextFieldDefaults.colors(
@@ -266,7 +284,7 @@ fun SocialRecoveryRestoreScreen(
                     }
 
                     item {
-                        Text("SIGNATURE ALGORITHM", style = MaterialTheme.typography.labelMedium)
+                        Text(stringResource(R.string.social_restore_algorithm_label), style = MaterialTheme.typography.labelMedium)
                         Spacer(Modifier.height(8.dp))
                     }
 
@@ -282,7 +300,11 @@ fun SocialRecoveryRestoreScreen(
                                     ),
                                     onClick = { selectedAlgorithm = algo }
                                 ) {
-                                    Row(Modifier.padding(14.dp)) {
+                                    Row(
+                                        Modifier
+                                            .padding(14.dp)
+                                            .semantics { contentDescription = "Select ${algo.name.replace("_", " ")} algorithm" }
+                                    ) {
                                         RadioButton(
                                             selected = isSelected,
                                             onClick = { selectedAlgorithm = algo },
@@ -304,7 +326,7 @@ fun SocialRecoveryRestoreScreen(
 
                     item {
                         Spacer(Modifier.height(4.dp))
-                        Text("GUARDIAN SHARES", style = MaterialTheme.typography.labelMedium)
+                        Text(stringResource(R.string.social_restore_shares_label), style = MaterialTheme.typography.labelMedium)
                         Spacer(Modifier.height(8.dp))
                     }
 
@@ -321,14 +343,19 @@ fun SocialRecoveryRestoreScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        "Share ${index + 1}",
+                                        stringResource(R.string.social_restore_share_label, index + 1),
                                         style = MaterialTheme.typography.titleSmall,
                                         color = TextPrimary,
                                         fontWeight = FontWeight.SemiBold
                                     )
                                     if (shares.size > 2) {
-                                        TextButton(onClick = { viewModel.removeShare(index) }) {
-                                            Text("Remove", color = Danger, fontSize = 13.sp)
+                                        TextButton(
+                                            onClick = { viewModel.removeShare(index) },
+                                            modifier = Modifier.semantics {
+                                                contentDescription = "Remove share ${index + 1}"
+                                            }
+                                        ) {
+                                            Text(stringResource(R.string.social_remove), color = Danger, fontSize = 13.sp)
                                         }
                                     }
                                 }
@@ -336,9 +363,9 @@ fun SocialRecoveryRestoreScreen(
                                 OutlinedTextField(
                                     value = share.index,
                                     onValueChange = {
-                                        viewModel.updateShare(index, share.copy(index = it))
+                                        viewModel.updateShare(index, share.copy(index = it.take(SocialRecoveryRestoreViewModel.MAX_SHARE_INDEX_LENGTH)))
                                     },
-                                    placeholder = { Text("Share index (number)", color = TextTertiary) },
+                                    placeholder = { Text(stringResource(R.string.social_restore_share_index_hint), color = TextTertiary) },
                                     modifier = Modifier.fillMaxWidth(),
                                     colors = OutlinedTextFieldDefaults.colors(
                                         focusedBorderColor = Accent,
@@ -353,9 +380,9 @@ fun SocialRecoveryRestoreScreen(
                                 OutlinedTextField(
                                     value = share.data,
                                     onValueChange = {
-                                        viewModel.updateShare(index, share.copy(data = it))
+                                        viewModel.updateShare(index, share.copy(data = it.take(SocialRecoveryRestoreViewModel.MAX_SHARE_DATA_LENGTH)))
                                     },
-                                    placeholder = { Text("Paste Base64 share data", color = TextTertiary) },
+                                    placeholder = { Text(stringResource(R.string.social_restore_share_data_hint), color = TextTertiary) },
                                     modifier = Modifier.fillMaxWidth(),
                                     colors = OutlinedTextFieldDefaults.colors(
                                         focusedBorderColor = Accent,
@@ -373,11 +400,10 @@ fun SocialRecoveryRestoreScreen(
 
                     item {
                         TextButton(onClick = { viewModel.addShare() }) {
-                            Text("+ Add Share", color = Accent, fontSize = 14.sp)
+                            Text(stringResource(R.string.social_restore_add_share), color = Accent, fontSize = 14.sp)
                         }
                     }
 
-                    // Error card
                     val errorState = state as? SocialRestoreState.Error
                     if (errorState != null) {
                         item {
@@ -399,7 +425,6 @@ fun SocialRecoveryRestoreScreen(
                     item { Spacer(Modifier.height(8.dp)) }
                 }
 
-                // Footer button
                 Button(
                     onClick = { viewModel.restore(did, name, selectedAlgorithm) },
                     modifier = Modifier
@@ -413,15 +438,15 @@ fun SocialRecoveryRestoreScreen(
                 ) {
                     if (state is SocialRestoreState.Restoring) {
                         CircularProgressIndicator(
-                            Modifier.size(20.dp),
+                            Modifier.size(20.dp).semantics { contentDescription = "Loading" },
                             color = BgPrimary,
                             strokeWidth = 2.dp
                         )
                         Spacer(Modifier.width(10.dp))
-                        Text("Recovering...", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                        Text(stringResource(R.string.social_restore_recovering), fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                     } else {
                         Text(
-                            "Recover Identity",
+                            stringResource(R.string.social_restore_recover_button),
                             fontSize = 15.sp,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.padding(vertical = 4.dp)
