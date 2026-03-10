@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SSDID — Self-Sovereign Digital Identity</title>
+  <meta name="description" content="A self-sovereign identity wallet with post-quantum cryptography. Own your digital identity — no middlemen, no compromises.">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* === TOKENS === */
+    :root {
+      --bg-primary: #0A0C10;
+      --bg-secondary: #0d1117;
+      --bg-footer: #060810;
+      --accent: #4A9EFF;
+      --accent-hover: #3b8de6;
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.6);
+      --text-tertiary: rgba(255, 255, 255, 0.4);
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --card-border: rgba(255, 255, 255, 0.06);
+      --glow: rgba(74, 158, 255, 0.12);
+      --glow-soft: rgba(74, 158, 255, 0.08);
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      --font: 'DM Sans', sans-serif;
+    }
+
+    /* === RESET === */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+
+    /* === NAV === */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.3s ease;
+    }
+    .nav.scrolled {
+      background: rgba(10, 12, 16, 0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-brand img {
+      width: 36px;
+      height: 36px;
+    }
+    .nav-brand span {
+      font-weight: 600;
+      font-size: 18px;
+      letter-spacing: -0.5px;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+    .nav-links a {
+      font-size: 14px;
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text-primary); }
+    .nav-cta {
+      padding: 8px 20px;
+      border-radius: var(--radius-sm);
+      background: var(--accent);
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 600;
+      transition: background 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+    .nav-cta:hover { background: var(--accent-hover); }
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 4px;
+    }
+    .hamburger span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--text-primary);
+      border-radius: 1px;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    @media (max-width: 767px) {
+      .nav-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        background: rgba(10, 12, 16, 0.98);
+        backdrop-filter: blur(12px);
+        padding: 24px;
+        gap: 20px;
+      }
+      .nav-links.open { display: flex; }
+      .hamburger { display: flex; }
+      .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+      .hamburger.open span:nth-child(2) { opacity: 0; }
+      .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+    }
+
+    /* === HERO === */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-glow-1 {
+      position: absolute;
+      top: -120px;
+      right: -120px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, var(--glow) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .hero-glow-2 {
+      position: absolute;
+      bottom: -80px;
+      left: -80px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, var(--glow-soft) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 640px;
+    }
+    .hero-logo {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 24px;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.25rem);
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -1px;
+      margin-bottom: 16px;
+    }
+    .hero-subtitle {
+      font-size: clamp(1rem, 2vw, 1.125rem);
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 32px;
+    }
+    .hero-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 28px;
+      border-radius: var(--radius-md);
+      background: var(--accent);
+      color: var(--text-primary);
+      font-size: 15px;
+      font-weight: 600;
+      transition: background 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      padding: 12px 28px;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(74, 158, 255, 0.3);
+      color: var(--accent);
+      font-size: 15px;
+      font-weight: 500;
+      transition: border-color 0.2s, color 0.2s;
+      background: none;
+      cursor: pointer;
+    }
+    .btn-outline:hover {
+      border-color: var(--accent);
+      color: var(--text-primary);
+    }
+
+    /* === SHARED SECTION === */
+    .section-label {
+      font-size: 12px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(1.5rem, 3vw, 2.25rem);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 48px;
+    }
+
+    /* === FEATURES === */
+    .features {
+      padding: 100px 24px;
+      max-width: 1120px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      text-align: left;
+    }
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .feature-card:hover {
+      border-color: rgba(74, 158, 255, 0.15);
+      transform: translateY(-2px);
+    }
+    .feature-icon {
+      font-size: 28px;
+      margin-bottom: 14px;
+    }
+    .feature-card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .feature-card p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Fade-up animation */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 1023px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 767px) {
+      .features-grid { grid-template-columns: 1fr; }
+    }
+
+    /* === HOW IT WORKS === */
+    .how-it-works {
+      padding: 100px 24px;
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: center;
+      background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+    }
+    .steps {
+      display: flex;
+      gap: 40px;
+      justify-content: center;
+      margin-top: 8px;
+    }
+    .step {
+      flex: 1;
+      max-width: 240px;
+      text-align: center;
+    }
+    .step-number {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      background: rgba(74, 158, 255, 0.1);
+      border: 1.5px solid rgba(74, 158, 255, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 20px;
+    }
+    .step h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .step p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    @media (max-width: 767px) {
+      .steps {
+        flex-direction: column;
+        align-items: center;
+        gap: 32px;
+      }
+      .step { max-width: 320px; }
+    }
+
+    /* === DOWNLOAD CTA === */
+    .cta {
+      padding: 100px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px;
+      height: 400px;
+      background: radial-gradient(ellipse, var(--glow-soft) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cta-content {
+      position: relative;
+      z-index: 1;
+    }
+    .cta h2 {
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .cta-subtitle {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 28px;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .cta-note {
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+
+    /* === FOOTER === */
+    .footer {
+      padding: 24px 24px;
+      background: var(--bg-footer);
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-copy {
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+    .footer-links a {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--text-secondary); }
+
+    @media (max-width: 767px) {
+      .footer {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav" id="nav">
+    <a href="#" class="nav-brand">
+      <img src="assets/logo-36.png" alt="SSDID Logo" width="36" height="36">
+      <span>SSDID</span>
+    </a>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="#features">Features</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="https://play.google.com/store" class="nav-cta">Download</a>
+    </div>
+  </nav>
+  <section class="hero">
+    <div class="hero-glow-1"></div>
+    <div class="hero-glow-2"></div>
+    <div class="hero-content">
+      <img src="assets/logo-80.png" alt="SSDID" class="hero-logo" width="80" height="80">
+      <h1>Your Identity.<br>Your Control.</h1>
+      <p class="hero-subtitle">A self-sovereign identity wallet with post-quantum cryptography. Own your digital identity — no middlemen, no compromises.</p>
+      <div class="hero-buttons">
+        <a href="https://play.google.com/store" class="btn-primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.199l2.302 2.302a1 1 0 0 1 0 1.38l-2.302 2.302L15.396 12l2.302-2.492zM5.864 2.658L16.8 9.49l-2.302 2.302L5.864 2.658z"/></svg>
+          Google Play
+        </a>
+        <a href="#features" class="btn-outline">Learn More</a>
+      </div>
+    </div>
+  </section>
+  <section class="features" id="features">
+    <p class="section-label">Features</p>
+    <h2 class="section-title">Why SSDID?</h2>
+    <div class="features-grid">
+      <div class="feature-card fade-up">
+        <div class="feature-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4A9EFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h3>Post-Quantum Security</h3>
+        <p>KAZ-Sign algorithms protect your identity against future quantum computing threats.</p>
+      </div>
+      <div class="feature-card fade-up">
+        <div class="feature-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4A9EFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <h3>Self-Sovereign</h3>
+        <p>You own your keys and data. No third party controls your digital identity.</p>
+      </div>
+      <div class="feature-card fade-up">
+        <div class="feature-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4A9EFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+        </div>
+        <h3>Hardware-Backed</h3>
+        <p>Keys stored in TEE/StrongBox hardware. Biometric unlock protects every action.</p>
+      </div>
+      <div class="feature-card fade-up">
+        <div class="feature-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4A9EFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+        </div>
+        <h3>Verifiable Credentials</h3>
+        <p>W3C standard credentials you can store, manage, and present anywhere, instantly.</p>
+      </div>
+      <div class="feature-card fade-up">
+        <div class="feature-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4A9EFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+        </div>
+        <h3>Recovery Options</h3>
+        <p>Three-tier recovery system: recovery keys, Shamir's Secret Sharing, and institutional backup.</p>
+      </div>
+      <div class="feature-card fade-up">
+        <div class="feature-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4A9EFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <h3>W3C DID Compliant</h3>
+        <p>Built on open standards. Interoperable with the global decentralized identity ecosystem.</p>
+      </div>
+    </div>
+  </section>
+  <section class="how-it-works" id="how-it-works">
+    <p class="section-label">How It Works</p>
+    <h2 class="section-title">Get Started in Minutes</h2>
+    <div class="steps">
+      <div class="step fade-up">
+        <div class="step-number">1</div>
+        <h3>Download</h3>
+        <p>Get SSDID Wallet from Google Play — free and open source.</p>
+      </div>
+      <div class="step fade-up">
+        <div class="step-number">2</div>
+        <h3>Create Identity</h3>
+        <p>Generate your DID with biometric protection in seconds.</p>
+      </div>
+      <div class="step fade-up">
+        <div class="step-number">3</div>
+        <h3>Use Everywhere</h3>
+        <p>Authenticate, sign transactions, and present credentials securely.</p>
+      </div>
+    </div>
+  </section>
+  <section class="cta">
+    <div class="cta-glow"></div>
+    <div class="cta-content">
+      <h2>Ready to Own Your Identity?</h2>
+      <p class="cta-subtitle">Download SSDID Wallet and take control of your digital identity today.</p>
+      <a href="https://play.google.com/store" class="btn-primary" style="font-size: 16px; padding: 14px 32px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.199l2.302 2.302a1 1 0 0 1 0 1.38l-2.302 2.302L15.396 12l2.302-2.492zM5.864 2.658L16.8 9.49l-2.302 2.302L5.864 2.658z"/></svg>
+        Download on Google Play
+      </a>
+      <p class="cta-note">Available on Android · iOS &amp; HarmonyOS coming soon</p>
+    </div>
+  </section>
+  <footer class="footer">
+    <p class="footer-copy">&copy; 2026 SSDID. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="https://github.com/amiryahaya" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </footer>
+  <script>
+    // Nav scroll effect
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    // Mobile hamburger
+    const hamburger = document.getElementById('hamburger');
+    const navLinks = document.getElementById('navLinks');
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      navLinks.classList.toggle('open');
+    });
+
+    // Close mobile menu on link click
+    navLinks.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('open');
+        navLinks.classList.remove('open');
+      });
+    });
+
+    // Fade-up animation on scroll
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 100);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
