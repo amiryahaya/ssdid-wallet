@@ -396,6 +396,39 @@
       font-size: 13px;
       color: var(--text-tertiary);
     }
+
+    /* === FOOTER === */
+    .footer {
+      padding: 24px 24px;
+      background: var(--bg-footer);
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-copy {
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+    .footer-links a {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--text-secondary); }
+
+    @media (max-width: 767px) {
+      .footer {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
   </style>
 </head>
 <body>
@@ -510,7 +543,14 @@
       <p class="cta-note">Available on Android · iOS &amp; HarmonyOS coming soon</p>
     </div>
   </section>
-  <!-- FOOTER -->
+  <footer class="footer">
+    <p class="footer-copy">&copy; 2026 SSDID. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="https://github.com/amiryahaya" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </footer>
   <script>
     // Nav scroll effect
     const nav = document.getElementById('nav');
