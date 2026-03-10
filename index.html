@@ -356,6 +356,46 @@
       }
       .step { max-width: 320px; }
     }
+
+    /* === DOWNLOAD CTA === */
+    .cta {
+      padding: 100px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px;
+      height: 400px;
+      background: radial-gradient(ellipse, var(--glow-soft) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cta-content {
+      position: relative;
+      z-index: 1;
+    }
+    .cta h2 {
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .cta-subtitle {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 28px;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .cta-note {
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
   </style>
 </head>
 <body>
@@ -458,7 +498,18 @@
       </div>
     </div>
   </section>
-  <!-- DOWNLOAD CTA -->
+  <section class="cta">
+    <div class="cta-glow"></div>
+    <div class="cta-content">
+      <h2>Ready to Own Your Identity?</h2>
+      <p class="cta-subtitle">Download SSDID Wallet and take control of your digital identity today.</p>
+      <a href="https://play.google.com/store" class="btn-primary" style="font-size: 16px; padding: 14px 32px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.199l2.302 2.302a1 1 0 0 1 0 1.38l-2.302 2.302L15.396 12l2.302-2.492zM5.864 2.658L16.8 9.49l-2.302 2.302L5.864 2.658z"/></svg>
+        Download on Google Play
+      </a>
+      <p class="cta-note">Available on Android · iOS &amp; HarmonyOS coming soon</p>
+    </div>
+  </section>
   <!-- FOOTER -->
   <script>
     // Nav scroll effect

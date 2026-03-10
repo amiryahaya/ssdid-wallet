@@ -1,0 +1,168 @@
+<h2>Page Layout &mdash; SSDID Landing Page</h2>
+<p class="subtitle">Full wireframe of the single-page structure. Scroll down to see all sections.</p>
+
+<!-- SECTION 1: NAV -->
+<div class="section">
+  <h3>1. Navigation Bar</h3>
+  <div class="mockup">
+    <div class="mockup-header">Fixed top nav</div>
+    <div class="mockup-body" style="background: #0A0C10; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #1a2a5e, #2563eb); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white; font-weight: bold;">SS</div>
+        <span style="color: #fff; font-weight: 600; font-size: 16px;">SSDID</span>
+      </div>
+      <div style="display: flex; gap: 24px; align-items: center;">
+        <span style="color: rgba(255,255,255,0.6); font-size: 13px;">Features</span>
+        <span style="color: rgba(255,255,255,0.6); font-size: 13px;">How It Works</span>
+        <div style="padding: 6px 16px; border-radius: 6px; background: #4A9EFF; color: #fff; font-size: 13px; font-weight: 600;">Download</div>
+      </div>
+    </div>
+  </div>
+  <p style="margin-top: 8px; color: #888; font-size: 13px;">Sticky nav with logo, section links, and download CTA button. Transparent on hero, gets solid bg on scroll.</p>
+</div>
+
+<!-- SECTION 2: HERO -->
+<div class="section">
+  <h3>2. Hero Section</h3>
+  <div class="mockup">
+    <div class="mockup-header">Full-viewport hero</div>
+    <div class="mockup-body" style="background: #0A0C10; padding: 60px 40px; text-align: center; position: relative; overflow: hidden; min-height: 300px;">
+      <div style="position: absolute; top: -80px; right: -80px; width: 300px; height: 300px; background: radial-gradient(circle, rgba(74,158,255,0.12) 0%, transparent 70%); border-radius: 50%;"></div>
+      <div style="position: absolute; bottom: -40px; left: -40px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(74,158,255,0.08) 0%, transparent 70%); border-radius: 50%;"></div>
+      <div style="position: relative; z-index: 1;">
+        <div style="width: 72px; height: 72px; margin: 0 auto 20px; background: linear-gradient(135deg, #1a2a5e, #2563eb); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
+          <div style="color: white; font-weight: bold; font-size: 14px;">LOGO</div>
+        </div>
+        <div style="font-size: 32px; font-weight: 700; color: #fff; margin-bottom: 12px; line-height: 1.2;">Your Identity.<br>Your Control.</div>
+        <div style="font-size: 15px; color: rgba(255,255,255,0.6); max-width: 480px; margin: 0 auto 24px; line-height: 1.6;">
+          A self-sovereign identity wallet with post-quantum cryptography. Own your digital identity — no middlemen, no compromises.
+        </div>
+        <div style="display: flex; gap: 12px; justify-content: center;">
+          <div style="padding: 10px 24px; border-radius: 8px; background: #4A9EFF; color: #fff; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+            <span>&#9654;</span> Google Play
+          </div>
+          <div style="padding: 10px 24px; border-radius: 8px; border: 1px solid rgba(74,158,255,0.3); color: #4A9EFF; font-size: 14px;">Learn More</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p style="margin-top: 8px; color: #888; font-size: 13px;">Full-viewport height. Logo + headline + subtitle + CTA buttons. Subtle radial glow background effects. Headline: "Your Identity. Your Control." or similar.</p>
+</div>
+
+<!-- SECTION 3: FEATURES -->
+<div class="section">
+  <h3>3. Features Grid (6 cards)</h3>
+  <div class="mockup">
+    <div class="mockup-header">Feature cards - 3x2 grid</div>
+    <div class="mockup-body" style="background: #0A0C10; padding: 40px 24px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <div style="font-size: 10px; color: #4A9EFF; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px;">Features</div>
+        <div style="font-size: 22px; font-weight: 700; color: #fff;">Why SSDID?</div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 20px;">
+          <div style="font-size: 24px; margin-bottom: 8px;">&#128274;</div>
+          <div style="font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px;">Post-Quantum Security</div>
+          <div style="font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.5;">KAZ-Sign algorithms protect your identity against future quantum threats.</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 20px;">
+          <div style="font-size: 24px; margin-bottom: 8px;">&#128100;</div>
+          <div style="font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px;">Self-Sovereign</div>
+          <div style="font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.5;">You own your keys and data. No third party controls your identity.</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 20px;">
+          <div style="font-size: 24px; margin-bottom: 8px;">&#128272;</div>
+          <div style="font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px;">Hardware-Backed</div>
+          <div style="font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.5;">Keys stored in TEE/StrongBox. Biometric unlock for every action.</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 20px;">
+          <div style="font-size: 24px; margin-bottom: 8px;">&#128196;</div>
+          <div style="font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px;">Verifiable Credentials</div>
+          <div style="font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.5;">W3C standard credentials you can present anywhere, instantly.</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 20px;">
+          <div style="font-size: 24px; margin-bottom: 8px;">&#128260;</div>
+          <div style="font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px;">Recovery Options</div>
+          <div style="font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.5;">Three-tier recovery: recovery keys, Shamir's Secret Sharing, institutional backup.</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 20px;">
+          <div style="font-size: 24px; margin-bottom: 8px;">&#127760;</div>
+          <div style="font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px;">W3C DID Compliant</div>
+          <div style="font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.5;">Built on open standards. Interoperable with the decentralized identity ecosystem.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p style="margin-top: 8px; color: #888; font-size: 13px;">6 feature cards in a 3-column grid (stacks to 2-col on tablet, 1-col on mobile). Each card: icon + title + short description. Subtle glass-morphism card style.</p>
+</div>
+
+<!-- SECTION 4: HOW IT WORKS -->
+<div class="section">
+  <h3>4. How It Works (3 steps)</h3>
+  <div class="mockup">
+    <div class="mockup-header">Step-by-step flow</div>
+    <div class="mockup-body" style="background: linear-gradient(180deg, #0A0C10 0%, #0d1117 100%); padding: 40px 24px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <div style="font-size: 10px; color: #4A9EFF; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px;">How It Works</div>
+        <div style="font-size: 22px; font-weight: 700; color: #fff;">Get Started in Minutes</div>
+      </div>
+      <div style="display: flex; gap: 24px; justify-content: center;">
+        <div style="text-align: center; flex: 1; max-width: 200px;">
+          <div style="width: 48px; height: 48px; margin: 0 auto 12px; border-radius: 50%; background: rgba(74,158,255,0.1); border: 1px solid rgba(74,158,255,0.2); display: flex; align-items: center; justify-content: center; color: #4A9EFF; font-weight: 700; font-size: 18px;">1</div>
+          <div style="font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px;">Download</div>
+          <div style="font-size: 12px; color: rgba(255,255,255,0.5);">Get SSDID Wallet from Google Play</div>
+        </div>
+        <div style="text-align: center; flex: 1; max-width: 200px;">
+          <div style="width: 48px; height: 48px; margin: 0 auto 12px; border-radius: 50%; background: rgba(74,158,255,0.1); border: 1px solid rgba(74,158,255,0.2); display: flex; align-items: center; justify-content: center; color: #4A9EFF; font-weight: 700; font-size: 18px;">2</div>
+          <div style="font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px;">Create Identity</div>
+          <div style="font-size: 12px; color: rgba(255,255,255,0.5);">Generate your DID with biometric protection</div>
+        </div>
+        <div style="text-align: center; flex: 1; max-width: 200px;">
+          <div style="width: 48px; height: 48px; margin: 0 auto 12px; border-radius: 50%; background: rgba(74,158,255,0.1); border: 1px solid rgba(74,158,255,0.2); display: flex; align-items: center; justify-content: center; color: #4A9EFF; font-weight: 700; font-size: 18px;">3</div>
+          <div style="font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px;">Use Everywhere</div>
+          <div style="font-size: 12px; color: rgba(255,255,255,0.5);">Authenticate, sign, and present credentials</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p style="margin-top: 8px; color: #888; font-size: 13px;">Three numbered steps with connecting flow. Clean, horizontal layout (vertical on mobile). Subtle gradient background shift to distinguish from features section.</p>
+</div>
+
+<!-- SECTION 5: DOWNLOAD CTA -->
+<div class="section">
+  <h3>5. Download CTA</h3>
+  <div class="mockup">
+    <div class="mockup-header">Final call to action</div>
+    <div class="mockup-body" style="background: #0A0C10; padding: 50px 40px; text-align: center; position: relative; overflow: hidden;">
+      <div style="position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(74,158,255,0.08) 0%, transparent 70%);"></div>
+      <div style="position: relative;">
+        <div style="font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 10px;">Ready to Own Your Identity?</div>
+        <div style="font-size: 14px; color: rgba(255,255,255,0.5); margin-bottom: 20px;">Download SSDID Wallet and take control of your digital identity today.</div>
+        <div style="display: inline-flex; gap: 12px;">
+          <div style="padding: 12px 28px; border-radius: 8px; background: #4A9EFF; color: #fff; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+            <span>&#9654;</span> Download on Google Play
+          </div>
+        </div>
+        <div style="margin-top: 12px; font-size: 12px; color: rgba(255,255,255,0.3);">Available on Android &bull; iOS &amp; HarmonyOS coming soon</div>
+      </div>
+    </div>
+  </div>
+  <p style="margin-top: 8px; color: #888; font-size: 13px;">Full-width CTA with centered headline + download button + "coming soon" platform note. Subtle radial glow behind.</p>
+</div>
+
+<!-- SECTION 6: FOOTER -->
+<div class="section">
+  <h3>6. Footer</h3>
+  <div class="mockup">
+    <div class="mockup-header">Minimal footer</div>
+    <div class="mockup-body" style="background: #060810; padding: 24px 40px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06);">
+      <div style="color: rgba(255,255,255,0.4); font-size: 12px;">&copy; 2024 SSDID. All rights reserved.</div>
+      <div style="display: flex; gap: 16px;">
+        <span style="color: rgba(255,255,255,0.4); font-size: 12px;">Privacy</span>
+        <span style="color: rgba(255,255,255,0.4); font-size: 12px;">Terms</span>
+        <span style="color: rgba(255,255,255,0.4); font-size: 12px;">GitHub</span>
+      </div>
+    </div>
+  </div>
+  <p style="margin-top: 8px; color: #888; font-size: 13px;">Simple footer with copyright, links to privacy/terms, and GitHub. Darker shade to close the page.</p>
+</div>
