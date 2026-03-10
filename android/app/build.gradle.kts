@@ -182,7 +182,7 @@ sentry {
     includeProguardMapping.set(true)
     autoUploadProguardMapping.set(false)
     includeNativeSources.set(false)
-    includeSourceContext.set(true)
+    includeSourceContext.set(false)
     autoUploadSourceContext.set(false)
     tracingInstrumentation {
         enabled.set(true)
