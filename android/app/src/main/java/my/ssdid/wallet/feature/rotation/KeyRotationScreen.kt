@@ -108,9 +108,12 @@ fun KeyRotationScreen(
             .statusBarsPadding()
     ) {
         // Header
-        Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
-            Spacer(Modifier.width(12.dp))
+        Row(
+            Modifier.padding(start = 8.dp, end = 20.dp, top = 12.dp, bottom = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
+            Spacer(Modifier.width(4.dp))
             Text("Key Rotation", style = MaterialTheme.typography.titleLarge)
         }
 

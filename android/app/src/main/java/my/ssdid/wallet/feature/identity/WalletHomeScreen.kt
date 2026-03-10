@@ -209,7 +209,7 @@ fun QuickActionCard(label: String, modifier: Modifier = Modifier, onClick: () ->
                 Text("\u2B21", color = Accent, fontSize = 18.sp)
             }
             Spacer(Modifier.height(8.dp))
-            Text(label, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
+            Text(label, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = TextPrimary, maxLines = 1)
         }
     }
 }
