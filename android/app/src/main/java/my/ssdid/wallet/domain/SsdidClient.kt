@@ -15,6 +15,9 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
+import io.sentry.Breadcrumb
+import io.sentry.Sentry
+import io.sentry.SentryLevel
 import java.io.IOException
 import java.net.SocketTimeoutException
 import java.security.MessageDigest
@@ -72,62 +75,34 @@ class SsdidClient(
 
     /** Flow 1: Create identity and publish DID to Registry */
     suspend fun initIdentity(name: String, algorithm: Algorithm): Result<Identity> = runCatching {
+        Sentry.addBreadcrumb(Breadcrumb().apply {
+            category = "identity"; message = "Creating identity"; level = SentryLevel.INFO
+            data["algorithm"] = algorithm.name
+        })
         val identity = vault.createIdentity(name, algorithm).getOrThrow()
+
+        Sentry.addBreadcrumb(Breadcrumb().apply {
+            category = "identity"; message = "Building DID document"; level = SentryLevel.INFO
+            data["keyId"] = identity.keyId
+        })
         val didDoc = vault.buildDidDocument(identity.keyId).getOrThrow()
         val didDocJson = wireJson.encodeToString(didDoc)
         val didDocJsonObject = wireJson.parseToJsonElement(didDocJson).jsonObject
+
+        Sentry.addBreadcrumb(Breadcrumb().apply {
+            category = "identity"; message = "Creating proof"; level = SentryLevel.INFO
+            data["proofPurpose"] = "assertionMethod"
+        })
         val proof = vault.createProof(
             identity.keyId,
             didDocJsonObject,
             "assertionMethod"
         ).getOrThrow()
-        val request = RegisterDidRequest(didDoc, proof)
-        val reqJson = wireJson.encodeToString(request)
 
-        // === DEBUG: Simulate what the registry will compute ===
-        val registrySimDebug = try {
-            // Parse the request JSON as the registry would receive it
-            val reqObj = wireJson.parseToJsonElement(reqJson).jsonObject
-            val regDidDoc = reqObj["did_document"]!!.jsonObject
-            val regProof = reqObj["proof"]!!.jsonObject
-
-            // Registry removes "proof" from document (no-op here) and "proofValue" from proof
-            val regDocForSign = JsonObject(regDidDoc.filterKeys { it != "proof" })
-            val regOptsForSign = JsonObject(regProof.filterKeys { it != "proofValue" })
-
-            // Registry computes canonical JSON
-            val regDocCanonical = my.ssdid.wallet.domain.vault.VaultImpl.canonicalJson(regDocForSign)
-            val regOptsCanonical = my.ssdid.wallet.domain.vault.VaultImpl.canonicalJson(regOptsForSign)
-
-            // Registry computes SHA3-256 hashes
-            val sha3 = MessageDigest.getInstance("SHA3-256")
-            val regOptsHash = sha3.digest(regOptsCanonical.toByteArray(Charsets.UTF_8))
-            sha3.reset()
-            val regDocHash = sha3.digest(regDocCanonical.toByteArray(Charsets.UTF_8))
-            val regPayload = regOptsHash + regDocHash
-
-            // Compare with wallet's original payload
-            val walletPayload = my.ssdid.wallet.domain.vault.VaultImpl.lastPayloadDebug
-            val match = walletPayload.contentEquals(regPayload)
-
-            buildString {
-                appendLine("REG_OPTS_JSON=$regOptsCanonical")
-                appendLine("REG_DOC_JSON=${regDocCanonical.take(500)}")
-                appendLine("REG_OPTS_HASH=${regOptsHash.joinToString("") { "%02x".format(it) }}")
-                appendLine("REG_DOC_HASH=${regDocHash.joinToString("") { "%02x".format(it) }}")
-                appendLine("REG_PAYLOAD(${regPayload.size})=${regPayload.joinToString("") { "%02x".format(it) }}")
-                appendLine("PAYLOAD_MATCH=$match")
-            }
-        } catch (e: Exception) {
-            "REG_SIM_ERR=${e.message}"
-        }
-
-        try {
-            httpClient.registry.registerDid(request)
-        } catch (e: Exception) {
-            val proofDebug = my.ssdid.wallet.domain.vault.VaultImpl.lastProofDebug
-            throw RuntimeException("Registry rejected:\n$proofDebug\n$registrySimDebug", e)
-        }
+        Sentry.addBreadcrumb(Breadcrumb().apply {
+            category = "identity"; message = "Registering DID with registry"; level = SentryLevel.INFO
+        })
+        httpClient.registry.registerDid(RegisterDidRequest(didDoc, proof))
         logActivity(ActivityType.IDENTITY_CREATED, identity.did, details = mapOf("algorithm" to algorithm.name))
         identity
     }
@@ -147,6 +122,10 @@ class SsdidClient(
     suspend fun deactivateDid(keyId: String): Result<Unit> = runCatching {
         val identity = vault.getIdentity(keyId)
             ?: throw IllegalArgumentException("Identity not found: $keyId")
+        Sentry.addBreadcrumb(Breadcrumb().apply {
+            category = "identity"; message = "Deactivating DID"; level = SentryLevel.WARNING
+            data["algorithm"] = identity.algorithm.name
+        })
         val deactivateData = wireJson.parseToJsonElement(
             """{"id":"${identity.did}","deactivated":true}"""
         ).jsonObject
@@ -158,6 +137,10 @@ class SsdidClient(
 
     /** Flow 2: Register with a service (mutual auth) */
     suspend fun registerWithService(identity: Identity, serverUrl: String): Result<VerifiableCredential> = runCatching {
+        Sentry.addBreadcrumb(Breadcrumb().apply {
+            category = "service"; message = "Registering with service"; level = SentryLevel.INFO
+            data["serverUrl"] = serverUrl
+        })
         val serverApi = httpClient.serverApi(serverUrl)
 
         // Step 1: Start registration — send our DID
@@ -194,6 +177,10 @@ class SsdidClient(
 
     /** Flow 3: Authenticate with a service */
     suspend fun authenticate(credential: VerifiableCredential, serverUrl: String): Result<AuthenticateResponse> = runCatching {
+        Sentry.addBreadcrumb(Breadcrumb().apply {
+            category = "auth"; message = "Authenticating with service"; level = SentryLevel.INFO
+            data["serverUrl"] = serverUrl
+        })
         // Check revocation status before presenting credential
         val revocationStatus = revocationManager.checkRevocation(credential)
         if (revocationStatus == RevocationStatus.REVOKED) {
@@ -231,6 +218,10 @@ class SsdidClient(
         transaction: Map<String, String>,
         serverUrl: String
     ): Result<TxSubmitResponse> = runCatching {
+        Sentry.addBreadcrumb(Breadcrumb().apply {
+            category = "transaction"; message = "Signing transaction"; level = SentryLevel.INFO
+            data["serverUrl"] = serverUrl; data["algorithm"] = identity.algorithm.name
+        })
         val serverApi = httpClient.serverApi(serverUrl)
 
         // Step 1: Request fresh challenge

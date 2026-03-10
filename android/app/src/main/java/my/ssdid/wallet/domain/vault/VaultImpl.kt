@@ -6,6 +6,9 @@ import my.ssdid.wallet.domain.model.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import io.sentry.Breadcrumb
+import io.sentry.Sentry
+import io.sentry.SentryLevel
 import java.security.MessageDigest
 import java.time.Instant
 import java.time.ZoneOffset
@@ -23,6 +26,10 @@ class VaultImpl(
     }
 
     override suspend fun createIdentity(name: String, algorithm: Algorithm): Result<Identity> = runCatching {
+        Sentry.addBreadcrumb(Breadcrumb().apply {
+            category = "vault"; message = "Generating key pair"; level = SentryLevel.INFO
+            data["algorithm"] = algorithm.name; data["isPostQuantum"] = algorithm.isPostQuantum.toString()
+        })
         val provider = providerFor(algorithm)
         val keyPair = provider.generateKeyPair(algorithm)
         val did = Did.generate()
@@ -106,37 +113,22 @@ class VaultImpl(
 
         // W3C Data Integrity signing payload:
         // SHA3-256(canonical_json(proof_options)) || SHA3-256(canonical_json(document))
-        val optionsCanonical = canonicalJson(JsonObject(proofOptions))
-        val docCanonical = canonicalJson(document)
-
         val sha3 = MessageDigest.getInstance("SHA3-256")
-        val optionsHash = sha3.digest(optionsCanonical.toByteArray(Charsets.UTF_8))
+        val optionsHash = sha3.digest(canonicalJson(JsonObject(proofOptions)).toByteArray(Charsets.UTF_8))
         sha3.reset()
-        val docHash = sha3.digest(docCanonical.toByteArray(Charsets.UTF_8))
+        val docHash = sha3.digest(canonicalJson(document).toByteArray(Charsets.UTF_8))
         val payload = optionsHash + docHash
 
+        Sentry.addBreadcrumb(Breadcrumb().apply {
+            category = "vault"; message = "Signing proof payload"; level = SentryLevel.INFO
+            data["proofPurpose"] = proofPurpose; data["algorithm"] = identity.algorithm.name
+            data["payloadSize"] = payload.size.toString()
+        })
         val signature = sign(keyId, payload).getOrThrow()
-
-        // DEBUG: Self-verify using native C library (strip 5-byte KazWire header)
-        val selfVerifyResult = try {
-            val pubKeyBytes = my.ssdid.wallet.domain.crypto.Multibase.decode(identity.publicKeyMultibase)
-            val rawSig = signature.copyOfRange(5, signature.size) // strip wire header
-            val provider = if (identity.algorithm.isPostQuantum) pqcProvider else classicalProvider
-            "SELF_VERIFY=${provider.verify(identity.algorithm, pubKeyBytes, rawSig, payload)}"
-        } catch (e: Exception) {
-            "SELF_VERIFY_ERR=${e.message}"
-        }
-
-        lastPayloadDebug = payload
-        lastProofDebug = buildString {
-            appendLine("OPT_JSON=$optionsCanonical")
-            appendLine("DOC_JSON=${docCanonical.take(400)}")
-            appendLine("OPT_HASH=${optionsHash.joinToString("") { "%02x".format(it) }}")
-            appendLine("DOC_HASH=${docHash.joinToString("") { "%02x".format(it) }}")
-            appendLine("PAYLOAD(${payload.size})=${payload.joinToString("") { "%02x".format(it) }}")
-            appendLine("SIG(${signature.size})=${signature.take(10).joinToString("") { "%02x".format(it) }}...")
-            appendLine(selfVerifyResult)
-        }
+        Sentry.addBreadcrumb(Breadcrumb().apply {
+            category = "vault"; message = "Proof signed"; level = SentryLevel.INFO
+            data["signatureSize"] = signature.size.toString()
+        })
         Proof(
             type = identity.algorithm.proofType,
             created = now,
@@ -148,14 +140,6 @@ class VaultImpl(
     }
 
     companion object {
-        /** Debug info from the last createProof call (for Honor devices where logcat is blocked) */
-        @Volatile
-        var lastProofDebug: String = ""
-
-        /** The raw payload bytes from the last createProof call (for registry simulation comparison) */
-        @Volatile
-        var lastPayloadDebug: ByteArray = ByteArray(0)
-
         /**
          * Produces deterministic JSON by recursively sorting map keys.
          * Matches the registry's canonical_json implementation.

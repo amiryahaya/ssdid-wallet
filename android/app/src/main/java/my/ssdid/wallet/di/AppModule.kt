@@ -76,7 +76,7 @@ object AppModule {
             .addInterceptor(RetryInterceptor())
             .addInterceptor(SentryOkHttpInterceptor())
             .addInterceptor(HttpLoggingInterceptor().apply {
-                level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
+                level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.HEADERS
                         else HttpLoggingInterceptor.Level.NONE
             })
             .build()

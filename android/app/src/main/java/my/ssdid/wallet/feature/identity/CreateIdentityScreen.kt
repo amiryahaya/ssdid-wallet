@@ -44,13 +44,9 @@ class CreateIdentityViewModel @Inject constructor(
                     storage.setOnboardingCompleted()
                     onSuccess()
                 }
-                .onFailure { e ->
-                    val body = if (e is retrofit2.HttpException) {
-                        e.response()?.errorBody()?.string() ?: ""
-                    } else ""
-                    val msg = "${e.message}\n$body"
-                    android.util.Log.e("CreateIdentity", msg, e)
-                    _error.value = msg
+                .onFailure {
+                    io.sentry.Sentry.captureException(it)
+                    _error.value = it.message ?: "Failed to create identity"
                 }
             _isCreating.value = false
         }

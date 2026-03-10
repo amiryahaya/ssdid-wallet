@@ -42,17 +42,28 @@ class IdentityDetailViewModel @Inject constructor(
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
 
+    private val _isDeactivating = MutableStateFlow(false)
+    val isDeactivating = _isDeactivating.asStateFlow()
+
     init {
         viewModelScope.launch { _identity.value = vault.getIdentity(keyId) }
     }
 
     fun deactivateIdentity(onComplete: () -> Unit) {
         viewModelScope.launch {
+            _isDeactivating.value = true
+            _error.value = null
             ssdidClient.deactivateDid(keyId)
                 .onSuccess { onComplete() }
-                .onFailure { _error.value = it.message ?: "Deactivation failed" }
+                .onFailure { e ->
+                    io.sentry.Sentry.captureException(e)
+                    _error.value = e.message ?: "Deactivation failed"
+                }
+            _isDeactivating.value = false
         }
     }
+
+    fun clearError() { _error.value = null }
 }
 
 @Composable
@@ -66,6 +77,8 @@ fun IdentityDetailScreen(
     viewModel: IdentityDetailViewModel = hiltViewModel()
 ) {
     val identity by viewModel.identity.collectAsState()
+    val error by viewModel.error.collectAsState()
+    val isDeactivating by viewModel.isDeactivating.collectAsState()
 
     Column(Modifier.fillMaxSize().background(BgPrimary).statusBarsPadding()) {
         Row(
@@ -130,10 +143,38 @@ fun IdentityDetailScreen(
                     Button(
                         onClick = { showDeactivateDialog = true },
                         modifier = Modifier.fillMaxWidth(),
+                        enabled = !isDeactivating,
                         colors = ButtonDefaults.buttonColors(containerColor = Danger),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text("Deactivate Identity", color = Color.White)
+                        if (isDeactivating) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text("Deactivating...", color = Color.White)
+                        } else {
+                            Text("Deactivate Identity", color = Color.White)
+                        }
+                    }
+
+                    error?.let { msg ->
+                        Spacer(Modifier.height(8.dp))
+                        Card(
+                            Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(8.dp),
+                            colors = CardDefaults.cardColors(containerColor = DangerDim)
+                        ) {
+                            Text(
+                                msg,
+                                modifier = Modifier.padding(12.dp),
+                                color = Danger,
+                                fontSize = 12.sp,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
                     }
 
                     if (showDeactivateDialog) {
