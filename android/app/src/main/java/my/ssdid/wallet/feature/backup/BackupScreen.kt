@@ -19,6 +19,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,6 +29,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.FragmentActivity
+import android.content.Intent
+import androidx.core.content.FileProvider
+import java.io.File
+import androidx.compose.ui.res.stringResource
+import my.ssdid.wallet.R
 import my.ssdid.wallet.domain.backup.BackupManager
 import my.ssdid.wallet.platform.biometric.BiometricAuthenticator
 import my.ssdid.wallet.platform.biometric.BiometricResult
@@ -50,8 +56,10 @@ sealed class BackupState {
 @HiltViewModel
 class BackupViewModel @Inject constructor(
     private val backupManager: BackupManager,
-    private val biometricAuth: BiometricAuthenticator
+    private val biometricAuth: BiometricAuthenticator,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+    val restoreUri: String = savedStateHandle["restoreUri"] ?: ""
 
     private val _state = MutableStateFlow<BackupState>(BackupState.Idle)
     val state = _state.asStateFlow()
@@ -140,6 +148,21 @@ fun BackupScreen(
     val context = LocalContext.current
     val activity = context as? FragmentActivity
     val scope = rememberCoroutineScope()
+
+    // Auto-load backup file from share intent
+    LaunchedEffect(viewModel.restoreUri) {
+        if (viewModel.restoreUri.isNotEmpty()) {
+            try {
+                val uri = android.net.Uri.parse(viewModel.restoreUri)
+                val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                if (bytes != null) {
+                    viewModel.onBackupFileLoaded(bytes)
+                }
+            } catch (e: Exception) {
+                // URI read failed — user can still manually load
+            }
+        }
+    }
 
     // SAF launcher for saving backup to a file
     val saveBackupLauncher = rememberLauncherForActivityResult(
@@ -330,6 +353,34 @@ fun BackupScreen(
                             colors = ButtonDefaults.buttonColors(containerColor = Success)
                         ) {
                             Text("Save to File", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                        }
+                        Spacer(Modifier.height(8.dp))
+                        Button(
+                            onClick = {
+                                val bytes = viewModel.lastBackupBytes ?: return@Button
+                                val cacheDir = File(context.cacheDir, "backups")
+                                cacheDir.mkdirs()
+                                val date = java.time.LocalDate.now().toString()
+                                val backupFile = File(cacheDir, "ssdid-backup-$date.enc")
+                                backupFile.writeBytes(bytes)
+                                val fileUri = FileProvider.getUriForFile(
+                                    context,
+                                    "${context.packageName}.fileprovider",
+                                    backupFile
+                                )
+                                val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "application/octet-stream"
+                                    putExtra(Intent.EXTRA_STREAM, fileUri)
+                                    setPackage("my.ssdid.drive")
+                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                }
+                                context.startActivity(sendIntent)
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Accent)
+                        ) {
+                            Text(stringResource(R.string.backup_to_cloud), fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                         }
                     }
                 }

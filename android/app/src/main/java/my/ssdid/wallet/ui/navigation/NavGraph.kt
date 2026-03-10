@@ -120,7 +120,8 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
         composable(
             Screen.AuthFlow.route,
             arguments = listOf(
-                navArgument("serverUrl") { type = NavType.StringType; defaultValue = "" }
+                navArgument("serverUrl") { type = NavType.StringType; defaultValue = "" },
+                navArgument("callbackUrl") { type = NavType.StringType; defaultValue = "" }
             )
         ) {
             AuthFlowScreen(
@@ -196,7 +197,12 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
             backStackEntry.arguments?.getString("keyId") ?: return@composable
             KeyRotationScreen(onBack = { navController.popBackStack() })
         }
-        composable(Screen.BackupExport.route) {
+        composable(
+            Screen.BackupExport.route,
+            arguments = listOf(
+                navArgument("restoreUri") { type = NavType.StringType; defaultValue = "" }
+            )
+        ) {
             BackupScreen(onBack = { navController.popBackStack() })
         }
         composable(Screen.DeviceManagement.route) { backStackEntry ->

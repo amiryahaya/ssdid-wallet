@@ -279,4 +279,8 @@
     <string name="cd_select_algorithm">Select %1$s algorithm</string>
     <string name="cd_success_icon">Success</string>
     <string name="cd_loading">Loading</string>
+
+    <!-- Backup & Drive -->
+    <string name="backup_to_cloud">Backup to Cloud</string>
+    <string name="return_to_drive">Return to SSDID Drive</string>
 </resources>

@@ -1,5 +1,6 @@
 package my.ssdid.wallet.feature.auth
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -25,6 +26,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.FragmentActivity
+import androidx.compose.ui.res.stringResource
+import my.ssdid.wallet.R
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.vault.Vault
@@ -36,7 +39,7 @@ import javax.inject.Inject
 sealed class AuthState {
     object Idle : AuthState()
     object Loading : AuthState()
-    object Success : AuthState()
+    data class Success(val sessionToken: String = "") : AuthState()
     data class Error(val message: String) : AuthState()
 }
 
@@ -48,6 +51,8 @@ class AuthFlowViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     val serverUrl: String = savedStateHandle["serverUrl"] ?: ""
+    val callbackUrl: String = savedStateHandle["callbackUrl"] ?: ""
+    val hasCallback: Boolean get() = callbackUrl.isNotEmpty()
 
     private val _state = MutableStateFlow<AuthState>(AuthState.Idle)
     val state = _state.asStateFlow()
@@ -82,9 +87,17 @@ class AuthFlowViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = AuthState.Loading
             client.authenticate(credential, serverUrl)
-                .onSuccess { _state.value = AuthState.Success }
+                .onSuccess { response -> _state.value = AuthState.Success(sessionToken = response.session_token) }
                 .onFailure { _state.value = AuthState.Error(it.message ?: "Authentication failed") }
         }
+    }
+
+    fun buildCallbackUri(sessionToken: String): android.net.Uri? {
+        if (callbackUrl.isEmpty()) return null
+        return android.net.Uri.parse(callbackUrl)
+            .buildUpon()
+            .appendQueryParameter("session_token", sessionToken)
+            .build()
     }
 }
 
@@ -261,6 +274,8 @@ fun AuthFlowScreen(
             }
 
             is AuthState.Success -> {
+                val authSuccess = state as AuthState.Success
+                val callbackUri = viewModel.buildCallbackUri(authSuccess.sessionToken)
                 Spacer(Modifier.weight(1f))
                 Column(
                     Modifier
@@ -284,14 +299,24 @@ fun AuthFlowScreen(
                 }
                 Spacer(Modifier.weight(1f))
                 Button(
-                    onClick = onComplete,
+                    onClick = {
+                        if (callbackUri != null) {
+                            val intent = Intent(Intent.ACTION_VIEW, callbackUri)
+                            context.startActivity(intent)
+                        }
+                        onComplete()
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(20.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Success)
                 ) {
-                    Text("Done", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        if (callbackUri != null) stringResource(R.string.return_to_drive) else "Done",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
             }
 

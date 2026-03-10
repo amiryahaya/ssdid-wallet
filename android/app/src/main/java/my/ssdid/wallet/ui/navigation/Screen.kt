@@ -15,8 +15,9 @@ sealed class Screen(val route: String) {
         fun createRoute(serverUrl: String, serverDid: String) =
             "registration?serverUrl=${Uri.encode(serverUrl)}&serverDid=${Uri.encode(serverDid)}"
     }
-    object AuthFlow : Screen("auth_flow?serverUrl={serverUrl}") {
-        fun createRoute(serverUrl: String) = "auth_flow?serverUrl=${Uri.encode(serverUrl)}"
+    object AuthFlow : Screen("auth_flow?serverUrl={serverUrl}&callbackUrl={callbackUrl}") {
+        fun createRoute(serverUrl: String, callbackUrl: String = "") =
+            "auth_flow?serverUrl=${Uri.encode(serverUrl)}&callbackUrl=${Uri.encode(callbackUrl)}"
     }
     object TxSigning : Screen("tx_signing?serverUrl={serverUrl}&sessionToken={sessionToken}") {
         fun createRoute(serverUrl: String, sessionToken: String) =
@@ -38,7 +39,10 @@ sealed class Screen(val route: String) {
     object KeyRotation : Screen("key_rotation/{keyId}") {
         fun createRoute(keyId: String) = "key_rotation/${Uri.encode(keyId)}"
     }
-    object BackupExport : Screen("backup_export")
+    object BackupExport : Screen("backup_export?restoreUri={restoreUri}") {
+        fun createRoute(restoreUri: String = "") =
+            "backup_export?restoreUri=${Uri.encode(restoreUri)}"
+    }
     object RecoveryRestore : Screen("recovery_restore")
     object SocialRecoverySetup : Screen("social_recovery_setup/{keyId}") {
         fun createRoute(keyId: String) = "social_recovery_setup/${Uri.encode(keyId)}"

@@ -10,6 +10,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import androidx.lifecycle.SavedStateHandle
 import my.ssdid.wallet.domain.backup.BackupManager
 import my.ssdid.wallet.platform.biometric.BiometricAuthenticator
 import org.junit.Before
@@ -32,7 +33,7 @@ class BackupViewModelTest {
     fun setup() {
         backupManager = mockk(relaxed = true)
         biometricAuth = mockk(relaxed = true)
-        viewModel = BackupViewModel(backupManager, biometricAuth)
+        viewModel = BackupViewModel(backupManager, biometricAuth, SavedStateHandle())
     }
 
     @Test

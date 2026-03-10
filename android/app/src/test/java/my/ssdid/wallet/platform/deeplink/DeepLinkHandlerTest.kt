@@ -203,4 +203,80 @@ class DeepLinkHandlerTest {
 
         assertThat(result).isNull()
     }
+
+    @Test
+    fun `parse authenticate with callback_url returns callbackUrl`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "authenticate",
+            queryParams = mapOf(
+                "server_url" to "https://demo.ssdid.my",
+                "callback_url" to "ssdiddrive://auth/callback"
+            )
+        )
+        val result = DeepLinkHandler.parse(uri)
+
+        assertThat(result).isNotNull()
+        assertThat(result!!.action).isEqualTo("authenticate")
+        assertThat(result.callbackUrl).isEqualTo("ssdiddrive://auth/callback")
+    }
+
+    @Test
+    fun `parse authenticate without callback_url has empty callbackUrl`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "authenticate",
+            queryParams = mapOf("server_url" to "https://demo.ssdid.my")
+        )
+        val result = DeepLinkHandler.parse(uri)
+
+        assertThat(result).isNotNull()
+        assertThat(result!!.callbackUrl).isEmpty()
+    }
+
+    @Test
+    fun `parse authenticate rejects non-ssdiddrive callback_url scheme`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "authenticate",
+            queryParams = mapOf(
+                "server_url" to "https://demo.ssdid.my",
+                "callback_url" to "https://evil.com/steal"
+            )
+        )
+        val result = DeepLinkHandler.parse(uri)
+
+        assertThat(result).isNotNull()
+        assertThat(result!!.callbackUrl).isEmpty()
+    }
+
+    @Test
+    fun `parse authenticate rejects javascript callback_url scheme`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "authenticate",
+            queryParams = mapOf(
+                "server_url" to "https://demo.ssdid.my",
+                "callback_url" to "javascript:alert(1)"
+            )
+        )
+        val result = DeepLinkHandler.parse(uri)
+
+        assertThat(result).isNotNull()
+        assertThat(result!!.callbackUrl).isEmpty()
+    }
+
+    @Test
+    fun `toNavRoute for authenticate with callbackUrl includes callbackUrl param`() {
+        val deepLink = DeepLinkAction(
+            action = "authenticate",
+            serverUrl = "https://demo.ssdid.my",
+            callbackUrl = "ssdiddrive://auth/callback"
+        )
+        val route = deepLink.toNavRoute()
+
+        assertThat(route).isNotNull()
+        assertThat(route).contains("auth_flow")
+        assertThat(route).contains("callbackUrl")
+    }
 }

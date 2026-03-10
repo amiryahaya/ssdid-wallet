@@ -10,7 +10,8 @@ data class DeepLinkAction(
     val serverDid: String = "",
     val sessionToken: String = "",
     val issuerUrl: String = "",
-    val offerId: String = ""
+    val offerId: String = "",
+    val callbackUrl: String = ""
 ) {
     /**
      * Returns the navigation route for this deep link action,
@@ -18,7 +19,7 @@ data class DeepLinkAction(
      */
     fun toNavRoute(): String? = when (action) {
         "register" -> Screen.Registration.createRoute(serverUrl, serverDid)
-        "authenticate" -> Screen.AuthFlow.createRoute(serverUrl)
+        "authenticate" -> Screen.AuthFlow.createRoute(serverUrl, callbackUrl)
         "sign" -> Screen.TxSigning.createRoute(serverUrl, sessionToken)
         "credential-offer" -> Screen.CredentialOffer.createRoute(issuerUrl, offerId)
         else -> null
@@ -52,11 +53,16 @@ object DeepLinkHandler {
 
         val serverUrl = uri.getQueryParameter("server_url") ?: return null
         if (!UrlValidator.isValidServerUrl(serverUrl)) return null
+
+        val rawCallbackUrl = uri.getQueryParameter("callback_url") ?: ""
+        val callbackUrl = if (rawCallbackUrl.startsWith("ssdiddrive://")) rawCallbackUrl else ""
+
         return DeepLinkAction(
             action = action,
             serverUrl = serverUrl,
             serverDid = uri.getQueryParameter("server_did") ?: "",
-            sessionToken = uri.getQueryParameter("session_token") ?: ""
+            sessionToken = uri.getQueryParameter("session_token") ?: "",
+            callbackUrl = callbackUrl
         )
     }
 }
