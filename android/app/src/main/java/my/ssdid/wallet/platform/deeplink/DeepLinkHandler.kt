@@ -1,6 +1,7 @@
 package my.ssdid.wallet.platform.deeplink
 
 import android.net.Uri
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import my.ssdid.wallet.domain.transport.dto.ClaimRequest
 import my.ssdid.wallet.platform.security.UrlValidator
@@ -24,7 +25,16 @@ data class DeepLinkAction(
      */
     fun toNavRoute(): String? = when (action) {
         "register" -> Screen.Registration.createRoute(serverUrl, serverDid)
-        "authenticate" -> Screen.AuthFlow.createRoute(serverUrl, callbackUrl)
+        "authenticate" -> {
+            if (requestedClaims.isNotEmpty()) {
+                val claimsJson = Json.encodeToString(requestedClaims)
+                val algosJson = if (acceptedAlgorithms.isNotEmpty())
+                    Json.encodeToString(acceptedAlgorithms) else ""
+                Screen.Consent.createRoute(serverUrl, callbackUrl, sessionId, claimsJson, algosJson)
+            } else {
+                Screen.AuthFlow.createRoute(serverUrl, callbackUrl)
+            }
+        }
         "sign" -> Screen.TxSigning.createRoute(serverUrl, sessionToken)
         "credential-offer" -> Screen.CredentialOffer.createRoute(issuerUrl, offerId)
         else -> null

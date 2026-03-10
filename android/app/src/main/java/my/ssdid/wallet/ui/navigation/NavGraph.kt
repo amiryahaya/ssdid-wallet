@@ -27,6 +27,8 @@ import my.ssdid.wallet.feature.recovery.SocialRecoveryRestoreScreen
 import my.ssdid.wallet.feature.recovery.SocialRecoverySetupScreen
 import my.ssdid.wallet.feature.registration.RegistrationScreen
 import my.ssdid.wallet.feature.rotation.KeyRotationScreen
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import my.ssdid.wallet.feature.scan.ScanQrScreen
 import my.ssdid.wallet.feature.settings.SettingsScreen
 import my.ssdid.wallet.feature.transaction.TxSigningScreen
@@ -102,7 +104,22 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
                 onScanned = { payload ->
                     when (payload.action) {
                         "register" -> navController.navigate(Screen.Registration.createRoute(payload.serverUrl, payload.serverDid))
-                        "authenticate" -> navController.navigate(Screen.AuthFlow.createRoute(payload.serverUrl))
+                        "authenticate" -> {
+                            if (payload.requestedClaims.isNotEmpty()) {
+                                val claimsJson = Json.encodeToString(payload.requestedClaims)
+                                val algosJson = if (payload.acceptedAlgorithms.isNotEmpty())
+                                    Json.encodeToString(payload.acceptedAlgorithms) else ""
+                                navController.navigate(Screen.Consent.createRoute(
+                                    serverUrl = payload.serverUrl,
+                                    callbackUrl = payload.callbackUrl,
+                                    sessionId = payload.sessionId,
+                                    requestedClaims = claimsJson,
+                                    acceptedAlgorithms = algosJson
+                                ))
+                            } else {
+                                navController.navigate(Screen.AuthFlow.createRoute(payload.serverUrl))
+                            }
+                        }
                         "sign" -> navController.navigate(Screen.TxSigning.createRoute(payload.serverUrl, payload.sessionToken))
                         "credential-offer" -> navController.navigate(Screen.CredentialOffer.createRoute(payload.issuerUrl, payload.offerId))
                     }
