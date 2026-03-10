@@ -2,6 +2,7 @@ package my.ssdid.wallet.domain.transport
 
 import my.ssdid.wallet.domain.transport.dto.*
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
 
 interface ServerApi {
@@ -19,4 +20,10 @@ interface ServerApi {
 
     @POST("api/transaction/submit")
     suspend fun submitTransaction(@Body request: TxSubmitRequest): TxSubmitResponse
+
+    @GET("api/auth/challenge")
+    suspend fun getAuthChallenge(): AuthChallengeResponse
+
+    @POST("api/auth/verify")
+    suspend fun verifyAuth(@Body request: AuthVerifyRequest): AuthVerifyResponse
 }
