@@ -5,4 +5,5 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version "2.1.0" apply false
     id("org.jetbrains.kotlin.plugin.compose") version "2.1.0" apply false
     id("org.jetbrains.kotlinx.kover") version "0.9.1" apply false
+    id("io.sentry.android.gradle") version "4.14.1" apply false
 }

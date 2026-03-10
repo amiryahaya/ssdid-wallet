@@ -6,6 +6,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.sentry.okhttp.SentryOkHttpInterceptor
+import my.ssdid.wallet.BuildConfig
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.backup.BackupManager
 import my.ssdid.wallet.domain.credential.CredentialIssuanceManager
@@ -23,6 +25,7 @@ import my.ssdid.wallet.domain.recovery.institutional.InstitutionalRecoveryStorag
 import my.ssdid.wallet.domain.revocation.HttpStatusListFetcher
 import my.ssdid.wallet.domain.revocation.RevocationManager
 import my.ssdid.wallet.domain.rotation.KeyRotationManager
+import my.ssdid.wallet.domain.transport.RetryInterceptor
 import my.ssdid.wallet.domain.transport.SsdidHttpClient
 import kotlinx.serialization.json.Json
 import my.ssdid.wallet.domain.vault.Vault
@@ -36,6 +39,9 @@ import my.ssdid.wallet.platform.device.AndroidDeviceInfoProvider
 import my.ssdid.wallet.domain.vault.KeystoreManager
 import my.ssdid.wallet.domain.settings.SettingsRepository
 import my.ssdid.wallet.platform.storage.DataStoreSettingsRepository
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import java.util.concurrent.TimeUnit
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -63,8 +69,26 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideHttpClient(): SsdidHttpClient {
-        return SsdidHttpClient(registryUrl = "https://registry.ssdid.my")
+    fun provideOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(10, TimeUnit.SECONDS)
+            .addInterceptor(RetryInterceptor())
+            .addInterceptor(SentryOkHttpInterceptor())
+            .addInterceptor(HttpLoggingInterceptor().apply {
+                level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.HEADERS
+                        else HttpLoggingInterceptor.Level.NONE
+            })
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideHttpClient(okHttpClient: OkHttpClient): SsdidHttpClient {
+        return SsdidHttpClient(
+            registryUrl = "https://registry.ssdid.my",
+            okHttp = okHttpClient
+        )
     }
 
     @Provides
