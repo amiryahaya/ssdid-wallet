@@ -53,13 +53,18 @@ class IdentityDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _isDeactivating.value = true
             _error.value = null
-            ssdidClient.deactivateDid(keyId)
-                .onSuccess { onComplete() }
-                .onFailure { e ->
-                    io.sentry.Sentry.captureException(e)
-                    _error.value = e.message ?: "Deactivation failed"
-                }
+            val result = ssdidClient.deactivateDid(keyId)
             _isDeactivating.value = false
+            result.onSuccess {
+                onComplete()
+            }.onFailure { e ->
+                io.sentry.Sentry.captureException(e)
+                val body = if (e is retrofit2.HttpException) {
+                    try { e.response()?.errorBody()?.string() } catch (_: Exception) { null }
+                } else null
+                _error.value = listOfNotNull(e.message, body).joinToString("\n")
+                    .ifBlank { "Deactivation failed" }
+            }
         }
     }
 
@@ -90,8 +95,29 @@ fun IdentityDetailScreen(
             Text("Identity Details", style = MaterialTheme.typography.titleLarge)
         }
 
+        var showDeactivateDialog by remember { mutableStateOf(false) }
+
+        error?.let { msg ->
+            Card(
+                Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp),
+                shape = RoundedCornerShape(8.dp),
+                colors = CardDefaults.cardColors(containerColor = DangerDim)
+            ) {
+                Text(
+                    msg,
+                    modifier = Modifier.padding(12.dp),
+                    color = Danger,
+                    fontSize = 12.sp,
+                    fontFamily = FontFamily.Monospace
+                )
+            }
+        }
+
         identity?.let { id ->
-            LazyColumn(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            LazyColumn(
+                Modifier.weight(1f).padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 item {
                     Card(
                         Modifier.fillMaxWidth(),
@@ -138,8 +164,6 @@ fun IdentityDetailScreen(
                     Text("DANGER ZONE", style = MaterialTheme.typography.labelMedium, color = Danger)
                     Spacer(Modifier.height(8.dp))
 
-                    var showDeactivateDialog by remember { mutableStateOf(false) }
-
                     Button(
                         onClick = { showDeactivateDialog = true },
                         modifier = Modifier.fillMaxWidth(),
@@ -160,56 +184,39 @@ fun IdentityDetailScreen(
                         }
                     }
 
-                    error?.let { msg ->
-                        Spacer(Modifier.height(8.dp))
-                        Card(
-                            Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(8.dp),
-                            colors = CardDefaults.cardColors(containerColor = DangerDim)
-                        ) {
-                            Text(
-                                msg,
-                                modifier = Modifier.padding(12.dp),
-                                color = Danger,
-                                fontSize = 12.sp,
-                                fontFamily = FontFamily.Monospace
-                            )
-                        }
-                    }
-
-                    if (showDeactivateDialog) {
-                        AlertDialog(
-                            onDismissRequest = { showDeactivateDialog = false },
-                            title = { Text("Deactivate Identity?") },
-                            text = {
-                                Text(
-                                    "This is irreversible. Your DID will be permanently " +
-                                        "deactivated on the registry and all associated " +
-                                        "data will be deleted."
-                                )
-                            },
-                            confirmButton = {
-                                Button(
-                                    onClick = {
-                                        showDeactivateDialog = false
-                                        viewModel.deactivateIdentity { onBack() }
-                                    },
-                                    colors = ButtonDefaults.buttonColors(containerColor = Danger)
-                                ) {
-                                    Text("Deactivate", color = Color.White)
-                                }
-                            },
-                            dismissButton = {
-                                TextButton(onClick = { showDeactivateDialog = false }) {
-                                    Text("Cancel")
-                                }
-                            }
-                        )
-                    }
-
                     Spacer(Modifier.height(24.dp))
                 }
             }
+        }
+
+        if (showDeactivateDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeactivateDialog = false },
+                title = { Text("Deactivate Identity?") },
+                text = {
+                    Text(
+                        "This is irreversible. Your DID will be permanently " +
+                            "deactivated on the registry and all associated " +
+                            "data will be deleted."
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showDeactivateDialog = false
+                            viewModel.deactivateIdentity { onBack() }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Danger)
+                    ) {
+                        Text("Deactivate", color = Color.White)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeactivateDialog = false }) {
+                        Text("Cancel")
+                    }
+                }
+            )
         }
     }
 }

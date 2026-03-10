@@ -114,7 +114,8 @@ class SsdidClient(
         val didDoc = vault.buildDidDocument(keyId).getOrThrow()
         val didDocJson = wireJson.encodeToString(didDoc)
         val didDocJsonObject = wireJson.parseToJsonElement(didDocJson).jsonObject
-        val proof = vault.createProof(keyId, didDocJsonObject, "capabilityInvocation").getOrThrow()
+        val challengeResp = httpClient.registry.createChallenge(identity.did)
+        val proof = vault.createProof(keyId, didDocJsonObject, "capabilityInvocation", challengeResp.challenge, challengeResp.domain).getOrThrow()
         httpClient.registry.updateDid(identity.did, UpdateDidRequest(didDoc, proof))
     }
 
@@ -127,10 +128,27 @@ class SsdidClient(
             data["algorithm"] = identity.algorithm.name
         })
         val deactivateData = wireJson.parseToJsonElement(
-            """{"id":"${identity.did}","deactivated":true}"""
+            """{"action":"deactivate","did":"${identity.did}"}"""
         ).jsonObject
-        val proof = vault.createProof(keyId, deactivateData, "capabilityInvocation").getOrThrow()
+
+        Sentry.addBreadcrumb(Breadcrumb().apply {
+            category = "identity"; message = "Requesting deactivation challenge"; level = SentryLevel.INFO
+        })
+        val challengeResp = httpClient.registry.createChallenge(identity.did)
+
+        Sentry.addBreadcrumb(Breadcrumb().apply {
+            category = "identity"; message = "Creating deactivation proof"; level = SentryLevel.INFO
+        })
+        val proof = vault.createProof(keyId, deactivateData, "capabilityInvocation", challengeResp.challenge, challengeResp.domain).getOrThrow()
+
+        Sentry.addBreadcrumb(Breadcrumb().apply {
+            category = "identity"; message = "Sending deactivation to registry"; level = SentryLevel.INFO
+        })
         httpClient.registry.deactivateDid(identity.did, DeactivateDidRequest(proof))
+
+        Sentry.addBreadcrumb(Breadcrumb().apply {
+            category = "identity"; message = "Deleting local identity"; level = SentryLevel.INFO
+        })
         vault.deleteIdentity(keyId).getOrThrow()
         logActivity(ActivityType.IDENTITY_CREATED, identity.did, details = mapOf("action" to "deactivated"))
     }

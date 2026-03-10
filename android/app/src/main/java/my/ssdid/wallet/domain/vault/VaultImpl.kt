@@ -98,7 +98,7 @@ class VaultImpl(
             .copy(nextKeyHash = nextKeyHash)
     }
 
-    override suspend fun createProof(keyId: String, document: JsonObject, proofPurpose: String, challenge: String?): Result<Proof> = runCatching {
+    override suspend fun createProof(keyId: String, document: JsonObject, proofPurpose: String, challenge: String?, domain: String?): Result<Proof> = runCatching {
         val identity = storage.getIdentity(keyId) ?: throw IllegalArgumentException("Identity not found: $keyId")
         val now = DateTimeFormatter.ISO_INSTANT.format(Instant.now().atOffset(ZoneOffset.UTC))
 
@@ -109,6 +109,7 @@ class VaultImpl(
             put("verificationMethod", JsonPrimitive(identity.keyId))
             put("proofPurpose", JsonPrimitive(proofPurpose))
             if (challenge != null) put("challenge", JsonPrimitive(challenge))
+            if (domain != null) put("domain", JsonPrimitive(domain))
         }
 
         // W3C Data Integrity signing payload:
@@ -135,6 +136,7 @@ class VaultImpl(
             verificationMethod = identity.keyId,
             proofPurpose = proofPurpose,
             proofValue = Multibase.encode(signature),
+            domain = domain,
             challenge = challenge
         )
     }

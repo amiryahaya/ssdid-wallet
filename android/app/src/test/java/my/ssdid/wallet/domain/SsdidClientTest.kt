@@ -127,8 +127,9 @@ class SsdidClientTest {
     @Test
     fun `deactivateDid calls registry and succeeds`() = runTest {
         coEvery { vault.getIdentity(testIdentity.keyId) } returns testIdentity
-        coEvery { vault.createProof(testIdentity.keyId, any(), "capabilityInvocation") } returns Result.success(testProof)
-        coEvery { registryApi.deactivateDid(testIdentity.did, any()) } returns RegisterDidResponse(testIdentity.did, "ok")
+        coEvery { registryApi.createChallenge(testIdentity.did) } returns ChallengeResponse("test-challenge", domain = "registry.ssdid.my")
+        coEvery { vault.createProof(testIdentity.keyId, any(), "capabilityInvocation", "test-challenge", "registry.ssdid.my") } returns Result.success(testProof)
+        coJustRun { registryApi.deactivateDid(testIdentity.did, any()) }
         coEvery { vault.deleteIdentity(testIdentity.keyId) } returns Result.success(Unit)
 
         val result = client.deactivateDid(testIdentity.keyId)

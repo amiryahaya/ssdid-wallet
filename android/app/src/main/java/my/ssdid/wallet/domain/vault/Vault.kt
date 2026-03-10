@@ -10,7 +10,7 @@ interface Vault {
     suspend fun deleteIdentity(keyId: String): Result<Unit>
     suspend fun sign(keyId: String, data: ByteArray): Result<ByteArray>
     suspend fun buildDidDocument(keyId: String): Result<DidDocument>
-    suspend fun createProof(keyId: String, document: JsonObject, proofPurpose: String, challenge: String? = null): Result<Proof>
+    suspend fun createProof(keyId: String, document: JsonObject, proofPurpose: String, challenge: String? = null, domain: String? = null): Result<Proof>
     suspend fun storeCredential(credential: VerifiableCredential): Result<Unit>
     suspend fun listCredentials(): List<VerifiableCredential>
     suspend fun getCredentialForDid(did: String): VerifiableCredential?

@@ -18,7 +18,7 @@ interface RegistryApi {
     suspend fun updateDid(@Path("did") did: String, @Body request: UpdateDidRequest): RegisterDidResponse
 
     @HTTP(method = "DELETE", path = "api/did/{did}", hasBody = true)
-    suspend fun deactivateDid(@Path("did") did: String, @Body request: DeactivateDidRequest): RegisterDidResponse
+    suspend fun deactivateDid(@Path("did") did: String, @Body request: DeactivateDidRequest)
 
     @POST("api/did/{did}/challenge")
     suspend fun createChallenge(@Path("did") did: String): ChallengeResponse
