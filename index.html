@@ -303,6 +303,59 @@
     @media (max-width: 767px) {
       .features-grid { grid-template-columns: 1fr; }
     }
+
+    /* === HOW IT WORKS === */
+    .how-it-works {
+      padding: 100px 24px;
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: center;
+      background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+    }
+    .steps {
+      display: flex;
+      gap: 40px;
+      justify-content: center;
+      margin-top: 8px;
+    }
+    .step {
+      flex: 1;
+      max-width: 240px;
+      text-align: center;
+    }
+    .step-number {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      background: rgba(74, 158, 255, 0.1);
+      border: 1.5px solid rgba(74, 158, 255, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 20px;
+    }
+    .step h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .step p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    @media (max-width: 767px) {
+      .steps {
+        flex-direction: column;
+        align-items: center;
+        gap: 32px;
+      }
+      .step { max-width: 320px; }
+    }
   </style>
 </head>
 <body>
@@ -384,7 +437,27 @@
       </div>
     </div>
   </section>
-  <!-- HOW IT WORKS -->
+  <section class="how-it-works" id="how-it-works">
+    <p class="section-label">How It Works</p>
+    <h2 class="section-title">Get Started in Minutes</h2>
+    <div class="steps">
+      <div class="step fade-up">
+        <div class="step-number">1</div>
+        <h3>Download</h3>
+        <p>Get SSDID Wallet from Google Play — free and open source.</p>
+      </div>
+      <div class="step fade-up">
+        <div class="step-number">2</div>
+        <h3>Create Identity</h3>
+        <p>Generate your DID with biometric protection in seconds.</p>
+      </div>
+      <div class="step fade-up">
+        <div class="step-number">3</div>
+        <h3>Use Everywhere</h3>
+        <p>Authenticate, sign transactions, and present credentials securely.</p>
+      </div>
+    </div>
+  </section>
   <!-- DOWNLOAD CTA -->
   <!-- FOOTER -->
   <script>
