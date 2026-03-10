@@ -22,6 +22,7 @@ import my.ssdid.wallet.domain.transport.dto.AuthVerifyRequest
 import my.ssdid.wallet.domain.transport.dto.ClaimRequest
 import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.domain.verifier.Verifier
+import my.ssdid.wallet.domain.profile.ProfileManager
 import my.ssdid.wallet.platform.biometric.BiometricAuthenticator
 import my.ssdid.wallet.platform.biometric.BiometricResult
 import javax.inject.Inject
@@ -40,6 +41,7 @@ class ConsentViewModel @Inject constructor(
     private val httpClient: SsdidHttpClient,
     private val verifier: Verifier,
     private val biometricAuth: BiometricAuthenticator,
+    private val profileManager: ProfileManager,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -96,8 +98,7 @@ class ConsentViewModel @Inject constructor(
                     emit(true)
                 } else {
                     try {
-                        val credential = vault.getCredentialForDid(identity.did)
-                        val claims = credential?.credentialSubject?.claims ?: emptyMap()
+                        val claims = profileManager.getProfileClaims()
                         emit(requiredKeys.all { !claims[it].isNullOrBlank() })
                     } catch (_: Exception) {
                         emit(false)
@@ -168,10 +169,9 @@ class ConsentViewModel @Inject constructor(
                 val signatureBytes = vault.sign(identity.keyId, challenge.toByteArray()).getOrThrow()
                 val signedChallenge = Multibase.encode(signatureBytes)
 
-                // Build shared claims — check required claims are present
+                // Build shared claims from global profile
                 val sharedClaims = mutableMapOf<String, String>()
-                val credential = vault.getCredentialForDid(identity.did)
-                val claims = credential?.credentialSubject?.claims ?: emptyMap()
+                val claims = profileManager.getProfileClaims()
 
                 val missingRequired = requestedClaims
                     .filter { it.required }

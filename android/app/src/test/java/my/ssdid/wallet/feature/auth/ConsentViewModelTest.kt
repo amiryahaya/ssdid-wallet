@@ -8,9 +8,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
 import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.model.Identity
-import my.ssdid.wallet.domain.model.CredentialSubject
-import my.ssdid.wallet.domain.model.Proof
-import my.ssdid.wallet.domain.model.VerifiableCredential
+import my.ssdid.wallet.domain.profile.ProfileManager
 import my.ssdid.wallet.domain.transport.ServerApi
 import my.ssdid.wallet.domain.transport.SsdidHttpClient
 import my.ssdid.wallet.domain.transport.dto.AuthChallengeResponse
@@ -33,6 +31,7 @@ class ConsentViewModelTest {
     private lateinit var serverApi: ServerApi
     private lateinit var verifier: Verifier
     private lateinit var biometricAuth: BiometricAuthenticator
+    private lateinit var profileManager: ProfileManager
 
     private val testIdentity = Identity(
         name = "Personal",
@@ -52,24 +51,6 @@ class ConsentViewModelTest {
         createdAt = "2026-03-10T00:00:00Z"
     )
 
-    private val testCredential = VerifiableCredential(
-        id = "urn:uuid:test",
-        type = listOf("VerifiableCredential"),
-        issuer = "did:ssdid:issuer",
-        issuanceDate = "2026-03-10T00:00:00Z",
-        credentialSubject = CredentialSubject(
-            id = "did:ssdid:user1",
-            claims = mapOf("name" to "Amir Rudin", "email" to "amir@example.com", "phone" to "+60123456789")
-        ),
-        proof = Proof(
-            type = "Ed25519Signature2020",
-            created = "2026-03-10T00:00:00Z",
-            verificationMethod = "did:ssdid:issuer#key-1",
-            proofPurpose = "assertionMethod",
-            proofValue = "uABC123"
-        )
-    )
-
     private val challengeResponse = AuthChallengeResponse(
         challenge = "test-challenge",
         serverName = "TestApp",
@@ -85,6 +66,7 @@ class ConsentViewModelTest {
         serverApi = mockk()
         verifier = mockk()
         biometricAuth = mockk()
+        profileManager = mockk()
         every { httpClient.serverApi(any()) } returns serverApi
     }
 
@@ -107,7 +89,7 @@ class ConsentViewModelTest {
             "callbackUrl" to callbackUrl,
             "sessionId" to sessionId
         ))
-        return ConsentViewModel(vault, httpClient, verifier, biometricAuth, handle)
+        return ConsentViewModel(vault, httpClient, verifier, biometricAuth, profileManager, handle)
     }
 
     private fun stubInitChallenge() {
@@ -120,7 +102,9 @@ class ConsentViewModelTest {
 
     private fun stubApproveFlow() {
         coEvery { vault.sign(any(), any()) } returns Result.success(ByteArray(64))
-        coEvery { vault.getCredentialForDid(any()) } returns testCredential
+        coEvery { profileManager.getProfileClaims() } returns mapOf(
+            "name" to "Amir Rudin", "email" to "amir@example.com", "phone" to "+60123456789"
+        )
         coEvery { serverApi.verifyAuth(any()) } returns AuthVerifyResponse(
             sessionToken = "tok-123",
             serverDid = "did:ssdid:server1",
@@ -299,7 +283,7 @@ class ConsentViewModelTest {
     @Test
     fun `hasAllRequiredClaims is true when all required claims present`() = runTest {
         coEvery { vault.listIdentities() } returns listOf(testIdentity)
-        coEvery { vault.getCredentialForDid("did:ssdid:user1") } returns testCredential
+        coEvery { profileManager.getProfileClaims() } returns mapOf("name" to "Alice", "email" to "alice@example.com")
         stubInitChallenge()
         val vm = createViewModel()
         advanceUntilIdle()
@@ -308,14 +292,8 @@ class ConsentViewModelTest {
 
     @Test
     fun `hasAllRequiredClaims is false when required claim missing`() = runTest {
-        val credentialMissingName = testCredential.copy(
-            credentialSubject = CredentialSubject(
-                id = "did:ssdid:user1",
-                claims = mapOf("phone" to "+60123456789")
-            )
-        )
         coEvery { vault.listIdentities() } returns listOf(testIdentity)
-        coEvery { vault.getCredentialForDid("did:ssdid:user1") } returns credentialMissingName
+        coEvery { profileManager.getProfileClaims() } returns mapOf("phone" to "+60123456789")
         stubInitChallenge()
         val vm = createViewModel()
         advanceUntilIdle()
@@ -334,7 +312,7 @@ class ConsentViewModelTest {
     @Test
     fun `hasAllRequiredClaims is false when credential is null`() = runTest {
         coEvery { vault.listIdentities() } returns listOf(testIdentity)
-        coEvery { vault.getCredentialForDid(any()) } returns null
+        coEvery { profileManager.getProfileClaims() } returns emptyMap()
         stubInitChallenge()
         val vm = createViewModel()
         advanceUntilIdle()
@@ -398,18 +376,7 @@ class ConsentViewModelTest {
         coEvery { vault.listIdentities() } returns listOf(testIdentity)
         stubInitChallenge()
         stubApproveFlow()
-        coEvery { vault.getCredentialForDid(any()) } returns VerifiableCredential(
-            id = "urn:uuid:test",
-            type = listOf("VerifiableCredential"),
-            issuer = "did:ssdid:issuer",
-            issuanceDate = "2026-03-10T00:00:00Z",
-            credentialSubject = CredentialSubject(id = "did:ssdid:user1", claims = mapOf("phone" to "+60123456789")),
-            proof = Proof(
-                type = "Ed25519Signature2020", created = "2026-03-10T00:00:00Z",
-                verificationMethod = "did:ssdid:issuer#key-1",
-                proofPurpose = "assertionMethod", proofValue = "uABC123"
-            )
-        )
+        coEvery { profileManager.getProfileClaims() } returns mapOf("phone" to "+60123456789")
         val vm = createViewModel()
         advanceUntilIdle()
         vm.approve(biometricUsed = true)
