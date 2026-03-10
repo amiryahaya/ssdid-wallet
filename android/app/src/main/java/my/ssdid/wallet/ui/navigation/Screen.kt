@@ -4,7 +4,10 @@ import android.net.Uri
 
 sealed class Screen(val route: String) {
     object Onboarding : Screen("onboarding")
-    object CreateIdentity : Screen("create_identity")
+    object CreateIdentity : Screen("create_identity?acceptedAlgorithms={acceptedAlgorithms}") {
+        fun createRoute(acceptedAlgorithms: String = ""): String =
+            "create_identity?acceptedAlgorithms=${Uri.encode(acceptedAlgorithms)}"
+    }
     object BiometricSetup : Screen("biometric_setup")
     object WalletHome : Screen("wallet_home")
     object IdentityDetail : Screen("identity_detail/{keyId}") {
@@ -18,6 +21,15 @@ sealed class Screen(val route: String) {
     object AuthFlow : Screen("auth_flow?serverUrl={serverUrl}&callbackUrl={callbackUrl}") {
         fun createRoute(serverUrl: String, callbackUrl: String = "") =
             "auth_flow?serverUrl=${Uri.encode(serverUrl)}&callbackUrl=${Uri.encode(callbackUrl)}"
+    }
+    object Consent : Screen("consent?serverUrl={serverUrl}&callbackUrl={callbackUrl}&sessionId={sessionId}&requestedClaims={requestedClaims}&acceptedAlgorithms={acceptedAlgorithms}") {
+        fun createRoute(
+            serverUrl: String,
+            callbackUrl: String = "",
+            sessionId: String = "",
+            requestedClaims: String = "",
+            acceptedAlgorithms: String = ""
+        ): String = "consent?serverUrl=${Uri.encode(serverUrl)}&callbackUrl=${Uri.encode(callbackUrl)}&sessionId=${Uri.encode(sessionId)}&requestedClaims=${Uri.encode(requestedClaims)}&acceptedAlgorithms=${Uri.encode(acceptedAlgorithms)}"
     }
     object TxSigning : Screen("tx_signing?serverUrl={serverUrl}&sessionToken={sessionToken}") {
         fun createRoute(serverUrl: String, sessionToken: String) =

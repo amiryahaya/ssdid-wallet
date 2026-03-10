@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import my.ssdid.wallet.feature.auth.AuthFlowScreen
+import my.ssdid.wallet.feature.auth.ConsentScreen
 import my.ssdid.wallet.feature.backup.BackupScreen
 import my.ssdid.wallet.feature.credentials.CredentialDetailScreen
 import my.ssdid.wallet.feature.credentials.CredentialOfferScreen
@@ -36,7 +37,7 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
         composable(Screen.Onboarding.route) {
             OnboardingScreen(
                 onComplete = {
-                    navController.navigate(Screen.CreateIdentity.route) {
+                    navController.navigate(Screen.CreateIdentity.createRoute()) {
                         popUpTo(Screen.Onboarding.route) { inclusive = true }
                     }
                 },
@@ -61,7 +62,7 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
         }
         composable(Screen.WalletHome.route) {
             WalletHomeScreen(
-                onCreateIdentity = { navController.navigate(Screen.CreateIdentity.route) },
+                onCreateIdentity = { navController.navigate(Screen.CreateIdentity.createRoute()) },
                 onIdentityClick = { keyId -> navController.navigate(Screen.IdentityDetail.createRoute(keyId)) },
                 onScanQr = { navController.navigate(Screen.ScanQr.route) },
                 onCredentials = { navController.navigate(Screen.Credentials.route) },
@@ -69,7 +70,12 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
                 onSettings = { navController.navigate(Screen.Settings.route) }
             )
         }
-        composable(Screen.CreateIdentity.route) {
+        composable(
+            route = Screen.CreateIdentity.route,
+            arguments = listOf(
+                navArgument("acceptedAlgorithms") { type = NavType.StringType; defaultValue = "" }
+            )
+        ) {
             CreateIdentityScreen(
                 onBack = { navController.popBackStack() },
                 onCreated = {
@@ -128,6 +134,28 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
                 onBack = { navController.popBackStack() },
                 onComplete = {
                     navController.popBackStack(Screen.WalletHome.route, inclusive = false)
+                }
+            )
+        }
+        composable(
+            route = Screen.Consent.route,
+            arguments = listOf(
+                navArgument("serverUrl") { type = NavType.StringType; defaultValue = "" },
+                navArgument("callbackUrl") { type = NavType.StringType; defaultValue = "" },
+                navArgument("sessionId") { type = NavType.StringType; defaultValue = "" },
+                navArgument("requestedClaims") { type = NavType.StringType; defaultValue = "" },
+                navArgument("acceptedAlgorithms") { type = NavType.StringType; defaultValue = "" }
+            )
+        ) {
+            ConsentScreen(
+                onBack = { navController.popBackStack() },
+                onComplete = {
+                    navController.navigate(Screen.WalletHome.route) {
+                        popUpTo(Screen.WalletHome.route) { inclusive = true }
+                    }
+                },
+                onCreateIdentity = { acceptedAlgos ->
+                    navController.navigate(Screen.CreateIdentity.createRoute(acceptedAlgos))
                 }
             )
         }
