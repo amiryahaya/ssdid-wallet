@@ -228,7 +228,8 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
         composable(Screen.Settings.route) {
             SettingsScreen(
                 onBack = { navController.popBackStack() },
-                onBackupExport = { navController.navigate(Screen.BackupExport.route) }
+                onBackupExport = { navController.navigate(Screen.BackupExport.route) },
+                onProfile = { navController.navigate(Screen.ProfileEdit.route) }
             )
         }
         composable(Screen.ProfileEdit.route) {
