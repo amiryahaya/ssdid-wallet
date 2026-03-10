@@ -50,12 +50,16 @@ class ProfileSetupViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val existing = profileManager.getProfile()
-            if (existing != null) {
-                val claims = existing.credentialSubject.claims
-                _name.value = claims["name"] ?: ""
-                _email.value = claims["email"] ?: ""
-                _phone.value = claims["phone"] ?: ""
+            try {
+                val existing = profileManager.getProfile()
+                if (existing != null) {
+                    val claims = existing.credentialSubject.claims
+                    _name.value = claims["name"] ?: ""
+                    _email.value = claims["email"] ?: ""
+                    _phone.value = claims["phone"] ?: ""
+                }
+            } catch (e: Exception) {
+                _error.value = "Failed to load profile"
             }
             _loading.value = false
         }

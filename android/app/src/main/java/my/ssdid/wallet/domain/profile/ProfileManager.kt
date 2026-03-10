@@ -19,7 +19,7 @@ class ProfileManager @Inject constructor(private val vault: Vault) {
     suspend fun saveProfile(name: String, email: String, phone: String): Result<Unit> = runCatching {
         // Delete existing profile if present
         val existing = vault.listCredentials().find { it.id == PROFILE_ID }
-        if (existing != null) vault.deleteCredential(PROFILE_ID)
+        if (existing != null) vault.deleteCredential(PROFILE_ID).getOrThrow()
 
         val now = DateTimeFormatter.ISO_INSTANT.format(Instant.now().atOffset(ZoneOffset.UTC))
         val claims = mutableMapOf("name" to name, "email" to email)
