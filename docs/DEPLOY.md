@@ -11,6 +11,31 @@ Deploy the SSDID landing page and email verification API to a VPS.
 
 ## Server: 194.233.95.97
 
+## Install required packages
+
+```bash
+sudo apt update && sudo apt install -y \
+  curl \
+  git \
+  ufw \
+  debian-keyring \
+  debian-archive-keyring \
+  apt-transport-https \
+  libicu-dev \
+  libssl-dev
+```
+
+### Open firewall ports
+
+```bash
+sudo ufw allow OpenSSH
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw enable
+```
+
+> The deploy script handles installing .NET 10 runtime and Caddy automatically.
+
 ## What gets deployed
 
 | Component | URL | Location on server |
