@@ -19,13 +19,28 @@ builder.Services.AddTransient<IResend, ResendClient>();
 builder.Services.AddSingleton<OtpStore>();
 builder.Services.AddSingleton<RateLimiter>();
 
+// Request size limit (16 KB max)
+builder.WebHost.ConfigureKestrel(opts => opts.Limits.MaxRequestBodySize = 16 * 1024);
+
+// CORS — restrict to mobile app (no browser origin needed)
+builder.Services.AddCors(opts =>
+{
+    opts.AddDefaultPolicy(policy => policy
+        .AllowNoOrigin()
+        .WithMethods("POST", "GET")
+        .WithHeaders("Content-Type"));
+});
+
 var app = builder.Build();
 
 var fromEmail = builder.Configuration["Resend:FromEmail"] ?? "verify@ssdid.my";
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
+app.UseCors();
 
 // --- Endpoints ---
 
-app.MapPost("/api/email/verify/send", async (SendRequest req, IResend resend, OtpStore store, RateLimiter limiter) =>
+app.MapPost("/api/email/verify/send", async (SendRequest req, IResend resend, OtpStore store, RateLimiter limiter, HttpContext ctx) =>
 {
     if (string.IsNullOrWhiteSpace(req.Email) || !req.Email.Contains('@'))
         return Results.BadRequest(new ErrorResponse("Invalid email address"));
@@ -33,15 +48,25 @@ app.MapPost("/api/email/verify/send", async (SendRequest req, IResend resend, Ot
     if (string.IsNullOrWhiteSpace(req.DeviceId))
         return Results.BadRequest(new ErrorResponse("Device ID is required"));
 
-    var email = req.Email.Trim().ToLowerInvariant();
+    // Cap input lengths
+    if (req.Email.Length > 254 || req.DeviceId.Length > 128)
+        return Results.BadRequest(new ErrorResponse("Invalid input"));
 
-    // Rate limiting
+    var email = req.Email.Trim().ToLowerInvariant();
+    var clientIp = ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+    // IP-based rate limiting
+    var ipLimit = limiter.CheckIp(clientIp);
+    if (!ipLimit.Allowed)
+        return Results.Json(new ErrorResponse(ipLimit.Reason!), statusCode: 429);
+
+    // Per-email / per-device rate limiting
     var limitResult = limiter.Check(email, req.DeviceId);
     if (!limitResult.Allowed)
         return Results.Json(new ErrorResponse(limitResult.Reason!), statusCode: 429);
 
-    // Generate 6-digit OTP
-    var code = RandomNumberGenerator.GetInt32(100000, 999999).ToString();
+    // Generate 6-digit OTP (000000–999999)
+    var code = RandomNumberGenerator.GetInt32(0, 1_000_000).ToString("D6");
     store.Set(email, code);
 
     // Send email via Resend
@@ -57,22 +82,28 @@ app.MapPost("/api/email/verify/send", async (SendRequest req, IResend resend, Ot
     {
         await resend.EmailSendAsync(message);
     }
-    catch
+    catch (Exception ex)
     {
+        logger.LogError(ex, "Failed to send verification email to {Email} from IP {Ip}", email, clientIp);
         return Results.Json(new ErrorResponse("Failed to send email"), statusCode: 502);
     }
 
-    limiter.RecordSend(email, req.DeviceId);
+    limiter.RecordSend(email, req.DeviceId, clientIp);
+    logger.LogInformation("OTP sent to {Email} from IP {Ip}", email, clientIp);
 
     return Results.Ok(new SendResponse(ExpiresIn: 600));
 });
 
-app.MapPost("/api/email/verify/confirm", (ConfirmRequest req, OtpStore store, RateLimiter limiter) =>
+app.MapPost("/api/email/verify/confirm", (ConfirmRequest req, OtpStore store, RateLimiter limiter, HttpContext ctx) =>
 {
     if (string.IsNullOrWhiteSpace(req.Email) || string.IsNullOrWhiteSpace(req.Code))
         return Results.BadRequest(new ErrorResponse("Email and code are required"));
 
+    if (req.Code.Length > 6)
+        return Results.BadRequest(new ErrorResponse("Invalid code format"));
+
     var email = req.Email.Trim().ToLowerInvariant();
+    var clientIp = ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
     // Check attempt lockout
     if (limiter.IsLockedOut(email))
@@ -84,10 +115,12 @@ app.MapPost("/api/email/verify/confirm", (ConfirmRequest req, OtpStore store, Ra
     {
         limiter.RecordFailedAttempt(email);
         var remaining = limiter.RemainingAttempts(email);
+        logger.LogWarning("Failed OTP attempt for {Email} from IP {Ip}, {Remaining} attempts left", email, clientIp, remaining);
         return Results.Json(new ErrorResponse($"Invalid code. {remaining} attempts remaining."), statusCode: 400);
     }
 
     limiter.ClearAttempts(email);
+    logger.LogInformation("Email verified: {Email} from IP {Ip}", email, clientIp);
     return Results.Ok(new ConfirmResponse(Verified: true));
 });
 
@@ -103,12 +136,30 @@ record ConfirmRequest(string Email, string Code, string DeviceId);
 record ConfirmResponse(bool Verified);
 record ErrorResponse(string Error);
 
+// --- CORS extension for mobile API (no Origin header) ---
+
+static class CorsPolicyBuilderExtensions
+{
+    public static Microsoft.AspNetCore.Cors.Infrastructure.CorsPolicyBuilder AllowNoOrigin(
+        this Microsoft.AspNetCore.Cors.Infrastructure.CorsPolicyBuilder builder)
+    {
+        return builder.SetIsOriginAllowed(_ => false);
+    }
+}
+
 // --- OTP Store (in-memory) ---
 
-class OtpStore
+class OtpStore : IDisposable
 {
     private readonly ConcurrentDictionary<string, OtpEntry> _store = new();
     private static readonly TimeSpan Expiry = TimeSpan.FromMinutes(10);
+    private readonly Timer _cleanupTimer;
+
+    public OtpStore()
+    {
+        // Purge expired entries every 5 minutes
+        _cleanupTimer = new Timer(_ => PurgeExpired(), null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
+    }
 
     public void Set(string email, string code)
     {
@@ -119,24 +170,47 @@ class OtpStore
     {
         if (!_store.TryRemove(email, out var entry)) return false;
         if (DateTime.UtcNow > entry.ExpiresAt) return false;
-        return string.Equals(entry.Code, code, StringComparison.Ordinal);
+        return CryptographicOperations.FixedTimeEquals(
+            System.Text.Encoding.UTF8.GetBytes(entry.Code),
+            System.Text.Encoding.UTF8.GetBytes(code));
     }
+
+    private void PurgeExpired()
+    {
+        var now = DateTime.UtcNow;
+        foreach (var kvp in _store)
+        {
+            if (now > kvp.Value.ExpiresAt)
+                _store.TryRemove(kvp.Key, out _);
+        }
+    }
+
+    public void Dispose() => _cleanupTimer.Dispose();
 
     private record OtpEntry(string Code, DateTime ExpiresAt);
 }
 
 // --- Rate Limiter (in-memory) ---
 
-class RateLimiter
+class RateLimiter : IDisposable
 {
     private readonly ConcurrentDictionary<string, List<DateTime>> _emailSends = new();
     private readonly ConcurrentDictionary<string, List<DateTime>> _deviceSends = new();
+    private readonly ConcurrentDictionary<string, List<DateTime>> _ipSends = new();
     private readonly ConcurrentDictionary<string, List<DateTime>> _failedAttempts = new();
+    private readonly Timer _cleanupTimer;
 
     private const int MaxSendsPerEmailPerHour = 3;
     private const int MaxSendsPerDevicePerDay = 10;
+    private const int MaxSendsPerIpPerHour = 20;
     private const int MaxFailedAttempts = 5;
     private static readonly TimeSpan LockoutDuration = TimeSpan.FromMinutes(15);
+
+    public RateLimiter()
+    {
+        // Purge stale entries every 15 minutes
+        _cleanupTimer = new Timer(_ => PurgeStale(), null, TimeSpan.FromMinutes(15), TimeSpan.FromMinutes(15));
+    }
 
     public (bool Allowed, string? Reason) Check(string email, string deviceId)
     {
@@ -163,7 +237,20 @@ class RateLimiter
         return (true, null);
     }
 
-    public void RecordSend(string email, string deviceId)
+    public (bool Allowed, string? Reason) CheckIp(string ip)
+    {
+        var now = DateTime.UtcNow;
+        var ipSends = _ipSends.GetOrAdd(ip, _ => new List<DateTime>());
+        lock (ipSends)
+        {
+            ipSends.RemoveAll(t => now - t > TimeSpan.FromHours(1));
+            if (ipSends.Count >= MaxSendsPerIpPerHour)
+                return (false, "Too many requests. Try again later.");
+        }
+        return (true, null);
+    }
+
+    public void RecordSend(string email, string deviceId, string ip)
     {
         var now = DateTime.UtcNow;
 
@@ -172,6 +259,9 @@ class RateLimiter
 
         var deviceSends = _deviceSends.GetOrAdd(deviceId, _ => new List<DateTime>());
         lock (deviceSends) { deviceSends.Add(now); }
+
+        var ipSends = _ipSends.GetOrAdd(ip, _ => new List<DateTime>());
+        lock (ipSends) { ipSends.Add(now); }
     }
 
     public bool IsLockedOut(string email)
@@ -204,6 +294,30 @@ class RateLimiter
     {
         _failedAttempts.TryRemove(email, out _);
     }
+
+    private void PurgeStale()
+    {
+        PurgeDictionary(_emailSends, TimeSpan.FromHours(1));
+        PurgeDictionary(_deviceSends, TimeSpan.FromDays(1));
+        PurgeDictionary(_ipSends, TimeSpan.FromHours(1));
+        PurgeDictionary(_failedAttempts, LockoutDuration);
+    }
+
+    private static void PurgeDictionary(ConcurrentDictionary<string, List<DateTime>> dict, TimeSpan maxAge)
+    {
+        var now = DateTime.UtcNow;
+        foreach (var kvp in dict)
+        {
+            lock (kvp.Value)
+            {
+                kvp.Value.RemoveAll(t => now - t > maxAge);
+                if (kvp.Value.Count == 0)
+                    dict.TryRemove(kvp.Key, out _);
+            }
+        }
+    }
+
+    public void Dispose() => _cleanupTimer.Dispose();
 }
 
 // --- Email Template ---
