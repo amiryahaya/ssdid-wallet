@@ -3,21 +3,20 @@ set -euo pipefail
 
 # --- Config ---
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-APP_DIR="/opt/ssdid-email-verify"
 LANDING_DIR="/var/www/ssdid-landing"
-SERVICE_NAME="ssdid-email-verify"
-DOTNET_VERSION="10.0"
+CONTAINER_NAME="ssdid-email-verify"
+IMAGE_NAME="ssdid-email-verify"
 
 echo "=== SSDID — Deployment Script ==="
 echo "Repo root: $REPO_ROOT"
 
-# --- 1. Install .NET runtime ---
-if ! command -v dotnet &>/dev/null; then
-    echo ">> Installing .NET $DOTNET_VERSION runtime..."
-    curl -sSL https://dot.net/v1/dotnet-install.sh | bash -s -- --runtime aspnetcore --version latest --channel $DOTNET_VERSION --install-dir /usr/share/dotnet
-    ln -sf /usr/share/dotnet/dotnet /usr/local/bin/dotnet
+# --- 1. Install Podman ---
+if ! command -v podman &>/dev/null; then
+    echo ">> Installing Podman..."
+    apt-get update
+    apt-get install -y podman
 else
-    echo ">> .NET already installed: $(dotnet --version)"
+    echo ">> Podman already installed: $(podman --version)"
 fi
 
 # --- 2. Install Caddy ---
@@ -32,41 +31,77 @@ else
     echo ">> Caddy already installed: $(caddy version)"
 fi
 
-# --- 3. Publish API ---
-echo ">> Publishing .NET app..."
-cd "$REPO_ROOT/api/SsdidEmailVerify"
-dotnet publish -c Release -o "$APP_DIR" --self-contained false
-chown -R www-data:www-data "$APP_DIR"
+# --- 3. Build container image ---
+echo ">> Building container image..."
+cd "$REPO_ROOT/api"
+podman build -t "$IMAGE_NAME" .
 
-# --- 4. Deploy landing page ---
+# --- 4. Stop existing container ---
+if podman container exists "$CONTAINER_NAME" 2>/dev/null; then
+    echo ">> Stopping existing container..."
+    podman stop "$CONTAINER_NAME" || true
+    podman rm "$CONTAINER_NAME" || true
+fi
+
+# --- 5. Run container ---
+echo ">> Starting container..."
+RESEND_TOKEN="${RESEND_APITOKEN:-}"
+if [ -f "$REPO_ROOT/api/.env" ]; then
+    echo ">> Loading .env file..."
+    podman run -d \
+        --name "$CONTAINER_NAME" \
+        --restart always \
+        --env-file "$REPO_ROOT/api/.env" \
+        -p 127.0.0.1:5000:5000 \
+        "$IMAGE_NAME"
+elif [ -n "$RESEND_TOKEN" ]; then
+    podman run -d \
+        --name "$CONTAINER_NAME" \
+        --restart always \
+        -e "RESEND_APITOKEN=$RESEND_TOKEN" \
+        -p 127.0.0.1:5000:5000 \
+        "$IMAGE_NAME"
+else
+    echo "WARNING: No RESEND_APITOKEN set. Create api/.env or export RESEND_APITOKEN first."
+    podman run -d \
+        --name "$CONTAINER_NAME" \
+        --restart always \
+        -p 127.0.0.1:5000:5000 \
+        "$IMAGE_NAME"
+fi
+
+# --- 6. Deploy landing page ---
 echo ">> Deploying landing page..."
 mkdir -p "$LANDING_DIR"
 cp -r "$REPO_ROOT/landing/"* "$LANDING_DIR/"
 cp -r "$REPO_ROOT/assets/" "$LANDING_DIR/assets/" 2>/dev/null || true
 chown -R www-data:www-data "$LANDING_DIR"
 
-# --- 5. Setup systemd service ---
-echo ">> Setting up systemd service..."
-cp "$REPO_ROOT/api/ssdid-email-verify.service" /etc/systemd/system/
-systemctl daemon-reload
-systemctl enable "$SERVICE_NAME"
-systemctl restart "$SERVICE_NAME"
-
-# --- 6. Setup Caddy ---
+# --- 7. Setup Caddy ---
 echo ">> Configuring Caddy..."
 mkdir -p /var/log/caddy
 cp "$REPO_ROOT/api/Caddyfile" /etc/caddy/Caddyfile
 systemctl enable caddy
 systemctl restart caddy
 
+# --- 8. Enable container auto-start on boot ---
+echo ">> Generating systemd service for container..."
+mkdir -p /etc/systemd/system
+podman generate systemd --name "$CONTAINER_NAME" --new --files
+mv "container-${CONTAINER_NAME}.service" /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable "container-${CONTAINER_NAME}.service"
+
 echo ""
 echo "=== Deployment complete ==="
 echo ""
+echo "Container status:"
+podman ps --filter name="$CONTAINER_NAME"
+echo ""
 echo "Next steps:"
-echo "  1. Set your Resend API token:"
-echo "     sudo systemctl edit ssdid-email-verify"
-echo "     Add: Environment=RESEND_APITOKEN=re_xxxxx"
-echo "     Then: sudo systemctl restart ssdid-email-verify"
+echo "  1. If you haven't set the Resend API token, create api/.env:"
+echo "     echo 'RESEND_APITOKEN=re_xxxxx' > $REPO_ROOT/api/.env"
+echo "     Then re-run: sudo bash api/deploy.sh"
 echo ""
 echo "  2. Test:"
 echo "     curl https://ssdid.my/health"

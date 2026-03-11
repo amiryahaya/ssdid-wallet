@@ -1,6 +1,6 @@
 # SSDID Deployment Guide
 
-Deploy the SSDID landing page and email verification API to a VPS.
+Deploy the SSDID landing page and email verification API to a VPS using Podman.
 
 ## Prerequisites
 
@@ -18,11 +18,10 @@ sudo apt update && sudo apt install -y \
   curl \
   git \
   ufw \
+  podman \
   debian-keyring \
   debian-archive-keyring \
-  apt-transport-https \
-  libicu-dev \
-  libssl-dev
+  apt-transport-https
 ```
 
 ### Open firewall ports
@@ -34,14 +33,14 @@ sudo ufw allow 443/tcp
 sudo ufw enable
 ```
 
-> The deploy script handles installing .NET 10 runtime and Caddy automatically.
+> The deploy script handles installing Podman and Caddy automatically if not present.
 
 ## What gets deployed
 
 | Component | URL | Location on server |
 |-----------|-----|-------------------|
 | Landing page | `https://ssdid.my/` | `/var/www/ssdid-landing/` |
-| Email verify API | `https://ssdid.my/api/email/verify/*` | `/opt/ssdid-email-verify/` |
+| Email verify API | `https://ssdid.my/api/email/verify/*` | Podman container `ssdid-email-verify` |
 | Health check | `https://ssdid.my/health` | — |
 
 ## Quick deploy
@@ -50,36 +49,24 @@ sudo ufw enable
 # On your local machine
 ssh root@194.233.95.97
 
-# On the server
+# On the server — first time
 git clone https://github.com/amiryahaya/ssdid-wallet.git /tmp/ssdid-wallet
 cd /tmp/ssdid-wallet
+
+# Set Resend API token before deploying
+echo 'RESEND_APITOKEN=re_your_api_token_here' > api/.env
+
+# Deploy
 sudo bash api/deploy.sh
 ```
 
 The script will:
-1. Install .NET 10 runtime (if not present)
+1. Install Podman (if not present)
 2. Install Caddy web server (if not present)
-3. Publish the .NET API to `/opt/ssdid-email-verify/`
+3. Build and run the .NET API as a Podman container
 4. Copy landing page to `/var/www/ssdid-landing/`
-5. Configure systemd service for the API
-6. Configure Caddy with automatic HTTPS (Let's Encrypt)
-
-## Post-deploy: set Resend API token
-
-```bash
-sudo systemctl edit ssdid-email-verify
-```
-
-Add this line between the comment markers:
-```ini
-[Service]
-Environment=RESEND_APITOKEN=re_your_api_token_here
-```
-
-Then restart:
-```bash
-sudo systemctl restart ssdid-email-verify
-```
+5. Configure Caddy with automatic HTTPS (Let's Encrypt)
+6. Generate systemd service for container auto-start on boot
 
 ## Verify
 
@@ -108,16 +95,21 @@ sudo bash api/deploy.sh
 ## Service management
 
 ```bash
-# API service
-sudo systemctl status ssdid-email-verify
-sudo systemctl restart ssdid-email-verify
-sudo journalctl -u ssdid-email-verify -f    # live logs
+# Container
+podman ps                                         # running containers
+podman logs -f ssdid-email-verify                 # live logs
+podman restart ssdid-email-verify                 # restart
+podman stop ssdid-email-verify                    # stop
+
+# Systemd (auto-start)
+sudo systemctl status container-ssdid-email-verify
+sudo systemctl restart container-ssdid-email-verify
 
 # Caddy
 sudo systemctl status caddy
 sudo systemctl restart caddy
-sudo journalctl -u caddy -f                  # live logs
-cat /var/log/caddy/ssdid.log                 # access logs
+sudo journalctl -u caddy -f                       # live logs
+cat /var/log/caddy/ssdid.log                      # access logs
 ```
 
 ## Architecture
@@ -127,7 +119,7 @@ Internet
   │
   ▼
 Caddy (ports 80/443, auto HTTPS)
-  ├── /api/*  →  localhost:5000 (.NET app)
+  ├── /api/*  →  localhost:5000 (Podman container)
   ├── /health →  localhost:5000
   └── /*      →  /var/www/ssdid-landing/ (static files)
 ```
