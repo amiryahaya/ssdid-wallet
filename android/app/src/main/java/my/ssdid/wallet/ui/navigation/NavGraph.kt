@@ -20,6 +20,7 @@ import my.ssdid.wallet.feature.identity.IdentityDetailScreen
 import my.ssdid.wallet.feature.identity.WalletHomeScreen
 import my.ssdid.wallet.feature.onboarding.BiometricSetupScreen
 import my.ssdid.wallet.feature.onboarding.OnboardingScreen
+import my.ssdid.wallet.feature.profile.ProfileSetupScreen
 import my.ssdid.wallet.feature.recovery.InstitutionalSetupScreen
 import my.ssdid.wallet.feature.recovery.RecoveryRestoreScreen
 import my.ssdid.wallet.feature.recovery.RecoverySetupScreen
@@ -39,12 +40,21 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
         composable(Screen.Onboarding.route) {
             OnboardingScreen(
                 onComplete = {
-                    navController.navigate(Screen.CreateIdentity.createRoute()) {
+                    navController.navigate(Screen.ProfileSetup.route) {
                         popUpTo(Screen.Onboarding.route) { inclusive = true }
                     }
                 },
                 onRestore = {
                     navController.navigate(Screen.RecoveryRestore.route)
+                }
+            )
+        }
+        composable(Screen.ProfileSetup.route) {
+            ProfileSetupScreen(
+                onComplete = {
+                    navController.navigate(Screen.CreateIdentity.createRoute()) {
+                        popUpTo(Screen.ProfileSetup.route) { inclusive = true }
+                    }
                 }
             )
         }
@@ -218,7 +228,15 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
         composable(Screen.Settings.route) {
             SettingsScreen(
                 onBack = { navController.popBackStack() },
-                onBackupExport = { navController.navigate(Screen.BackupExport.route) }
+                onBackupExport = { navController.navigate(Screen.BackupExport.route) },
+                onProfile = { navController.navigate(Screen.ProfileEdit.route) }
+            )
+        }
+        composable(Screen.ProfileEdit.route) {
+            ProfileSetupScreen(
+                onComplete = { navController.popBackStack() },
+                onBack = { navController.popBackStack() },
+                buttonText = "Save"
             )
         }
         composable(Screen.TxHistory.route) {
