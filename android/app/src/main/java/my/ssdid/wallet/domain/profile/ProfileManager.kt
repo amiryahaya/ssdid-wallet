@@ -16,14 +16,13 @@ class ProfileManager @Inject constructor(private val vault: Vault) {
         const val SELF_ISSUER = "did:ssdid:self"
     }
 
-    suspend fun saveProfile(name: String, email: String, phone: String): Result<Unit> = runCatching {
+    suspend fun saveProfile(name: String, email: String): Result<Unit> = runCatching {
         // Delete existing profile if present
         val existing = vault.listCredentials().find { it.id == PROFILE_ID }
         if (existing != null) vault.deleteCredential(PROFILE_ID).getOrThrow()
 
         val now = DateTimeFormatter.ISO_INSTANT.format(Instant.now().atOffset(ZoneOffset.UTC))
-        val claims = mutableMapOf("name" to name, "email" to email)
-        if (phone.isNotBlank()) claims["phone"] = phone
+        val claims = mapOf("name" to name, "email" to email)
 
         val credential = VerifiableCredential(
             id = PROFILE_ID,

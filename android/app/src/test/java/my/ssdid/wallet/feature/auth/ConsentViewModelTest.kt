@@ -103,7 +103,7 @@ class ConsentViewModelTest {
     private fun stubApproveFlow() {
         coEvery { vault.sign(any(), any()) } returns Result.success(ByteArray(64))
         coEvery { profileManager.getProfileClaims() } returns mapOf(
-            "name" to "Amir Rudin", "email" to "amir@example.com", "phone" to "+60123456789"
+            "name" to "Amir Rudin", "email" to "amir@example.com"
         )
         coEvery { serverApi.verifyAuth(any()) } returns AuthVerifyResponse(
             sessionToken = "tok-123",

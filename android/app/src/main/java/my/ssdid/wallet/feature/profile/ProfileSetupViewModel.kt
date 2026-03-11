@@ -21,17 +21,11 @@ class ProfileSetupViewModel @Inject constructor(
     private val _email = MutableStateFlow("")
     val email = _email.asStateFlow()
 
-    private val _phone = MutableStateFlow("")
-    val phone = _phone.asStateFlow()
-
     private val _nameError = MutableStateFlow<String?>(null)
     val nameError = _nameError.asStateFlow()
 
     private val _emailError = MutableStateFlow<String?>(null)
     val emailError = _emailError.asStateFlow()
-
-    private val _phoneError = MutableStateFlow<String?>(null)
-    val phoneError = _phoneError.asStateFlow()
 
     private val _isValid = MutableStateFlow(false)
     val isValid = _isValid.asStateFlow()
@@ -56,7 +50,6 @@ class ProfileSetupViewModel @Inject constructor(
                     val claims = existing.credentialSubject.claims
                     _name.value = claims["name"] ?: ""
                     _email.value = claims["email"] ?: ""
-                    _phone.value = claims["phone"] ?: ""
                 }
             } catch (e: Exception) {
                 _error.value = "Failed to load profile"
@@ -77,17 +70,10 @@ class ProfileSetupViewModel @Inject constructor(
         revalidate()
     }
 
-    fun updatePhone(value: String) {
-        _phone.value = value
-        _phoneError.value = if (value.isBlank()) null else ClaimValidator.validate("phone", value)
-        revalidate()
-    }
-
     private fun revalidate() {
         val nameOk = _name.value.isNotBlank() && _nameError.value == null
         val emailOk = _email.value.isNotBlank() && _emailError.value == null
-        val phoneOk = _phone.value.isBlank() || _phoneError.value == null
-        _isValid.value = nameOk && emailOk && phoneOk
+        _isValid.value = nameOk && emailOk
     }
 
     fun save() {
@@ -95,7 +81,7 @@ class ProfileSetupViewModel @Inject constructor(
         _saving.value = true
         viewModelScope.launch {
             _error.value = null
-            val result = profileManager.saveProfile(_name.value, _email.value, _phone.value)
+            val result = profileManager.saveProfile(_name.value, _email.value)
             if (result.isSuccess) {
                 _saved.value = true
             } else {

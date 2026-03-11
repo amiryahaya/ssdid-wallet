@@ -51,7 +51,7 @@ fun SettingsScreen(
 
         LazyColumn(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             item { Text("ACCOUNT", style = MaterialTheme.typography.labelMedium); Spacer(Modifier.height(8.dp)) }
-            item { SettingsItem("Profile", "Name, email, phone", onClick = onProfile) }
+            item { SettingsItem("Profile", "Name, email", onClick = onProfile) }
             item { Spacer(Modifier.height(16.dp)) }
             item { Text("SECURITY", style = MaterialTheme.typography.labelMedium); Spacer(Modifier.height(8.dp)) }
             item {

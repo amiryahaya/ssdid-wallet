@@ -44,7 +44,6 @@ class ProfileSetupViewModelTest {
         advanceUntilIdle()
         assertThat(vm.name.value).isEmpty()
         assertThat(vm.email.value).isEmpty()
-        assertThat(vm.phone.value).isEmpty()
         assertThat(vm.nameError.value).isNull()
         assertThat(vm.emailError.value).isNull()
     }
@@ -58,7 +57,7 @@ class ProfileSetupViewModelTest {
             issuanceDate = "2026-03-11T00:00:00Z",
             credentialSubject = CredentialSubject(
                 id = "did:ssdid:self",
-                claims = mapOf("name" to "Alice", "email" to "alice@example.com", "phone" to "+60123456789")
+                claims = mapOf("name" to "Alice", "email" to "alice@example.com")
             ),
             proof = Proof(type = "SelfIssued2024", created = "2026-03-11T00:00:00Z",
                 verificationMethod = "did:ssdid:self", proofPurpose = "selfAssertion", proofValue = "")
@@ -68,7 +67,6 @@ class ProfileSetupViewModelTest {
         advanceUntilIdle()
         assertThat(vm.name.value).isEqualTo("Alice")
         assertThat(vm.email.value).isEqualTo("alice@example.com")
-        assertThat(vm.phone.value).isEqualTo("+60123456789")
     }
 
     @Test
@@ -101,31 +99,9 @@ class ProfileSetupViewModelTest {
     }
 
     @Test
-    fun `isValid is false when phone provided but invalid`() = runTest {
-        coEvery { profileManager.getProfile() } returns null
-        vm = createViewModel()
-        advanceUntilIdle()
-        vm.updateName("Alice")
-        vm.updateEmail("alice@example.com")
-        vm.updatePhone("12345")
-        assertThat(vm.isValid.value).isFalse()
-    }
-
-    @Test
-    fun `isValid is true when phone provided and valid`() = runTest {
-        coEvery { profileManager.getProfile() } returns null
-        vm = createViewModel()
-        advanceUntilIdle()
-        vm.updateName("Alice")
-        vm.updateEmail("alice@example.com")
-        vm.updatePhone("+60123456789")
-        assertThat(vm.isValid.value).isTrue()
-    }
-
-    @Test
     fun `save calls profileManager and sets saved state`() = runTest {
         coEvery { profileManager.getProfile() } returns null
-        coEvery { profileManager.saveProfile(any(), any(), any()) } returns Result.success(Unit)
+        coEvery { profileManager.saveProfile(any(), any()) } returns Result.success(Unit)
         vm = createViewModel()
         advanceUntilIdle()
         vm.updateName("Alice")
@@ -133,13 +109,13 @@ class ProfileSetupViewModelTest {
         vm.save()
         advanceUntilIdle()
         assertThat(vm.saved.value).isTrue()
-        coVerify { profileManager.saveProfile("Alice", "alice@example.com", "") }
+        coVerify { profileManager.saveProfile("Alice", "alice@example.com") }
     }
 
     @Test
     fun `save sets error on failure`() = runTest {
         coEvery { profileManager.getProfile() } returns null
-        coEvery { profileManager.saveProfile(any(), any(), any()) } returns Result.failure(RuntimeException("Storage error"))
+        coEvery { profileManager.saveProfile(any(), any()) } returns Result.failure(RuntimeException("Storage error"))
         vm = createViewModel()
         advanceUntilIdle()
         vm.updateName("Alice")
