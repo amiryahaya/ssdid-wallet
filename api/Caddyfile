@@ -1,0 +1,16 @@
+ssdid.my {
+    reverse_proxy /api/* localhost:5000
+    reverse_proxy /health localhost:5000
+
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy no-referrer
+        -Server
+    }
+
+    log {
+        output file /var/log/caddy/ssdid.log
+        format json
+    }
+}

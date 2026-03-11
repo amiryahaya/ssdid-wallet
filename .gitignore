@@ -60,6 +60,13 @@ harmony/.idea/
 *.dylib
 *.a
 
+# .NET / API
+api/SsdidEmailVerify/bin/
+api/SsdidEmailVerify/obj/
+api/SsdidEmailVerify/.vs/
+api/SsdidEmailVerify/*.user
+api/SsdidEmailVerify/appsettings.Development.json
+
 # General
 .DS_Store
 *.swp
