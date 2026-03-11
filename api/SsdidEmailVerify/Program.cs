@@ -9,8 +9,9 @@ builder.Services.AddOptions();
 builder.Services.AddHttpClient<ResendClient>();
 builder.Services.Configure<ResendClientOptions>(o =>
 {
-    o.ApiToken = builder.Configuration["Resend:ApiToken"]
-        ?? Environment.GetEnvironmentVariable("RESEND_APITOKEN")
+    var token = builder.Configuration["Resend:ApiToken"];
+    o.ApiToken = !string.IsNullOrEmpty(token) ? token
+        : Environment.GetEnvironmentVariable("RESEND_APITOKEN")
         ?? throw new InvalidOperationException("Resend API token not configured");
 });
 builder.Services.AddTransient<IResend, ResendClient>();
