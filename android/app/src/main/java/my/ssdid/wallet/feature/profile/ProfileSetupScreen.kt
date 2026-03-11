@@ -9,7 +9,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -28,10 +27,8 @@ fun ProfileSetupScreen(
 ) {
     val name by viewModel.name.collectAsState()
     val email by viewModel.email.collectAsState()
-    val phone by viewModel.phone.collectAsState()
     val nameError by viewModel.nameError.collectAsState()
     val emailError by viewModel.emailError.collectAsState()
-    val phoneError by viewModel.phoneError.collectAsState()
     val isValid by viewModel.isValid.collectAsState()
     val saved by viewModel.saved.collectAsState()
     val saving by viewModel.saving.collectAsState()
@@ -102,7 +99,7 @@ fun ProfileSetupScreen(
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                    keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) })
+                    keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(androidx.compose.ui.focus.FocusDirection.Down) })
                 )
 
                 Spacer(Modifier.height(12.dp))
@@ -118,24 +115,7 @@ fun ProfileSetupScreen(
                     supportingText = emailError?.let { { Text(it, color = Danger) } },
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
-                    keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) })
-                )
-
-                Spacer(Modifier.height(12.dp))
-
-                // Phone field
-                Text("PHONE", style = MaterialTheme.typography.labelMedium, color = TextTertiary)
-                Spacer(Modifier.height(6.dp))
-                OutlinedTextField(
-                    value = phone,
-                    onValueChange = { viewModel.updatePhone(it) },
-                    modifier = Modifier.fillMaxWidth(),
-                    isError = phoneError != null,
-                    supportingText = phoneError?.let { { Text(it, color = Danger) } },
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Done),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })
                 )
 

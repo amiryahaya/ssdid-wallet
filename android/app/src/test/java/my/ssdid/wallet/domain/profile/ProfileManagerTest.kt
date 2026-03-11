@@ -27,7 +27,7 @@ class ProfileManagerTest {
         coEvery { vault.deleteCredential(any()) } returns Result.success(Unit)
         coEvery { vault.listCredentials() } returns emptyList()
 
-        val result = manager.saveProfile("Alice", "alice@example.com", "+60123456789")
+        val result = manager.saveProfile("Alice", "alice@example.com")
 
         assertThat(result.isSuccess).isTrue()
         coVerify {
@@ -38,25 +38,8 @@ class ProfileManagerTest {
                     && vc.credentialSubject.id == "did:ssdid:self"
                     && vc.credentialSubject.claims["name"] == "Alice"
                     && vc.credentialSubject.claims["email"] == "alice@example.com"
-                    && vc.credentialSubject.claims["phone"] == "+60123456789"
+                    && !vc.credentialSubject.claims.containsKey("phone")
                     && vc.proof.type == "SelfIssued2024"
-            })
-        }
-    }
-
-    @Test
-    fun `saveProfile without phone omits phone claim`() = runTest {
-        coEvery { vault.storeCredential(any()) } returns Result.success(Unit)
-        coEvery { vault.deleteCredential(any()) } returns Result.success(Unit)
-        coEvery { vault.listCredentials() } returns emptyList()
-
-        manager.saveProfile("Alice", "alice@example.com", "")
-
-        coVerify {
-            vault.storeCredential(match { vc ->
-                !vc.credentialSubject.claims.containsKey("phone")
-                    && vc.credentialSubject.claims["name"] == "Alice"
-                    && vc.credentialSubject.claims["email"] == "alice@example.com"
             })
         }
     }
@@ -76,7 +59,7 @@ class ProfileManagerTest {
         coEvery { vault.deleteCredential("urn:ssdid:profile") } returns Result.success(Unit)
         coEvery { vault.storeCredential(any()) } returns Result.success(Unit)
 
-        manager.saveProfile("New Name", "new@example.com", "")
+        manager.saveProfile("New Name", "new@example.com")
 
         coVerifyOrder {
             vault.deleteCredential("urn:ssdid:profile")
