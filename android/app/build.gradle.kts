@@ -28,6 +28,11 @@ val sentryEnv = localProps.getProperty(
     System.getenv("SENTRY_ENVIRONMENT") ?: "production"
 )
 
+val emailVerifyUrl = localProps.getProperty(
+    "emailVerify.url",
+    System.getenv("EMAIL_VERIFY_URL") ?: "https://email-verify.ssdid.my"
+)
+
 android {
     namespace = "my.ssdid.wallet"
     compileSdk = 35
@@ -65,6 +70,7 @@ android {
         buildConfigField("String", "ONESIGNAL_APP_ID", "\"$onesignalAppId\"")
         buildConfigField("String", "SENTRY_DSN", "\"$sentryDsn\"")
         buildConfigField("String", "SENTRY_ENVIRONMENT", "\"$sentryEnv\"")
+        buildConfigField("String", "EMAIL_VERIFY_URL", "\"$emailVerifyUrl\"")
     }
     externalNativeBuild {
         cmake {

@@ -24,6 +24,10 @@ class SsdidHttpClient(registryUrl: String, private val okHttp: OkHttpClient) {
         return buildRetrofit(baseUrl).create(IssuerApi::class.java)
     }
 
+    fun emailVerifyApi(baseUrl: String): EmailVerifyApi {
+        return buildRetrofit(baseUrl).create(EmailVerifyApi::class.java)
+    }
+
     private fun buildRetrofit(baseUrl: String): Retrofit {
         return Retrofit.Builder()
             .baseUrl(baseUrl.trimEnd('/') + "/")
