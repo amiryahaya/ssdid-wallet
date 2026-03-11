@@ -40,11 +40,8 @@ import my.ssdid.wallet.domain.vault.KeystoreManager
 import my.ssdid.wallet.domain.settings.SettingsRepository
 import my.ssdid.wallet.platform.storage.DataStoreSettingsRepository
 import my.ssdid.wallet.domain.transport.EmailVerifyApi
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Retrofit
-import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Named
 import javax.inject.Singleton
@@ -201,13 +198,6 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideEmailVerifyApi(okHttpClient: OkHttpClient): EmailVerifyApi {
-        val json = Json { ignoreUnknownKeys = true }
-        return Retrofit.Builder()
-            .baseUrl(BuildConfig.EMAIL_VERIFY_URL.trimEnd('/') + "/")
-            .client(okHttpClient)
-            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
-            .build()
-            .create(EmailVerifyApi::class.java)
-    }
+    fun provideEmailVerifyApi(httpClient: SsdidHttpClient): EmailVerifyApi =
+        httpClient.emailVerifyApi(BuildConfig.EMAIL_VERIFY_URL)
 }

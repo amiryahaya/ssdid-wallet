@@ -53,9 +53,7 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
         composable(Screen.ProfileSetup.route) {
             ProfileSetupScreen(
                 onComplete = { email ->
-                    navController.navigate(Screen.EmailVerification.createRoute(email)) {
-                        popUpTo(Screen.ProfileSetup.route) { inclusive = true }
-                    }
+                    navController.navigate(Screen.EmailVerification.createRoute(email))
                 }
             )
         }
@@ -68,7 +66,7 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
             EmailVerificationScreen(
                 onVerified = {
                     navController.navigate(Screen.CreateIdentity.createRoute()) {
-                        popUpTo(Screen.EmailVerification.route) { inclusive = true }
+                        popUpTo(Screen.ProfileSetup.route) { inclusive = true }
                     }
                 },
                 onBack = { navController.popBackStack() }

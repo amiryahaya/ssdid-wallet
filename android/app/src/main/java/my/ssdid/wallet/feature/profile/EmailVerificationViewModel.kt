@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import my.ssdid.wallet.domain.transport.ConfirmCodeRequest
 import my.ssdid.wallet.domain.transport.EmailVerifyApi
 import my.ssdid.wallet.domain.transport.SendCodeRequest
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -51,9 +52,14 @@ class EmailVerificationViewModel @Inject constructor(
     @SuppressLint("HardwareIds")
     private val deviceId: String =
         Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+            ?: UUID.randomUUID().toString()
 
     init {
-        sendCode()
+        if (email.isBlank()) {
+            _error.value = "Invalid email address."
+        } else {
+            sendCode()
+        }
     }
 
     fun updateCode(value: String) {
@@ -72,7 +78,6 @@ class EmailVerificationViewModel @Inject constructor(
                 emailVerifyApi.sendCode(SendCodeRequest(email, deviceId))
                 startCooldown()
             } catch (e: retrofit2.HttpException) {
-                val body = e.response()?.errorBody()?.string() ?: ""
                 _error.value = if (e.code() == 429) {
                     "Too many requests. Please wait before trying again."
                 } else {
@@ -99,7 +104,6 @@ class EmailVerificationViewModel @Inject constructor(
                     _error.value = "Invalid code."
                 }
             } catch (e: retrofit2.HttpException) {
-                val body = e.response()?.errorBody()?.string() ?: ""
                 _error.value = when (e.code()) {
                     429 -> "Too many failed attempts. Try again in 15 minutes."
                     400 -> "Invalid code. Please check and try again."
