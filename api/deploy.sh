@@ -2,11 +2,14 @@
 set -euo pipefail
 
 # --- Config ---
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 APP_DIR="/opt/ssdid-email-verify"
+LANDING_DIR="/var/www/ssdid-landing"
 SERVICE_NAME="ssdid-email-verify"
 DOTNET_VERSION="10.0"
 
-echo "=== SSDID Email Verify — Deployment Script ==="
+echo "=== SSDID — Deployment Script ==="
+echo "Repo root: $REPO_ROOT"
 
 # --- 1. Install .NET runtime ---
 if ! command -v dotnet &>/dev/null; then
@@ -29,23 +32,30 @@ else
     echo ">> Caddy already installed: $(caddy version)"
 fi
 
-# --- 3. Publish app ---
+# --- 3. Publish API ---
 echo ">> Publishing .NET app..."
-cd "$(dirname "$0")/SsdidEmailVerify"
+cd "$REPO_ROOT/api/SsdidEmailVerify"
 dotnet publish -c Release -o "$APP_DIR" --self-contained false
 chown -R www-data:www-data "$APP_DIR"
 
-# --- 4. Setup systemd service ---
+# --- 4. Deploy landing page ---
+echo ">> Deploying landing page..."
+mkdir -p "$LANDING_DIR"
+cp -r "$REPO_ROOT/landing/"* "$LANDING_DIR/"
+cp -r "$REPO_ROOT/assets/" "$LANDING_DIR/assets/" 2>/dev/null || true
+chown -R www-data:www-data "$LANDING_DIR"
+
+# --- 5. Setup systemd service ---
 echo ">> Setting up systemd service..."
-cp "$(dirname "$0")/ssdid-email-verify.service" /etc/systemd/system/
+cp "$REPO_ROOT/api/ssdid-email-verify.service" /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable "$SERVICE_NAME"
 systemctl restart "$SERVICE_NAME"
 
-# --- 5. Setup Caddy ---
+# --- 6. Setup Caddy ---
 echo ">> Configuring Caddy..."
 mkdir -p /var/log/caddy
-cp "$(dirname "$0")/Caddyfile" /etc/caddy/Caddyfile
+cp "$REPO_ROOT/api/Caddyfile" /etc/caddy/Caddyfile
 systemctl enable caddy
 systemctl restart caddy
 
@@ -58,9 +68,7 @@ echo "     sudo systemctl edit ssdid-email-verify"
 echo "     Add: Environment=RESEND_APITOKEN=re_xxxxx"
 echo "     Then: sudo systemctl restart ssdid-email-verify"
 echo ""
-echo "  2. Make sure DNS A record for ssdid.my points to this server"
-echo "     Caddy will auto-provision Let's Encrypt cert"
-echo ""
-echo "  3. Test:"
+echo "  2. Test:"
 echo "     curl https://ssdid.my/health"
+echo "     curl https://ssdid.my/"
 echo ""
