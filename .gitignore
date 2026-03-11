@@ -65,6 +65,7 @@ api/SsdidEmailVerify/bin/
 api/SsdidEmailVerify/obj/
 api/SsdidEmailVerify/.vs/
 api/SsdidEmailVerify/*.user
+api/SsdidEmailVerify/*.http
 api/SsdidEmailVerify/appsettings.Development.json
 
 # General
