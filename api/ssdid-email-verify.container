@@ -1,0 +1,13 @@
+[Unit]
+Description=SSDID Email Verify API
+After=network-online.target
+
+[Container]
+Image=localhost/ssdid-email-verify
+ContainerName=ssdid-email-verify
+PublishPort=127.0.0.1:5000:5000
+EnvironmentFile=/opt/ssdid-email-verify/.env
+AutoUpdate=local
+
+[Install]
+WantedBy=default.target

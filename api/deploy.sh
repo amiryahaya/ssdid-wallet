@@ -6,6 +6,8 @@ REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 LANDING_DIR="/var/www/ssdid-landing"
 CONTAINER_NAME="ssdid-email-verify"
 IMAGE_NAME="ssdid-email-verify"
+ENV_DIR="/opt/ssdid-email-verify"
+QUADLET_DIR="/etc/containers/systemd"
 
 echo "=== SSDID — Deployment Script ==="
 echo "Repo root: $REPO_ROOT"
@@ -36,61 +38,45 @@ echo ">> Building container image..."
 cd "$REPO_ROOT/api"
 podman build -t "$IMAGE_NAME" .
 
-# --- 4. Stop existing container ---
+# --- 4. Stop existing container (if running) ---
 if podman container exists "$CONTAINER_NAME" 2>/dev/null; then
     echo ">> Stopping existing container..."
     podman stop "$CONTAINER_NAME" || true
     podman rm "$CONTAINER_NAME" || true
 fi
 
-# --- 5. Run container ---
-echo ">> Starting container..."
-RESEND_TOKEN="${RESEND_APITOKEN:-}"
+# --- 5. Setup .env file ---
+echo ">> Setting up environment..."
+mkdir -p "$ENV_DIR"
 if [ -f "$REPO_ROOT/api/.env" ]; then
-    echo ">> Loading .env file..."
-    podman run -d \
-        --name "$CONTAINER_NAME" \
-        --restart always \
-        --env-file "$REPO_ROOT/api/.env" \
-        -p 127.0.0.1:5000:5000 \
-        "$IMAGE_NAME"
-elif [ -n "$RESEND_TOKEN" ]; then
-    podman run -d \
-        --name "$CONTAINER_NAME" \
-        --restart always \
-        -e "RESEND_APITOKEN=$RESEND_TOKEN" \
-        -p 127.0.0.1:5000:5000 \
-        "$IMAGE_NAME"
-else
-    echo "WARNING: No RESEND_APITOKEN set. Create api/.env or export RESEND_APITOKEN first."
-    podman run -d \
-        --name "$CONTAINER_NAME" \
-        --restart always \
-        -p 127.0.0.1:5000:5000 \
-        "$IMAGE_NAME"
+    cp "$REPO_ROOT/api/.env" "$ENV_DIR/.env"
+    chmod 600 "$ENV_DIR/.env"
+    echo ">> .env copied to $ENV_DIR/.env"
+elif [ ! -f "$ENV_DIR/.env" ]; then
+    echo "WARNING: No .env file found. Create $ENV_DIR/.env with RESEND_APITOKEN=re_xxxxx"
+    touch "$ENV_DIR/.env"
 fi
 
-# --- 6. Deploy landing page ---
+# --- 6. Install Quadlet (systemd container unit) ---
+echo ">> Installing Quadlet..."
+mkdir -p "$QUADLET_DIR"
+cp "$REPO_ROOT/api/ssdid-email-verify.container" "$QUADLET_DIR/"
+systemctl daemon-reload
+systemctl restart "$CONTAINER_NAME"
+
+# --- 7. Deploy landing page ---
 echo ">> Deploying landing page..."
 mkdir -p "$LANDING_DIR"
 cp -r "$REPO_ROOT/landing/"* "$LANDING_DIR/"
 cp -r "$REPO_ROOT/assets/" "$LANDING_DIR/assets/" 2>/dev/null || true
 chown -R www-data:www-data "$LANDING_DIR"
 
-# --- 7. Setup Caddy ---
+# --- 8. Setup Caddy ---
 echo ">> Configuring Caddy..."
 mkdir -p /var/log/caddy
 cp "$REPO_ROOT/api/Caddyfile" /etc/caddy/Caddyfile
 systemctl enable caddy
 systemctl restart caddy
-
-# --- 8. Enable container auto-start on boot ---
-echo ">> Generating systemd service for container..."
-mkdir -p /etc/systemd/system
-podman generate systemd --name "$CONTAINER_NAME" --new --files
-mv "container-${CONTAINER_NAME}.service" /etc/systemd/system/
-systemctl daemon-reload
-systemctl enable "container-${CONTAINER_NAME}.service"
 
 echo ""
 echo "=== Deployment complete ==="
@@ -99,9 +85,9 @@ echo "Container status:"
 podman ps --filter name="$CONTAINER_NAME"
 echo ""
 echo "Next steps:"
-echo "  1. If you haven't set the Resend API token, create api/.env:"
-echo "     echo 'RESEND_APITOKEN=re_xxxxx' > $REPO_ROOT/api/.env"
-echo "     Then re-run: sudo bash api/deploy.sh"
+echo "  1. If you haven't set the Resend API token:"
+echo "     echo 'RESEND_APITOKEN=re_xxxxx' > $ENV_DIR/.env"
+echo "     sudo systemctl restart $CONTAINER_NAME"
 echo ""
 echo "  2. Test:"
 echo "     curl https://ssdid.my/health"

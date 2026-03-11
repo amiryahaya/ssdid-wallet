@@ -95,15 +95,16 @@ sudo bash api/deploy.sh
 ## Service management
 
 ```bash
-# Container
+# Container (managed via Quadlet)
+sudo systemctl status ssdid-email-verify          # status
+sudo systemctl restart ssdid-email-verify         # restart
+sudo systemctl stop ssdid-email-verify            # stop
 podman ps                                         # running containers
 podman logs -f ssdid-email-verify                 # live logs
-podman restart ssdid-email-verify                 # restart
-podman stop ssdid-email-verify                    # stop
 
-# Systemd (auto-start)
-sudo systemctl status container-ssdid-email-verify
-sudo systemctl restart container-ssdid-email-verify
+# Resend API token
+sudo nano /opt/ssdid-email-verify/.env            # edit token
+sudo systemctl restart ssdid-email-verify         # apply
 
 # Caddy
 sudo systemctl status caddy
