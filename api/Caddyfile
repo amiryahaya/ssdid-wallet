@@ -1,8 +1,4 @@
 ssdid.my {
-    # API — reverse proxy to .NET app
-    reverse_proxy /api/* localhost:5000
-    reverse_proxy /health localhost:5000
-
     # Landing page — static files
     root * /var/www/ssdid-landing
     file_server
@@ -16,6 +12,24 @@ ssdid.my {
 
     log {
         output file /var/log/caddy/ssdid.log
+        format json
+    }
+}
+
+wallet.ssdid.my {
+    # Wallet API — reverse proxy to .NET app
+    reverse_proxy /api/* localhost:5000
+    reverse_proxy /health localhost:5000
+
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy no-referrer
+        -Server
+    }
+
+    log {
+        output file /var/log/caddy/wallet.log
         format json
     }
 }

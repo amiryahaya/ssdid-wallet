@@ -30,7 +30,7 @@ val sentryEnv = localProps.getProperty(
 
 val emailVerifyUrl = localProps.getProperty(
     "emailVerify.url",
-    System.getenv("EMAIL_VERIFY_URL") ?: "https://email-verify.ssdid.my"
+    System.getenv("EMAIL_VERIFY_URL") ?: "https://wallet.ssdid.my"
 )
 
 android {

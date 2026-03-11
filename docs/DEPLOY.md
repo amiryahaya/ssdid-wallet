@@ -5,7 +5,7 @@ Deploy the SSDID landing page and email verification API to a VPS using Podman.
 ## Prerequisites
 
 - VPS with Ubuntu/Debian (tested on Contabo VPS 10 — 4 CPU, 8 GB RAM)
-- DNS A record for `ssdid.my` pointing to server IP
+- DNS A records for `ssdid.my` and `wallet.ssdid.my` pointing to server IP
 - Ports 80 and 443 open in firewall
 - Resend API account with verified domain
 
@@ -40,8 +40,8 @@ sudo ufw enable
 | Component | URL | Location on server |
 |-----------|-----|-------------------|
 | Landing page | `https://ssdid.my/` | `/var/www/ssdid-landing/` |
-| Email verify API | `https://ssdid.my/api/email/verify/*` | Podman container `ssdid-email-verify` |
-| Health check | `https://ssdid.my/health` | — |
+| Email verify API | `https://wallet.ssdid.my/api/email/verify/*` | Podman container `ssdid-email-verify` |
+| Health check | `https://wallet.ssdid.my/health` | — |
 
 ## Quick deploy
 
@@ -65,20 +65,20 @@ The script will:
 2. Install Caddy web server (if not present)
 3. Build and run the .NET API as a Podman container
 4. Copy landing page to `/var/www/ssdid-landing/`
-5. Configure Caddy with automatic HTTPS (Let's Encrypt)
+5. Configure Caddy with automatic HTTPS (Let's Encrypt) for both domains
 6. Generate systemd service for container auto-start on boot
 
 ## Verify
 
 ```bash
 # Health check
-curl https://ssdid.my/health
+curl https://wallet.ssdid.my/health
 
 # Landing page
 curl -I https://ssdid.my/
 
 # Send test OTP
-curl -X POST https://ssdid.my/api/email/verify/send \
+curl -X POST https://wallet.ssdid.my/api/email/verify/send \
   -H "Content-Type: application/json" \
   -d '{"email":"you@example.com","deviceId":"test-device"}'
 ```
@@ -110,7 +110,8 @@ sudo systemctl restart ssdid-email-verify         # apply
 sudo systemctl status caddy
 sudo systemctl restart caddy
 sudo journalctl -u caddy -f                       # live logs
-cat /var/log/caddy/ssdid.log                      # access logs
+cat /var/log/caddy/ssdid.log                      # landing page logs
+cat /var/log/caddy/wallet.log                     # wallet API logs
 ```
 
 ## Architecture
@@ -120,7 +121,11 @@ Internet
   │
   ▼
 Caddy (ports 80/443, auto HTTPS)
-  ├── /api/*  →  localhost:5000 (Podman container)
-  ├── /health →  localhost:5000
-  └── /*      →  /var/www/ssdid-landing/ (static files)
+  │
+  ├── ssdid.my
+  │     └── /*      →  /var/www/ssdid-landing/ (static files)
+  │
+  └── wallet.ssdid.my
+        ├── /api/*  →  localhost:5000 (Podman container)
+        └── /health →  localhost:5000
 ```
