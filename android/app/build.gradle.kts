@@ -17,7 +17,6 @@ if (localPropsFile.exists()) {
     localPropsFile.inputStream().use { localProps.load(it) }
 }
 
-val onesignalAppId = localProps.getProperty("onesignal.appId", System.getenv("ONESIGNAL_APP_ID") ?: "")
 val sentryDsn = localProps.getProperty("sentry.dsn", System.getenv("SENTRY_DSN") ?: "")
 if (sentryDsn.isBlank() && System.getenv("CI") != null) {
     logger.warn("WARNING: SENTRY_DSN is not set. Release build will have no crash reporting.")
@@ -31,6 +30,11 @@ val sentryEnv = localProps.getProperty(
 val emailVerifyUrl = localProps.getProperty(
     "emailVerify.url",
     System.getenv("EMAIL_VERIFY_URL") ?: "https://wallet.ssdid.my"
+)
+
+val notifyUrl = localProps.getProperty(
+    "notify.url",
+    System.getenv("NOTIFY_URL") ?: "https://notify.ssdid.my"
 )
 
 android {
@@ -67,10 +71,10 @@ android {
         ndk {
             abiFilters += listOf("arm64-v8a", "x86_64")
         }
-        buildConfigField("String", "ONESIGNAL_APP_ID", "\"$onesignalAppId\"")
         buildConfigField("String", "SENTRY_DSN", "\"$sentryDsn\"")
         buildConfigField("String", "SENTRY_ENVIRONMENT", "\"$sentryEnv\"")
         buildConfigField("String", "EMAIL_VERIFY_URL", "\"$emailVerifyUrl\"")
+        buildConfigField("String", "NOTIFY_URL", "\"$notifyUrl\"")
     }
     externalNativeBuild {
         cmake {
@@ -156,12 +160,13 @@ dependencies {
     // Lifecycle
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-process:2.8.7")
+
+    // UnifiedPush (FCM-free push delivery)
+    implementation("com.github.UnifiedPush:android-connector:2.5.0")
 
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.1.1")
-
-    // OneSignal
-    implementation("com.onesignal:OneSignal:5.1.20")
 
     // Sentry
     implementation("io.sentry:sentry-android:7.22.0")

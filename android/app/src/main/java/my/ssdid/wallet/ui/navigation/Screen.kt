@@ -36,6 +36,14 @@ sealed class Screen(val route: String) {
             acceptedAlgorithms: String = ""
         ): String = "consent?serverUrl=${Uri.encode(serverUrl)}&callbackUrl=${Uri.encode(callbackUrl)}&sessionId=${Uri.encode(sessionId)}&requestedClaims=${Uri.encode(requestedClaims)}&acceptedAlgorithms=${Uri.encode(acceptedAlgorithms)}"
     }
+    object DriveLogin : Screen("drive_login?serviceUrl={serviceUrl}&serviceName={serviceName}&challengeId={challengeId}&requestedClaims={requestedClaims}") {
+        fun createRoute(
+            serviceUrl: String,
+            serviceName: String = "",
+            challengeId: String = "",
+            requestedClaims: String = ""
+        ): String = "drive_login?serviceUrl=${Uri.encode(serviceUrl)}&serviceName=${Uri.encode(serviceName)}&challengeId=${Uri.encode(challengeId)}&requestedClaims=${Uri.encode(requestedClaims)}"
+    }
     object TxSigning : Screen("tx_signing?serverUrl={serverUrl}&sessionToken={sessionToken}") {
         fun createRoute(serverUrl: String, sessionToken: String) =
             "tx_signing?serverUrl=${Uri.encode(serverUrl)}&sessionToken=${Uri.encode(sessionToken)}"
@@ -73,6 +81,6 @@ sealed class Screen(val route: String) {
     }
     object DeviceEnroll : Screen("device_enroll/{keyId}?mode={mode}") {
         fun createRoute(keyId: String, mode: String) =
-            "device_enroll/${Uri.encode(keyId)}?mode=$mode"
+            "device_enroll/${Uri.encode(keyId)}?mode=${Uri.encode(mode)}"
     }
 }

@@ -7,10 +7,10 @@ import kotlinx.serialization.Serializable
 data class DidDocument(
     @SerialName("@context") val context: List<String> = listOf("https://www.w3.org/ns/did/v1"),
     val id: String,
-    val controller: String,
+    val controller: String = "",
     val verificationMethod: List<VerificationMethod>,
-    val authentication: List<String>,
-    val assertionMethod: List<String>,
+    val authentication: List<String> = emptyList(),
+    val assertionMethod: List<String> = emptyList(),
     val capabilityInvocation: List<String> = emptyList(),
     val nextKeyHash: String? = null
 ) {

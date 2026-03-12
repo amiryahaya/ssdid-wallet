@@ -31,6 +31,7 @@ import my.ssdid.wallet.feature.registration.RegistrationScreen
 import my.ssdid.wallet.feature.rotation.KeyRotationScreen
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import my.ssdid.wallet.feature.auth.DriveLoginScreen
 import my.ssdid.wallet.feature.scan.ScanQrScreen
 import my.ssdid.wallet.feature.settings.SettingsScreen
 import my.ssdid.wallet.feature.transaction.TxSigningScreen
@@ -129,8 +130,9 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
                     when (payload.action) {
                         "register" -> navController.navigate(Screen.Registration.createRoute(payload.serverUrl, payload.serverDid))
                         "authenticate" -> {
-                            if (payload.requestedClaims.isNotEmpty()) {
-                                val claimsJson = Json.encodeToString(payload.requestedClaims)
+                            val claims = payload.resolvedClaims
+                            if (claims.isNotEmpty()) {
+                                val claimsJson = Json.encodeToString(claims)
                                 val algosJson = if (payload.acceptedAlgorithms.isNotEmpty())
                                     Json.encodeToString(payload.acceptedAlgorithms) else ""
                                 navController.navigate(Screen.Consent.createRoute(
@@ -141,8 +143,19 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
                                     acceptedAlgorithms = algosJson
                                 ))
                             } else {
-                                navController.navigate(Screen.AuthFlow.createRoute(payload.serverUrl))
+                                navController.navigate(Screen.AuthFlow.createRoute(payload.serverUrl, payload.callbackUrl))
                             }
+                        }
+                        "login" -> {
+                            val url = payload.serviceUrl.ifBlank { payload.serverUrl }
+                            val claimsJson = if (payload.resolvedClaims.isNotEmpty())
+                                Json.encodeToString(payload.resolvedClaims) else ""
+                            navController.navigate(Screen.DriveLogin.createRoute(
+                                serviceUrl = url,
+                                serviceName = payload.serviceName,
+                                challengeId = payload.challengeId,
+                                requestedClaims = claimsJson
+                            ))
                         }
                         "sign" -> navController.navigate(Screen.TxSigning.createRoute(payload.serverUrl, payload.sessionToken))
                         "credential-offer" -> navController.navigate(Screen.CredentialOffer.createRoute(payload.issuerUrl, payload.offerId))
@@ -193,6 +206,26 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
                 onComplete = {
                     navController.popBackStack(Screen.WalletHome.route, inclusive = false)
                 },
+                onCreateIdentity = { acceptedAlgos ->
+                    navController.navigate(Screen.CreateIdentity.createRoute(acceptedAlgos))
+                }
+            )
+        }
+        composable(
+            Screen.DriveLogin.route,
+            arguments = listOf(
+                navArgument("serviceUrl") { type = NavType.StringType; defaultValue = "" },
+                navArgument("serviceName") { type = NavType.StringType; defaultValue = "" },
+                navArgument("challengeId") { type = NavType.StringType; defaultValue = "" },
+                navArgument("requestedClaims") { type = NavType.StringType; defaultValue = "" }
+            )
+        ) {
+            DriveLoginScreen(
+                onBack = { navController.popBackStack() },
+                onComplete = {
+                    navController.popBackStack(Screen.WalletHome.route, inclusive = false)
+                },
+                // H2: Pass accepted algorithms (empty for Drive), not serviceUrl
                 onCreateIdentity = { acceptedAlgos ->
                     navController.navigate(Screen.CreateIdentity.createRoute(acceptedAlgos))
                 }
