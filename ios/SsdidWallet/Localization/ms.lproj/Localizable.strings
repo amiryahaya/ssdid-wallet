@@ -1,0 +1,340 @@
+/* Localizable.strings (Bahasa Melayu)
+   SSDID Wallet — iOS */
+
+/* ── Umum ── */
+"common.error" = "Ralat";
+"common.loading" = "Memuatkan...";
+"common.cancel" = "Batal";
+"common.done" = "Selesai";
+"common.confirm" = "Sahkan";
+"common.delete" = "Padam";
+"common.copy" = "Salin";
+"common.copied" = "Disalin ke papan keratan";
+"common.save" = "Simpan";
+"common.share" = "Kongsi";
+"common.back" = "Kembali";
+"common.go_back" = "Kembali";
+"common.ok" = "OK";
+"common.retry" = "Cuba Semula";
+"common.close" = "Tutup";
+"common.continue" = "Teruskan";
+"common.success" = "Berjaya";
+
+/* ── Pengenalan ── */
+"onboarding.title_1" = "Identiti Anda, Kawalan Anda";
+"onboarding.desc_1" = "SSDID ialah dompet identiti berdaulat kendiri yang memberi anda kawalan penuh ke atas identiti digital anda. Tiada pihak berkuasa pusat. Tiada silo data. Hanya anda dan kunci kriptografi anda.";
+"onboarding.title_2" = "Keselamatan Pasca-Kuantum";
+"onboarding.desc_2" = "Dikuasakan oleh KAZ-Sign, algoritma kriptografi pasca-kuantum, bersama algoritma klasik seperti Ed25519 dan ECDSA. Identiti anda kekal selamat daripada ancaman semasa dan masa hadapan.";
+"onboarding.title_3" = "Privasi Diutamakan";
+"onboarding.desc_3" = "Sahkan dengan perkhidmatan serta-merta menggunakan kod QR dan pautan dalam. Daftar, buktikan identiti anda, dan tandatangani transaksi — semuanya dari peranti anda dengan pengesahan biometrik.";
+"onboarding.next" = "Seterusnya";
+"onboarding.get_started" = "Mula";
+"onboarding.skip" = "Langkau";
+
+/* ── Persediaan Profil ── */
+"profile.setup_title" = "Sediakan Profil Anda";
+"profile.name" = "Nama";
+"profile.name_placeholder" = "Masukkan nama anda";
+"profile.email" = "E-mel";
+"profile.email_placeholder" = "Masukkan alamat e-mel anda";
+"profile.continue" = "Teruskan";
+"profile.save" = "Simpan";
+
+/* ── Pengesahan E-mel ── */
+"email_verify.title" = "Pengesahan E-mel";
+"email_verify.enter_code" = "Masukkan kod pengesahan";
+"email_verify.code_placeholder" = "Kod 6 digit";
+"email_verify.verify" = "Sahkan";
+"email_verify.resend" = "Hantar Semula Kod";
+"email_verify.resend_countdown" = "Hantar semula dalam %d saat";
+"email_verify.success" = "E-mel berjaya disahkan";
+"email_verify.invalid_code" = "Kod pengesahan tidak sah";
+
+/* ── Cipta Identiti ── */
+"identity.create_title" = "Cipta Identiti";
+"identity.name_label" = "NAMA IDENTITI";
+"identity.name_hint" = "cth. Peribadi, Kerja";
+"identity.algorithm_label" = "ALGORITMA TANDATANGAN";
+"identity.create_button" = "Cipta Identiti";
+"identity.creating" = "Menjana kunci...";
+"identity.create_success" = "Identiti berjaya dicipta";
+"identity.create_error" = "Gagal mencipta identiti";
+"identity.your_identities" = "Identiti Anda";
+"identity.delete_title" = "Padam Identiti";
+"identity.delete_message" = "Adakah anda pasti mahu memadamkan identiti ini? Tindakan ini tidak boleh dibuat asal.";
+
+/* ── Butiran Identiti ── */
+"identity_detail.title" = "Butiran Identiti";
+"identity_detail.did" = "DID";
+"identity_detail.algorithm" = "Algoritma";
+"identity_detail.created" = "Dicipta";
+"identity_detail.public_key" = "Kunci Awam";
+"identity_detail.registrations" = "Pendaftaran";
+
+/* ── Persediaan Biometrik ── */
+"biometric.setup_title" = "Pengesahan Biometrik";
+"biometric.enable" = "Aktifkan Pengesahan Biometrik";
+"biometric.skip" = "Langkau buat masa ini";
+"biometric.security_info" = "Data biometrik anda tidak akan meninggalkan peranti ini. Ia hanya digunakan untuk membuka kunci peti besi identiti anda.";
+"biometric.not_available" = "Pengesahan biometrik tidak tersedia pada peranti ini.";
+
+/* ── Dompet Utama ── */
+"wallet.title" = "Dompet SSDID";
+"wallet.identity_label" = "DOMPET IDENTITI";
+"wallet.app_name" = "SSDID";
+"wallet.my_identities" = "IDENTITI SAYA";
+"wallet.new" = "+ Baru";
+"wallet.create_first" = "Cipta identiti pertama anda";
+"wallet.no_identities" = "Tiada identiti lagi";
+"wallet.quick_actions" = "TINDAKAN PANTAS";
+"wallet.scan_qr" = "Imbas QR";
+"wallet.credentials" = "Kelayakan";
+"wallet.history" = "Sejarah";
+"wallet.active" = "Aktif";
+"wallet.settings" = "Tetapan";
+
+/* ── Imbas QR ── */
+"scan.title" = "Imbas Kod QR";
+"scan.camera_preview" = "Pratonton Kamera";
+"scan.supported_formats" = "FORMAT DISOKONG";
+"scan.permission_required" = "Kebenaran Kamera Diperlukan";
+"scan.permission_message" = "Sila berikan kebenaran kamera dalam tetapan peranti anda untuk mengimbas kod QR.";
+"scan.open_settings" = "Buka Tetapan";
+"scan.invalid_qr" = "Format kod QR tidak sah";
+
+/* ── Pendaftaran ── */
+"registration.title" = "Pendaftaran Perkhidmatan";
+"registration.server_info" = "MAKLUMAT PELAYAN";
+"registration.select_identity" = "PILIH IDENTITI";
+"registration.no_identities" = "Tiada identiti tersedia";
+"registration.register_button" = "Daftar dengan Perkhidmatan";
+"registration.registering" = "Mendaftar\U2026";
+"registration.complete" = "Pendaftaran Selesai";
+"registration.complete_desc" = "Identiti anda telah didaftarkan dengan perkhidmatan ini.";
+"registration.failed" = "Pendaftaran Gagal";
+"registration.failed_desc" = "Tidak dapat melengkapkan pendaftaran. Sila cuba semula.";
+
+/* ── Pengesahan ── */
+"auth.title" = "Pengesahan";
+"auth.sign_in_request" = "Permintaan Log Masuk";
+"auth.service_request" = "PERMINTAAN PERKHIDMATAN";
+"auth.select_credential" = "PILIH KELAYAKAN";
+"auth.no_credentials" = "Tiada kelayakan tersedia";
+"auth.approve" = "Luluskan";
+"auth.decline" = "Tolak";
+"auth.biometric_confirm" = "Pengesahan Biometrik";
+"auth.biometric_touch" = "Sentuh penderia untuk mengesahkan pengesahan";
+"auth.authenticate_button" = "Sahkan";
+"auth.authenticating" = "Mengesahkan\U2026";
+"auth.success" = "Pengesahan Berjaya";
+"auth.success_desc" = "Anda telah disahkan dengan perkhidmatan ini.";
+"auth.failed" = "Pengesahan Gagal";
+"auth.failed_desc" = "Tidak dapat melengkapkan pengesahan. Sila cuba semula.";
+
+/* ── Persetujuan ── */
+"consent.title" = "Persetujuan";
+"consent.requested_information" = "Maklumat Diminta";
+"consent.required" = "Diperlukan";
+"consent.optional" = "Pilihan";
+"consent.approve" = "Luluskan";
+"consent.deny" = "Tolak";
+
+/* ── Tandatangan Transaksi ── */
+"tx.signing_title" = "Tandatangan Transaksi";
+"tx.details" = "BUTIRAN TRANSAKSI";
+"tx.security" = "KESELAMATAN";
+"tx.challenge_expires" = "Cabaran tamat dalam";
+"tx.bound_hash" = "Transaksi terikat kepada hash cabaran";
+"tx.sha3_verify" = "Pengesahan integriti SHA3-256";
+"tx.pqc_available" = "Tandatangan pasca-kuantum (jika tersedia)";
+"tx.biometric_required" = "Biometrik Diperlukan";
+"tx.biometric_touch" = "Sentuh penderia untuk membenarkan tandatangan";
+"tx.sign_button" = "Tandatangan Transaksi";
+"tx.reject" = "Tolak";
+"tx.signing" = "Menandatangan\U2026";
+"tx.confirmed" = "Transaksi Disahkan";
+"tx.confirmed_desc" = "Transaksi anda telah ditandatangani dan dihantar.";
+"tx.failed" = "Transaksi Gagal";
+"tx.failed_desc" = "Tidak dapat melengkapkan tandatangan transaksi. Sila cuba semula.";
+"tx.challenge_expired" = "Cabaran tamat tempoh. Sila imbas QR semula.";
+
+/* ── Kelayakan ── */
+"credentials.title" = "Kelayakan Anda";
+"credentials.empty" = "Tiada kelayakan lagi";
+"credentials.empty_desc" = "Kelayakan yang dikeluarkan kepada anda oleh perkhidmatan akan muncul di sini.";
+"credential.detail_title" = "Butiran Kelayakan";
+"credential.subject" = "SUBJEK KELAYAKAN";
+"credential.claims" = "TUNTUTAN";
+"credential.no_claims" = "Tiada tuntutan tambahan";
+"credential.proof" = "BUKTI";
+"credential.show_json" = "Tunjuk JSON Mentah";
+"credential.hide_json" = "Sembunyikan JSON Mentah";
+"credential.delete_title" = "Padam Kelayakan";
+"credential.delete_message" = "Adakah anda pasti mahu memadamkan kelayakan ini? Tindakan ini tidak boleh dibuat asal.";
+"credential.issuer" = "Pengeluar";
+"credential.issued_date" = "Tarikh Dikeluarkan";
+"credential.expiry_date" = "Tarikh Luput";
+"credential.status" = "Status";
+"credential.valid" = "Sah";
+"credential.expired" = "Tamat Tempoh";
+"credential.revoked" = "Dibatalkan";
+
+/* ── Tetapan ── */
+"settings.title" = "Tetapan";
+"settings.security" = "KESELAMATAN";
+"settings.biometric" = "Pengesahan Biometrik";
+"settings.auto_lock" = "Kunci Auto";
+"settings.auto_lock_value" = "5 minit";
+"settings.network" = "RANGKAIAN";
+"settings.registry_url" = "URL Pendaftaran";
+"settings.preferences" = "KEUTAMAAN";
+"settings.language" = "Bahasa";
+"settings.language_value" = "Bahasa Melayu";
+"settings.notifications" = "Pemberitahuan";
+"settings.version" = "Versi";
+"settings.version_value" = "1.0.0";
+"settings.about" = "Perihal";
+"settings.export" = "Eksport Data";
+"settings.reset" = "Set Semula Dompet";
+"settings.reset_warning" = "Ini akan memadamkan semua identiti dan kelayakan. Tindakan ini tidak boleh dibuat asal.";
+
+/* ── Pemulihan ── */
+"recovery.setup_title" = "Persediaan Pemulihan";
+"recovery.key_title" = "Kunci Pemulihan";
+"recovery.key_desc" = "Jana pasangan kunci pemulihan luar talian";
+"recovery.key_badge" = "Disyorkan";
+"recovery.generate_button" = "Jana Kunci Pemulihan";
+"recovery.generating" = "Menjana\U2026";
+"recovery.key_store_offline" = "Simpan kunci ini secara luar talian. Ia tidak boleh dipulihkan.";
+"recovery.key_label" = "KUNCI PEMULIHAN";
+"recovery.copy_clipboard" = "Salin ke Papan Keratan";
+"recovery.configured" = "Dikonfigurasi";
+"recovery.important" = "Penting";
+"recovery.timeout" = "Operasi tamat masa. Sila cuba semula.";
+"recovery.offline_title" = "Pemulihan Luar Talian";
+"recovery.offline_desc" = "Pulihkan menggunakan kunci pemulihan luar talian anda";
+"recovery.social_title" = "Pemulihan Sosial";
+"recovery.social_desc" = "Bahagikan rahsia pemulihan kepada kenalan dipercayai";
+"recovery.social_badge" = "Lanjutan";
+"recovery.social_button" = "Sediakan Pemulihan Sosial";
+"recovery.social_config" = "%d-daripada-%d penjaga";
+"recovery.institutional_title" = "Institusi";
+"recovery.institutional_desc" = "Organisasi memegang kuasa pemulihan";
+"recovery.institutional_badge" = "Perusahaan";
+"recovery.institutional_button" = "Daftar Organisasi";
+
+/* ── Pemulihan Sosial ── */
+"social.setup_title" = "Pemulihan Sosial";
+"social.threshold" = "Ambang";
+"social.threshold_display" = "%d daripada %d";
+"social.threshold_info" = "Minimum %d penjaga diperlukan untuk memulihkan";
+"social.guardian_label" = "Penjaga %d";
+"social.guardian_name" = "Nama";
+"social.guardian_did" = "DID";
+"social.remove" = "Buang";
+"social.add_guardian" = "+ Tambah Penjaga";
+"social.create_shares" = "Cipta Bahagian";
+"social.creating_shares" = "Mencipta Bahagian\U2026";
+"social.success_message" = "Pemulihan sosial berjaya dicipta";
+"social.distribute_warning" = "Edarkan setiap bahagian kepada penjaga yang berkenaan dengan selamat. Jangan simpan beberapa bahagian bersama. Setiap penjaga hanya perlu menerima bahagian mereka sendiri.";
+"social.share_label" = "BAHAGIAN %d";
+"social.copy_share" = "Salin Bahagian";
+"social.confirm_overwrite_title" = "Tulis Ganti Pemulihan Sosial?";
+"social.confirm_overwrite_message" = "Pemulihan sosial telah dikonfigurasi. Mencipta bahagian baru akan menggantikan konfigurasi sedia ada. Teruskan?";
+
+/* ── Pemulihan Sosial (Pulih) ── */
+"social_restore.title" = "Pemulihan Sosial";
+"social_restore.desc" = "Kumpulkan bahagian daripada penjaga anda untuk memulihkan identiti anda. Anda memerlukan bilangan minimum bahagian untuk membina semula kunci pemulihan anda.";
+"social_restore.did_label" = "DID";
+"social_restore.name_label" = "NAMA IDENTITI";
+"social_restore.algorithm_label" = "ALGORITMA TANDATANGAN";
+"social_restore.shares_label" = "BAHAGIAN PENJAGA";
+"social_restore.share_label" = "Bahagian %d";
+"social_restore.share_index_hint" = "Indeks bahagian (nombor)";
+"social_restore.share_data_hint" = "Tampal data bahagian Base64";
+"social_restore.add_share" = "+ Tambah Bahagian";
+"social_restore.recovering" = "Memulihkan\U2026";
+"social_restore.recover_button" = "Pulihkan Identiti";
+"social_restore.success_title" = "Identiti Dipulihkan";
+"social_restore.success_desc" = "Identiti anda telah dipulihkan menggunakan bahagian penjaga.";
+
+/* ── Pemulihan Institusi ── */
+"institutional.title" = "Pemulihan Institusi";
+"institutional.desc" = "Daftarkan organisasi sebagai penjaga pemulihan. Organisasi akan menyimpan salinan tersulit kunci pemulihan anda dan boleh membantu pemulihan identiti selepas mengesahkan identiti anda melalui proses KYC mereka.";
+"institutional.no_recovery_key" = "Kunci pemulihan mesti dijana sebelum mendaftarkan organisasi. Pergi ke Persediaan Pemulihan untuk menjana satu terlebih dahulu.";
+"institutional.org_name_label" = "Nama Organisasi";
+"institutional.org_did_label" = "DID Organisasi";
+"institutional.org_did_hint" = "did:ssdid:\U2026";
+"institutional.encrypted_key_label" = "Kunci Pemulihan Tersulit";
+"institutional.encrypted_key_hint" = "Tampal kunci pemulihan tersulit";
+"institutional.enroll_button" = "Daftar Organisasi";
+"institutional.enrolling" = "Mendaftar\U2026";
+"institutional.enrolled" = "Organisasi Didaftarkan";
+"institutional.confirm_overwrite_title" = "Tulis Ganti Pendaftaran?";
+"institutional.confirm_overwrite_message" = "Organisasi telah didaftarkan untuk pemulihan. Mendaftar semula akan menggantikan konfigurasi sedia ada. Teruskan?";
+
+/* ── Pulih ── */
+"restore.title" = "Pulihkan Identiti";
+"restore.desc" = "Masukkan DID dan kunci pemulihan anda untuk memulihkan akses pada peranti ini.";
+"restore.social_title" = "Pemulihan Sosial";
+"restore.social_desc" = "Pulihkan menggunakan bahagian penjaga";
+"restore.or_recovery_key" = "atau gunakan kunci pemulihan";
+"restore.recovery_key_label" = "KUNCI PEMULIHAN (BASE64)";
+"restore.recovery_key_hint" = "Tampal kunci peribadi pemulihan anda";
+"restore.restoring" = "Memulihkan\U2026";
+"restore.button" = "Pulihkan Identiti";
+"restore.success_title" = "Identiti Dipulihkan";
+"restore.success_desc" = "Identiti anda telah berjaya dipulihkan.";
+
+/* ── Sandaran ── */
+"backup.title" = "Sandaran";
+"backup.create" = "Cipta Sandaran";
+"backup.restore" = "Pulihkan daripada Sandaran";
+"backup.passphrase" = "Frasa Laluan";
+"backup.passphrase_placeholder" = "Masukkan frasa laluan yang kukuh";
+"backup.passphrase_confirm" = "Sahkan Frasa Laluan";
+"backup.to_cloud" = "Sandaran ke Awan";
+"backup.return_to_drive" = "Kembali ke SSDID Drive";
+"backup.success" = "Sandaran berjaya dicipta";
+"backup.restore_success" = "Sandaran berjaya dipulihkan";
+
+/* ── Pengurusan Peranti ── */
+"device.title" = "Peranti";
+"device.add" = "Tambah Peranti";
+"device.remove" = "Buang Peranti";
+"device.remove_confirm" = "Adakah anda pasti mahu membuang peranti ini?";
+"device.current" = "Peranti Semasa";
+"device.last_active" = "Terakhir aktif";
+
+/* ── Sejarah Aktiviti ── */
+"history.title" = "Sejarah Aktiviti";
+"history.empty" = "Tiada aktiviti lagi";
+"history.empty_desc" = "Sejarah identiti dan transaksi anda akan muncul di sini.";
+"history.registration" = "Pendaftaran";
+"history.authentication" = "Pengesahan";
+"history.transaction" = "Transaksi";
+"history.credential_issued" = "Kelayakan Dikeluarkan";
+
+/* ── Langkah Pendaftaran ── */
+"step.connecting" = "Menyambung";
+"step.mutual_auth" = "Pengesahan Bersama";
+"step.identity_select" = "Pilih Identiti";
+"step.complete" = "Selesai";
+
+/* ── Nama Algoritma ── */
+"algorithm.ed25519" = "Ed25519";
+"algorithm.ecdsa_p256" = "ECDSA P-256";
+"algorithm.ecdsa_p384" = "ECDSA P-384";
+"algorithm.kaz_sign_128" = "KAZ-Sign 128";
+"algorithm.kaz_sign_192" = "KAZ-Sign 192";
+"algorithm.kaz_sign_256" = "KAZ-Sign 256";
+
+/* ── Penerangan Kandungan (Kebolehcapaian) ── */
+"a11y.navigate_back" = "Navigasi kembali";
+"a11y.decrease_threshold" = "Kurangkan ambang";
+"a11y.increase_threshold" = "Tingkatkan ambang";
+"a11y.remove_guardian" = "Buang penjaga %d";
+"a11y.remove_share" = "Buang bahagian %d";
+"a11y.select_algorithm" = "Pilih algoritma %@";
+"a11y.success_icon" = "Berjaya";
+"a11y.loading" = "Memuatkan";

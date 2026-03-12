@@ -1,0 +1,340 @@
+/* Localizable.strings (简体中文)
+   SSDID Wallet — iOS */
+
+/* ── 通用 ── */
+"common.error" = "错误";
+"common.loading" = "加载中...";
+"common.cancel" = "取消";
+"common.done" = "完成";
+"common.confirm" = "确认";
+"common.delete" = "删除";
+"common.copy" = "复制";
+"common.copied" = "已复制到剪贴板";
+"common.save" = "保存";
+"common.share" = "分享";
+"common.back" = "返回";
+"common.go_back" = "返回";
+"common.ok" = "确定";
+"common.retry" = "重试";
+"common.close" = "关闭";
+"common.continue" = "继续";
+"common.success" = "成功";
+
+/* ── 引导页 ── */
+"onboarding.title_1" = "您的身份，由您掌控";
+"onboarding.desc_1" = "SSDID 是一款自主主权身份钱包，让您完全掌控自己的数字身份。没有中央机构。没有数据孤岛。只有您和您的密码密钥。";
+"onboarding.title_2" = "后量子安全";
+"onboarding.desc_2" = "采用 KAZ-Sign 后量子密码算法，配合 Ed25519 和 ECDSA 等经典算法。您的身份在当前和未来的威胁面前都安全无忧。";
+"onboarding.title_3" = "隐私优先";
+"onboarding.desc_3" = "使用二维码和深度链接即时向服务验证身份。注册、证明您的身份并签署交易 — 一切都在您的设备上通过生物识别确认完成。";
+"onboarding.next" = "下一步";
+"onboarding.get_started" = "开始使用";
+"onboarding.skip" = "跳过";
+
+/* ── 个人资料设置 ── */
+"profile.setup_title" = "设置您的个人资料";
+"profile.name" = "姓名";
+"profile.name_placeholder" = "输入您的姓名";
+"profile.email" = "电子邮箱";
+"profile.email_placeholder" = "输入您的电子邮箱地址";
+"profile.continue" = "继续";
+"profile.save" = "保存";
+
+/* ── 电子邮箱验证 ── */
+"email_verify.title" = "电子邮箱验证";
+"email_verify.enter_code" = "输入验证码";
+"email_verify.code_placeholder" = "6位数验证码";
+"email_verify.verify" = "验证";
+"email_verify.resend" = "重新发送验证码";
+"email_verify.resend_countdown" = "%d 秒后重新发送";
+"email_verify.success" = "电子邮箱验证成功";
+"email_verify.invalid_code" = "验证码无效";
+
+/* ── 创建身份 ── */
+"identity.create_title" = "创建身份";
+"identity.name_label" = "身份名称";
+"identity.name_hint" = "例如：个人、工作";
+"identity.algorithm_label" = "签名算法";
+"identity.create_button" = "创建身份";
+"identity.creating" = "正在生成密钥...";
+"identity.create_success" = "身份创建成功";
+"identity.create_error" = "创建身份失败";
+"identity.your_identities" = "您的身份";
+"identity.delete_title" = "删除身份";
+"identity.delete_message" = "您确定要删除此身份吗？此操作无法撤销。";
+
+/* ── 身份详情 ── */
+"identity_detail.title" = "身份详情";
+"identity_detail.did" = "DID";
+"identity_detail.algorithm" = "算法";
+"identity_detail.created" = "创建时间";
+"identity_detail.public_key" = "公钥";
+"identity_detail.registrations" = "注册记录";
+
+/* ── 生物识别设置 ── */
+"biometric.setup_title" = "生物识别认证";
+"biometric.enable" = "启用生物识别认证";
+"biometric.skip" = "暂时跳过";
+"biometric.security_info" = "您的生物识别数据不会离开此设备。它仅用于解锁您的身份保管库。";
+"biometric.not_available" = "此设备不支持生物识别认证。";
+
+/* ── 钱包主页 ── */
+"wallet.title" = "SSDID 钱包";
+"wallet.identity_label" = "身份钱包";
+"wallet.app_name" = "SSDID";
+"wallet.my_identities" = "我的身份";
+"wallet.new" = "+ 新建";
+"wallet.create_first" = "创建您的第一个身份";
+"wallet.no_identities" = "暂无身份";
+"wallet.quick_actions" = "快捷操作";
+"wallet.scan_qr" = "扫描二维码";
+"wallet.credentials" = "凭证";
+"wallet.history" = "历史";
+"wallet.active" = "活跃";
+"wallet.settings" = "设置";
+
+/* ── 扫描二维码 ── */
+"scan.title" = "扫描二维码";
+"scan.camera_preview" = "相机预览";
+"scan.supported_formats" = "支持的格式";
+"scan.permission_required" = "需要相机权限";
+"scan.permission_message" = "请在设备设置中授予相机权限以扫描二维码。";
+"scan.open_settings" = "打开设置";
+"scan.invalid_qr" = "无效的二维码格式";
+
+/* ── 注册 ── */
+"registration.title" = "服务注册";
+"registration.server_info" = "服务器信息";
+"registration.select_identity" = "选择身份";
+"registration.no_identities" = "没有可用的身份";
+"registration.register_button" = "注册服务";
+"registration.registering" = "正在注册\U2026";
+"registration.complete" = "注册完成";
+"registration.complete_desc" = "您的身份已注册到此服务。";
+"registration.failed" = "注册失败";
+"registration.failed_desc" = "无法完成注册。请重试。";
+
+/* ── 身份验证 ── */
+"auth.title" = "身份验证";
+"auth.sign_in_request" = "登录请求";
+"auth.service_request" = "服务请求";
+"auth.select_credential" = "选择凭证";
+"auth.no_credentials" = "没有可用的凭证";
+"auth.approve" = "批准";
+"auth.decline" = "拒绝";
+"auth.biometric_confirm" = "生物识别确认";
+"auth.biometric_touch" = "触摸传感器以确认身份验证";
+"auth.authenticate_button" = "验证";
+"auth.authenticating" = "正在验证\U2026";
+"auth.success" = "验证成功";
+"auth.success_desc" = "您已通过此服务的身份验证。";
+"auth.failed" = "验证失败";
+"auth.failed_desc" = "无法完成身份验证。请重试。";
+
+/* ── 同意 ── */
+"consent.title" = "同意";
+"consent.requested_information" = "请求的信息";
+"consent.required" = "必需";
+"consent.optional" = "可选";
+"consent.approve" = "批准";
+"consent.deny" = "拒绝";
+
+/* ── 交易签署 ── */
+"tx.signing_title" = "签署交易";
+"tx.details" = "交易详情";
+"tx.security" = "安全性";
+"tx.challenge_expires" = "挑战将在以下时间过期";
+"tx.bound_hash" = "交易绑定到挑战哈希";
+"tx.sha3_verify" = "SHA3-256 完整性验证";
+"tx.pqc_available" = "后量子签名（如可用）";
+"tx.biometric_required" = "需要生物识别";
+"tx.biometric_touch" = "触摸传感器以授权签名";
+"tx.sign_button" = "签署交易";
+"tx.reject" = "拒绝";
+"tx.signing" = "正在签署\U2026";
+"tx.confirmed" = "交易已确认";
+"tx.confirmed_desc" = "您的交易已签署并提交。";
+"tx.failed" = "交易失败";
+"tx.failed_desc" = "无法完成交易签署。请重试。";
+"tx.challenge_expired" = "挑战已过期。请重新扫描二维码。";
+
+/* ── 凭证 ── */
+"credentials.title" = "您的凭证";
+"credentials.empty" = "暂无凭证";
+"credentials.empty_desc" = "服务向您签发的凭证将显示在此处。";
+"credential.detail_title" = "凭证详情";
+"credential.subject" = "凭证主体";
+"credential.claims" = "声明";
+"credential.no_claims" = "没有其他声明";
+"credential.proof" = "证明";
+"credential.show_json" = "显示原始 JSON";
+"credential.hide_json" = "隐藏原始 JSON";
+"credential.delete_title" = "删除凭证";
+"credential.delete_message" = "您确定要删除此凭证吗？此操作无法撤销。";
+"credential.issuer" = "签发者";
+"credential.issued_date" = "签发日期";
+"credential.expiry_date" = "到期日期";
+"credential.status" = "状态";
+"credential.valid" = "有效";
+"credential.expired" = "已过期";
+"credential.revoked" = "已撤销";
+
+/* ── 设置 ── */
+"settings.title" = "设置";
+"settings.security" = "安全";
+"settings.biometric" = "生物识别认证";
+"settings.auto_lock" = "自动锁定超时";
+"settings.auto_lock_value" = "5 分钟";
+"settings.network" = "网络";
+"settings.registry_url" = "注册表 URL";
+"settings.preferences" = "偏好设置";
+"settings.language" = "语言";
+"settings.language_value" = "中文";
+"settings.notifications" = "通知";
+"settings.version" = "版本";
+"settings.version_value" = "1.0.0";
+"settings.about" = "关于";
+"settings.export" = "导出数据";
+"settings.reset" = "重置钱包";
+"settings.reset_warning" = "这将删除所有身份和凭证。此操作无法撤销。";
+
+/* ── 恢复 ── */
+"recovery.setup_title" = "恢复设置";
+"recovery.key_title" = "恢复密钥";
+"recovery.key_desc" = "生成离线恢复密钥对";
+"recovery.key_badge" = "推荐";
+"recovery.generate_button" = "生成恢复密钥";
+"recovery.generating" = "正在生成\U2026";
+"recovery.key_store_offline" = "请将此密钥离线存储。它无法被恢复。";
+"recovery.key_label" = "恢复密钥";
+"recovery.copy_clipboard" = "复制到剪贴板";
+"recovery.configured" = "已配置";
+"recovery.important" = "重要";
+"recovery.timeout" = "操作超时。请重试。";
+"recovery.offline_title" = "离线恢复";
+"recovery.offline_desc" = "使用您的离线恢复密钥进行恢复";
+"recovery.social_title" = "社交恢复";
+"recovery.social_desc" = "将恢复密钥分割给可信联系人";
+"recovery.social_badge" = "高级";
+"recovery.social_button" = "设置社交恢复";
+"recovery.social_config" = "%d/%d 守护人";
+"recovery.institutional_title" = "机构恢复";
+"recovery.institutional_desc" = "由组织持有恢复权限";
+"recovery.institutional_badge" = "企业";
+"recovery.institutional_button" = "注册组织";
+
+/* ── 社交恢复 ── */
+"social.setup_title" = "社交恢复";
+"social.threshold" = "阈值";
+"social.threshold_display" = "%d / %d";
+"social.threshold_info" = "恢复至少需要 %d 位守护人";
+"social.guardian_label" = "守护人 %d";
+"social.guardian_name" = "姓名";
+"social.guardian_did" = "DID";
+"social.remove" = "移除";
+"social.add_guardian" = "+ 添加守护人";
+"social.create_shares" = "创建分片";
+"social.creating_shares" = "正在创建分片\U2026";
+"social.success_message" = "社交恢复创建成功";
+"social.distribute_warning" = "请将每个分片安全地分发给对应的守护人。不要将多个分片存储在一起。每位守护人只应收到自己的分片。";
+"social.share_label" = "分片 %d";
+"social.copy_share" = "复制分片";
+"social.confirm_overwrite_title" = "覆盖社交恢复？";
+"social.confirm_overwrite_message" = "社交恢复已配置。创建新分片将覆盖现有配置。是否继续？";
+
+/* ── 社交恢复（还原） ── */
+"social_restore.title" = "社交恢复";
+"social_restore.desc" = "从您的守护人处收集分片以恢复您的身份。您需要达到最低阈值的分片数量才能重建恢复密钥。";
+"social_restore.did_label" = "DID";
+"social_restore.name_label" = "身份名称";
+"social_restore.algorithm_label" = "签名算法";
+"social_restore.shares_label" = "守护人分片";
+"social_restore.share_label" = "分片 %d";
+"social_restore.share_index_hint" = "分片索引（数字）";
+"social_restore.share_data_hint" = "粘贴 Base64 分片数据";
+"social_restore.add_share" = "+ 添加分片";
+"social_restore.recovering" = "正在恢复\U2026";
+"social_restore.recover_button" = "恢复身份";
+"social_restore.success_title" = "身份已恢复";
+"social_restore.success_desc" = "您的身份已通过守护人分片成功恢复。";
+
+/* ── 机构恢复 ── */
+"institutional.title" = "机构恢复";
+"institutional.desc" = "将组织注册为恢复托管人。组织将持有您恢复密钥的加密副本，并可在通过其 KYC 流程验证您的身份后协助进行身份恢复。";
+"institutional.no_recovery_key" = "注册组织前必须先生成恢复密钥。请先前往恢复设置生成密钥。";
+"institutional.org_name_label" = "组织名称";
+"institutional.org_did_label" = "组织 DID";
+"institutional.org_did_hint" = "did:ssdid:\U2026";
+"institutional.encrypted_key_label" = "加密恢复密钥";
+"institutional.encrypted_key_hint" = "粘贴加密恢复密钥";
+"institutional.enroll_button" = "注册组织";
+"institutional.enrolling" = "正在注册\U2026";
+"institutional.enrolled" = "组织已注册";
+"institutional.confirm_overwrite_title" = "覆盖注册？";
+"institutional.confirm_overwrite_message" = "已有组织注册用于恢复。重新注册将覆盖现有配置。是否继续？";
+
+/* ── 还原 ── */
+"restore.title" = "还原身份";
+"restore.desc" = "输入您的 DID 和恢复密钥以在此设备上还原访问权限。";
+"restore.social_title" = "社交恢复";
+"restore.social_desc" = "使用守护人分片进行恢复";
+"restore.or_recovery_key" = "或使用恢复密钥";
+"restore.recovery_key_label" = "恢复密钥 (BASE64)";
+"restore.recovery_key_hint" = "粘贴您的恢复私钥";
+"restore.restoring" = "正在还原\U2026";
+"restore.button" = "还原身份";
+"restore.success_title" = "身份已还原";
+"restore.success_desc" = "您的身份已成功恢复。";
+
+/* ── 备份 ── */
+"backup.title" = "备份";
+"backup.create" = "创建备份";
+"backup.restore" = "从备份还原";
+"backup.passphrase" = "密码短语";
+"backup.passphrase_placeholder" = "输入一个强密码短语";
+"backup.passphrase_confirm" = "确认密码短语";
+"backup.to_cloud" = "备份到云端";
+"backup.return_to_drive" = "返回 SSDID Drive";
+"backup.success" = "备份创建成功";
+"backup.restore_success" = "备份还原成功";
+
+/* ── 设备管理 ── */
+"device.title" = "设备";
+"device.add" = "添加设备";
+"device.remove" = "移除设备";
+"device.remove_confirm" = "您确定要移除此设备吗？";
+"device.current" = "当前设备";
+"device.last_active" = "上次活跃";
+
+/* ── 活动历史 ── */
+"history.title" = "活动历史";
+"history.empty" = "暂无活动";
+"history.empty_desc" = "您的身份和交易历史将显示在此处。";
+"history.registration" = "注册";
+"history.authentication" = "身份验证";
+"history.transaction" = "交易";
+"history.credential_issued" = "凭证已签发";
+
+/* ── 注册步骤 ── */
+"step.connecting" = "正在连接";
+"step.mutual_auth" = "相互认证";
+"step.identity_select" = "选择身份";
+"step.complete" = "完成";
+
+/* ── 算法名称 ── */
+"algorithm.ed25519" = "Ed25519";
+"algorithm.ecdsa_p256" = "ECDSA P-256";
+"algorithm.ecdsa_p384" = "ECDSA P-384";
+"algorithm.kaz_sign_128" = "KAZ-Sign 128";
+"algorithm.kaz_sign_192" = "KAZ-Sign 192";
+"algorithm.kaz_sign_256" = "KAZ-Sign 256";
+
+/* ── 内容描述（无障碍） ── */
+"a11y.navigate_back" = "返回导航";
+"a11y.decrease_threshold" = "降低阈值";
+"a11y.increase_threshold" = "提高阈值";
+"a11y.remove_guardian" = "移除守护人 %d";
+"a11y.remove_share" = "移除分片 %d";
+"a11y.select_algorithm" = "选择 %@ 算法";
+"a11y.success_icon" = "成功";
+"a11y.loading" = "加载中";
