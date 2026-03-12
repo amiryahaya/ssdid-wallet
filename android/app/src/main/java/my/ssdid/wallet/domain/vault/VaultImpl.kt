@@ -168,8 +168,21 @@ class VaultImpl(
         }
 
         private fun escapeJsonString(s: String): String {
-            return s.replace("\\", "\\\\").replace("\"", "\\\"")
-                .replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t")
+            return buildString(s.length) {
+                for (ch in s) {
+                    when (ch) {
+                        '\\' -> append("\\\\")
+                        '"' -> append("\\\"")
+                        '\n' -> append("\\n")
+                        '\r' -> append("\\r")
+                        '\t' -> append("\\t")
+                        '\b' -> append("\\b")
+                        '\u000C' -> append("\\f")
+                        in '\u0000'..'\u001F' -> append("\\u%04x".format(ch.code))
+                        else -> append(ch)
+                    }
+                }
+            }
         }
     }
 
@@ -186,4 +199,10 @@ class VaultImpl(
     override suspend fun deleteCredential(credentialId: String): Result<Unit> = runCatching {
         storage.deleteCredential(credentialId)
     }
+
+    override suspend fun getEncryptedPrivateKey(keyId: String): ByteArray? =
+        storage.getEncryptedPrivateKey(keyId)
+
+    override suspend fun saveIdentity(identity: Identity, encryptedPrivateKey: ByteArray) =
+        storage.saveIdentity(identity, encryptedPrivateKey)
 }

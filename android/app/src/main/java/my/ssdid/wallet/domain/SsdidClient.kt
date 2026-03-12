@@ -3,6 +3,7 @@ package my.ssdid.wallet.domain
 import my.ssdid.wallet.domain.crypto.Multibase
 import my.ssdid.wallet.domain.history.ActivityRepository
 import my.ssdid.wallet.domain.model.*
+import my.ssdid.wallet.domain.notify.NotifyManager
 import my.ssdid.wallet.domain.revocation.RevocationManager
 import my.ssdid.wallet.domain.revocation.RevocationStatus
 import my.ssdid.wallet.domain.transport.NetworkResult
@@ -14,7 +15,9 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.put
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -30,13 +33,17 @@ class SsdidClient(
     private val verifier: Verifier,
     private val httpClient: SsdidHttpClient,
     private val activityRepo: ActivityRepository,
-    private val revocationManager: RevocationManager
+    private val revocationManager: RevocationManager,
+    private val notifyManager: NotifyManager
 ) {
     private val wireJson = Json {
         ignoreUnknownKeys = true
         encodeDefaults = true
         explicitNulls = false
     }
+
+    private fun DidDocument.toJsonObject(): JsonObject =
+        wireJson.parseToJsonElement(wireJson.encodeToString(this)).jsonObject
 
     private suspend fun logActivity(
         type: ActivityType,
@@ -86,8 +93,7 @@ class SsdidClient(
             data["keyId"] = identity.keyId
         })
         val didDoc = vault.buildDidDocument(identity.keyId).getOrThrow()
-        val didDocJson = wireJson.encodeToString(didDoc)
-        val didDocJsonObject = wireJson.parseToJsonElement(didDocJson).jsonObject
+        val didDocJsonObject = didDoc.toJsonObject()
 
         Sentry.addBreadcrumb(Breadcrumb().apply {
             category = "identity"; message = "Creating proof"; level = SentryLevel.INFO
@@ -104,6 +110,8 @@ class SsdidClient(
         })
         httpClient.registry.registerDid(RegisterDidRequest(didDoc, proof))
         logActivity(ActivityType.IDENTITY_CREATED, identity.did, details = mapOf("algorithm" to algorithm.name))
+        notifyManager.createMailbox(identity)
+        notifyManager.updateKnownIdentities(vault.listIdentities())
         identity
     }
 
@@ -112,8 +120,7 @@ class SsdidClient(
         val identity = vault.getIdentity(keyId)
             ?: throw IllegalArgumentException("Identity not found: $keyId")
         val didDoc = vault.buildDidDocument(keyId).getOrThrow()
-        val didDocJson = wireJson.encodeToString(didDoc)
-        val didDocJsonObject = wireJson.parseToJsonElement(didDocJson).jsonObject
+        val didDocJsonObject = didDoc.toJsonObject()
         val challengeResp = httpClient.registry.createChallenge(identity.did)
         val proof = vault.createProof(keyId, didDocJsonObject, "capabilityInvocation", challengeResp.challenge, challengeResp.domain).getOrThrow()
         httpClient.registry.updateDid(identity.did, UpdateDidRequest(didDoc, proof))
@@ -127,9 +134,10 @@ class SsdidClient(
             category = "identity"; message = "Deactivating DID"; level = SentryLevel.WARNING
             data["algorithm"] = identity.algorithm.name
         })
-        val deactivateData = wireJson.parseToJsonElement(
-            """{"action":"deactivate","did":"${identity.did}"}"""
-        ).jsonObject
+        val deactivateData = buildJsonObject {
+            put("action", "deactivate")
+            put("did", identity.did)
+        }
 
         Sentry.addBreadcrumb(Breadcrumb().apply {
             category = "identity"; message = "Requesting deactivation challenge"; level = SentryLevel.INFO
@@ -149,8 +157,10 @@ class SsdidClient(
         Sentry.addBreadcrumb(Breadcrumb().apply {
             category = "identity"; message = "Deleting local identity"; level = SentryLevel.INFO
         })
+        notifyManager.deleteMailbox(identity)
         vault.deleteIdentity(keyId).getOrThrow()
-        logActivity(ActivityType.IDENTITY_CREATED, identity.did, details = mapOf("action" to "deactivated"))
+        notifyManager.updateKnownIdentities(vault.listIdentities())
+        logActivity(ActivityType.IDENTITY_DEACTIVATED, identity.did)
     }
 
     /** Flow 2: Register with a service (mutual auth) */

@@ -12,6 +12,7 @@ import my.ssdid.wallet.domain.model.*
 import my.ssdid.wallet.domain.revocation.RevocationStatus
 import my.ssdid.wallet.domain.revocation.StatusListCredential
 import my.ssdid.wallet.domain.revocation.StatusListSubject
+import my.ssdid.wallet.domain.vault.VaultImpl
 import org.junit.Before
 import org.junit.Test
 import java.io.ByteArrayOutputStream
@@ -207,8 +208,7 @@ class OfflineVerifierTest {
         val fullJson = json.encodeToString(VerifiableCredential.serializer(), credential)
         val jsonObj = json.parseToJsonElement(fullJson).jsonObject.toMutableMap()
         jsonObj.remove("proof")
-        val sorted = kotlinx.serialization.json.JsonObject(jsonObj.toSortedMap())
-        return json.encodeToString(kotlinx.serialization.json.JsonObject.serializer(), sorted).toByteArray(Charsets.UTF_8)
+        return VaultImpl.canonicalJson(kotlinx.serialization.json.JsonObject(jsonObj)).toByteArray(Charsets.UTF_8)
     }
 
     private fun makeEncodedList(revokedIndices: Set<Int>): String {

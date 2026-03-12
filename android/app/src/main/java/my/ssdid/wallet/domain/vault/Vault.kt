@@ -15,4 +15,6 @@ interface Vault {
     suspend fun listCredentials(): List<VerifiableCredential>
     suspend fun getCredentialForDid(did: String): VerifiableCredential?
     suspend fun deleteCredential(credentialId: String): Result<Unit>
+    suspend fun getEncryptedPrivateKey(keyId: String): ByteArray?
+    suspend fun saveIdentity(identity: Identity, encryptedPrivateKey: ByteArray)
 }

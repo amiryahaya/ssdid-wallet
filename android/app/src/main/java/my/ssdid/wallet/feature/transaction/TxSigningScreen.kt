@@ -121,6 +121,7 @@ fun TxSigningScreen(
     val context = LocalContext.current
     val activity = context as? FragmentActivity
     val scope = rememberCoroutineScope()
+    var signing by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -274,16 +275,25 @@ fun TxSigningScreen(
                 // Sign button
                 Button(
                     onClick = {
-                        scope.launch {
-                            if (activity == null || viewModel.requireBiometric(activity)) {
-                                viewModel.signTransaction()
+                        if (!signing) {
+                            signing = true
+                            scope.launch {
+                                try {
+                                    if (activity == null || viewModel.requireBiometric(activity)) {
+                                        viewModel.signTransaction()
+                                    } else {
+                                        signing = false
+                                    }
+                                } catch (_: Exception) {
+                                    signing = false
+                                }
                             }
                         }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(20.dp),
-                    enabled = !isLoading && timerSeconds > 0,
+                    enabled = !isLoading && !signing && timerSeconds > 0,
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Warning)
                 ) {

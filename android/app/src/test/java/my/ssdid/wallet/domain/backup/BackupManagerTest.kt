@@ -7,7 +7,6 @@ import my.ssdid.wallet.domain.history.ActivityRepository
 import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.vault.Vault
-import my.ssdid.wallet.domain.vault.VaultStorage
 import my.ssdid.wallet.domain.vault.KeystoreManager
 import org.junit.Before
 import org.junit.Test
@@ -16,7 +15,6 @@ import java.util.Base64
 class BackupManagerTest {
 
     private lateinit var vault: Vault
-    private lateinit var storage: VaultStorage
     private lateinit var keystoreManager: KeystoreManager
     private lateinit var activityRepo: ActivityRepository
     private lateinit var backupManager: BackupManager
@@ -34,16 +32,15 @@ class BackupManagerTest {
 
     @Before
     fun setup() {
-        vault = mockk()
-        storage = mockk(relaxed = true)
+        vault = mockk(relaxed = true)
         keystoreManager = mockk(relaxed = true)
         activityRepo = mockk(relaxed = true)
 
         // Vault returns one identity
         coEvery { vault.listIdentities() } returns listOf(testIdentity)
 
-        // Storage returns an encrypted private key (in this mock, same bytes)
-        coEvery { storage.getEncryptedPrivateKey(testIdentity.keyId) } returns fakePrivateKey.copyOf()
+        // Vault returns an encrypted private key (in this mock, same bytes)
+        coEvery { vault.getEncryptedPrivateKey(testIdentity.keyId) } returns fakePrivateKey.copyOf()
 
         // Keystore decrypt returns the raw private key
         every { keystoreManager.decrypt(any(), any()) } returns fakePrivateKey.copyOf()
@@ -51,12 +48,12 @@ class BackupManagerTest {
         // Keystore encrypt returns the input as-is (mock wrapping)
         every { keystoreManager.encrypt(any(), any()) } answers { secondArg<ByteArray>().copyOf() }
 
-        backupManager = BackupManager(vault, storage, keystoreManager, activityRepo)
+        backupManager = BackupManager(vault, keystoreManager, activityRepo)
     }
 
     @Test
     fun `createBackup produces non-empty output`() = runTest {
-        val result = backupManager.createBackup("testPassphrase123")
+        val result = backupManager.createBackup("testPassphrase123".toCharArray())
         assertThat(result.isSuccess).isTrue()
         val backupData = result.getOrThrow()
         assertThat(backupData).isNotEmpty()
@@ -74,11 +71,11 @@ class BackupManagerTest {
 
     @Test
     fun `restoreBackup with wrong passphrase fails`() = runTest {
-        val backupResult = backupManager.createBackup("correctPassphrase")
+        val backupResult = backupManager.createBackup("correctPassphrase".toCharArray())
         assertThat(backupResult.isSuccess).isTrue()
         val backupData = backupResult.getOrThrow()
 
-        val restoreResult = backupManager.restoreBackup(backupData, "wrongPassphrase")
+        val restoreResult = backupManager.restoreBackup(backupData, "wrongPassphrase".toCharArray())
         assertThat(restoreResult.isFailure).isTrue()
         val error = restoreResult.exceptionOrNull()
         assertThat(error).isNotNull()
@@ -86,7 +83,7 @@ class BackupManagerTest {
 
     @Test
     fun `HMAC catches tampering`() = runTest {
-        val backupResult = backupManager.createBackup("mySecurePassphrase")
+        val backupResult = backupManager.createBackup("mySecurePassphrase".toCharArray())
         assertThat(backupResult.isSuccess).isTrue()
         val backupData = backupResult.getOrThrow()
 
@@ -95,7 +92,7 @@ class BackupManagerTest {
         val tamperedJson = jsonStr.replace("\"ciphertext\":\"", "\"ciphertext\":\"AAAA")
         val tamperedData = tamperedJson.toByteArray(Charsets.UTF_8)
 
-        val restoreResult = backupManager.restoreBackup(tamperedData, "mySecurePassphrase")
+        val restoreResult = backupManager.restoreBackup(tamperedData, "mySecurePassphrase".toCharArray())
         assertThat(restoreResult.isFailure).isTrue()
         val error = restoreResult.exceptionOrNull()
         assertThat(error).isNotNull()
@@ -105,16 +102,16 @@ class BackupManagerTest {
     @Test
     fun `createBackup and restoreBackup round trip`() = runTest {
         val passphrase = "strongPassphrase123!"
-        val backupResult = backupManager.createBackup(passphrase)
+        val backupResult = backupManager.createBackup(passphrase.toCharArray())
         assertThat(backupResult.isSuccess).isTrue()
         val backupData = backupResult.getOrThrow()
 
-        val restoreResult = backupManager.restoreBackup(backupData, passphrase)
+        val restoreResult = backupManager.restoreBackup(backupData, passphrase.toCharArray())
         assertThat(restoreResult.isSuccess).isTrue()
         assertThat(restoreResult.getOrThrow()).isEqualTo(1)
 
-        // Verify storage.saveIdentity was called during restore
-        coVerify { storage.saveIdentity(any(), any()) }
+        // Verify vault.saveIdentity was called during restore
+        coVerify { vault.saveIdentity(any(), any()) }
         // Verify keystore wrapping key was generated for restored identity
         verify { keystoreManager.generateWrappingKey("ssdid_wrap_testId123") }
     }

@@ -5,9 +5,9 @@ import my.ssdid.wallet.domain.crypto.Multibase
 import my.ssdid.wallet.domain.model.*
 import my.ssdid.wallet.domain.revocation.BitstringParser
 import my.ssdid.wallet.domain.revocation.RevocationStatus
+import my.ssdid.wallet.domain.vault.VaultImpl
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import java.time.Instant
 
@@ -113,8 +113,7 @@ class OfflineVerifier(
         val fullJson = canonicalJson.encodeToString(credential)
         val jsonObj = canonicalJson.parseToJsonElement(fullJson).jsonObject.toMutableMap()
         jsonObj.remove("proof")
-        val sorted = JsonObject(jsonObj.toSortedMap())
-        return canonicalJson.encodeToString(sorted).toByteArray(Charsets.UTF_8)
+        return VaultImpl.canonicalJson(kotlinx.serialization.json.JsonObject(jsonObj)).toByteArray(Charsets.UTF_8)
     }
 }
 

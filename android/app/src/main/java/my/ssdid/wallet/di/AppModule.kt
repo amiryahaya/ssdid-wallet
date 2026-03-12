@@ -39,7 +39,12 @@ import my.ssdid.wallet.platform.device.AndroidDeviceInfoProvider
 import my.ssdid.wallet.domain.vault.KeystoreManager
 import my.ssdid.wallet.domain.settings.SettingsRepository
 import my.ssdid.wallet.platform.storage.DataStoreSettingsRepository
+import my.ssdid.wallet.domain.notify.AndroidNotifyDispatcher
+import my.ssdid.wallet.domain.notify.NotifyLifecycleObserver
+import my.ssdid.wallet.domain.notify.NotifyManager
+import my.ssdid.wallet.domain.notify.NotifyStorage
 import my.ssdid.wallet.domain.transport.EmailVerifyApi
+import my.ssdid.wallet.domain.transport.NotifyApi
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
@@ -123,8 +128,9 @@ object AppModule {
         verifier: Verifier,
         httpClient: SsdidHttpClient,
         activityRepo: ActivityRepository,
-        revocationManager: RevocationManager
-    ): SsdidClient = SsdidClient(vault, verifier, httpClient, activityRepo, revocationManager)
+        revocationManager: RevocationManager,
+        notifyManager: NotifyManager
+    ): SsdidClient = SsdidClient(vault, verifier, httpClient, activityRepo, revocationManager, notifyManager)
 
     @Provides
     @Singleton
@@ -165,10 +171,9 @@ object AppModule {
     @Singleton
     fun provideBackupManager(
         vault: Vault,
-        storage: VaultStorage,
         keystoreManager: KeystoreManager,
         activityRepo: ActivityRepository
-    ): BackupManager = BackupManager(vault, storage, keystoreManager, activityRepo)
+    ): BackupManager = BackupManager(vault, keystoreManager, activityRepo)
 
     @Provides
     @Singleton
@@ -200,4 +205,38 @@ object AppModule {
     @Singleton
     fun provideEmailVerifyApi(httpClient: SsdidHttpClient): EmailVerifyApi =
         httpClient.emailVerifyApi(BuildConfig.EMAIL_VERIFY_URL)
+
+    @Provides
+    @Singleton
+    fun provideNotifyApi(httpClient: SsdidHttpClient): NotifyApi =
+        httpClient.notifyApi(BuildConfig.NOTIFY_URL)
+
+    @Provides
+    @Singleton
+    fun provideNotifyStorage(
+        @ApplicationContext context: Context,
+        keystoreManager: KeystoreManager
+    ): NotifyStorage = NotifyStorage(context, keystoreManager)
+
+    @Provides
+    @Singleton
+    fun provideNotifyManager(
+        notifyApi: NotifyApi,
+        storage: NotifyStorage,
+        dispatcher: AndroidNotifyDispatcher
+    ): NotifyManager = NotifyManager(notifyApi, storage, dispatcher)
+
+    @Provides
+    @Singleton
+    fun provideNotifyDispatcher(
+        @ApplicationContext context: Context
+    ): AndroidNotifyDispatcher = AndroidNotifyDispatcher(context)
+
+    @Provides
+    @Singleton
+    fun provideNotifyLifecycleObserver(
+        @ApplicationContext context: Context,
+        notifyManager: NotifyManager,
+        vault: Vault
+    ): NotifyLifecycleObserver = NotifyLifecycleObserver(context as android.app.Application, notifyManager, vault)
 }
