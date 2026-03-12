@@ -58,22 +58,24 @@ fun EmailVerificationScreen(
         Column(
             Modifier
                 .weight(1f)
+                .fillMaxWidth()
                 .padding(horizontal = 20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
         ) {
-            Spacer(Modifier.height(24.dp))
-
             Text(
                 "We sent a verification code to",
                 fontSize = 14.sp,
-                color = TextSecondary
+                color = TextSecondary,
+                textAlign = TextAlign.Center
             )
             Spacer(Modifier.height(4.dp))
             Text(
                 viewModel.email,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = TextPrimary
+                color = TextPrimary,
+                textAlign = TextAlign.Center
             )
 
             Spacer(Modifier.height(32.dp))

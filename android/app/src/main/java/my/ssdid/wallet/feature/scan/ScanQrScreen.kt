@@ -2,6 +2,8 @@ package my.ssdid.wallet.feature.scan
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -33,10 +35,12 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.common.InputImage
+import my.ssdid.wallet.BuildConfig
 import my.ssdid.wallet.platform.scan.QrPayload
 import my.ssdid.wallet.platform.scan.QrScanner
 import my.ssdid.wallet.ui.theme.*
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicBoolean
 
 @Composable
 fun ScanQrScreen(
@@ -155,10 +159,17 @@ private fun CameraPreview(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
-    var hasScanned by remember { mutableStateOf(false) }
+    val hasScanned = remember { AtomicBoolean(false) }
+    val mainHandler = remember { Handler(Looper.getMainLooper()) }
+    // M2: Track disposal to prevent post-dispose navigation
+    val disposed = remember { AtomicBoolean(false) }
 
     DisposableEffect(Unit) {
-        onDispose { cameraExecutor.shutdown() }
+        onDispose {
+            disposed.set(true)
+            mainHandler.removeCallbacksAndMessages(null)
+            cameraExecutor.shutdown()
+        }
     }
 
     AndroidView(
@@ -180,11 +191,19 @@ private fun CameraPreview(
                     .build()
 
                 imageAnalysis.setAnalyzer(cameraExecutor, BarcodeAnalyzer { rawValue ->
-                    if (!hasScanned) {
+                    // L1: Only log in debug builds
+                    if (BuildConfig.DEBUG) {
+                        Log.d("ScanQrScreen", "QR detected: ${rawValue.take(100)}")
+                    }
+                    if (!hasScanned.get()) {
                         val payload = QrScanner.parsePayload(rawValue)
-                        if (payload != null) {
-                            hasScanned = true
-                            onScanned(payload)
+                        if (payload != null && hasScanned.compareAndSet(false, true)) {
+                            // M2: Check disposed before posting navigation
+                            mainHandler.post {
+                                if (!disposed.get()) onScanned(payload)
+                            }
+                        } else if (payload == null && BuildConfig.DEBUG) {
+                            Log.w("ScanQrScreen", "QR parse failed for: ${rawValue.take(200)}")
                         }
                     }
                 })

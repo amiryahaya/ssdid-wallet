@@ -139,6 +139,11 @@ target_compile_options(kazsign PRIVATE
     -fstack-protector-strong
 )
 
+# 16 KB page size alignment (required for Android 15+ / Google Play)
+target_link_options(kazsign PRIVATE
+    -Wl,-z,max-page-size=16384
+)
+
 # Export only necessary symbols
 set_target_properties(kazsign PROPERTIES
     C_VISIBILITY_PRESET hidden
