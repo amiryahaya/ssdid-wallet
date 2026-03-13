@@ -189,6 +189,12 @@ struct ScanQrScreen: View {
                 issuerUrl: issuerUrl,
                 offerId: offerId
             ))
+        case .invite(let serverUrl, let token, let callbackUrl):
+            router.push(.inviteAccept(
+                serverUrl: serverUrl,
+                token: token,
+                callbackUrl: callbackUrl
+            ))
         }
     }
 }

@@ -21,6 +21,7 @@
 		0D23547E7CB7C6B702F907EB /* BackupCryptoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69A3BC89A6C2482C86EE38D0 /* BackupCryptoTests.swift */; };
 		11F1DA07A22E5689707FA23A /* ActivityRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0124DE6830FE4BC3B8391B5A /* ActivityRepository.swift */; };
 		136BD0485E3A34912E85BA64 /* DeepLinkHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF3C32F383CC9B23373C734 /* DeepLinkHandler.swift */; };
+		13B758B70FCD797CD6EE099B /* InviteAcceptScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08F034773ABB5E39DD6D2B98 /* InviteAcceptScreen.swift */; };
 		169EAD5448E2582A0272D8B5 /* LocalizationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85DBFFB49B4FA5F0DDFA24B9 /* LocalizationManager.swift */; };
 		197A4201EE2A32276DD1530B /* Identity.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9A67835B6BAF26E99D578B1 /* Identity.swift */; };
 		21B97926CB51352CFFB9E420 /* WalletHomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56EA9DC9B66504E93267F77 /* WalletHomeScreen.swift */; };
@@ -54,6 +55,7 @@
 		68177A6E7440027E05D58CEF /* AlgorithmBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEB759342B72885647D00887 /* AlgorithmBadge.swift */; };
 		696069B0BC4144A98BF1F394 /* ServiceContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7FB896692C4E9DBDE438C69 /* ServiceContainer.swift */; };
 		6A4D667049E9CF9F59E830C1 /* ProfileSetupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A7FAD32A652C96C229BEFE1 /* ProfileSetupScreen.swift */; };
+		74EE9B21FBCA1154E153B470 /* InviteDtos.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60C3A0304CF888F4F7D320CF /* InviteDtos.swift */; };
 		79656CCF74D5A25CB61B6272 /* InstitutionalSetupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C5771B6AC99929644562CF2 /* InstitutionalSetupScreen.swift */; };
 		7B50D8AC6DD18748DFC61C31 /* RevocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12D666A531A1CFAE8BDDCB22 /* RevocationManager.swift */; };
 		7BFF9EB410CF2111C1CD1302 /* TxHistoryScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2057980C3D89E456B7B639 /* TxHistoryScreen.swift */; };
@@ -128,6 +130,7 @@
 		021037A350A22341955C2E0D /* CredentialsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsScreen.swift; sourceTree = "<group>"; };
 		07C33FE955251E6D5809254C /* ClassicalProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassicalProvider.swift; sourceTree = "<group>"; };
 		0864D8CCB4750CB46D2724F9 /* VerificationMethod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerificationMethod.swift; sourceTree = "<group>"; };
+		08F034773ABB5E39DD6D2B98 /* InviteAcceptScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteAcceptScreen.swift; sourceTree = "<group>"; };
 		0A5DFFD93FBB406C89165243 /* KeyRotationScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyRotationScreen.swift; sourceTree = "<group>"; };
 		0D67B23D3822502FC98324B4 /* CredentialDetailScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialDetailScreen.swift; sourceTree = "<group>"; };
 		0F93C6E13677EB154FBBB40D /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
@@ -166,6 +169,7 @@
 		5A6237909046A401164E5C6F /* BackupManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupManager.swift; sourceTree = "<group>"; };
 		5BD760DCC73FEDDA71E69AD7 /* SocialRecoverySetupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialRecoverySetupScreen.swift; sourceTree = "<group>"; };
 		5BEA0C8F82729DADBC5F3F0E /* AppCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCoordinator.swift; sourceTree = "<group>"; };
+		60C3A0304CF888F4F7D320CF /* InviteDtos.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteDtos.swift; sourceTree = "<group>"; };
 		61EBC3510481A2B45D35D87D /* KeychainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainManager.swift; sourceTree = "<group>"; };
 		620815538E471B53257CD2D9 /* ClassicalProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassicalProviderTests.swift; sourceTree = "<group>"; };
 		6750DEC9A757F6F81F0CF173 /* BitstringParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BitstringParser.swift; sourceTree = "<group>"; };
@@ -256,6 +260,7 @@
 				8497FA480DAA74E7A5975EF8 /* AuthDtos.swift */,
 				55C2A11CCEE2B911A05B6536 /* CredentialDtos.swift */,
 				51FF677B8A13ECAB3318B570 /* DeviceDtos.swift */,
+				60C3A0304CF888F4F7D320CF /* InviteDtos.swift */,
 				2F6420157E4C4CD642A1B590 /* NotifyDto.swift */,
 				B3C9078596AEF15C0BBA0DB5 /* RegistryDtos.swift */,
 				C06B177D4A0D07785B1100A2 /* ServerDtos.swift */,
@@ -396,6 +401,7 @@
 				737D6D84AD2F068C26998A4D /* Device */,
 				F2C23636FB7BDEFB778D124D /* History */,
 				ECB75EA55131A6C3937108BD /* Identity */,
+				B73E6928BA304F2139BACCD3 /* Invite */,
 				879352BD0BE91B8E91A8ADD8 /* Onboarding */,
 				2BA277F44DECA0212F4F663C /* Profile */,
 				2D94D1F0CBF5B7174B605CA2 /* Recovery */,
@@ -639,6 +645,14 @@
 				C79360D40A6B27851F111166 /* Info.plist */,
 			);
 			path = SsdidWallet;
+			sourceTree = "<group>";
+		};
+		B73E6928BA304F2139BACCD3 /* Invite */ = {
+			isa = PBXGroup;
+			children = (
+				08F034773ABB5E39DD6D2B98 /* InviteAcceptScreen.swift */,
+			);
+			path = Invite;
 			sourceTree = "<group>";
 		};
 		B80F52F06C4DE698C3F443A8 /* Profile */ = {
@@ -920,6 +934,8 @@
 				197A4201EE2A32276DD1530B /* Identity.swift in Sources */,
 				53D109D974591EA50D286C56 /* IdentityDetailScreen.swift in Sources */,
 				79656CCF74D5A25CB61B6272 /* InstitutionalSetupScreen.swift in Sources */,
+				13B758B70FCD797CD6EE099B /* InviteAcceptScreen.swift in Sources */,
+				74EE9B21FBCA1154E153B470 /* InviteDtos.swift in Sources */,
 				F5EF73E8741E7E0666FF4B59 /* KeyRotationScreen.swift in Sources */,
 				B6259B9205C85DF4B4878784 /* KeychainManager.swift in Sources */,
 				5AB06F4F7528AFB2A44EDB34 /* LoadingView.swift in Sources */,
