@@ -275,7 +275,7 @@ fun InviteAcceptScreen(
                 }
 
                 // Footer buttons
-                if (invitation != null) {
+                if (uiState.invitation != null) {
                     Column(
                         Modifier
                             .fillMaxWidth()

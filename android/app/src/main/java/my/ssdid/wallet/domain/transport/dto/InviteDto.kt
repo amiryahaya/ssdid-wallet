@@ -6,15 +6,15 @@ import kotlinx.serialization.json.JsonElement
 
 @Serializable
 data class InvitationDetailsResponse(
-    val id: String,
-    @SerialName("tenant_id") val tenantId: String,
     @SerialName("tenant_name") val tenantName: String,
     @SerialName("inviter_name") val inviterName: String? = null,
     val email: String,
     val role: String,
     val status: String,
     val message: String? = null,
-    @SerialName("expires_at") val expiresAt: String
+    @SerialName("short_code") val shortCode: String? = null,
+    @SerialName("expires_at") val expiresAt: String,
+    @SerialName("created_at") val createdAt: String? = null
 )
 
 @Serializable

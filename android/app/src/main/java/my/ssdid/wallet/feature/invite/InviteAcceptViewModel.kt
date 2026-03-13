@@ -139,7 +139,11 @@ class InviteAcceptViewModel @Inject constructor(
                     ).getOrThrow()
 
                     if (!verified) {
-                        android.util.Log.w("InviteAccept", "Server signature verification failed")
+                        _state.value = _state.value.copy(
+                            isAccepting = false,
+                            error = "Server identity verification failed. Please try again."
+                        )
+                        return@launch
                     }
                 }
 
