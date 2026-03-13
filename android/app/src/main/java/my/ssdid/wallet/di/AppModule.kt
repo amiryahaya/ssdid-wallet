@@ -51,6 +51,7 @@ import my.ssdid.wallet.domain.notify.NotifyManager
 import my.ssdid.wallet.domain.notify.NotifyStorage
 import my.ssdid.wallet.domain.transport.EmailVerifyApi
 import my.ssdid.wallet.domain.transport.NotifyApi
+import okhttp3.CertificatePinner
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
@@ -82,7 +83,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
-        return OkHttpClient.Builder()
+        val builder = OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(10, TimeUnit.SECONDS)
             .addInterceptor(RetryInterceptor())
@@ -91,7 +92,17 @@ object AppModule {
                 level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.HEADERS
                         else HttpLoggingInterceptor.Level.NONE
             })
-            .build()
+
+        if (!BuildConfig.DEBUG) {
+            // TODO: Replace placeholder pins with actual certificate SHA-256 pins before production release
+            val pinner = CertificatePinner.Builder()
+                .add("registry.ssdid.my", "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+                .add("notify.ssdid.my", "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+                .build()
+            builder.certificatePinner(pinner)
+        }
+
+        return builder.build()
     }
 
     @Provides
