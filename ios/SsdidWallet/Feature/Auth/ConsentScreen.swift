@@ -8,6 +8,7 @@ struct ConsentScreen: View {
     let sessionId: String
     let requestedClaims: String
     let acceptedAlgorithms: String?
+    var credentialFormat: String = "vc" // "vc" or "sd-jwt-vc"
 
     struct ClaimItem: Identifiable {
         let id: String
@@ -109,9 +110,20 @@ struct ConsentScreen: View {
 
                     // Requested information section
                     Spacer().frame(height: 4)
-                    Text("REQUESTED INFORMATION")
-                        .font(.ssdidCaption)
-                        .foregroundStyle(Color.textTertiary)
+                    HStack(spacing: 8) {
+                        Text("REQUESTED INFORMATION")
+                            .font(.ssdidCaption)
+                            .foregroundStyle(Color.textTertiary)
+                        if credentialFormat == "sd-jwt-vc" {
+                            Text("SD-JWT")
+                                .font(.system(size: 9, weight: .semibold))
+                                .foregroundStyle(Color.ssdidAccent)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.accentDim)
+                                .cornerRadius(4)
+                        }
+                    }
 
                     ForEach(claims) { claim in
                         claimRow(claim)

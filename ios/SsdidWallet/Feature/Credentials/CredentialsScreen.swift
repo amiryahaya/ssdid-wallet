@@ -43,6 +43,15 @@ struct CredentialsScreen: View {
                                         Text(vc.type.last ?? "Credential")
                                             .font(.ssdidCaption)
                                             .foregroundStyle(Color.textTertiary)
+                                        if vc.type.contains("SdJwtVerifiableCredential") {
+                                            Text("SD-JWT")
+                                                .font(.system(size: 9, weight: .semibold))
+                                                .foregroundStyle(Color.ssdidAccent)
+                                                .padding(.horizontal, 6)
+                                                .padding(.vertical, 2)
+                                                .background(Color.accentDim)
+                                                .cornerRadius(4)
+                                        }
                                         Spacer()
                                         Text(isExpired ? "Expired" : "Valid")
                                             .font(.system(size: 10))

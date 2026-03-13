@@ -43,6 +43,7 @@ fun ConsentScreen(
     val selectedIdentity by viewModel.selectedIdentity.collectAsState()
     val selectedClaims by viewModel.selectedClaims.collectAsState()
     val serverName by viewModel.serverName.collectAsState()
+    val credentialFormat by viewModel.credentialFormat.collectAsState()
     val context = LocalContext.current
     val activity = context as? FragmentActivity
     val scope = rememberCoroutineScope()
@@ -201,11 +202,29 @@ fun ConsentScreen(
             // Requested information section
             item {
                 Spacer(Modifier.height(4.dp))
-                Text(
-                    "REQUESTED INFORMATION",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = TextTertiary
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "REQUESTED INFORMATION",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = TextTertiary
+                    )
+                    if (credentialFormat == "sd-jwt-vc") {
+                        Spacer(Modifier.width(8.dp))
+                        Box(
+                            Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(AccentDim)
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                "SD-JWT",
+                                fontSize = 9.sp,
+                                color = Accent,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+                }
             }
 
             items(viewModel.requestedClaims) { claim ->

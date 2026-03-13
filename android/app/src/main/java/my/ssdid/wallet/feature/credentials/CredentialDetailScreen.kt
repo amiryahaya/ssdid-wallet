@@ -126,10 +126,28 @@ fun CredentialDetailScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(
-                                    vc.type.lastOrNull() ?: "Credential",
-                                    style = MaterialTheme.typography.headlineSmall
-                                )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        vc.type.lastOrNull() ?: "Credential",
+                                        style = MaterialTheme.typography.headlineSmall
+                                    )
+                                    if (vc.type.contains("SdJwtVerifiableCredential")) {
+                                        Spacer(Modifier.width(8.dp))
+                                        Box(
+                                            Modifier
+                                                .clip(RoundedCornerShape(4.dp))
+                                                .background(AccentDim)
+                                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                                        ) {
+                                            Text(
+                                                "SD-JWT VC",
+                                                fontSize = 9.sp,
+                                                color = Accent,
+                                                fontWeight = FontWeight.SemiBold
+                                            )
+                                        }
+                                    }
+                                }
                                 val isExpired = vc.expirationDate?.let {
                                     try { Instant.now().isAfter(Instant.parse(it)) } catch (_: Exception) { false }
                                 } ?: false

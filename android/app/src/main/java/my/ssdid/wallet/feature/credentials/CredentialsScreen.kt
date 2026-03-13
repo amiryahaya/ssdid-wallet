@@ -28,6 +28,7 @@ import my.ssdid.wallet.domain.vault.Vault
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.ui.text.font.FontWeight
 import my.ssdid.wallet.ui.components.truncatedDid
 import my.ssdid.wallet.ui.theme.*
 import java.time.Instant
@@ -82,7 +83,20 @@ fun CredentialsScreen(
                                 try { Instant.now().isAfter(Instant.parse(it)) } catch (_: Exception) { false }
                             } ?: false
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text(vc.type.lastOrNull() ?: "Credential", style = MaterialTheme.typography.labelSmall)
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(vc.type.lastOrNull() ?: "Credential", style = MaterialTheme.typography.labelSmall)
+                                    if (vc.type.contains("SdJwtVerifiableCredential")) {
+                                        Spacer(Modifier.width(6.dp))
+                                        Box(
+                                            Modifier
+                                                .clip(RoundedCornerShape(4.dp))
+                                                .background(AccentDim)
+                                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                                        ) {
+                                            Text("SD-JWT", fontSize = 9.sp, color = Accent, fontWeight = FontWeight.SemiBold)
+                                        }
+                                    }
+                                }
                                 Box(Modifier.clip(RoundedCornerShape(4.dp)).background(if (isExpired) DangerDim else SuccessDim).padding(horizontal = 8.dp, vertical = 2.dp)) {
                                     Text(if (isExpired) "Expired" else "Valid", fontSize = 10.sp, color = if (isExpired) Danger else Success)
                                 }
