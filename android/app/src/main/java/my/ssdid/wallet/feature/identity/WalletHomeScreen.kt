@@ -22,21 +22,33 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import my.ssdid.wallet.domain.model.Identity
+import my.ssdid.wallet.domain.notify.LocalNotificationStorage
 import my.ssdid.wallet.domain.vault.Vault
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.Icon
 import my.ssdid.wallet.ui.components.truncatedDid
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
 
 @HiltViewModel
-class WalletHomeViewModel @Inject constructor(private val vault: Vault) : ViewModel() {
+class WalletHomeViewModel @Inject constructor(
+    private val vault: Vault,
+    private val localNotificationStorage: LocalNotificationStorage
+) : ViewModel() {
     private val _identities = MutableStateFlow<List<Identity>>(emptyList())
     val identities = _identities.asStateFlow()
+
+    val unreadNotificationCount = localNotificationStorage.unreadCount
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     init { refresh() }
 
@@ -53,6 +65,7 @@ fun WalletHomeScreen(
     onCredentials: () -> Unit,
     onHistory: () -> Unit,
     onSettings: () -> Unit,
+    onNotifications: () -> Unit,
     viewModel: WalletHomeViewModel = hiltViewModel()
 ) {
     val identities by viewModel.identities.collectAsState()
@@ -73,10 +86,39 @@ fun WalletHomeScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Top
         ) {
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text("IDENTITY WALLET", style = MaterialTheme.typography.labelMedium)
                 Text("Self-Sovereign Digital ID", style = MaterialTheme.typography.headlineLarge)
             }
+            val unreadCount by viewModel.unreadNotificationCount.collectAsState()
+            // Notifications bell
+            Box {
+                IconButton(
+                    onClick = onNotifications,
+                    modifier = Modifier.semantics { contentDescription = "Notifications" }
+                ) {
+                    Icon(Icons.Default.Notifications, contentDescription = "Notifications", tint = TextSecondary)
+                }
+                if (unreadCount > 0) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .offset(x = (-4).dp, y = 4.dp)
+                            .size(18.dp)
+                            .clip(CircleShape)
+                            .background(Danger),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            if (unreadCount > 99) "99+" else unreadCount.toString(),
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = BgPrimary
+                        )
+                    }
+                }
+            }
+            // Settings gear
             IconButton(
                 onClick = onSettings,
                 modifier = Modifier.semantics { contentDescription = "Settings" }

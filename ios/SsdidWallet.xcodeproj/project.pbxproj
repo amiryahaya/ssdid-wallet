@@ -19,6 +19,7 @@
 		0A31E18B806C2ECDEB677F29 /* SsdidClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45B7A80A92BA2FB3FDED8C4A /* SsdidClient.swift */; };
 		0CB354B4BBC623849987C21E /* DeviceDtos.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51FF677B8A13ECAB3318B570 /* DeviceDtos.swift */; };
 		0D23547E7CB7C6B702F907EB /* BackupCryptoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69A3BC89A6C2482C86EE38D0 /* BackupCryptoTests.swift */; };
+		10B9ADCEE54AD12CC91B1AE7 /* LocalNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = E684AA53A7072380E40CF328 /* LocalNotification.swift */; };
 		11F1DA07A22E5689707FA23A /* ActivityRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0124DE6830FE4BC3B8391B5A /* ActivityRepository.swift */; };
 		136BD0485E3A34912E85BA64 /* DeepLinkHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF3C32F383CC9B23373C734 /* DeepLinkHandler.swift */; };
 		13B758B70FCD797CD6EE099B /* InviteAcceptScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08F034773ABB5E39DD6D2B98 /* InviteAcceptScreen.swift */; };
@@ -103,6 +104,8 @@
 		D73FFD574B9C8CD9B5DC2D01 /* SocialRecoverySetupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BD760DCC73FEDDA71E69AD7 /* SocialRecoverySetupScreen.swift */; };
 		D867F5FD0D7ABDA5C1341245 /* SsdidTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33D5B3A2CC7DC4EEBB970301 /* SsdidTheme.swift */; };
 		D989D08588436CE47AFF1FFE /* DriveLoginScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97D45ED8B8353E4957E5C39E /* DriveLoginScreen.swift */; };
+		D9B366A2C4B233473107FC54 /* LocalNotificationStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A91844C173AAC7D0A61D1B8 /* LocalNotificationStorage.swift */; };
+		DB256161FBE7580A47A9D99F /* NotificationsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A5C6CB760061598C4EC6ABC /* NotificationsScreen.swift */; };
 		DCD895780D488869F2C6E59E /* CredentialStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA9C300A9D36C503C04CB404 /* CredentialStatus.swift */; };
 		DDCE449AF52F388E93A437F4 /* Algorithm.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1F637B289271318F07012E /* Algorithm.swift */; };
 		E9CF0C727241FFCA043123FB /* ActivityStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF55A238411822B76DAF81AC /* ActivityStatus.swift */; };
@@ -146,6 +149,7 @@
 		1CEE96DC224F655B1B274BAC /* ServerApi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerApi.swift; sourceTree = "<group>"; };
 		29500872D47064A269CB5F22 /* InviteAcceptViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteAcceptViewModel.swift; sourceTree = "<group>"; };
 		2A0E96DC0F78ABBDE00C4DD0 /* BiometricAuthenticator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricAuthenticator.swift; sourceTree = "<group>"; };
+		2A5C6CB760061598C4EC6ABC /* NotificationsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsScreen.swift; sourceTree = "<group>"; };
 		2D9CD4CB36F04B52FBD2CF3E /* ms */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ms; path = ms.lproj/Localizable.strings; sourceTree = "<group>"; };
 		2DED55A3911AAD154703C7EE /* SsdidColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SsdidColors.swift; sourceTree = "<group>"; };
 		2E4D1FD9B101F063186485B2 /* SentryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentryManager.swift; sourceTree = "<group>"; };
@@ -173,6 +177,7 @@
 		542B2934B2C3279561FF9F0C /* HttpStatusListFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HttpStatusListFetcher.swift; sourceTree = "<group>"; };
 		55C2A11CCEE2B911A05B6536 /* CredentialDtos.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialDtos.swift; sourceTree = "<group>"; };
 		5A6237909046A401164E5C6F /* BackupManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupManager.swift; sourceTree = "<group>"; };
+		5A91844C173AAC7D0A61D1B8 /* LocalNotificationStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalNotificationStorage.swift; sourceTree = "<group>"; };
 		5BD760DCC73FEDDA71E69AD7 /* SocialRecoverySetupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialRecoverySetupScreen.swift; sourceTree = "<group>"; };
 		5BEA0C8F82729DADBC5F3F0E /* AppCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCoordinator.swift; sourceTree = "<group>"; };
 		60C3A0304CF888F4F7D320CF /* InviteDtos.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteDtos.swift; sourceTree = "<group>"; };
@@ -225,6 +230,7 @@
 		E1D1E30715AA99B0696F6551 /* ConsentScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsentScreen.swift; sourceTree = "<group>"; };
 		E358B3F925E46D97481CBF2D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E59859DA28D69CD47737C4E7 /* StatusListCredential.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusListCredential.swift; sourceTree = "<group>"; };
+		E684AA53A7072380E40CF328 /* LocalNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalNotification.swift; sourceTree = "<group>"; };
 		E777CBF4BA31F05818B6C2EA /* RevocationStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RevocationStatus.swift; sourceTree = "<group>"; };
 		E8CF6BA0086CD4502FB8565D /* LibOQS */ = {isa = PBXFileReference; lastKnownFileType = folder; name = LibOQS; path = Packages/LibOQS; sourceTree = SOURCE_ROOT; };
 		EDC68C254CEB3F320CBFBE7E /* SplashScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashScreen.swift; sourceTree = "<group>"; };
@@ -410,6 +416,7 @@
 				F2C23636FB7BDEFB778D124D /* History */,
 				ECB75EA55131A6C3937108BD /* Identity */,
 				B73E6928BA304F2139BACCD3 /* Invite */,
+				D3033D23312A94944AE65C4B /* Notifications */,
 				879352BD0BE91B8E91A8ADD8 /* Onboarding */,
 				2BA277F44DECA0212F4F663C /* Profile */,
 				2D94D1F0CBF5B7174B605CA2 /* Recovery */,
@@ -451,6 +458,8 @@
 		528447F63ADF7513A3154AED /* Notify */ = {
 			isa = PBXGroup;
 			children = (
+				E684AA53A7072380E40CF328 /* LocalNotification.swift */,
+				5A91844C173AAC7D0A61D1B8 /* LocalNotificationStorage.swift */,
 				F8FB97CF1C8FE5180AA42125 /* NotifyManager.swift */,
 			);
 			path = Notify;
@@ -704,6 +713,14 @@
 				40A21FD338C737BE0E74AD2F /* BackupScreen.swift */,
 			);
 			path = Backup;
+			sourceTree = "<group>";
+		};
+		D3033D23312A94944AE65C4B /* Notifications */ = {
+			isa = PBXGroup;
+			children = (
+				2A5C6CB760061598C4EC6ABC /* NotificationsScreen.swift */,
+			);
+			path = Notifications;
 			sourceTree = "<group>";
 		};
 		E68C186B66AC60800080A78F /* Keychain */ = {
@@ -962,8 +979,11 @@
 				F5EF73E8741E7E0666FF4B59 /* KeyRotationScreen.swift in Sources */,
 				B6259B9205C85DF4B4878784 /* KeychainManager.swift in Sources */,
 				5AB06F4F7528AFB2A44EDB34 /* LoadingView.swift in Sources */,
+				10B9ADCEE54AD12CC91B1AE7 /* LocalNotification.swift in Sources */,
+				D9B366A2C4B233473107FC54 /* LocalNotificationStorage.swift in Sources */,
 				169EAD5448E2582A0272D8B5 /* LocalizationManager.swift in Sources */,
 				C2E63E0CA4300F72365B03EC /* Multibase.swift in Sources */,
+				DB256161FBE7580A47A9D99F /* NotificationsScreen.swift in Sources */,
 				A1EE571EB471947545FA816D /* NotifyApi.swift in Sources */,
 				8C207CA6E26F6AF38A23E578 /* NotifyDto.swift in Sources */,
 				538034150235886711953036 /* NotifyManager.swift in Sources */,

@@ -124,6 +124,8 @@ struct RootView: View {
             SettingsScreen()
         case .txHistory:
             TxHistoryScreen()
+        case .notifications:
+            NotificationsScreen()
         case .recoverySetup(let keyId):
             RecoverySetupScreen(keyId: keyId)
         case .keyRotation(let keyId):

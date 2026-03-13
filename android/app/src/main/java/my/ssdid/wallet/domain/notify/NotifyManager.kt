@@ -31,7 +31,8 @@ import kotlin.jvm.Volatile
 class NotifyManager @Inject constructor(
     private val notifyApi: NotifyApi,
     private val storage: NotifyStorage,
-    private val dispatcher: NotifyDispatcher
+    private val dispatcher: NotifyDispatcher,
+    private val localNotificationStorage: LocalNotificationStorage
 ) {
 
     private val registrationMutex = Mutex()
@@ -62,6 +63,20 @@ class NotifyManager @Inject constructor(
 
         for (notification in pending) {
             val identityName = mailboxToName[notification.mailboxId]
+
+            // Save locally first
+            localNotificationStorage.save(
+                LocalNotification(
+                    id = notification.notificationId,
+                    mailboxId = notification.mailboxId,
+                    identityName = identityName,
+                    payload = notification.payload,
+                    priority = notification.priority,
+                    receivedAt = notification.receivedAt ?: "",
+                    isRead = false
+                )
+            )
+
             try {
                 dispatcher.dispatch(identityName, notification)
             } catch (_: Exception) {

@@ -59,6 +59,7 @@ sealed class Screen(val route: String) {
     }
     object Settings : Screen("settings")
     object TxHistory : Screen("tx_history")
+    object Notifications : Screen("notifications")
     object RecoverySetup : Screen("recovery_setup/{keyId}") {
         fun createRoute(keyId: String) = "recovery_setup/${Uri.encode(keyId)}"
     }

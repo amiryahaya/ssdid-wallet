@@ -34,6 +34,7 @@ enum Route: Hashable {
     case credentialOffer(issuerUrl: String, offerId: String)
     case settings
     case txHistory
+    case notifications
     case recoverySetup(keyId: String)
     case keyRotation(keyId: String)
     case backupExport(restoreUri: String? = nil)

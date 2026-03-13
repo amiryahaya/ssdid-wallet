@@ -15,6 +15,7 @@ final class ServiceContainer: ObservableObject {
     let revocationManager: RevocationManager
     let ssdidClient: SsdidClient
     let notifyManager: NotifyManager
+    let localNotificationStorage: LocalNotificationStorage
 
     /// Base URL for the SSDID Notify service. Override in debug builds or via configuration.
     static let notifyBaseURL: String = "https://notify.ssdid.my"
@@ -55,9 +56,13 @@ final class ServiceContainer: ObservableObject {
             pqcProvider: pqc
         )
 
+        let localNotifStorage = LocalNotificationStorage()
+        self.localNotificationStorage = localNotifStorage
+
         let notifyMgr = NotifyManager(
             api: httpClient.notifyApi(baseURL: Self.notifyBaseURL),
-            keychainManager: keychain
+            keychainManager: keychain,
+            localNotificationStorage: localNotifStorage
         )
         self.notifyManager = notifyMgr
 

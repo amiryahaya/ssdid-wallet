@@ -21,6 +21,26 @@ struct WalletHomeScreen: View {
 
                 Spacer()
 
+                // Notifications bell with badge
+                Button { router.push(.notifications) } label: {
+                    ZStack(alignment: .topTrailing) {
+                        Image(systemName: "bell")
+                            .font(.system(size: 22))
+                            .foregroundStyle(Color.textSecondary)
+                        if services.localNotificationStorage.unreadCount > 0 {
+                            Text(services.localNotificationStorage.unreadCount > 99
+                                 ? "99+"
+                                 : "\(services.localNotificationStorage.unreadCount)")
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundStyle(Color.bgPrimary)
+                                .frame(minWidth: 16, minHeight: 16)
+                                .background(Color.danger)
+                                .clipShape(Circle())
+                                .offset(x: 6, y: -6)
+                        }
+                    }
+                }
+
                 Button { router.push(.settings) } label: {
                     Image(systemName: "gearshape")
                         .font(.system(size: 22))

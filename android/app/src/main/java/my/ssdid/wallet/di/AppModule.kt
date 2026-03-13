@@ -40,6 +40,7 @@ import my.ssdid.wallet.domain.vault.KeystoreManager
 import my.ssdid.wallet.domain.settings.SettingsRepository
 import my.ssdid.wallet.platform.storage.DataStoreSettingsRepository
 import my.ssdid.wallet.domain.notify.AndroidNotifyDispatcher
+import my.ssdid.wallet.domain.notify.LocalNotificationStorage
 import my.ssdid.wallet.domain.notify.NotifyLifecycleObserver
 import my.ssdid.wallet.domain.notify.NotifyManager
 import my.ssdid.wallet.domain.notify.NotifyStorage
@@ -220,11 +221,18 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideLocalNotificationStorage(
+        @ApplicationContext context: Context
+    ): LocalNotificationStorage = LocalNotificationStorage(context)
+
+    @Provides
+    @Singleton
     fun provideNotifyManager(
         notifyApi: NotifyApi,
         storage: NotifyStorage,
-        dispatcher: AndroidNotifyDispatcher
-    ): NotifyManager = NotifyManager(notifyApi, storage, dispatcher)
+        dispatcher: AndroidNotifyDispatcher,
+        localNotificationStorage: LocalNotificationStorage
+    ): NotifyManager = NotifyManager(notifyApi, storage, dispatcher, localNotificationStorage)
 
     @Provides
     @Singleton

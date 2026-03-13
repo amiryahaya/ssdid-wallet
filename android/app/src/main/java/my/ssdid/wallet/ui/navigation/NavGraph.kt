@@ -35,6 +35,7 @@ import my.ssdid.wallet.feature.auth.DriveLoginScreen
 import my.ssdid.wallet.feature.invite.InviteAcceptScreen
 import my.ssdid.wallet.feature.scan.ScanQrScreen
 import my.ssdid.wallet.feature.settings.SettingsScreen
+import my.ssdid.wallet.feature.notifications.NotificationsScreen
 import my.ssdid.wallet.feature.transaction.TxSigningScreen
 
 @Composable
@@ -101,7 +102,8 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
                 onScanQr = { navController.navigate(Screen.ScanQr.route) },
                 onCredentials = { navController.navigate(Screen.Credentials.route) },
                 onHistory = { navController.navigate(Screen.TxHistory.route) },
-                onSettings = { navController.navigate(Screen.Settings.route) }
+                onSettings = { navController.navigate(Screen.Settings.route) },
+                onNotifications = { navController.navigate(Screen.Notifications.route) }
             )
         }
         composable(
@@ -302,6 +304,9 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
         }
         composable(Screen.TxHistory.route) {
             TxHistoryScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.Notifications.route) {
+            NotificationsScreen(onBack = { navController.popBackStack() })
         }
         composable(Screen.RecoverySetup.route) { backStackEntry ->
             backStackEntry.arguments?.getString("keyId") ?: return@composable
