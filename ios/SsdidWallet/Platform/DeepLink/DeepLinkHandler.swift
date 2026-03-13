@@ -7,6 +7,7 @@ enum DeepLinkAction: Equatable {
     case sign(serverUrl: String, sessionToken: String)
     case credentialOffer(issuerUrl: String, offerId: String)
     case login(serverUrl: String, serviceName: String?, challengeId: String?, callbackUrl: String, requestedClaims: String?)
+    case invite(serverUrl: String, token: String, callbackUrl: String)
 }
 
 /// Errors specific to deep link parsing.
@@ -115,6 +116,20 @@ final class DeepLinkHandler {
                 callbackUrl: callbackUrl,
                 requestedClaims: params["requested_claims"]
             )
+
+        case "invite":
+            guard let serverUrl = params["server_url"] else {
+                throw DeepLinkError.missingRequiredParameter("server_url")
+            }
+            guard let token = params["token"] else {
+                throw DeepLinkError.missingRequiredParameter("token")
+            }
+            try urlValidator.validate(urlString: serverUrl)
+            let callbackUrl = params["callback_url"] ?? ""
+            if !callbackUrl.isEmpty {
+                try Self.validateCallbackUrl(callbackUrl)
+            }
+            return .invite(serverUrl: serverUrl, token: token, callbackUrl: callbackUrl)
 
         default:
             throw DeepLinkError.invalidHost(host)

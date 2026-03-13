@@ -43,6 +43,7 @@ enum Route: Hashable {
     case socialRecoveryRestore
     case deviceManagement(keyId: String)
     case deviceEnroll(keyId: String, mode: String)
+    case inviteAccept(serverUrl: String, token: String, callbackUrl: String)
 }
 
 // MARK: - AppRouter

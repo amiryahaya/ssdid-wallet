@@ -272,6 +272,13 @@ final class SsdidClient: @unchecked Sendable {
         return response
     }
 
+    // MARK: - Verification
+
+    /// Verifies a multibase-encoded challenge response against a DID's public key.
+    func verifyChallengeResponse(did: String, keyId: String, challenge: String, signedChallenge: String) async throws -> Bool {
+        return try await verifier.verifyChallengeResponse(did: did, keyId: keyId, challenge: challenge, signedChallenge: signedChallenge)
+    }
+
     // MARK: - Helpers
 
     /// Converts an Encodable value to a [String: Any] dictionary.

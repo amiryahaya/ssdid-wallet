@@ -60,6 +60,8 @@ struct RootView: View {
             router.push(.txSigning(serverUrl: serverUrl, sessionToken: sessionToken))
         case .credentialOffer(let issuerUrl, let offerId):
             router.push(.credentialOffer(issuerUrl: issuerUrl, offerId: offerId))
+        case .invite(let serverUrl, let token, let callbackUrl):
+            router.push(.inviteAccept(serverUrl: serverUrl, token: token, callbackUrl: callbackUrl))
         }
     }
 
@@ -122,6 +124,8 @@ struct RootView: View {
             DeviceManagementScreen(keyId: keyId)
         case .deviceEnroll(let keyId, let mode):
             DeviceEnrollScreen(keyId: keyId, mode: mode)
+        case .inviteAccept(let serverUrl, let token, let callbackUrl):
+            InviteAcceptScreen(serverUrl: serverUrl, token: token, callbackUrl: callbackUrl)
         }
     }
 }

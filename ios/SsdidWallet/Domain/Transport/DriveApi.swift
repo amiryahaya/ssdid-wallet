@@ -38,4 +38,21 @@ final class DriveApi {
             responseType: DriveAuthenticateResponse.self
         )
     }
+
+    // MARK: - Invitations
+
+    func getInvitationByToken(_ token: String) async throws -> InvitationDetailsResponse {
+        return try await client.get(
+            url: "\(baseURL)/api/invitations/token/\(token)",
+            responseType: InvitationDetailsResponse.self
+        )
+    }
+
+    func acceptWithWallet(token: String, request: AcceptWithWalletRequest) async throws -> AcceptWithWalletResponse {
+        return try await client.post(
+            url: "\(baseURL)/api/invitations/token/\(token)/accept-with-wallet",
+            body: request,
+            responseType: AcceptWithWalletResponse.self
+        )
+    }
 }
