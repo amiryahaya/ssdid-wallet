@@ -129,22 +129,28 @@ class InviteAcceptViewModel @Inject constructor(
                     )
                 )
 
-                // Verify server signature
-                if (response.serverDid.isNotBlank() && response.serverSignature.isNotBlank()) {
-                    val verified = verifier.verifyChallengeResponse(
-                        response.serverDid,
-                        response.serverKeyId,
-                        response.sessionToken,
-                        response.serverSignature
-                    ).getOrThrow()
+                // Verify server signature — blank fields = fatal (possible MITM)
+                if (response.serverDid.isBlank() || response.serverSignature.isBlank()) {
+                    _state.value = _state.value.copy(
+                        isAccepting = false,
+                        error = "Server did not provide identity proof. Please try again."
+                    )
+                    return@launch
+                }
 
-                    if (!verified) {
-                        _state.value = _state.value.copy(
-                            isAccepting = false,
-                            error = "Server identity verification failed. Please try again."
-                        )
-                        return@launch
-                    }
+                val verified = verifier.verifyChallengeResponse(
+                    response.serverDid,
+                    response.serverKeyId,
+                    response.sessionToken,
+                    response.serverSignature
+                ).getOrThrow()
+
+                if (!verified) {
+                    _state.value = _state.value.copy(
+                        isAccepting = false,
+                        error = "Server identity verification failed. Please try again."
+                    )
+                    return@launch
                 }
 
                 val callbackUri = if (callbackUrl.isNotBlank()) {
