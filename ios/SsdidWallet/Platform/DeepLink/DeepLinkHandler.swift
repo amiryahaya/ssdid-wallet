@@ -155,9 +155,12 @@ final class DeepLinkHandler {
         if dangerousSchemes.contains(scheme) {
             throw DeepLinkError.unsafeURL("Dangerous scheme in callback URL: \(scheme)")
         }
+        if scheme == "http" {
+            throw DeepLinkError.unsafeURL("Plain HTTP not allowed in callback URL: \(urlString)")
+        }
         // HTTPS must have a host
         if scheme == "https" {
-            guard url.host?.isEmpty == false else {
+            guard let host = url.host, !host.isEmpty else {
                 throw DeepLinkError.unsafeURL("HTTPS callback URL must have a host")
             }
         }

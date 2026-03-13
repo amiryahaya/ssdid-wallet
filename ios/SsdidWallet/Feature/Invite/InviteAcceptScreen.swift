@@ -19,6 +19,8 @@ struct InviteAcceptScreen: View {
     @State private var isSuccess = false
     @State private var sessionToken: String?
     @State private var errorMessage: String?
+    @State private var acceptTask: Task<Void, Never>?
+    @State private var hasReturned = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -263,6 +265,7 @@ struct InviteAcceptScreen: View {
         .task {
             await loadData()
         }
+        .onDisappear { acceptTask?.cancel() }
     }
 
     // MARK: - Actions
@@ -287,7 +290,10 @@ struct InviteAcceptScreen: View {
             let claims = await profileManager.getProfileClaims()
             walletEmail = claims["email"] ?? ""
 
-            emailMatch = !walletEmail.isEmpty && walletEmail.lowercased() == inv.email.lowercased()
+            let normalizeEmail: (String) -> String = {
+                $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            }
+            emailMatch = !walletEmail.isEmpty && normalizeEmail(walletEmail) == normalizeEmail(inv.email)
 
             if !emailMatch && !walletEmail.isEmpty {
                 errorMessage = "Email mismatch: invitation is for \(inv.email) but your wallet email is \(walletEmail)"
@@ -312,7 +318,9 @@ struct InviteAcceptScreen: View {
         isAccepting = true
         errorMessage = nil
 
-        Task {
+        acceptTask?.cancel()
+        acceptTask = Task {
+            defer { isAccepting = false }
             do {
                 let driveApi = services.httpClient.driveApi(baseURL: serverUrl)
 
@@ -323,7 +331,6 @@ struct InviteAcceptScreen: View {
                 }
                 guard let vc = credential else {
                     errorMessage = "Failed to obtain credential"
-                    isAccepting = false
                     return
                 }
 
@@ -336,7 +343,6 @@ struct InviteAcceptScreen: View {
                 // Verify server signature -- blank fields = fatal
                 guard !response.serverDid.isEmpty, !response.serverSignature.isEmpty else {
                     errorMessage = "Server did not provide identity proof. Please try again."
-                    isAccepting = false
                     return
                 }
 
@@ -349,13 +355,11 @@ struct InviteAcceptScreen: View {
 
                 guard verified else {
                     errorMessage = "Server identity verification failed. Please try again."
-                    isAccepting = false
                     return
                 }
 
                 sessionToken = response.sessionToken
                 isSuccess = true
-                isAccepting = false
 
                 // Auto-return after short delay
                 if !callbackUrl.isEmpty {
@@ -363,8 +367,9 @@ struct InviteAcceptScreen: View {
                     returnToDrive(sessionToken: response.sessionToken)
                 }
             } catch {
-                isAccepting = false
-                errorMessage = error.localizedDescription
+                if !Task.isCancelled {
+                    errorMessage = error.localizedDescription
+                }
             }
         }
     }
@@ -387,6 +392,9 @@ struct InviteAcceptScreen: View {
     }
 
     private func returnToDrive(sessionToken: String) {
+        guard !hasReturned else { return }
+        hasReturned = true
+
         if callbackUrl.isEmpty {
             router.pop()
             return

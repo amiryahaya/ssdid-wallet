@@ -174,11 +174,21 @@ struct ScanQrScreen: View {
                 serverUrl: serverUrl,
                 serverDid: serverDid ?? ""
             ))
-        case .authenticate(let serverUrl, let callbackUrl, _, _, _):
-            router.push(.authFlow(
-                serverUrl: serverUrl,
-                callbackUrl: callbackUrl
-            ))
+        case .authenticate(let serverUrl, let callbackUrl, let sessionId, let requestedClaims, let acceptedAlgorithms):
+            if sessionId != nil || requestedClaims != nil {
+                router.push(.consent(
+                    serverUrl: serverUrl,
+                    callbackUrl: callbackUrl,
+                    sessionId: sessionId ?? "",
+                    requestedClaims: requestedClaims ?? "",
+                    acceptedAlgorithms: acceptedAlgorithms
+                ))
+            } else {
+                router.push(.authFlow(
+                    serverUrl: serverUrl,
+                    callbackUrl: callbackUrl
+                ))
+            }
         case .sign(let serverUrl, let sessionToken):
             router.push(.txSigning(
                 serverUrl: serverUrl,

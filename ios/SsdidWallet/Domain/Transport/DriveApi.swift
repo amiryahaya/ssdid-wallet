@@ -42,15 +42,21 @@ final class DriveApi {
     // MARK: - Invitations
 
     func getInvitationByToken(_ token: String) async throws -> InvitationDetailsResponse {
+        guard let encodedToken = token.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else {
+            throw HttpError.invalidURL("Invalid token")
+        }
         return try await client.get(
-            url: "\(baseURL)/api/invitations/token/\(token)",
+            url: "\(baseURL)/api/invitations/token/\(encodedToken)",
             responseType: InvitationDetailsResponse.self
         )
     }
 
     func acceptWithWallet(token: String, request: AcceptWithWalletRequest) async throws -> AcceptWithWalletResponse {
+        guard let encodedToken = token.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else {
+            throw HttpError.invalidURL("Invalid token")
+        }
         return try await client.post(
-            url: "\(baseURL)/api/invitations/token/\(token)/accept-with-wallet",
+            url: "\(baseURL)/api/invitations/token/\(encodedToken)/accept-with-wallet",
             body: request,
             responseType: AcceptWithWalletResponse.self
         )

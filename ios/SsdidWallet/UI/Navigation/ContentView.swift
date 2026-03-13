@@ -30,6 +30,9 @@ struct RootView: View {
 
     /// Routes an incoming deep link URL to the appropriate screen.
     private func routeDeepLink(_ url: URL) {
+        // Don't process deep links before onboarding is complete
+        guard coordinator.isOnboarded else { return }
+
         let handler = DeepLinkHandler()
         guard let action = try? handler.parse(url: url) else { return }
 
