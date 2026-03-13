@@ -88,6 +88,7 @@
 		B895B4851B52436AC5F68CD1 /* SsdidButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9454974AB83D4F413F66322 /* SsdidButton.swift */; };
 		B8998384A47A46D68B2707B5 /* Verifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD151205BA7415914053A8C /* Verifier.swift */; };
 		B9F3D0C40C77B3A63081C911 /* StatusListCredential.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59859DA28D69CD47737C4E7 /* StatusListCredential.swift */; };
+		BA54946646164BF16AD372C9 /* InviteAcceptViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29500872D47064A269CB5F22 /* InviteAcceptViewModel.swift */; };
 		BCC96F2F204004DB800CAA5A /* SsdidColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DED55A3911AAD154703C7EE /* SsdidColors.swift */; };
 		BE4746F7C6223EEE85294BE6 /* AnyCodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9886C4604621EFB1CB87865D /* AnyCodable.swift */; };
 		BFCC1367341A06CA79629A24 /* OnboardingScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77C306D244AD5CD428551152 /* OnboardingScreen.swift */; };
@@ -140,6 +141,7 @@
 		1C2C982E606F4F5D11B8589F /* SsdidWalletTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = SsdidWalletTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1C5771B6AC99929644562CF2 /* InstitutionalSetupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstitutionalSetupScreen.swift; sourceTree = "<group>"; };
 		1CEE96DC224F655B1B274BAC /* ServerApi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerApi.swift; sourceTree = "<group>"; };
+		29500872D47064A269CB5F22 /* InviteAcceptViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteAcceptViewModel.swift; sourceTree = "<group>"; };
 		2A0E96DC0F78ABBDE00C4DD0 /* BiometricAuthenticator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricAuthenticator.swift; sourceTree = "<group>"; };
 		2D9CD4CB36F04B52FBD2CF3E /* ms */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ms; path = ms.lproj/Localizable.strings; sourceTree = "<group>"; };
 		2DED55A3911AAD154703C7EE /* SsdidColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SsdidColors.swift; sourceTree = "<group>"; };
@@ -651,6 +653,7 @@
 			isa = PBXGroup;
 			children = (
 				08F034773ABB5E39DD6D2B98 /* InviteAcceptScreen.swift */,
+				29500872D47064A269CB5F22 /* InviteAcceptViewModel.swift */,
 			);
 			path = Invite;
 			sourceTree = "<group>";
@@ -935,6 +938,7 @@
 				53D109D974591EA50D286C56 /* IdentityDetailScreen.swift in Sources */,
 				79656CCF74D5A25CB61B6272 /* InstitutionalSetupScreen.swift in Sources */,
 				13B758B70FCD797CD6EE099B /* InviteAcceptScreen.swift in Sources */,
+				BA54946646164BF16AD372C9 /* InviteAcceptViewModel.swift in Sources */,
 				74EE9B21FBCA1154E153B470 /* InviteDtos.swift in Sources */,
 				F5EF73E8741E7E0666FF4B59 /* KeyRotationScreen.swift in Sources */,
 				B6259B9205C85DF4B4878784 /* KeychainManager.swift in Sources */,
