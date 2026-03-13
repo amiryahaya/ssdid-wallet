@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
@@ -57,10 +58,10 @@ class InviteAcceptViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 if (!UrlValidator.isValidServerUrl(serverUrl)) {
-                    _state.value = _state.value.copy(
+                    _state.update { it.copy(
                         isLoading = false,
                         error = "Invalid server URL"
-                    )
+                    ) }
                     return@launch
                 }
 
@@ -73,7 +74,7 @@ class InviteAcceptViewModel @Inject constructor(
                 val emailMatch = walletEmail.isNotBlank() &&
                     walletEmail.equals(invitation.email, ignoreCase = true)
 
-                _state.value = _state.value.copy(
+                _state.update { it.copy(
                     isLoading = false,
                     invitation = invitation,
                     emailMatch = emailMatch,
@@ -83,7 +84,7 @@ class InviteAcceptViewModel @Inject constructor(
                     else if (walletEmail.isBlank())
                         "No email configured in wallet profile"
                     else null
-                )
+                ) }
             } catch (e: Exception) {
                 io.sentry.Sentry.captureException(e)
                 val message = when {
@@ -91,10 +92,10 @@ class InviteAcceptViewModel @Inject constructor(
                         "Invitation not found or expired"
                     else -> e.message ?: "Failed to load invitation"
                 }
-                _state.value = _state.value.copy(
+                _state.update { it.copy(
                     isLoading = false,
                     error = message
-                )
+                ) }
             }
         }
     }
@@ -103,14 +104,14 @@ class InviteAcceptViewModel @Inject constructor(
         if (_state.value.isAccepting) return
 
         viewModelScope.launch {
-            _state.value = _state.value.copy(isAccepting = true, error = null)
+            _state.update { it.copy(isAccepting = true, error = null) }
             try {
                 val credentials = vault.listCredentials()
                 if (credentials.isEmpty()) {
-                    _state.value = _state.value.copy(
+                    _state.update { it.copy(
                         isAccepting = false,
                         error = "No credentials found in wallet. Please register with a service first."
-                    )
+                    ) }
                     return@launch
                 }
 
@@ -131,10 +132,10 @@ class InviteAcceptViewModel @Inject constructor(
 
                 // Verify server signature — blank fields = fatal (possible MITM)
                 if (response.serverDid.isBlank() || response.serverSignature.isBlank()) {
-                    _state.value = _state.value.copy(
+                    _state.update { it.copy(
                         isAccepting = false,
                         error = "Server did not provide identity proof. Please try again."
-                    )
+                    ) }
                     return@launch
                 }
 
@@ -146,10 +147,10 @@ class InviteAcceptViewModel @Inject constructor(
                 ).getOrThrow()
 
                 if (!verified) {
-                    _state.value = _state.value.copy(
+                    _state.update { it.copy(
                         isAccepting = false,
                         error = "Server identity verification failed. Please try again."
-                    )
+                    ) }
                     return@launch
                 }
 
@@ -157,18 +158,18 @@ class InviteAcceptViewModel @Inject constructor(
                     Uri.parse("$callbackUrl?session_token=${Uri.encode(response.sessionToken)}&status=success")
                 } else null
 
-                _state.value = _state.value.copy(
+                _state.update { it.copy(
                     isAccepting = false,
                     acceptSuccess = true,
                     sessionToken = response.sessionToken,
                     callbackUri = callbackUri
-                )
+                ) }
             } catch (e: Exception) {
                 io.sentry.Sentry.captureException(e)
-                _state.value = _state.value.copy(
+                _state.update { it.copy(
                     isAccepting = false,
                     error = e.message ?: "Failed to accept invitation"
-                )
+                ) }
             }
         }
     }
@@ -177,7 +178,7 @@ class InviteAcceptViewModel @Inject constructor(
         val callbackUri = if (callbackUrl.isNotBlank()) {
             Uri.parse("$callbackUrl?status=cancelled")
         } else null
-        _state.value = _state.value.copy(callbackUri = callbackUri)
+        _state.update { it.copy(callbackUri = callbackUri) }
     }
 
     fun buildErrorCallbackUri(message: String): Uri? {
