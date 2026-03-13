@@ -153,6 +153,8 @@
 		DD22BB09A1B2C3D4E5F60009 /* VpTokenBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA09A1B2C3D4E5F60009 /* VpTokenBuilder.swift */; };
 		DD22BB10A1B2C3D4E5F60010 /* PresentationSubmission.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA10A1B2C3D4E5F60010 /* PresentationSubmission.swift */; };
 		DD22BB11A1B2C3D4E5F60011 /* VpTokenBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA11A1B2C3D4E5F60011 /* VpTokenBuilderTests.swift */; };
+		DD22BB12A1B2C3D4E5F60012 /* OpenId4VpTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA12A1B2C3D4E5F60012 /* OpenId4VpTransport.swift */; };
+		DD22BB13A1B2C3D4E5F60013 /* OpenId4VpTransportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA13A1B2C3D4E5F60013 /* OpenId4VpTransportTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -178,6 +180,8 @@
 		DD22AA09A1B2C3D4E5F60009 /* VpTokenBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VpTokenBuilder.swift; sourceTree = "<group>"; };
 		DD22AA10A1B2C3D4E5F60010 /* PresentationSubmission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationSubmission.swift; sourceTree = "<group>"; };
 		DD22AA11A1B2C3D4E5F60011 /* VpTokenBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VpTokenBuilderTests.swift; sourceTree = "<group>"; };
+		DD22AA12A1B2C3D4E5F60012 /* OpenId4VpTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenId4VpTransport.swift; sourceTree = "<group>"; };
+		DD22AA13A1B2C3D4E5F60013 /* OpenId4VpTransportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenId4VpTransportTests.swift; sourceTree = "<group>"; };
 		0124DE6830FE4BC3B8391B5A /* ActivityRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityRepository.swift; sourceTree = "<group>"; };
 		0164BDCEADFC8DFED9F7654A /* RecoveryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryManager.swift; sourceTree = "<group>"; };
 		01BB201CB4CDEB28460D9CD1 /* RecoverySetupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoverySetupScreen.swift; sourceTree = "<group>"; };
@@ -399,6 +403,7 @@
 				DD22AA07A1B2C3D4E5F60007 /* PresentationDefinitionMatcherTests.swift */,
 				DD22AA08A1B2C3D4E5F60008 /* DcqlMatcherTests.swift */,
 				DD22AA11A1B2C3D4E5F60011 /* VpTokenBuilderTests.swift */,
+				DD22AA13A1B2C3D4E5F60013 /* OpenId4VpTransportTests.swift */,
 				31F41C58074608E9C2F2FD80 /* SsdidWalletTests.swift */,
 			);
 			path = SsdidWalletTests;
@@ -676,6 +681,7 @@
 				DD22AA06A1B2C3D4E5F60006 /* DcqlMatcher.swift */,
 				DD22AA10A1B2C3D4E5F60010 /* PresentationSubmission.swift */,
 				DD22AA09A1B2C3D4E5F60009 /* VpTokenBuilder.swift */,
+				DD22AA12A1B2C3D4E5F60012 /* OpenId4VpTransport.swift */,
 			);
 			path = Oid4vp;
 			sourceTree = "<group>";
@@ -1065,6 +1071,7 @@
 				DD22BB07A1B2C3D4E5F60007 /* PresentationDefinitionMatcherTests.swift in Sources */,
 				DD22BB08A1B2C3D4E5F60008 /* DcqlMatcherTests.swift in Sources */,
 				DD22BB11A1B2C3D4E5F60011 /* VpTokenBuilderTests.swift in Sources */,
+				DD22BB13A1B2C3D4E5F60013 /* OpenId4VpTransportTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1180,6 +1187,7 @@
 				DD22BB06A1B2C3D4E5F60006 /* DcqlMatcher.swift in Sources */,
 				DD22BB10A1B2C3D4E5F60010 /* PresentationSubmission.swift in Sources */,
 				DD22BB09A1B2C3D4E5F60009 /* VpTokenBuilder.swift in Sources */,
+				DD22BB12A1B2C3D4E5F60012 /* OpenId4VpTransport.swift in Sources */,
 				15E3A62AF84972F98854E0E8 /* DidJwkResolver.swift in Sources */,
 				826FAEF3D90263B6667A94C6 /* DidKeyResolver.swift in Sources */,
 				58A72093608F2F3985946F35 /* DidResolutionError.swift in Sources */,

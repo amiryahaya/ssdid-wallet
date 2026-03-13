@@ -11,6 +11,11 @@ enum OpenId4VpError: Error, LocalizedError {
     case invalidClientId(String)
     case ambiguousQuery
     case noQuery
+    case invalidRequestUri(String)
+    case invalidResponseUri(String)
+    case invalidRequestObject
+    case httpError(Int)
+    case emptyResponse
 
     var errorDescription: String? {
         switch self {
@@ -34,6 +39,16 @@ enum OpenId4VpError: Error, LocalizedError {
             return "Request is ambiguous: both presentation_definition and dcql_query present"
         case .noQuery:
             return "No query in authorization request"
+        case .invalidRequestUri(let v):
+            return "Invalid request_uri: \(v)"
+        case .invalidResponseUri(let v):
+            return "Invalid response_uri: \(v)"
+        case .invalidRequestObject:
+            return "Invalid request object JSON"
+        case .httpError(let code):
+            return "HTTP error: \(code)"
+        case .emptyResponse:
+            return "Empty response from server"
         }
     }
 }
