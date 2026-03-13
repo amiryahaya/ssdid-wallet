@@ -5,13 +5,13 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import my.ssdid.wallet.domain.crypto.CryptoProvider
 import my.ssdid.wallet.domain.crypto.Multibase
+import my.ssdid.wallet.domain.did.DidResolver
 import my.ssdid.wallet.domain.model.*
-import my.ssdid.wallet.domain.transport.RegistryApi
 import my.ssdid.wallet.domain.vault.VaultImpl
 import java.time.Instant
 
 class VerifierImpl(
-    private val registryApi: RegistryApi,
+    private val didResolver: DidResolver,
     private val classicalProvider: CryptoProvider,
     private val pqcProvider: CryptoProvider
 ) : Verifier {
@@ -22,8 +22,8 @@ class VerifierImpl(
         explicitNulls = false
     }
 
-    override suspend fun resolveDid(did: String): Result<DidDocument> = runCatching {
-        registryApi.resolveDid(did)
+    override suspend fun resolveDid(did: String): Result<DidDocument> {
+        return didResolver.resolve(did)
     }
 
     override suspend fun verifySignature(did: String, keyId: String, signature: ByteArray, data: ByteArray): Result<Boolean> = runCatching {

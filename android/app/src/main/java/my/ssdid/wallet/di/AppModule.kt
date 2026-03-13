@@ -31,6 +31,11 @@ import kotlinx.serialization.json.Json
 import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.domain.vault.VaultImpl
 import my.ssdid.wallet.domain.vault.VaultStorage
+import my.ssdid.wallet.domain.did.DidJwkResolver
+import my.ssdid.wallet.domain.did.DidKeyResolver
+import my.ssdid.wallet.domain.did.DidResolver
+import my.ssdid.wallet.domain.did.MultiMethodResolver
+import my.ssdid.wallet.domain.did.SsdidRegistryResolver
 import my.ssdid.wallet.domain.verifier.Verifier
 import my.ssdid.wallet.domain.verifier.VerifierImpl
 import my.ssdid.wallet.platform.biometric.BiometricAuthenticator
@@ -109,11 +114,18 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideDidResolver(httpClient: SsdidHttpClient): DidResolver {
+        val ssdidResolver = SsdidRegistryResolver(httpClient.registry)
+        return MultiMethodResolver(ssdidResolver, DidKeyResolver(), DidJwkResolver())
+    }
+
+    @Provides
+    @Singleton
     fun provideVerifier(
-        httpClient: SsdidHttpClient,
+        didResolver: DidResolver,
         @Named("classical") classical: CryptoProvider,
         @Named("pqc") pqc: CryptoProvider
-    ): Verifier = VerifierImpl(httpClient.registry, classical, pqc)
+    ): Verifier = VerifierImpl(didResolver, classical, pqc)
 
     @Provides
     @Singleton
