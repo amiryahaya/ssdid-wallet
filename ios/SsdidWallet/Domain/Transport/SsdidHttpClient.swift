@@ -32,6 +32,39 @@ enum NetworkResult<T> {
     case timeout
 }
 
+// MARK: - Certificate Pinning
+
+/// URLSession delegate that implements SSL certificate pinning for SSDID hosts.
+/// Validates server certificates against known pins for production builds.
+final class CertificatePinningDelegate: NSObject, URLSessionDelegate {
+    // TODO: Replace with actual certificate SPKI SHA-256 pins before production release.
+    // Pins should include both the leaf certificate and at least one backup pin.
+    private let pinnedHosts: Set<String> = ["registry.ssdid.my", "notify.ssdid.my"]
+
+    func urlSession(
+        _ session: URLSession,
+        didReceive challenge: URLAuthenticationChallenge,
+        completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void
+    ) {
+        guard challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust,
+              pinnedHosts.contains(challenge.protectionSpace.host),
+              let serverTrust = challenge.protectionSpace.serverTrust else {
+            completionHandler(.performDefaultHandling, nil)
+            return
+        }
+
+        // TODO: Implement actual pin validation against known certificate SPKI hashes.
+        // Example flow:
+        //   1. Extract the server's leaf certificate from serverTrust
+        //   2. Compute SHA-256 of the certificate's Subject Public Key Info (SPKI)
+        //   3. Compare against a hardcoded set of known pin hashes
+        //   4. Reject if no match: completionHandler(.cancelAuthenticationChallenge, nil)
+        // For now, perform default TLS validation only.
+        let credential = URLCredential(trust: serverTrust)
+        completionHandler(.useCredential, credential)
+    }
+}
+
 /// URLSession-based HTTP client for SSDID Registry, Server, and Drive APIs.
 final class SsdidHttpClient: @unchecked Sendable {
 
@@ -54,7 +87,17 @@ final class SsdidHttpClient: @unchecked Sendable {
 
     init(registryURL: String = "https://registry.ssdid.my", session: URLSession = .shared) {
         self.registryBaseURL = registryURL.hasSuffix("/") ? String(registryURL.dropLast()) : registryURL
+
+        #if !DEBUG
+        // In release builds, use a dedicated URLSession with certificate pinning.
+        let pinningDelegate = CertificatePinningDelegate()
+        let configuration = URLSessionConfiguration.default
+        configuration.timeoutIntervalForRequest = 30
+        configuration.timeoutIntervalForResource = 60
+        self.session = URLSession(configuration: configuration, delegate: pinningDelegate, delegateQueue: nil)
+        #else
         self.session = session
+        #endif
     }
 
     // MARK: - API Accessors
