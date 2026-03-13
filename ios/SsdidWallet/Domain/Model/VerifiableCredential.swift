@@ -18,7 +18,7 @@ struct VerifiableCredential: Codable, Identifiable, @unchecked Sendable {
     }
 
     init(
-        context: [String] = ["https://www.w3.org/2018/credentials/v1"],
+        context: [String] = ["https://www.w3.org/ns/credentials/v2"],
         id: String,
         type: [String],
         issuer: String,
