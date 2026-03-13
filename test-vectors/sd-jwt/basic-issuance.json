@@ -1,0 +1,24 @@
+{
+  "description": "Issue SD-JWT VC with 3 claims, 2 disclosable",
+  "input": {
+    "issuer": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
+    "subject": "did:key:z6MkjchhfUsD6mmvni8mCdXHw216Xrm9bQe2mBH1P5RDjVJG",
+    "type": ["VerifiableCredential", "VerifiedEmployee"],
+    "claims": {
+      "name": "Ahmad bin Ali",
+      "employeeId": "EMP-1234",
+      "department": "Engineering"
+    },
+    "disclosable": ["name", "department"],
+    "iat": 1719792000,
+    "exp": 1751328000
+  },
+  "expected": {
+    "format": "sd-jwt-vc",
+    "disclosure_count": 2,
+    "always_visible_claims": ["employeeId"],
+    "sd_alg": "sha-256",
+    "typ": "vc+sd-jwt",
+    "has_cnf": true
+  }
+}
