@@ -1,0 +1,30 @@
+{
+  "description": "Invalid authorization requests",
+  "vectors": [
+    {
+      "description": "Missing response_type",
+      "uri": "openid4vp://?client_id=https://v.example.com&nonce=abc&response_mode=direct_post&response_uri=https://v.example.com/r",
+      "expected_error": "missing_response_type"
+    },
+    {
+      "description": "Missing nonce",
+      "uri": "openid4vp://?response_type=vp_token&client_id=https://v.example.com&response_mode=direct_post&response_uri=https://v.example.com/r",
+      "expected_error": "missing_nonce"
+    },
+    {
+      "description": "Missing client_id",
+      "uri": "openid4vp://?response_type=vp_token&nonce=abc&response_mode=direct_post&response_uri=https://v.example.com/r",
+      "expected_error": "missing_client_id"
+    },
+    {
+      "description": "Non-HTTPS response_uri",
+      "uri": "openid4vp://?response_type=vp_token&client_id=https://v.example.com&nonce=abc&response_mode=direct_post&response_uri=http://v.example.com/r",
+      "expected_error": "invalid_response_uri"
+    },
+    {
+      "description": "Both presentation_definition and dcql_query present",
+      "uri": "openid4vp://?response_type=vp_token&client_id=https://v.example.com&nonce=abc&response_mode=direct_post&response_uri=https://v.example.com/r&presentation_definition=%7B%7D&dcql_query=%7B%7D",
+      "expected_error": "ambiguous_query"
+    }
+  ]
+}

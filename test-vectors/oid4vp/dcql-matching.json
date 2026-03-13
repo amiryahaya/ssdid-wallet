@@ -1,0 +1,55 @@
+{
+  "description": "DCQL credential matching scenarios",
+  "vectors": [
+    {
+      "description": "Single credential match with optional claim",
+      "dcql_query": {
+        "credentials": [{
+          "id": "emp-cred",
+          "format": "vc+sd-jwt",
+          "meta": { "vct_values": ["VerifiedEmployee"] },
+          "claims": [
+            { "path": ["name"] },
+            { "path": ["department"], "optional": true }
+          ]
+        }]
+      },
+      "stored_credentials": [
+        {
+          "type": "sd-jwt-vc",
+          "vct": "VerifiedEmployee",
+          "claims": { "name": "Ahmad", "department": "Engineering" },
+          "disclosable_claims": ["name", "department"]
+        }
+      ],
+      "expected": {
+        "matched": true,
+        "matched_credential_index": 0,
+        "required_claims": ["name"],
+        "optional_claims": ["department"]
+      }
+    },
+    {
+      "description": "No match — required claim not available",
+      "dcql_query": {
+        "credentials": [{
+          "id": "id-cred",
+          "format": "vc+sd-jwt",
+          "meta": { "vct_values": ["VerifiedEmployee"] },
+          "claims": [
+            { "path": ["national_id"] }
+          ]
+        }]
+      },
+      "stored_credentials": [
+        {
+          "type": "sd-jwt-vc",
+          "vct": "VerifiedEmployee",
+          "claims": { "name": "Ahmad" },
+          "disclosable_claims": ["name"]
+        }
+      ],
+      "expected": { "matched": false }
+    }
+  ]
+}
