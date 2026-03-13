@@ -142,6 +142,10 @@
 		AA11BB12C1D2E3F4A5B60012 /* MultiMethodResolverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC11DD12C1D2E3F4A5B60012 /* MultiMethodResolverTests.swift */; };
 		AA11BB13C1D2E3F4A5B60013 /* MulticodecTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC11DD13C1D2E3F4A5B60013 /* MulticodecTests.swift */; };
 		AA11BB14C1D2E3F4A5B60014 /* StoredSdJwtVcTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC11DD14C1D2E3F4A5B60014 /* StoredSdJwtVcTests.swift */; };
+		DD22BB01A1B2C3D4E5F60001 /* AuthorizationRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA01A1B2C3D4E5F60001 /* AuthorizationRequest.swift */; };
+		DD22BB02A1B2C3D4E5F60002 /* CredentialQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA02A1B2C3D4E5F60002 /* CredentialQuery.swift */; };
+		DD22BB03A1B2C3D4E5F60003 /* OpenId4VpError.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA03A1B2C3D4E5F60003 /* OpenId4VpError.swift */; };
+		DD22BB04A1B2C3D4E5F60004 /* AuthorizationRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA04A1B2C3D4E5F60004 /* AuthorizationRequestTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -156,6 +160,10 @@
 
 /* Begin PBXFileReference section */
 		00CDDDC89BA9C750FA2E2019 /* SettingsRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRepository.swift; sourceTree = "<group>"; };
+		DD22AA01A1B2C3D4E5F60001 /* AuthorizationRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorizationRequest.swift; sourceTree = "<group>"; };
+		DD22AA02A1B2C3D4E5F60002 /* CredentialQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialQuery.swift; sourceTree = "<group>"; };
+		DD22AA03A1B2C3D4E5F60003 /* OpenId4VpError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenId4VpError.swift; sourceTree = "<group>"; };
+		DD22AA04A1B2C3D4E5F60004 /* AuthorizationRequestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorizationRequestTests.swift; sourceTree = "<group>"; };
 		0124DE6830FE4BC3B8391B5A /* ActivityRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityRepository.swift; sourceTree = "<group>"; };
 		0164BDCEADFC8DFED9F7654A /* RecoveryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryManager.swift; sourceTree = "<group>"; };
 		01BB201CB4CDEB28460D9CD1 /* RecoverySetupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoverySetupScreen.swift; sourceTree = "<group>"; };
@@ -361,6 +369,7 @@
 		1DAEDF0F34C61B531009AAB8 /* SsdidWalletTests */ = {
 			isa = PBXGroup;
 			children = (
+				DD22AA04A1B2C3D4E5F60004 /* AuthorizationRequestTests.swift */,
 				69A3BC89A6C2482C86EE38D0 /* BackupCryptoTests.swift */,
 				796E2847CEC9A652C226FEA4 /* DidJwkResolverTests.swift */,
 				74B63E4AEB87C1FB7A71BA17 /* DidKeyResolverTests.swift */,
@@ -407,6 +416,7 @@
 				CA3B73099932B673F015A859 /* History */,
 				725746F12E407511D002606B /* Model */,
 				528447F63ADF7513A3154AED /* Notify */,
+				DD22CC01A1B2C3D4E5F60001 /* Oid4vp */,
 				B80F52F06C4DE698C3F443A8 /* Profile */,
 				7467A80EA4287890F6E9A193 /* Recovery */,
 				F61097ADD203396F8E37BC02 /* Revocation */,
@@ -637,6 +647,16 @@
 				CCD151205BA7415914053A8C /* Verifier.swift */,
 			);
 			path = Verifier;
+			sourceTree = "<group>";
+		};
+		DD22CC01A1B2C3D4E5F60001 /* Oid4vp */ = {
+			isa = PBXGroup;
+			children = (
+				DD22AA01A1B2C3D4E5F60001 /* AuthorizationRequest.swift */,
+				DD22AA02A1B2C3D4E5F60002 /* CredentialQuery.swift */,
+				DD22AA03A1B2C3D4E5F60003 /* OpenId4VpError.swift */,
+			);
+			path = Oid4vp;
 			sourceTree = "<group>";
 		};
 		792BB6524E2FAD8DCEDCBADB /* Rotation */ = {
@@ -1020,6 +1040,7 @@
 				AA11BB12C1D2E3F4A5B60012 /* MultiMethodResolverTests.swift in Sources */,
 				AA11BB13C1D2E3F4A5B60013 /* MulticodecTests.swift in Sources */,
 				AA11BB14C1D2E3F4A5B60014 /* StoredSdJwtVcTests.swift in Sources */,
+				DD22BB04A1B2C3D4E5F60004 /* AuthorizationRequestTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1128,6 +1149,9 @@
 				A1B2C3D4E5F6789012345678 /* VerifiablePresentation.swift in Sources */,
 				093576AB1A8A29B95B44C00A /* VerificationMethod.swift in Sources */,
 				B8998384A47A46D68B2707B5 /* Verifier.swift in Sources */,
+				DD22BB01A1B2C3D4E5F60001 /* AuthorizationRequest.swift in Sources */,
+				DD22BB02A1B2C3D4E5F60002 /* CredentialQuery.swift in Sources */,
+				DD22BB03A1B2C3D4E5F60003 /* OpenId4VpError.swift in Sources */,
 				15E3A62AF84972F98854E0E8 /* DidJwkResolver.swift in Sources */,
 				826FAEF3D90263B6667A94C6 /* DidKeyResolver.swift in Sources */,
 				58A72093608F2F3985946F35 /* DidResolutionError.swift in Sources */,
