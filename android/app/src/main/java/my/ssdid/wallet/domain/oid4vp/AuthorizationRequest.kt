@@ -1,6 +1,9 @@
 package my.ssdid.wallet.domain.oid4vp
 
 import android.net.Uri
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 data class AuthorizationRequest(
     val clientId: String,
@@ -70,6 +73,22 @@ data class AuthorizationRequest(
                 state = state,
                 presentationDefinition = presentationDefinition,
                 dcqlQuery = dcqlQuery
+            )
+        }
+
+        fun parseJson(json: String): Result<AuthorizationRequest> = runCatching {
+            val obj = Json.parseToJsonElement(json).jsonObject
+            val clientId = obj["client_id"]?.jsonPrimitive?.content
+                ?: throw IllegalArgumentException("Missing client_id in request object")
+            AuthorizationRequest(
+                clientId = clientId,
+                responseType = obj["response_type"]?.jsonPrimitive?.content,
+                responseMode = obj["response_mode"]?.jsonPrimitive?.content,
+                responseUri = obj["response_uri"]?.jsonPrimitive?.content,
+                nonce = obj["nonce"]?.jsonPrimitive?.content,
+                state = obj["state"]?.jsonPrimitive?.content,
+                presentationDefinition = obj["presentation_definition"]?.toString(),
+                dcqlQuery = obj["dcql_query"]?.toString()
             )
         }
 
