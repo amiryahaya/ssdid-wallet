@@ -5,9 +5,9 @@ struct SdJwtVc {
     let disclosures: [Disclosure]
     let keyBindingJwt: String?
 
-    func present(selectedDisclosures: [Disclosure], kbJwt: String? = nil) -> String {
+    func present(selectedDisclosures: [Disclosure], kbJwt: String? = nil) throws -> String {
         var parts = [issuerJwt]
-        parts.append(contentsOf: selectedDisclosures.map { $0.encode() })
+        parts.append(contentsOf: try selectedDisclosures.map { try $0.encode() })
         let suffix = kbJwt ?? ""
         return parts.joined(separator: "~") + "~\(suffix)"
     }

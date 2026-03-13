@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.*
 import my.ssdid.wallet.domain.did.DidResolver
 import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.model.DidDocument
@@ -43,7 +44,7 @@ class SdJwtVerifierTest {
             issuer = "did:key:z6MkIssuer",
             subject = "did:key:z6MkHolder",
             type = listOf("VerifiableCredential", "VerifiedEmployee"),
-            claims = mapOf("name" to "Ahmad", "employeeId" to "EMP-1234"),
+            claims = mapOf("name" to JsonPrimitive("Ahmad"), "employeeId" to JsonPrimitive("EMP-1234")),
             disclosable = setOf("name"),
             issuedAt = 1719792000,
             expiresAt = 4102444800 // year 2100
@@ -53,8 +54,8 @@ class SdJwtVerifierTest {
 
         assertThat(result.verified).isTrue()
         assertThat(result.issuer).isEqualTo("did:key:z6MkIssuer")
-        assertThat(result.disclosedClaims).containsEntry("name", "Ahmad")
-        assertThat(result.disclosedClaims).containsEntry("employeeId", "EMP-1234")
+        assertThat(result.disclosedClaims).containsEntry("name", JsonPrimitive("Ahmad"))
+        assertThat(result.disclosedClaims).containsEntry("employeeId", JsonPrimitive("EMP-1234"))
     }
 
     @Test
@@ -66,7 +67,7 @@ class SdJwtVerifierTest {
             issuer = "did:key:z6MkIssuer",
             subject = "did:key:z6MkHolder",
             type = listOf("VerifiableCredential"),
-            claims = mapOf("name" to "Ahmad"),
+            claims = mapOf("name" to JsonPrimitive("Ahmad")),
             disclosable = setOf("name"),
             issuedAt = 1719792000,
             expiresAt = 4102444800
@@ -87,7 +88,7 @@ class SdJwtVerifierTest {
             issuer = "did:key:z6MkIssuer",
             subject = "did:key:z6MkHolder",
             type = listOf("VerifiableCredential"),
-            claims = mapOf("name" to "Ahmad"),
+            claims = mapOf("name" to JsonPrimitive("Ahmad")),
             disclosable = setOf("name"),
             issuedAt = 1719792000,
             expiresAt = 1 // expired in 1970
@@ -108,7 +109,7 @@ class SdJwtVerifierTest {
             issuer = "did:key:z6MkIssuer",
             subject = "did:key:z6MkHolder",
             type = listOf("VerifiableCredential"),
-            claims = mapOf("name" to "Ahmad"),
+            claims = mapOf("name" to JsonPrimitive("Ahmad")),
             disclosable = setOf("name"),
             issuedAt = 1719792000,
             expiresAt = 4102444800
@@ -126,7 +127,7 @@ class SdJwtVerifierTest {
 
         val withKbJwt = SdJwtVc(sdJwt.issuerJwt, sdJwt.disclosures, kbJwt)
 
-        // Matching audience and nonce
+        // Matching audience and nonce (no cnf claim, so KB-JWT sig not verified — only aud/nonce checked)
         val result = verifier.verify(
             withKbJwt,
             expectedAudience = "https://verifier.example.com",
@@ -152,7 +153,7 @@ class SdJwtVerifierTest {
             issuer = "did:key:z6MkUnknown",
             subject = "did:key:z6MkHolder",
             type = listOf("VerifiableCredential"),
-            claims = mapOf("name" to "Ahmad"),
+            claims = mapOf("name" to JsonPrimitive("Ahmad")),
             disclosable = setOf("name")
         )
 
@@ -169,7 +170,7 @@ class SdJwtVerifierTest {
             issuer = "did:key:z6MkIssuer",
             subject = "did:key:z6MkHolder",
             type = listOf("VerifiableCredential"),
-            claims = mapOf("name" to "Ahmad"),
+            claims = mapOf("name" to JsonPrimitive("Ahmad")),
             disclosable = setOf("name"),
             issuedAt = 1719792000,
             expiresAt = 4102444800
@@ -177,5 +178,64 @@ class SdJwtVerifierTest {
 
         val result = verifier.verify(sdJwt)
         assertThat(result.subject).isEqualTo("did:key:z6MkHolder")
+    }
+
+    @Test
+    fun `verify with no verification methods returns error`() = runTest {
+        val did = "did:key:z6MkEmpty"
+        val doc = DidDocument(
+            id = did,
+            verificationMethod = emptyList()
+        )
+        coEvery { didResolver.resolve(did) } returns Result.success(doc)
+        val verifier = SdJwtVerifier(didResolver, alwaysTrue, alwaysTrue)
+
+        val sdJwt = issuerInstance.issue(
+            issuer = did,
+            subject = "did:key:z6MkHolder",
+            type = listOf("VerifiableCredential"),
+            claims = mapOf("name" to JsonPrimitive("Ahmad")),
+            disclosable = setOf("name"),
+            issuedAt = 1719792000,
+            expiresAt = 4102444800
+        )
+
+        val result = verifier.verify(sdJwt)
+        assertThat(result.verified).isFalse()
+        assertThat(result.errors).contains("No verification methods in issuer DID document")
+    }
+
+    @Test
+    fun `verify with unsupported algorithm returns error`() = runTest {
+        val did = "did:key:z6MkBadAlg"
+        val doc = DidDocument(
+            id = did,
+            verificationMethod = listOf(
+                VerificationMethod(
+                    id = "$did#key-1",
+                    type = "Ed25519VerificationKey2020",
+                    controller = did,
+                    publicKeyMultibase = "uVGVzdFB1YmxpY0tleQ"
+                )
+            )
+        )
+        coEvery { didResolver.resolve(did) } returns Result.success(doc)
+        val verifier = SdJwtVerifier(didResolver, alwaysTrue, alwaysTrue)
+
+        // Issue with a non-standard algorithm that won't map
+        val badAlgIssuer = SdJwtIssuer(signer = testSigner, algorithm = "UNSUPPORTED")
+        val sdJwt = badAlgIssuer.issue(
+            issuer = did,
+            subject = "did:key:z6MkHolder",
+            type = listOf("VerifiableCredential"),
+            claims = mapOf("name" to JsonPrimitive("Ahmad")),
+            disclosable = setOf("name"),
+            issuedAt = 1719792000,
+            expiresAt = 4102444800
+        )
+
+        val result = verifier.verify(sdJwt)
+        assertThat(result.verified).isFalse()
+        assertThat(result.errors.any { it.contains("Unsupported JWT algorithm") }).isTrue()
     }
 }

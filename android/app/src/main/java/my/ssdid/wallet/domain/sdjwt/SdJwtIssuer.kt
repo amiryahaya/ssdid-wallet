@@ -31,7 +31,7 @@ class SdJwtIssuer(
         issuer: String,
         subject: String,
         type: List<String>,
-        claims: Map<String, String>,
+        claims: Map<String, JsonElement>,
         disclosable: Set<String>,
         holderKeyJwk: JsonObject? = null,
         issuedAt: Long = System.currentTimeMillis() / 1000,
@@ -39,7 +39,7 @@ class SdJwtIssuer(
     ): SdJwtVc {
         val disclosures = mutableListOf<Disclosure>()
         val sdHashes = mutableListOf<String>()
-        val visibleClaims = mutableMapOf<String, String>()
+        val visibleClaims = mutableMapOf<String, JsonElement>()
 
         for ((name, value) in claims) {
             if (name in disclosable) {
@@ -67,6 +67,7 @@ class SdJwtIssuer(
             for ((name, value) in visibleClaims) {
                 put(name, value)
             }
+
             // Key binding
             holderKeyJwk?.let { jwk ->
                 putJsonObject("cnf") {

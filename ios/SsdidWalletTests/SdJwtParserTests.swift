@@ -16,21 +16,21 @@ final class SdJwtParserTests: XCTestCase {
         let disclosure = try Disclosure.decode(encoded)
         XCTAssertEqual(disclosure.salt, "salt1")
         XCTAssertEqual(disclosure.claimName, "name")
-        XCTAssertEqual(disclosure.claimValue, "Ahmad")
+        XCTAssertEqual(disclosure.claimValue as? String, "Ahmad")
     }
 
-    func testDisclosureHashDeterministic() {
+    func testDisclosureHashDeterministic() throws {
         let d = Disclosure(salt: "salt1", claimName: "name", claimValue: "Ahmad")
-        XCTAssertEqual(d.hash(), d.hash())
-        XCTAssertFalse(d.hash().isEmpty)
+        XCTAssertEqual(try d.hash(), try d.hash())
+        XCTAssertFalse(try d.hash().isEmpty)
     }
 
     func testDisclosureEncodeRoundTrip() throws {
         let original = Disclosure(salt: "salt1", claimName: "name", claimValue: "Ahmad")
-        let encoded = original.encode()
+        let encoded = try original.encode()
         let decoded = try Disclosure.decode(encoded)
         XCTAssertEqual(decoded.salt, "salt1")
         XCTAssertEqual(decoded.claimName, "name")
-        XCTAssertEqual(decoded.claimValue, "Ahmad")
+        XCTAssertEqual(decoded.claimValue as? String, "Ahmad")
     }
 }

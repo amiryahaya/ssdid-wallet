@@ -19,7 +19,7 @@ class SdJwtIssuer {
         holderKeyJwk: [String: String]? = nil,
         issuedAt: Int = Int(Date().timeIntervalSince1970),
         expiresAt: Int? = nil
-    ) -> SdJwtVc {
+    ) throws -> SdJwtVc {
         var disclosures: [Disclosure] = []
         var sdHashes: [String] = []
         var visibleClaims: [String: String] = [:]
@@ -29,7 +29,7 @@ class SdJwtIssuer {
                 let salt = generateSalt()
                 let disclosure = Disclosure(salt: salt, claimName: name, claimValue: value)
                 disclosures.append(disclosure)
-                sdHashes.append(disclosure.hash())
+                sdHashes.append(try disclosure.hash())
             } else {
                 visibleClaims[name] = value
             }
@@ -49,8 +49,8 @@ class SdJwtIssuer {
 
         let headerDict: [String: String] = ["alg": algorithm, "typ": "vc+sd-jwt"]
 
-        let headerB64 = try! JSONSerialization.data(withJSONObject: headerDict).base64URLEncodedString()
-        let payloadB64 = try! JSONSerialization.data(withJSONObject: payloadDict).base64URLEncodedString()
+        let headerB64 = try JSONSerialization.data(withJSONObject: headerDict).base64URLEncodedString()
+        let payloadB64 = try JSONSerialization.data(withJSONObject: payloadDict).base64URLEncodedString()
         let signingInput = "\(headerB64).\(payloadB64)"
         let signature = signer(Data(signingInput.utf8))
         let signatureB64 = signature.base64URLEncodedString()

@@ -9,7 +9,7 @@ enum KeyBindingJwt {
         algorithm: String,
         signer: (Data) -> Data,
         issuedAt: Int = Int(Date().timeIntervalSince1970)
-    ) -> String {
+    ) throws -> String {
         let sdHash = computeSdHash(sdJwtWithDisclosures)
 
         let header: [String: String] = ["alg": algorithm, "typ": "kb+jwt"]
@@ -20,8 +20,8 @@ enum KeyBindingJwt {
             "sd_hash": sdHash
         ]
 
-        let headerB64 = try! JSONSerialization.data(withJSONObject: header).base64URLEncodedString()
-        let payloadB64 = try! JSONSerialization.data(withJSONObject: payload).base64URLEncodedString()
+        let headerB64 = try JSONSerialization.data(withJSONObject: header).base64URLEncodedString()
+        let payloadB64 = try JSONSerialization.data(withJSONObject: payload).base64URLEncodedString()
         let signingInput = "\(headerB64).\(payloadB64)"
         let signature = signer(Data(signingInput.utf8))
         let signatureB64 = signature.base64URLEncodedString()

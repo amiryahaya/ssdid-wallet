@@ -4,24 +4,32 @@ import CryptoKit
 struct Disclosure: Equatable {
     let salt: String
     let claimName: String
-    let claimValue: String
+    let claimValue: Any  // RFC 9901: any JSON type
     let encoded: String
 
-    init(salt: String, claimName: String, claimValue: String, encoded: String = "") {
+    static func == (lhs: Disclosure, rhs: Disclosure) -> Bool {
+        lhs.salt == rhs.salt && lhs.claimName == rhs.claimName && lhs.encoded == rhs.encoded
+    }
+
+    init(salt: String, claimName: String, claimValue: Any, encoded: String = "") {
         self.salt = salt
         self.claimName = claimName
         self.claimValue = claimValue
         self.encoded = encoded
     }
 
-    func encode() -> String {
+    func encode() throws -> String {
         if !encoded.isEmpty { return encoded }
-        let array = "[\"\(salt)\",\"\(claimName)\",\"\(claimValue)\"]"
-        return Data(array.utf8).base64URLEncodedString()
+        let array: [Any] = [salt, claimName, claimValue]
+        let data = try JSONSerialization.data(withJSONObject: array, options: [.withoutEscapingSlashes])
+        return data.base64URLEncodedString()
     }
 
-    func hash(algorithm: String = "sha-256") -> String {
-        let input = encode()
+    func hash(algorithm: String = "sha-256") throws -> String {
+        guard algorithm == "sha-256" else {
+            throw SdJwtError.unsupportedAlgorithm(algorithm)
+        }
+        let input = try encode()
         let digest = SHA256.hash(data: Data(input.utf8))
         return Data(digest).base64URLEncodedString()
     }
@@ -32,11 +40,11 @@ struct Disclosure: Equatable {
               let array = try? JSONSerialization.jsonObject(with: Data(json.utf8)) as? [Any],
               array.count >= 3,
               let salt = array[0] as? String,
-              let claimName = array[1] as? String,
-              let claimValue = array[2] as? String
+              let claimName = array[1] as? String
         else {
             throw SdJwtError.invalidDisclosure
         }
+        let claimValue = array[2]
         return Disclosure(salt: salt, claimName: claimName, claimValue: claimValue, encoded: base64url)
     }
 }

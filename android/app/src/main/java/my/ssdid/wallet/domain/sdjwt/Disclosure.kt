@@ -7,10 +7,13 @@ import kotlinx.serialization.json.*
 data class Disclosure(
     val salt: String,
     val claimName: String,
-    val claimValue: String,
+    val claimValue: JsonElement,
     val encoded: String = ""
 ) {
     fun hash(algorithm: String = "sha-256"): String {
+        require(algorithm == "sha-256") {
+            "Unsupported hash algorithm: $algorithm. Only sha-256 is supported."
+        }
         val input = encode()
         val digest = MessageDigest.getInstance("SHA-256").digest(input.toByteArray(Charsets.US_ASCII))
         return Base64.getUrlEncoder().withoutPadding().encodeToString(digest)
@@ -34,7 +37,7 @@ data class Disclosure(
             return Disclosure(
                 salt = array[0].jsonPrimitive.content,
                 claimName = array[1].jsonPrimitive.content,
-                claimValue = array[2].jsonPrimitive.content,
+                claimValue = array[2],
                 encoded = base64url
             )
         }

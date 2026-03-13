@@ -1,6 +1,7 @@
 package my.ssdid.wallet.domain.sdjwt
 
 import com.google.common.truth.Truth.assertThat
+import kotlinx.serialization.json.JsonPrimitive
 import org.junit.Test
 
 class SdJwtParserTest {
@@ -24,7 +25,7 @@ class SdJwtParserTest {
 
         assertThat(disclosure.salt).isEqualTo("salt1")
         assertThat(disclosure.claimName).isEqualTo("name")
-        assertThat(disclosure.claimValue).isEqualTo("Ahmad")
+        assertThat(disclosure.claimValue).isEqualTo(JsonPrimitive("Ahmad"))
     }
 
     @Test
@@ -39,7 +40,7 @@ class SdJwtParserTest {
 
     @Test
     fun `disclosure hash is deterministic`() {
-        val disclosure = Disclosure("salt1", "name", "Ahmad")
+        val disclosure = Disclosure("salt1", "name", JsonPrimitive("Ahmad"))
         val hash1 = disclosure.hash("sha-256")
         val hash2 = disclosure.hash("sha-256")
         assertThat(hash1).isEqualTo(hash2)
@@ -59,11 +60,22 @@ class SdJwtParserTest {
 
     @Test
     fun `disclosure encode round-trips`() {
-        val original = Disclosure("salt1", "name", "Ahmad")
+        val original = Disclosure("salt1", "name", JsonPrimitive("Ahmad"))
         val encoded = original.encode()
         val decoded = Disclosure.decode(encoded)
         assertThat(decoded.salt).isEqualTo("salt1")
         assertThat(decoded.claimName).isEqualTo("name")
-        assertThat(decoded.claimValue).isEqualTo("Ahmad")
+        assertThat(decoded.claimValue).isEqualTo(JsonPrimitive("Ahmad"))
+    }
+
+    @Test
+    fun `disclosure hash rejects unsupported algorithm`() {
+        val disclosure = Disclosure("salt1", "name", JsonPrimitive("Ahmad"))
+        try {
+            disclosure.hash("sha-384")
+            assertThat(false).isTrue() // should not reach here
+        } catch (e: IllegalArgumentException) {
+            assertThat(e.message).contains("Unsupported hash algorithm")
+        }
     }
 }

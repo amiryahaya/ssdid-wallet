@@ -19,6 +19,8 @@ class DidJwkResolverTest {
         assertThat(doc.id).isEqualTo(did)
         assertThat(doc.verificationMethod).hasSize(1)
         assertThat(doc.verificationMethod[0].type).isEqualTo("JsonWebKey2020")
+        assertThat(doc.verificationMethod[0].publicKeyJwk).isNotNull()
+        assertThat(doc.verificationMethod[0].publicKeyJwk!!["kty"]?.toString()).contains("OKP")
     }
 
     @Test

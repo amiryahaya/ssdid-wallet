@@ -18,7 +18,7 @@ class SdJwtIssuerTest {
             issuer = "did:key:z6MkIssuer",
             subject = "did:key:z6MkHolder",
             type = listOf("VerifiableCredential", "VerifiedEmployee"),
-            claims = mapOf("name" to "Ahmad", "employeeId" to "EMP-1234", "department" to "Engineering"),
+            claims = mapOf("name" to JsonPrimitive("Ahmad"), "employeeId" to JsonPrimitive("EMP-1234"), "department" to JsonPrimitive("Engineering")),
             disclosable = setOf("name", "department"),
             issuedAt = 1719792000,
             expiresAt = 1751328000
@@ -35,7 +35,7 @@ class SdJwtIssuerTest {
             issuer = "did:key:z6MkIssuer",
             subject = "did:key:z6MkHolder",
             type = listOf("VerifiableCredential"),
-            claims = mapOf("name" to "Ahmad"),
+            claims = mapOf("name" to JsonPrimitive("Ahmad")),
             disclosable = setOf("name")
         )
 
@@ -50,7 +50,7 @@ class SdJwtIssuerTest {
             issuer = "did:key:z6MkIssuer",
             subject = "did:key:z6MkHolder",
             type = listOf("VerifiableCredential", "VerifiedEmployee"),
-            claims = mapOf("name" to "Ahmad", "employeeId" to "EMP-1234"),
+            claims = mapOf("name" to JsonPrimitive("Ahmad"), "employeeId" to JsonPrimitive("EMP-1234")),
             disclosable = setOf("name")
         )
 
@@ -75,7 +75,7 @@ class SdJwtIssuerTest {
             issuer = "did:key:z6MkIssuer",
             subject = "did:key:z6MkHolder",
             type = listOf("VerifiableCredential"),
-            claims = mapOf("name" to "Ahmad"),
+            claims = mapOf("name" to JsonPrimitive("Ahmad")),
             disclosable = setOf("name"),
             holderKeyJwk = holderJwk
         )
@@ -92,7 +92,7 @@ class SdJwtIssuerTest {
             issuer = "did:key:z6MkIssuer",
             subject = "did:key:z6MkHolder",
             type = listOf("VerifiableCredential"),
-            claims = mapOf("name" to "Ahmad", "dept" to "Eng"),
+            claims = mapOf("name" to JsonPrimitive("Ahmad"), "dept" to JsonPrimitive("Eng")),
             disclosable = setOf("name", "dept")
         )
 
@@ -106,7 +106,7 @@ class SdJwtIssuerTest {
             issuer = "did:key:z6MkIssuer",
             subject = "did:key:z6MkHolder",
             type = listOf("VerifiableCredential"),
-            claims = mapOf("name" to "Ahmad"),
+            claims = mapOf("name" to JsonPrimitive("Ahmad")),
             disclosable = setOf("name")
         )
 
