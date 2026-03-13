@@ -2,13 +2,17 @@ import SwiftUI
 
 struct ProfileSetupScreen: View {
     @Environment(AppRouter.self) private var router
+    @EnvironmentObject private var services: ServiceContainer
 
     let isEditing: Bool
 
     @State private var name = ""
     @State private var email = ""
+    @State private var originalEmail = ""
     @State private var nameError: String?
     @State private var emailError: String?
+    @State private var saving = false
+    @State private var loaded = false
 
     init(isEditing: Bool = false) {
         self.isEditing = isEditing
@@ -134,15 +138,15 @@ struct ProfileSetupScreen: View {
             VStack(spacing: 4) {
                 Button {
                     if isEditing {
-                        router.pop()
+                        saveAndContinue()
                     } else {
                         router.push(.emailVerification(email: email))
                     }
                 } label: {
                     Text(isEditing ? "Save" : "Continue")
                 }
-                .buttonStyle(.ssdidPrimary(enabled: isValid))
-                .disabled(!isValid)
+                .buttonStyle(.ssdidPrimary(enabled: isValid && !saving))
+                .disabled(!isValid || saving)
 
                 if !isEditing {
                     Text("You can edit this later in Settings.")
@@ -156,5 +160,32 @@ struct ProfileSetupScreen: View {
             .padding(.vertical, 12)
         }
         .background(Color.bgPrimary)
+        .task {
+            guard isEditing, !loaded else { return }
+            loaded = true
+            let profileManager = ProfileManager(vault: services.vault)
+            let claims = await profileManager.getProfileClaims()
+            name = claims["name"] ?? ""
+            email = claims["email"] ?? ""
+            originalEmail = claims["email"] ?? ""
+        }
+    }
+
+    private func saveAndContinue() {
+        saving = true
+        let trimmedEmail = email.trimmingCharacters(in: .whitespaces)
+        let emailChanged = trimmedEmail.lowercased() != originalEmail.trimmingCharacters(in: .whitespaces).lowercased()
+
+        Task {
+            let profileManager = ProfileManager(vault: services.vault)
+            try? await profileManager.saveProfile(name: name.trimmingCharacters(in: .whitespaces), email: trimmedEmail)
+            saving = false
+
+            if emailChanged {
+                router.push(.emailVerification(email: trimmedEmail, isEditing: true))
+            } else {
+                router.pop()
+            }
+        }
     }
 }

@@ -30,8 +30,13 @@ class ProfileSetupViewModel @Inject constructor(
     private val _isValid = MutableStateFlow(false)
     val isValid = _isValid.asStateFlow()
 
+    private var originalEmail = ""
+
     private val _saved = MutableStateFlow(false)
     val saved = _saved.asStateFlow()
+
+    private val _emailChanged = MutableStateFlow(false)
+    val emailChanged = _emailChanged.asStateFlow()
 
     private val _saving = MutableStateFlow(false)
     val saving = _saving.asStateFlow()
@@ -50,6 +55,7 @@ class ProfileSetupViewModel @Inject constructor(
                     val claims = existing.credentialSubject.claims
                     _name.value = claims["name"] ?: ""
                     _email.value = claims["email"] ?: ""
+                    originalEmail = _email.value
                 }
             } catch (e: Exception) {
                 _error.value = "Failed to load profile"
@@ -83,6 +89,7 @@ class ProfileSetupViewModel @Inject constructor(
             _error.value = null
             val result = profileManager.saveProfile(_name.value, _email.value)
             if (result.isSuccess) {
+                _emailChanged.value = _email.value.trim().lowercase() != originalEmail.trim().lowercase()
                 _saved.value = true
             } else {
                 _error.value = result.exceptionOrNull()?.message ?: "Failed to save profile"

@@ -81,8 +81,8 @@ struct RootView: View {
             ProfileSetupScreen(isEditing: false)
         case .profileEdit:
             ProfileSetupScreen(isEditing: true)
-        case .emailVerification(let email):
-            EmailVerificationScreen(email: email)
+        case .emailVerification(let email, let isEditing):
+            EmailVerificationScreen(email: email, isEditing: isEditing)
         case .walletHome:
             WalletHomeScreen()
         case .identityDetail(let keyId):

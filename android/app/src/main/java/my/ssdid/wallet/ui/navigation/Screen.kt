@@ -11,8 +11,9 @@ sealed class Screen(val route: String) {
     object BiometricSetup : Screen("biometric_setup")
     object ProfileSetup : Screen("profile_setup")
     object ProfileEdit : Screen("profile_edit")
-    object EmailVerification : Screen("email_verification?email={email}") {
-        fun createRoute(email: String) = "email_verification?email=${Uri.encode(email)}"
+    object EmailVerification : Screen("email_verification?email={email}&source={source}") {
+        fun createRoute(email: String, source: String = "setup") =
+            "email_verification?email=${Uri.encode(email)}&source=${Uri.encode(source)}"
     }
     object WalletHome : Screen("wallet_home")
     object IdentityDetail : Screen("identity_detail/{keyId}") {

@@ -62,13 +62,19 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
         composable(
             Screen.EmailVerification.route,
             arguments = listOf(
-                navArgument("email") { type = NavType.StringType; defaultValue = "" }
+                navArgument("email") { type = NavType.StringType; defaultValue = "" },
+                navArgument("source") { type = NavType.StringType; defaultValue = "setup" }
             )
-        ) {
+        ) { backStackEntry ->
+            val source = backStackEntry.arguments?.getString("source") ?: "setup"
             EmailVerificationScreen(
                 onVerified = {
-                    navController.navigate(Screen.CreateIdentity.createRoute()) {
-                        popUpTo(Screen.ProfileSetup.route) { inclusive = true }
+                    if (source == "edit") {
+                        navController.popBackStack(Screen.Settings.route, inclusive = false)
+                    } else {
+                        navController.navigate(Screen.CreateIdentity.createRoute()) {
+                            popUpTo(Screen.ProfileSetup.route) { inclusive = true }
+                        }
                     }
                 },
                 onBack = { navController.popBackStack() }
@@ -282,7 +288,14 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
         }
         composable(Screen.ProfileEdit.route) {
             ProfileSetupScreen(
-                onComplete = { _ -> navController.popBackStack() },
+                onComplete = { email ->
+                    navController.popBackStack()
+                },
+                onEmailChanged = { email ->
+                    navController.navigate(Screen.EmailVerification.createRoute(email, source = "edit")) {
+                        popUpTo(Screen.ProfileEdit.route) { inclusive = true }
+                    }
+                },
                 onBack = { navController.popBackStack() },
                 buttonText = "Save"
             )

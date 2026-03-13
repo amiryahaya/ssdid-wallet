@@ -5,6 +5,7 @@ struct EmailVerificationScreen: View {
     @Environment(AppRouter.self) private var router
 
     let email: String
+    let isEditing: Bool
 
     @State private var code = ""
     @State private var isVerifying = false
@@ -14,6 +15,11 @@ struct EmailVerificationScreen: View {
     @State private var hasSentInitialCode = false
 
     private nonisolated(unsafe) let emailApi = EmailApi(client: SsdidHttpClient())
+
+    init(email: String, isEditing: Bool = false) {
+        self.email = email
+        self.isEditing = isEditing
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -157,7 +163,13 @@ struct EmailVerificationScreen: View {
                 await MainActor.run {
                     isVerifying = false
                     if response.verified {
-                        router.push(.createIdentity())
+                        if isEditing {
+                            // Pop back to settings (remove both email verification and profile edit)
+                            router.pop()
+                            router.pop()
+                        } else {
+                            router.push(.createIdentity())
+                        }
                     } else {
                         errorMessage = "Verification failed. Please try again."
                     }

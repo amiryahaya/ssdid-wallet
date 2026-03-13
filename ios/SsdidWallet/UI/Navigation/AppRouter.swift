@@ -8,7 +8,7 @@ enum Route: Hashable {
     case biometricSetup
     case profileSetup
     case profileEdit
-    case emailVerification(email: String)
+    case emailVerification(email: String, isEditing: Bool = false)
     case walletHome
     case identityDetail(keyId: String)
     case scanQr
