@@ -156,10 +156,21 @@ final class VaultImpl: Vault, @unchecked Sendable {
 
         // W3C Data Integrity signing payload:
         // SHA3-256(canonical_json(proof_options)) || SHA3-256(canonical_json(document))
-        let optionsHash = SHA3.sha256(Data(canonicalJson(proofOptions).utf8))
-        let docHash = SHA3.sha256(Data(canonicalJson(document).utf8))
+        let optionsJson = canonicalJson(proofOptions)
+        let docJson = canonicalJson(document)
+        let optionsHash = SHA3.sha256(Data(optionsJson.utf8))
+        let docHash = SHA3.sha256(Data(docJson.utf8))
         var payload = optionsHash
         payload.append(docHash)
+
+        // DEBUG: remove after fixing proof verification
+        print("=== PROOF DEBUG ===")
+        print("OPTIONS JSON: \(optionsJson)")
+        print("DOC JSON: \(docJson)")
+        print("OPTIONS HASH: \(optionsHash.map { String(format: "%02x", $0) }.joined())")
+        print("DOC HASH: \(docHash.map { String(format: "%02x", $0) }.joined())")
+        print("PAYLOAD (\(payload.count) bytes): \(payload.map { String(format: "%02x", $0) }.joined())")
+        print("===================")
 
         let signatureData = try await sign(keyId: keyId, data: payload)
 
