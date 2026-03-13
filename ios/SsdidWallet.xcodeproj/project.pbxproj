@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -185,7 +185,7 @@
 		7EAD0D784DAA5FDDC605B566 /* DeviceInfoProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceInfoProvider.swift; sourceTree = "<group>"; };
 		8497FA480DAA74E7A5975EF8 /* AuthDtos.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthDtos.swift; sourceTree = "<group>"; };
 		85DBFFB49B4FA5F0DDFA24B9 /* LocalizationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationManager.swift; sourceTree = "<group>"; };
-		893874D5D6CAFB993028741F /* SsdidWallet.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SsdidWallet.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		893874D5D6CAFB993028741F /* SsdidWallet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SsdidWallet.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8AFB02858179C279940E04D0 /* VaultImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultImpl.swift; sourceTree = "<group>"; };
 		8E1FEF511A129675E5A9B796 /* CryptoProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CryptoProvider.swift; sourceTree = "<group>"; };
 		9190E3BB5E3D6CE7CFEE29A7 /* RegistrationScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationScreen.swift; sourceTree = "<group>"; };
@@ -855,7 +855,6 @@
 				695D9D513ADCFB1F8530F0E3 /* XCLocalSwiftPackageReference "Packages/KazSign" */,
 				C739842A39A966593F976862 /* XCLocalSwiftPackageReference "Packages/LibOQS" */,
 			);
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -1098,10 +1097,10 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SsdidWallet.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SsdidWallet/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "SSDID Wallet";
+				INFOPLIST_KEY_CFBundleDisplayName = SSDID;
 				INFOPLIST_KEY_NSCameraUsageDescription = "SSDID Wallet needs camera access to scan QR codes for identity verification and service registration.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "SSDID Wallet uses Face ID to protect your decentralized identity and authorize transactions.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -1114,6 +1113,10 @@
 				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = my.ssdid.wallet;
 				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_STRICT_CONCURRENCY = minimal;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -1210,10 +1213,10 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SsdidWallet.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SsdidWallet/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "SSDID Wallet";
+				INFOPLIST_KEY_CFBundleDisplayName = SSDID;
 				INFOPLIST_KEY_NSCameraUsageDescription = "SSDID Wallet needs camera access to scan QR codes for identity verification and service registration.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "SSDID Wallet uses Face ID to protect your decentralized identity and authorize transactions.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -1226,6 +1229,10 @@
 				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = my.ssdid.wallet;
 				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_STRICT_CONCURRENCY = minimal;
 				TARGETED_DEVICE_FAMILY = 1;
