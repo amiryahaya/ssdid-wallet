@@ -6,6 +6,7 @@ import kotlinx.coroutines.test.runTest
 import my.ssdid.wallet.domain.crypto.Multibase
 import my.ssdid.wallet.domain.model.*
 import my.ssdid.wallet.domain.history.ActivityRepository
+import my.ssdid.wallet.domain.notify.NotifyManager
 import my.ssdid.wallet.domain.revocation.RevocationManager
 import my.ssdid.wallet.domain.revocation.RevocationStatus
 import my.ssdid.wallet.domain.transport.RegistryApi
@@ -83,7 +84,8 @@ class SsdidClientTest {
         every { httpClient.registry } returns registryApi
         every { httpClient.serverApi(any()) } returns serverApi
 
-        client = SsdidClient(vault, verifier, httpClient, activityRepo, revocationManager)
+        val notifyManager = mockk<NotifyManager>(relaxed = true)
+        client = SsdidClient(vault, verifier, httpClient, activityRepo, revocationManager, notifyManager)
     }
 
     // --- Flow 1: initIdentity ---
@@ -94,6 +96,7 @@ class SsdidClientTest {
         coEvery { vault.buildDidDocument(testIdentity.keyId) } returns Result.success(testDidDoc)
         coEvery { vault.createProof(testIdentity.keyId, any(), "assertionMethod") } returns Result.success(testProof)
         coEvery { registryApi.registerDid(any()) } returns RegisterDidResponse("did:ssdid:test123", "ok")
+        coEvery { vault.listIdentities() } returns listOf(testIdentity)
 
         val result = client.initIdentity("Test", Algorithm.ED25519)
 
@@ -131,6 +134,7 @@ class SsdidClientTest {
         coEvery { vault.createProof(testIdentity.keyId, any(), "capabilityInvocation", "test-challenge", "registry.ssdid.my") } returns Result.success(testProof)
         coJustRun { registryApi.deactivateDid(testIdentity.did, any()) }
         coEvery { vault.deleteIdentity(testIdentity.keyId) } returns Result.success(Unit)
+        coEvery { vault.listIdentities() } returns emptyList()
 
         val result = client.deactivateDid(testIdentity.keyId)
 

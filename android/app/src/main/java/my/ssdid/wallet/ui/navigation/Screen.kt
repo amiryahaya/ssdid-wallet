@@ -11,8 +11,9 @@ sealed class Screen(val route: String) {
     object BiometricSetup : Screen("biometric_setup")
     object ProfileSetup : Screen("profile_setup")
     object ProfileEdit : Screen("profile_edit")
-    object EmailVerification : Screen("email_verification?email={email}") {
-        fun createRoute(email: String) = "email_verification?email=${Uri.encode(email)}"
+    object EmailVerification : Screen("email_verification?email={email}&source={source}") {
+        fun createRoute(email: String, source: String = "setup") =
+            "email_verification?email=${Uri.encode(email)}&source=${Uri.encode(source)}"
     }
     object WalletHome : Screen("wallet_home")
     object IdentityDetail : Screen("identity_detail/{keyId}") {
@@ -35,6 +36,14 @@ sealed class Screen(val route: String) {
             requestedClaims: String = "",
             acceptedAlgorithms: String = ""
         ): String = "consent?serverUrl=${Uri.encode(serverUrl)}&callbackUrl=${Uri.encode(callbackUrl)}&sessionId=${Uri.encode(sessionId)}&requestedClaims=${Uri.encode(requestedClaims)}&acceptedAlgorithms=${Uri.encode(acceptedAlgorithms)}"
+    }
+    object DriveLogin : Screen("drive_login?serviceUrl={serviceUrl}&serviceName={serviceName}&challengeId={challengeId}&requestedClaims={requestedClaims}") {
+        fun createRoute(
+            serviceUrl: String,
+            serviceName: String = "",
+            challengeId: String = "",
+            requestedClaims: String = ""
+        ): String = "drive_login?serviceUrl=${Uri.encode(serviceUrl)}&serviceName=${Uri.encode(serviceName)}&challengeId=${Uri.encode(challengeId)}&requestedClaims=${Uri.encode(requestedClaims)}"
     }
     object TxSigning : Screen("tx_signing?serverUrl={serverUrl}&sessionToken={sessionToken}") {
         fun createRoute(serverUrl: String, sessionToken: String) =
@@ -73,6 +82,10 @@ sealed class Screen(val route: String) {
     }
     object DeviceEnroll : Screen("device_enroll/{keyId}?mode={mode}") {
         fun createRoute(keyId: String, mode: String) =
-            "device_enroll/${Uri.encode(keyId)}?mode=$mode"
+            "device_enroll/${Uri.encode(keyId)}?mode=${Uri.encode(mode)}"
+    }
+    object InviteAccept : Screen("invite_accept?serverUrl={serverUrl}&token={token}&callbackUrl={callbackUrl}") {
+        fun createRoute(serverUrl: String, token: String, callbackUrl: String = "") =
+            "invite_accept?serverUrl=${Uri.encode(serverUrl)}&token=${Uri.encode(token)}&callbackUrl=${Uri.encode(callbackUrl)}"
     }
 }

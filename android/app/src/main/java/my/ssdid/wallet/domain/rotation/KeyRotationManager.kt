@@ -12,7 +12,10 @@ import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.vault.VaultStorage
 import my.ssdid.wallet.domain.vault.KeystoreManager
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.security.MessageDigest
+import java.util.concurrent.ConcurrentHashMap
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -46,6 +49,8 @@ class KeyRotationManager @Inject constructor(
     private val activityRepo: ActivityRepository,
     private val ssdidClient: dagger.Lazy<SsdidClient>
 ) {
+    private val rotationLocks = ConcurrentHashMap<String, Mutex>()
+
     private fun providerFor(algorithm: Algorithm): CryptoProvider =
         if (algorithm.isPostQuantum) pqcProvider else classicalProvider
 
@@ -59,35 +64,38 @@ class KeyRotationManager @Inject constructor(
      * store pre-rotated key encrypted. Returns the hash to publish in DID Document.
      */
     suspend fun prepareRotation(identity: Identity): Result<String> = runCatching {
-        val provider = providerFor(identity.algorithm)
-        val nextKeyPair = provider.generateKeyPair(identity.algorithm)
+        val lock = rotationLocks.getOrPut(identity.did) { Mutex() }
+        lock.withLock {
+            val provider = providerFor(identity.algorithm)
+            val nextKeyPair = provider.generateKeyPair(identity.algorithm)
 
-        // Compute SHA3-256 hash of next public key
-        val sha3 = MessageDigest.getInstance("SHA3-256")
-        val hashBytes = sha3.digest(nextKeyPair.publicKey)
-        val nextKeyHash = "u" + Base64.getUrlEncoder().withoutPadding().encodeToString(hashBytes)
+            // Compute SHA3-256 hash of next public key
+            val sha3 = MessageDigest.getInstance("SHA3-256")
+            val hashBytes = sha3.digest(nextKeyPair.publicKey)
+            val nextKeyHash = "u" + Base64.getUrlEncoder().withoutPadding().encodeToString(hashBytes)
 
-        // Encrypt and store pre-rotated key material
-        val preRotatedKeyId = "${identity.keyId}-prerotated"
-        val wrappingAlias = "ssdid_prerot_${stableAlias(identity.keyId)}"
-        keystoreManager.generateWrappingKey(wrappingAlias)
+            // Encrypt and store pre-rotated key material
+            val preRotatedKeyId = "${identity.keyId}-prerotated"
+            val wrappingAlias = "ssdid_prerot_${stableAlias(identity.keyId)}"
+            keystoreManager.generateWrappingKey(wrappingAlias)
 
-        val encryptedPrivateKey = keystoreManager.encrypt(wrappingAlias, nextKeyPair.privateKey)
-        nextKeyPair.privateKey.fill(0)
+            val encryptedPrivateKey = keystoreManager.encrypt(wrappingAlias, nextKeyPair.privateKey)
+            nextKeyPair.privateKey.fill(0)
 
-        // Store pre-rotated key data
-        storage.savePreRotatedKey(preRotatedKeyId, encryptedPrivateKey, nextKeyPair.publicKey)
+            // Store pre-rotated key data
+            storage.savePreRotatedKey(preRotatedKeyId, encryptedPrivateKey, nextKeyPair.publicKey)
 
-        // Update identity with pre-rotation reference
-        val updatedIdentity = identity.copy(preRotatedKeyId = preRotatedKeyId)
-        val existingEncKey = storage.getEncryptedPrivateKey(identity.keyId)
-            ?: throw IllegalStateException("Private key not found for: ${identity.keyId}")
-        storage.saveIdentity(updatedIdentity, existingEncKey)
+            // Update identity with pre-rotation reference
+            val updatedIdentity = identity.copy(preRotatedKeyId = preRotatedKeyId)
+            val existingEncKey = storage.getEncryptedPrivateKey(identity.keyId)
+                ?: throw IllegalStateException("Private key not found for: ${identity.keyId}")
+            storage.saveIdentity(updatedIdentity, existingEncKey)
 
-        // Publish pre-commitment to registry
-        ssdidClient.get().updateDidDocument(identity.keyId).getOrThrow()
+            // Publish pre-commitment to registry
+            ssdidClient.get().updateDidDocument(identity.keyId).getOrThrow()
 
-        nextKeyHash
+            nextKeyHash
+        }
     }
 
     /**
@@ -133,6 +141,7 @@ class KeyRotationManager @Inject constructor(
         // Clean up: delete old identity's private key and pre-rotated key (safe to lose on crash)
         storage.deleteIdentity(identity.keyId)
         storage.deletePreRotatedKey(preRotatedKeyId)
+        keystoreManager.deleteKey("ssdid_prerot_${stableAlias(identity.keyId)}")
 
         try {
             activityRepo.addActivity(ActivityRecord(

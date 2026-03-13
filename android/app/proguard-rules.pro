@@ -27,7 +27,3 @@
 # BouncyCastle
 -keep class org.bouncycastle.** { *; }
 -dontwarn org.bouncycastle.**
-
-# OneSignal
--keep class com.onesignal.** { *; }
--dontwarn com.onesignal.**

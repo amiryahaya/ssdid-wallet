@@ -92,7 +92,7 @@ class BackupViewModel @Inject constructor(
     fun createBackup(passphrase: String) {
         viewModelScope.launch {
             _state.value = BackupState.Creating
-            backupManager.createBackup(passphrase)
+            backupManager.createBackup(passphrase.toCharArray())
                 .onSuccess { bytes ->
                     lastBackupBytes = bytes
                     _state.value = BackupState.Success(bytes)
@@ -113,7 +113,7 @@ class BackupViewModel @Inject constructor(
         val bytes = _loadedFileBytes.value ?: return
         viewModelScope.launch {
             _state.value = BackupState.Restoring
-            backupManager.restoreBackup(bytes, passphrase)
+            backupManager.restoreBackup(bytes, passphrase.toCharArray())
                 .onSuccess { count ->
                     _loadedFileBytes.value = null
                     _state.value = BackupState.RestoreSuccess(count)
@@ -125,7 +125,7 @@ class BackupViewModel @Inject constructor(
     fun restoreBackup(data: ByteArray, passphrase: String) {
         viewModelScope.launch {
             _state.value = BackupState.Restoring
-            backupManager.restoreBackup(data, passphrase)
+            backupManager.restoreBackup(data, passphrase.toCharArray())
                 .onSuccess { _state.value = BackupState.RestoreSuccess(it) }
                 .onFailure { _state.value = BackupState.Error(it.message ?: "Restore failed") }
         }

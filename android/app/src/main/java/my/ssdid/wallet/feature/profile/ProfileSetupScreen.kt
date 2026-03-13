@@ -21,6 +21,7 @@ import my.ssdid.wallet.ui.theme.*
 @Composable
 fun ProfileSetupScreen(
     onComplete: (email: String) -> Unit,
+    onEmailChanged: ((email: String) -> Unit)? = null,
     onBack: (() -> Unit)? = null,
     buttonText: String = "Continue",
     viewModel: ProfileSetupViewModel = hiltViewModel()
@@ -34,10 +35,17 @@ fun ProfileSetupScreen(
     val saving by viewModel.saving.collectAsState()
     val error by viewModel.error.collectAsState()
     val loading by viewModel.loading.collectAsState()
+    val emailChanged by viewModel.emailChanged.collectAsState()
     val focusManager = LocalFocusManager.current
 
     LaunchedEffect(saved) {
-        if (saved) onComplete(email)
+        if (saved) {
+            if (emailChanged && onEmailChanged != null) {
+                onEmailChanged(email)
+            } else {
+                onComplete(email)
+            }
+        }
     }
 
     Column(

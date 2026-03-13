@@ -71,7 +71,7 @@ fun WalletHomeScreen(
         ) {
             Column {
                 Text("IDENTITY WALLET", style = MaterialTheme.typography.labelMedium)
-                Text("SSDID", style = MaterialTheme.typography.headlineLarge)
+                Text("Self-Sovereign Digital ID", style = MaterialTheme.typography.headlineLarge)
             }
             IconButton(onClick = onSettings) {
                 Text("\u2699", fontSize = 22.sp, color = TextSecondary)

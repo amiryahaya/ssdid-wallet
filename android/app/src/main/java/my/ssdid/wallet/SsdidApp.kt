@@ -1,45 +1,39 @@
 package my.ssdid.wallet
 
 import android.app.Application
-import android.content.Intent
-import com.onesignal.OneSignal
-import com.onesignal.notifications.INotificationClickEvent
-import com.onesignal.notifications.INotificationClickListener
+import androidx.lifecycle.ProcessLifecycleOwner
 import dagger.hilt.android.HiltAndroidApp
 import io.sentry.android.core.SentryAndroid
-import my.ssdid.wallet.platform.deeplink.DeepLinkHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import my.ssdid.wallet.domain.notify.NotifyLifecycleObserver
+import my.ssdid.wallet.domain.notify.NotifyManager
+import org.unifiedpush.android.connector.UnifiedPush
+import javax.inject.Inject
 
 @HiltAndroidApp
 class SsdidApp : Application() {
 
+    val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    @Inject lateinit var notifyManager: NotifyManager
+    @Inject lateinit var notifyLifecycleObserver: NotifyLifecycleObserver
+
     override fun onCreate() {
         super.onCreate()
-        initOneSignal()
         initSentry()
-    }
 
-    private fun initOneSignal() {
-        if (BuildConfig.DEBUG) return
+        // Fetch pending notifications whenever the app enters the foreground.
+        ProcessLifecycleOwner.get().lifecycle.addObserver(notifyLifecycleObserver)
 
-        val appId = BuildConfig.ONESIGNAL_APP_ID
-        if (appId.isBlank()) return
+        appScope.launch {
+            notifyManager.ensureInboxRegistered()
+        }
 
-        OneSignal.consentRequired = true
-        OneSignal.initWithContext(this, appId)
-
-        OneSignal.Notifications.addClickListener(object : INotificationClickListener {
-            override fun onClick(event: INotificationClickEvent) {
-                val url = event.notification.launchURL ?: return
-                val uri = android.net.Uri.parse(url)
-                if (uri.scheme == "ssdid" && DeepLinkHandler.parse(uri) != null) {
-                    val intent = Intent(Intent.ACTION_VIEW, uri).apply {
-                        setPackage(packageName)
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    }
-                    startActivity(intent)
-                }
-            }
-        })
+        // Register with a UnifiedPush distributor if one is available.
+        UnifiedPush.registerApp(this)
     }
 
     private fun initSentry() {

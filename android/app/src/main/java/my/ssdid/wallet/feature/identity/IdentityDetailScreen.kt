@@ -11,6 +11,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -133,7 +135,47 @@ fun IdentityDetailScreen(
                             }
                             Spacer(Modifier.height(16.dp))
 
-                            DetailRow("DID", id.did, mono = true)
+                            val clipboardManager = LocalClipboardManager.current
+                            var didCopied by remember { mutableStateOf(false) }
+
+                            // M6: Reset "Copied" label after 2 seconds
+                            LaunchedEffect(didCopied) {
+                                if (didCopied) {
+                                    kotlinx.coroutines.delay(2000)
+                                    didCopied = false
+                                }
+                            }
+
+                            Column(Modifier.padding(vertical = 8.dp)) {
+                                Row(
+                                    Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text("DID", style = MaterialTheme.typography.labelSmall)
+                                    TextButton(
+                                        onClick = {
+                                            clipboardManager.setText(AnnotatedString(id.did))
+                                            didCopied = true
+                                        },
+                                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                                    ) {
+                                        Text(
+                                            if (didCopied) "Copied" else "Copy",
+                                            fontSize = 12.sp,
+                                            color = Accent
+                                        )
+                                    }
+                                }
+                                Text(
+                                    id.did,
+                                    fontSize = 13.sp,
+                                    color = TextPrimary,
+                                    fontFamily = FontFamily.Monospace
+                                )
+                                Spacer(Modifier.height(8.dp))
+                                HorizontalDivider(color = Border)
+                            }
                             DetailRow("Key ID", id.keyId, mono = true)
                             DetailRow("Algorithm", id.algorithm.name.replace("_", " "))
                             DetailRow("W3C Type", id.algorithm.w3cType, mono = true)

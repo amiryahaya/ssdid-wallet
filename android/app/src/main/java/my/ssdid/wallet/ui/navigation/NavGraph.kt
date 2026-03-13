@@ -31,6 +31,8 @@ import my.ssdid.wallet.feature.registration.RegistrationScreen
 import my.ssdid.wallet.feature.rotation.KeyRotationScreen
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import my.ssdid.wallet.feature.auth.DriveLoginScreen
+import my.ssdid.wallet.feature.invite.InviteAcceptScreen
 import my.ssdid.wallet.feature.scan.ScanQrScreen
 import my.ssdid.wallet.feature.settings.SettingsScreen
 import my.ssdid.wallet.feature.transaction.TxSigningScreen
@@ -60,13 +62,19 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
         composable(
             Screen.EmailVerification.route,
             arguments = listOf(
-                navArgument("email") { type = NavType.StringType; defaultValue = "" }
+                navArgument("email") { type = NavType.StringType; defaultValue = "" },
+                navArgument("source") { type = NavType.StringType; defaultValue = "setup" }
             )
-        ) {
+        ) { backStackEntry ->
+            val source = backStackEntry.arguments?.getString("source") ?: "setup"
             EmailVerificationScreen(
                 onVerified = {
-                    navController.navigate(Screen.CreateIdentity.createRoute()) {
-                        popUpTo(Screen.ProfileSetup.route) { inclusive = true }
+                    if (source == "edit") {
+                        navController.popBackStack(Screen.Settings.route, inclusive = false)
+                    } else {
+                        navController.navigate(Screen.CreateIdentity.createRoute()) {
+                            popUpTo(Screen.ProfileSetup.route) { inclusive = true }
+                        }
                     }
                 },
                 onBack = { navController.popBackStack() }
@@ -129,8 +137,9 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
                     when (payload.action) {
                         "register" -> navController.navigate(Screen.Registration.createRoute(payload.serverUrl, payload.serverDid))
                         "authenticate" -> {
-                            if (payload.requestedClaims.isNotEmpty()) {
-                                val claimsJson = Json.encodeToString(payload.requestedClaims)
+                            val claims = payload.resolvedClaims
+                            if (claims.isNotEmpty()) {
+                                val claimsJson = Json.encodeToString(claims)
                                 val algosJson = if (payload.acceptedAlgorithms.isNotEmpty())
                                     Json.encodeToString(payload.acceptedAlgorithms) else ""
                                 navController.navigate(Screen.Consent.createRoute(
@@ -141,8 +150,19 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
                                     acceptedAlgorithms = algosJson
                                 ))
                             } else {
-                                navController.navigate(Screen.AuthFlow.createRoute(payload.serverUrl))
+                                navController.navigate(Screen.AuthFlow.createRoute(payload.serverUrl, payload.callbackUrl))
                             }
+                        }
+                        "login" -> {
+                            val url = payload.serviceUrl.ifBlank { payload.serverUrl }
+                            val claimsJson = if (payload.resolvedClaims.isNotEmpty())
+                                Json.encodeToString(payload.resolvedClaims) else ""
+                            navController.navigate(Screen.DriveLogin.createRoute(
+                                serviceUrl = url,
+                                serviceName = payload.serviceName,
+                                challengeId = payload.challengeId,
+                                requestedClaims = claimsJson
+                            ))
                         }
                         "sign" -> navController.navigate(Screen.TxSigning.createRoute(payload.serverUrl, payload.sessionToken))
                         "credential-offer" -> navController.navigate(Screen.CredentialOffer.createRoute(payload.issuerUrl, payload.offerId))
@@ -199,6 +219,26 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
             )
         }
         composable(
+            Screen.DriveLogin.route,
+            arguments = listOf(
+                navArgument("serviceUrl") { type = NavType.StringType; defaultValue = "" },
+                navArgument("serviceName") { type = NavType.StringType; defaultValue = "" },
+                navArgument("challengeId") { type = NavType.StringType; defaultValue = "" },
+                navArgument("requestedClaims") { type = NavType.StringType; defaultValue = "" }
+            )
+        ) {
+            DriveLoginScreen(
+                onBack = { navController.popBackStack() },
+                onComplete = {
+                    navController.popBackStack(Screen.WalletHome.route, inclusive = false)
+                },
+                // H2: Pass accepted algorithms (empty for Drive), not serviceUrl
+                onCreateIdentity = { acceptedAlgos ->
+                    navController.navigate(Screen.CreateIdentity.createRoute(acceptedAlgos))
+                }
+            )
+        }
+        composable(
             Screen.TxSigning.route,
             arguments = listOf(
                 navArgument("serverUrl") { type = NavType.StringType; defaultValue = "" },
@@ -248,7 +288,14 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
         }
         composable(Screen.ProfileEdit.route) {
             ProfileSetupScreen(
-                onComplete = { _ -> navController.popBackStack() },
+                onComplete = { email ->
+                    navController.popBackStack()
+                },
+                onEmailChanged = { email ->
+                    navController.navigate(Screen.EmailVerification.createRoute(email, source = "edit")) {
+                        popUpTo(Screen.ProfileEdit.route) { inclusive = true }
+                    }
+                },
                 onBack = { navController.popBackStack() },
                 buttonText = "Save"
             )
@@ -319,6 +366,16 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
         composable(Screen.InstitutionalSetup.route) { backStackEntry ->
             backStackEntry.arguments?.getString("keyId") ?: return@composable
             InstitutionalSetupScreen(onBack = { navController.popBackStack() })
+        }
+        composable(
+            route = Screen.InviteAccept.route,
+            arguments = listOf(
+                navArgument("serverUrl") { type = NavType.StringType; defaultValue = "" },
+                navArgument("token") { type = NavType.StringType; defaultValue = "" },
+                navArgument("callbackUrl") { type = NavType.StringType; defaultValue = "" }
+            )
+        ) {
+            InviteAcceptScreen()
         }
         composable(Screen.SocialRecoveryRestore.route) {
             SocialRecoveryRestoreScreen(

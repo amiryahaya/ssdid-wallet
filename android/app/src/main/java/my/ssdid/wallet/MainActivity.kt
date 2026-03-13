@@ -3,7 +3,7 @@ package my.ssdid.wallet
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
+import androidx.fragment.app.FragmentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.LaunchedEffect
@@ -24,7 +24,7 @@ import my.ssdid.wallet.ui.theme.SsdidTheme
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
 
     @Inject lateinit var vaultStorage: VaultStorage
 

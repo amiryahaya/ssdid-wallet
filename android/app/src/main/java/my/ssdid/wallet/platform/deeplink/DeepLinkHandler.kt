@@ -16,6 +16,7 @@ data class DeepLinkAction(
     val offerId: String = "",
     val callbackUrl: String = "",
     val sessionId: String = "",
+    val token: String = "",
     val requestedClaims: List<ClaimRequest> = emptyList(),
     val acceptedAlgorithms: List<String> = emptyList()
 ) {
@@ -37,6 +38,7 @@ data class DeepLinkAction(
         }
         "sign" -> Screen.TxSigning.createRoute(serverUrl, sessionToken)
         "credential-offer" -> Screen.CredentialOffer.createRoute(issuerUrl, offerId)
+        "invite" -> Screen.InviteAccept.createRoute(serverUrl, token, callbackUrl)
         else -> null
     }
 }
@@ -47,7 +49,7 @@ object DeepLinkHandler {
      * Parses a deep link URI with scheme `ssdid://`.
      * Returns null if the URI is not a valid SSDID deep link.
      */
-    private val VALID_ACTIONS = setOf("register", "authenticate", "sign", "credential-offer")
+    private val VALID_ACTIONS = setOf("register", "authenticate", "sign", "credential-offer", "invite")
     private val json = Json { ignoreUnknownKeys = true }
 
     private val ALLOWED_CALLBACK_SCHEMES = setOf("https")
@@ -85,12 +87,13 @@ object DeepLinkHandler {
         val serverUrl = uri.getQueryParameter("server_url") ?: return null
         if (!UrlValidator.isValidServerUrl(serverUrl)) return null
 
-        val callbackUrl = if (action == "authenticate") {
+        val callbackUrl = if (action in setOf("authenticate", "invite")) {
             val rawCallbackUrl = uri.getQueryParameter("callback_url") ?: ""
             if (isValidCallbackUrl(rawCallbackUrl)) rawCallbackUrl else ""
         } else ""
 
         val sessionId = uri.getQueryParameter("session_id") ?: ""
+        val token = uri.getQueryParameter("token") ?: ""
 
         val requestedClaims = try {
             val raw = uri.getQueryParameter("requested_claims") ?: ""
@@ -113,6 +116,7 @@ object DeepLinkHandler {
             sessionToken = uri.getQueryParameter("session_token") ?: "",
             callbackUrl = callbackUrl,
             sessionId = sessionId,
+            token = token,
             requestedClaims = requestedClaims,
             acceptedAlgorithms = acceptedAlgorithms
         )

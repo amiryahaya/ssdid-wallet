@@ -74,13 +74,21 @@ class PqcProvider : CryptoProvider {
      * Verifies KAZ-Sign signature, detecting security level from DER-encoded public key.
      */
     private fun verifyKazSign(publicKey: ByteArray, signature: ByteArray, data: ByteArray): Boolean {
+        // Decode KazWire signature to raw bytes if needed.
+        // KazWire format: magic(0x67 0x52) + alg(1) + type(1) + version(1) + raw signature
+        val rawSignature = if (signature.size >= 5 && signature[0] == 0x67.toByte() && signature[1] == 0x52.toByte()) {
+            signature.copyOfRange(5, signature.size)
+        } else {
+            signature
+        }
+
         for (level in SecurityLevel.entries) {
             try {
                 KazSigner(level).use { signer ->
                     val rawPublicKey = signer.publicKeyFromDer(publicKey)
                     if (rawPublicKey.size == level.publicKeyBytes) {
                         // Non-detached verify: reconstruct S1||S2||S3||message
-                        val fullSig = signature + data
+                        val fullSig = rawSignature + data
                         val result = signer.verify(fullSig, rawPublicKey)
                         return result.isValid
                     }

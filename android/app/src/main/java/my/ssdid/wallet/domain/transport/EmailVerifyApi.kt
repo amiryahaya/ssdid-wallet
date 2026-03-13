@@ -17,19 +17,19 @@ interface EmailVerifyApi {
 @Serializable
 data class SendCodeRequest(
     val email: String,
-    @SerialName("device_id") val deviceId: String
+    val deviceId: String
 )
 
 @Serializable
 data class SendCodeResponse(
-    @SerialName("expires_in") val expiresIn: Int
+    val expiresIn: Int
 )
 
 @Serializable
 data class ConfirmCodeRequest(
     val email: String,
     val code: String,
-    @SerialName("device_id") val deviceId: String
+    val deviceId: String
 )
 
 @Serializable

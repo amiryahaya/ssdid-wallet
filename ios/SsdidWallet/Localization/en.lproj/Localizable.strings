@@ -1,0 +1,340 @@
+/* Localizable.strings (English)
+   SSDID Wallet — iOS */
+
+/* ── Common ── */
+"common.error" = "Error";
+"common.loading" = "Loading...";
+"common.cancel" = "Cancel";
+"common.done" = "Done";
+"common.confirm" = "Confirm";
+"common.delete" = "Delete";
+"common.copy" = "Copy";
+"common.copied" = "Copied to clipboard";
+"common.save" = "Save";
+"common.share" = "Share";
+"common.back" = "Back";
+"common.go_back" = "Go Back";
+"common.ok" = "OK";
+"common.retry" = "Retry";
+"common.close" = "Close";
+"common.continue" = "Continue";
+"common.success" = "Success";
+
+/* ── Onboarding ── */
+"onboarding.title_1" = "Your Identity, Your Control";
+"onboarding.desc_1" = "SSDID is a self-sovereign identity wallet that puts you in full control of your digital identity. No central authority. No data silos. Just you and your cryptographic keys.";
+"onboarding.title_2" = "Post-Quantum Security";
+"onboarding.desc_2" = "Powered by KAZ-Sign, a post-quantum cryptographic algorithm, alongside classical algorithms like Ed25519 and ECDSA. Your identity stays secure against both current and future threats.";
+"onboarding.title_3" = "Privacy First";
+"onboarding.desc_3" = "Authenticate with services instantly using QR codes and deep links. Register, prove your identity, and sign transactions — all from your device with biometric confirmation.";
+"onboarding.next" = "Next";
+"onboarding.get_started" = "Get Started";
+"onboarding.skip" = "Skip";
+
+/* ── Profile Setup ── */
+"profile.setup_title" = "Set Up Your Profile";
+"profile.name" = "Name";
+"profile.name_placeholder" = "Enter your name";
+"profile.email" = "Email";
+"profile.email_placeholder" = "Enter your email address";
+"profile.continue" = "Continue";
+"profile.save" = "Save";
+
+/* ── Email Verification ── */
+"email_verify.title" = "Email Verification";
+"email_verify.enter_code" = "Enter verification code";
+"email_verify.code_placeholder" = "6-digit code";
+"email_verify.verify" = "Verify";
+"email_verify.resend" = "Resend Code";
+"email_verify.resend_countdown" = "Resend in %d seconds";
+"email_verify.success" = "Email verified successfully";
+"email_verify.invalid_code" = "Invalid verification code";
+
+/* ── Create Identity ── */
+"identity.create_title" = "Create Identity";
+"identity.name_label" = "IDENTITY NAME";
+"identity.name_hint" = "e.g. Personal, Work";
+"identity.algorithm_label" = "SIGNATURE ALGORITHM";
+"identity.create_button" = "Create Identity";
+"identity.creating" = "Generating keys...";
+"identity.create_success" = "Identity created successfully";
+"identity.create_error" = "Failed to create identity";
+"identity.your_identities" = "Your Identities";
+"identity.delete_title" = "Delete Identity";
+"identity.delete_message" = "Are you sure you want to delete this identity? This action cannot be undone.";
+
+/* ── Identity Detail ── */
+"identity_detail.title" = "Identity Detail";
+"identity_detail.did" = "DID";
+"identity_detail.algorithm" = "Algorithm";
+"identity_detail.created" = "Created";
+"identity_detail.public_key" = "Public Key";
+"identity_detail.registrations" = "Registrations";
+
+/* ── Biometric Setup ── */
+"biometric.setup_title" = "Biometric Authentication";
+"biometric.enable" = "Enable Biometric Authentication";
+"biometric.skip" = "Skip for now";
+"biometric.security_info" = "Your biometric data never leaves this device. It is used only to unlock your identity vault.";
+"biometric.not_available" = "Biometric authentication is not available on this device.";
+
+/* ── Wallet Home ── */
+"wallet.title" = "SSDID Wallet";
+"wallet.identity_label" = "IDENTITY WALLET";
+"wallet.app_name" = "SSDID";
+"wallet.my_identities" = "MY IDENTITIES";
+"wallet.new" = "+ New";
+"wallet.create_first" = "Create your first identity";
+"wallet.no_identities" = "No identities yet";
+"wallet.quick_actions" = "QUICK ACTIONS";
+"wallet.scan_qr" = "Scan QR";
+"wallet.credentials" = "Credentials";
+"wallet.history" = "History";
+"wallet.active" = "Active";
+"wallet.settings" = "Settings";
+
+/* ── Scan QR ── */
+"scan.title" = "Scan QR Code";
+"scan.camera_preview" = "Camera Preview";
+"scan.supported_formats" = "SUPPORTED FORMATS";
+"scan.permission_required" = "Camera Permission Required";
+"scan.permission_message" = "Please grant camera permission in your device settings to scan QR codes.";
+"scan.open_settings" = "Open Settings";
+"scan.invalid_qr" = "Invalid QR code format";
+
+/* ── Registration ── */
+"registration.title" = "Service Registration";
+"registration.server_info" = "SERVER INFO";
+"registration.select_identity" = "SELECT IDENTITY";
+"registration.no_identities" = "No identities available";
+"registration.register_button" = "Register with Service";
+"registration.registering" = "Registering\U2026";
+"registration.complete" = "Registration Complete";
+"registration.complete_desc" = "Your identity has been registered with this service.";
+"registration.failed" = "Registration Failed";
+"registration.failed_desc" = "Could not complete registration. Please try again.";
+
+/* ── Authentication ── */
+"auth.title" = "Authentication";
+"auth.sign_in_request" = "Sign In Request";
+"auth.service_request" = "SERVICE REQUEST";
+"auth.select_credential" = "SELECT CREDENTIAL";
+"auth.no_credentials" = "No credentials available";
+"auth.approve" = "Approve";
+"auth.decline" = "Decline";
+"auth.biometric_confirm" = "Biometric Confirmation";
+"auth.biometric_touch" = "Touch sensor to confirm authentication";
+"auth.authenticate_button" = "Authenticate";
+"auth.authenticating" = "Authenticating\U2026";
+"auth.success" = "Authentication Successful";
+"auth.success_desc" = "You have been authenticated with the service.";
+"auth.failed" = "Authentication Failed";
+"auth.failed_desc" = "Could not complete authentication. Please try again.";
+
+/* ── Consent ── */
+"consent.title" = "Consent";
+"consent.requested_information" = "Requested Information";
+"consent.required" = "Required";
+"consent.optional" = "Optional";
+"consent.approve" = "Approve";
+"consent.deny" = "Deny";
+
+/* ── Transaction Signing ── */
+"tx.signing_title" = "Sign Transaction";
+"tx.details" = "TRANSACTION DETAILS";
+"tx.security" = "SECURITY";
+"tx.challenge_expires" = "Challenge expires in";
+"tx.bound_hash" = "Transaction bound to challenge hash";
+"tx.sha3_verify" = "SHA3-256 integrity verification";
+"tx.pqc_available" = "Post-quantum signature (if available)";
+"tx.biometric_required" = "Biometric Required";
+"tx.biometric_touch" = "Touch sensor to authorize signing";
+"tx.sign_button" = "Sign Transaction";
+"tx.reject" = "Reject";
+"tx.signing" = "Signing\U2026";
+"tx.confirmed" = "Transaction Confirmed";
+"tx.confirmed_desc" = "Your transaction has been signed and submitted.";
+"tx.failed" = "Transaction Failed";
+"tx.failed_desc" = "Could not complete transaction signing. Please try again.";
+"tx.challenge_expired" = "Challenge expired. Please scan QR again.";
+
+/* ── Credentials ── */
+"credentials.title" = "Your Credentials";
+"credentials.empty" = "No credentials yet";
+"credentials.empty_desc" = "Credentials issued to you by services will appear here.";
+"credential.detail_title" = "Credential Details";
+"credential.subject" = "CREDENTIAL SUBJECT";
+"credential.claims" = "CLAIMS";
+"credential.no_claims" = "No additional claims";
+"credential.proof" = "PROOF";
+"credential.show_json" = "Show Raw JSON";
+"credential.hide_json" = "Hide Raw JSON";
+"credential.delete_title" = "Delete Credential";
+"credential.delete_message" = "Are you sure you want to delete this credential? This action cannot be undone.";
+"credential.issuer" = "Issuer";
+"credential.issued_date" = "Issued Date";
+"credential.expiry_date" = "Expiry Date";
+"credential.status" = "Status";
+"credential.valid" = "Valid";
+"credential.expired" = "Expired";
+"credential.revoked" = "Revoked";
+
+/* ── Settings ── */
+"settings.title" = "Settings";
+"settings.security" = "SECURITY";
+"settings.biometric" = "Biometric Authentication";
+"settings.auto_lock" = "Auto-lock Timeout";
+"settings.auto_lock_value" = "5 minutes";
+"settings.network" = "NETWORK";
+"settings.registry_url" = "Registry URL";
+"settings.preferences" = "PREFERENCES";
+"settings.language" = "Language";
+"settings.language_value" = "English";
+"settings.notifications" = "Notifications";
+"settings.version" = "Version";
+"settings.version_value" = "1.0.0";
+"settings.about" = "About";
+"settings.export" = "Export Data";
+"settings.reset" = "Reset Wallet";
+"settings.reset_warning" = "This will delete all identities and credentials. This action cannot be undone.";
+
+/* ── Recovery ── */
+"recovery.setup_title" = "Recovery Setup";
+"recovery.key_title" = "Recovery Key";
+"recovery.key_desc" = "Generate offline recovery keypair";
+"recovery.key_badge" = "Recommended";
+"recovery.generate_button" = "Generate Recovery Key";
+"recovery.generating" = "Generating\U2026";
+"recovery.key_store_offline" = "Store this key offline. It cannot be recovered.";
+"recovery.key_label" = "RECOVERY KEY";
+"recovery.copy_clipboard" = "Copy to Clipboard";
+"recovery.configured" = "Configured";
+"recovery.important" = "Important";
+"recovery.timeout" = "Operation timed out. Please try again.";
+"recovery.offline_title" = "Offline Recovery";
+"recovery.offline_desc" = "Recover using your offline recovery key";
+"recovery.social_title" = "Social Recovery";
+"recovery.social_desc" = "Split recovery secret among trusted contacts";
+"recovery.social_badge" = "Advanced";
+"recovery.social_button" = "Set Up Social Recovery";
+"recovery.social_config" = "%d-of-%d guardians";
+"recovery.institutional_title" = "Institutional";
+"recovery.institutional_desc" = "Organization holds recovery authority";
+"recovery.institutional_badge" = "Enterprise";
+"recovery.institutional_button" = "Enroll Organization";
+
+/* ── Social Recovery ── */
+"social.setup_title" = "Social Recovery";
+"social.threshold" = "Threshold";
+"social.threshold_display" = "%d of %d";
+"social.threshold_info" = "Minimum %d guardian(s) needed to recover";
+"social.guardian_label" = "Guardian %d";
+"social.guardian_name" = "Name";
+"social.guardian_did" = "DID";
+"social.remove" = "Remove";
+"social.add_guardian" = "+ Add Guardian";
+"social.create_shares" = "Create Shares";
+"social.creating_shares" = "Creating Shares\U2026";
+"social.success_message" = "Social recovery created successfully";
+"social.distribute_warning" = "Distribute each share to the corresponding guardian securely. Do not store multiple shares together. Each guardian should only receive their own share.";
+"social.share_label" = "SHARE %d";
+"social.copy_share" = "Copy Share";
+"social.confirm_overwrite_title" = "Overwrite Social Recovery?";
+"social.confirm_overwrite_message" = "Social recovery is already configured. Creating new shares will overwrite the existing configuration. Continue?";
+
+/* ── Social Recovery Restore ── */
+"social_restore.title" = "Social Recovery";
+"social_restore.desc" = "Collect shares from your guardians to recover your identity. You need the minimum threshold of shares to reconstruct your recovery key.";
+"social_restore.did_label" = "DID";
+"social_restore.name_label" = "IDENTITY NAME";
+"social_restore.algorithm_label" = "SIGNATURE ALGORITHM";
+"social_restore.shares_label" = "GUARDIAN SHARES";
+"social_restore.share_label" = "Share %d";
+"social_restore.share_index_hint" = "Share index (number)";
+"social_restore.share_data_hint" = "Paste Base64 share data";
+"social_restore.add_share" = "+ Add Share";
+"social_restore.recovering" = "Recovering\U2026";
+"social_restore.recover_button" = "Recover Identity";
+"social_restore.success_title" = "Identity Restored";
+"social_restore.success_desc" = "Your identity has been recovered using guardian shares.";
+
+/* ── Institutional Recovery ── */
+"institutional.title" = "Institutional Recovery";
+"institutional.desc" = "Enroll an organization as a recovery custodian. The organization will hold an encrypted copy of your recovery key and can assist with identity recovery after verifying your identity through their KYC process.";
+"institutional.no_recovery_key" = "A recovery key must be generated before enrolling an organization. Go to Recovery Setup to generate one first.";
+"institutional.org_name_label" = "Organization Name";
+"institutional.org_did_label" = "Organization DID";
+"institutional.org_did_hint" = "did:ssdid:\U2026";
+"institutional.encrypted_key_label" = "Encrypted Recovery Key";
+"institutional.encrypted_key_hint" = "Paste encrypted recovery key";
+"institutional.enroll_button" = "Enroll Organization";
+"institutional.enrolling" = "Enrolling\U2026";
+"institutional.enrolled" = "Organization Enrolled";
+"institutional.confirm_overwrite_title" = "Overwrite Enrollment?";
+"institutional.confirm_overwrite_message" = "An organization is already enrolled for recovery. Re-enrolling will overwrite the existing configuration. Continue?";
+
+/* ── Restore ── */
+"restore.title" = "Restore Identity";
+"restore.desc" = "Enter your DID and recovery key to restore access on this device.";
+"restore.social_title" = "Social Recovery";
+"restore.social_desc" = "Recover using guardian shares";
+"restore.or_recovery_key" = "or use recovery key";
+"restore.recovery_key_label" = "RECOVERY KEY (BASE64)";
+"restore.recovery_key_hint" = "Paste your recovery private key";
+"restore.restoring" = "Restoring\U2026";
+"restore.button" = "Restore Identity";
+"restore.success_title" = "Identity Restored";
+"restore.success_desc" = "Your identity has been recovered successfully.";
+
+/* ── Backup ── */
+"backup.title" = "Backup";
+"backup.create" = "Create Backup";
+"backup.restore" = "Restore from Backup";
+"backup.passphrase" = "Passphrase";
+"backup.passphrase_placeholder" = "Enter a strong passphrase";
+"backup.passphrase_confirm" = "Confirm Passphrase";
+"backup.to_cloud" = "Backup to Cloud";
+"backup.return_to_drive" = "Return to SSDID Drive";
+"backup.success" = "Backup created successfully";
+"backup.restore_success" = "Backup restored successfully";
+
+/* ── Device Management ── */
+"device.title" = "Devices";
+"device.add" = "Add Device";
+"device.remove" = "Remove Device";
+"device.remove_confirm" = "Are you sure you want to remove this device?";
+"device.current" = "Current Device";
+"device.last_active" = "Last active";
+
+/* ── Activity History ── */
+"history.title" = "Activity History";
+"history.empty" = "No activity yet";
+"history.empty_desc" = "Your identity and transaction history will appear here.";
+"history.registration" = "Registration";
+"history.authentication" = "Authentication";
+"history.transaction" = "Transaction";
+"history.credential_issued" = "Credential Issued";
+
+/* ── Registration Steps ── */
+"step.connecting" = "Connecting";
+"step.mutual_auth" = "Mutual Auth";
+"step.identity_select" = "Identity Select";
+"step.complete" = "Complete";
+
+/* ── Algorithm Names ── */
+"algorithm.ed25519" = "Ed25519";
+"algorithm.ecdsa_p256" = "ECDSA P-256";
+"algorithm.ecdsa_p384" = "ECDSA P-384";
+"algorithm.kaz_sign_128" = "KAZ-Sign 128";
+"algorithm.kaz_sign_192" = "KAZ-Sign 192";
+"algorithm.kaz_sign_256" = "KAZ-Sign 256";
+
+/* ── Content Descriptions (Accessibility) ── */
+"a11y.navigate_back" = "Navigate back";
+"a11y.decrease_threshold" = "Decrease threshold";
+"a11y.increase_threshold" = "Increase threshold";
+"a11y.remove_guardian" = "Remove guardian %d";
+"a11y.remove_share" = "Remove share %d";
+"a11y.select_algorithm" = "Select %@ algorithm";
+"a11y.success_icon" = "Success";
+"a11y.loading" = "Loading";

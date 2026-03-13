@@ -44,7 +44,7 @@ class BackupViewModelTest {
     @Test
     fun `createBackup success sets state to Success with backup bytes`() = runTest {
         val backupBytes = byteArrayOf(1, 2, 3, 4, 5)
-        coEvery { backupManager.createBackup("passphrase") } returns Result.success(backupBytes)
+        coEvery { backupManager.createBackup(any<CharArray>()) } returns Result.success(backupBytes)
 
         viewModel.createBackup("passphrase")
 
@@ -56,7 +56,7 @@ class BackupViewModelTest {
 
     @Test
     fun `createBackup failure sets Error state`() = runTest {
-        coEvery { backupManager.createBackup("bad") } returns Result.failure(
+        coEvery { backupManager.createBackup(any<CharArray>()) } returns Result.failure(
             RuntimeException("No identities to back up")
         )
 
@@ -70,7 +70,7 @@ class BackupViewModelTest {
     @Test
     fun `restoreBackup success sets RestoreSuccess with count`() = runTest {
         val backupData = byteArrayOf(10, 20, 30)
-        coEvery { backupManager.restoreBackup(backupData, "passphrase") } returns Result.success(3)
+        coEvery { backupManager.restoreBackup(backupData, any<CharArray>()) } returns Result.success(3)
 
         viewModel.restoreBackup(backupData, "passphrase")
 
@@ -82,7 +82,7 @@ class BackupViewModelTest {
     @Test
     fun `restoreBackup failure sets Error state`() = runTest {
         val backupData = byteArrayOf(10, 20, 30)
-        coEvery { backupManager.restoreBackup(backupData, "wrong") } returns Result.failure(
+        coEvery { backupManager.restoreBackup(backupData, any<CharArray>()) } returns Result.failure(
             RuntimeException("HMAC verification failed")
         )
 
@@ -96,7 +96,7 @@ class BackupViewModelTest {
     @Test
     fun `resetState sets Idle`() = runTest {
         val backupBytes = byteArrayOf(1, 2, 3)
-        coEvery { backupManager.createBackup("pass") } returns Result.success(backupBytes)
+        coEvery { backupManager.createBackup(any<CharArray>()) } returns Result.success(backupBytes)
         viewModel.createBackup("pass")
         assertThat(viewModel.state.value).isInstanceOf(BackupState.Success::class.java)
 
@@ -108,7 +108,7 @@ class BackupViewModelTest {
     @Test
     fun `restoreBackup via loaded file bytes`() = runTest {
         val fileBytes = byteArrayOf(5, 6, 7)
-        coEvery { backupManager.restoreBackup(fileBytes, "pass") } returns Result.success(2)
+        coEvery { backupManager.restoreBackup(fileBytes, any<CharArray>()) } returns Result.success(2)
 
         viewModel.onBackupFileLoaded(fileBytes)
         viewModel.restoreBackup("pass")
@@ -123,7 +123,7 @@ class BackupViewModelTest {
     @Test
     fun `onBackupSaved clears lastBackupBytes`() = runTest {
         val backupBytes = byteArrayOf(1, 2, 3)
-        coEvery { backupManager.createBackup("pass") } returns Result.success(backupBytes)
+        coEvery { backupManager.createBackup(any<CharArray>()) } returns Result.success(backupBytes)
         viewModel.createBackup("pass")
         assertThat(viewModel.lastBackupBytes).isNotNull()
 
@@ -160,7 +160,7 @@ class BackupViewModelTest {
     fun `restoreBackup with explicit bytes does not clear loadedFileBytes`() = runTest {
         val fileBytes = byteArrayOf(5, 6, 7)
         val restoreBytes = byteArrayOf(9, 10, 11)
-        coEvery { backupManager.restoreBackup(restoreBytes, "pass") } returns Result.success(1)
+        coEvery { backupManager.restoreBackup(restoreBytes, any<CharArray>()) } returns Result.success(1)
 
         viewModel.onBackupFileLoaded(fileBytes)
         viewModel.restoreBackup(restoreBytes, "pass")
