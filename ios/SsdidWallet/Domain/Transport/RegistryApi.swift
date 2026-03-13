@@ -1,7 +1,7 @@
 import Foundation
 
 /// Registry API client for DID operations and device pairing.
-final class RegistryApi {
+final class RegistryApi: @unchecked Sendable {
 
     private let client: SsdidHttpClient
     private let baseURL: String

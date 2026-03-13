@@ -2,7 +2,7 @@ import Foundation
 
 /// Email verification API client for `wallet.ssdid.my`.
 /// Uses its own encoder/decoder (camelCase) instead of SsdidHttpClient's (snake_case).
-final class EmailApi {
+final class EmailApi: @unchecked Sendable {
 
     private let baseURL: String
     private let session: URLSession

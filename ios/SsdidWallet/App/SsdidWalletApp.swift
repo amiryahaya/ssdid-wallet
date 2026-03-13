@@ -51,11 +51,12 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         print("[NotifyManager] APNs registration failed: \(error.localizedDescription)")
         #endif
     }
+
 }
 
 // MARK: - UNUserNotificationCenterDelegate
 
-extension AppDelegate: UNUserNotificationCenterDelegate {
+extension AppDelegate: @preconcurrency UNUserNotificationCenterDelegate {
     /// Called when a notification arrives while the app is in the foreground.
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,

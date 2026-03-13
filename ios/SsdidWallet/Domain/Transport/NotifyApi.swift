@@ -2,7 +2,7 @@ import Foundation
 
 /// API client for the SSDID Notify push notification relay service.
 /// Mirrors the pattern of ServerApi and RegistryApi — takes SsdidHttpClient and a base URL.
-final class NotifyApi {
+final class NotifyApi: @unchecked Sendable {
 
     private let client: SsdidHttpClient
     private let baseURL: String

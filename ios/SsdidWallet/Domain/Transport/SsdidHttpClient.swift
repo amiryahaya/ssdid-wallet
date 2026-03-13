@@ -33,7 +33,7 @@ enum NetworkResult<T> {
 }
 
 /// URLSession-based HTTP client for SSDID Registry, Server, and Drive APIs.
-final class SsdidHttpClient {
+final class SsdidHttpClient: @unchecked Sendable {
 
     let registryBaseURL: String
     private let session: URLSession

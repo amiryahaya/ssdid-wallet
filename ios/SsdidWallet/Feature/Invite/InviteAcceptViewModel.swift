@@ -35,10 +35,6 @@ final class InviteAcceptViewModel {
         self.services = services
     }
 
-    deinit {
-        acceptTask?.cancel()
-    }
-
     // MARK: - Public
 
     func cancelAccept() {

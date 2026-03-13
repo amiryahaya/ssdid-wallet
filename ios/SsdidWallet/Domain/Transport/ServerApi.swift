@@ -1,7 +1,7 @@
 import Foundation
 
 /// Service/Server API client for registration, authentication, and transaction signing.
-final class ServerApi {
+final class ServerApi: @unchecked Sendable {
 
     private let client: SsdidHttpClient
     private let baseURL: String

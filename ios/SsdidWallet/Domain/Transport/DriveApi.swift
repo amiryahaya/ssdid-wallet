@@ -1,7 +1,7 @@
 import Foundation
 
 /// Drive API client for SSDID Drive registration, verification, and authentication.
-final class DriveApi {
+final class DriveApi: @unchecked Sendable {
 
     private let client: SsdidHttpClient
     private let baseURL: String
