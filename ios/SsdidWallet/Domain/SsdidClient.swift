@@ -73,18 +73,8 @@ final class SsdidClient: @unchecked Sendable {
                 domain: nil
             )
 
-            // DEBUG: remove after fixing proof verification
-            let debugRequest = RegisterDidRequest(didDocument: didDoc, proof: proof)
-            if let debugData = try? JSONEncoder().encode(debugRequest),
-               let debugStr = String(data: debugData, encoding: .utf8) {
-                print("=== REGISTER REQUEST DEBUG ===")
-                print("REQUEST BODY: \(debugStr)")
-                print("PUBLIC KEY MULTIBASE: \(identity.publicKeyMultibase)")
-                print("ALGORITHM: \(identity.algorithm.rawValue)")
-                print("==============================")
-            }
-
-            _ = try await httpClient.registry.registerDid(request: debugRequest)
+            let request = RegisterDidRequest(didDocument: didDoc, proof: proof)
+            _ = try await httpClient.registry.registerDid(request: request)
         } catch {
             // Roll back: remove the locally saved identity on failure
             try? await vault.deleteIdentity(keyId: identity.keyId)

@@ -12,6 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.platform.LocalView
+import my.ssdid.wallet.ui.components.HapticManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -86,13 +90,17 @@ fun IdentityDetailScreen(
     val identity by viewModel.identity.collectAsState()
     val error by viewModel.error.collectAsState()
     val isDeactivating by viewModel.isDeactivating.collectAsState()
+    val view = LocalView.current
 
     Column(Modifier.fillMaxSize().background(BgPrimary).statusBarsPadding()) {
         Row(
             Modifier.padding(start = 8.dp, end = 20.dp, top = 12.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
+            IconButton(
+                onClick = onBack,
+                modifier = Modifier.semantics { contentDescription = "Back" }
+            ) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
             Spacer(Modifier.width(4.dp))
             Text("Identity Details", style = MaterialTheme.typography.titleLarge)
         }
@@ -157,6 +165,10 @@ fun IdentityDetailScreen(
                                         onClick = {
                                             clipboardManager.setText(AnnotatedString(id.did))
                                             didCopied = true
+                                            HapticManager.success(view)
+                                        },
+                                        modifier = Modifier.semantics {
+                                            contentDescription = if (didCopied) "DID copied" else "Copy DID"
                                         },
                                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
                                     ) {
@@ -208,7 +220,9 @@ fun IdentityDetailScreen(
 
                     Button(
                         onClick = { showDeactivateDialog = true },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().semantics {
+                            contentDescription = if (isDeactivating) "Deactivating identity" else "Deactivate identity"
+                        },
                         enabled = !isDeactivating,
                         colors = ButtonDefaults.buttonColors(containerColor = Danger),
                         shape = RoundedCornerShape(12.dp)
@@ -266,7 +280,9 @@ fun IdentityDetailScreen(
 @Composable
 fun ActionCard(icon: String, label: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Card(
-        modifier = modifier.clickable(onClick = onClick),
+        modifier = modifier
+            .clickable(onClick = onClick)
+            .semantics { contentDescription = label },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = BgCard)
     ) {

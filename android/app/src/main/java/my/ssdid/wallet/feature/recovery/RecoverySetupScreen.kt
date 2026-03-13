@@ -36,6 +36,8 @@ import my.ssdid.wallet.domain.recovery.social.SocialRecoveryManager
 import my.ssdid.wallet.domain.recovery.institutional.InstitutionalRecoveryManager
 import my.ssdid.wallet.domain.recovery.institutional.OrgRecoveryConfig
 import my.ssdid.wallet.domain.vault.Vault
+import androidx.compose.ui.platform.LocalView
+import my.ssdid.wallet.ui.components.HapticManager
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
 
@@ -136,6 +138,7 @@ fun RecoverySetupScreen(
     val hasInstitutionalRecovery by viewModel.hasInstitutionalRecovery.collectAsState()
     val orgConfig by viewModel.orgConfig.collectAsState()
     val clipboardManager = LocalClipboardManager.current
+    val view = LocalView.current
 
     Column(
         modifier = Modifier
@@ -217,7 +220,10 @@ fun RecoverySetupScreen(
                             )
                             Spacer(Modifier.height(12.dp))
                             Button(
-                                onClick = { clipboardManager.setText(AnnotatedString(keyBase64)) },
+                                onClick = {
+                                    clipboardManager.setText(AnnotatedString(keyBase64))
+                                    HapticManager.success(view)
+                                },
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(12.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = Accent)

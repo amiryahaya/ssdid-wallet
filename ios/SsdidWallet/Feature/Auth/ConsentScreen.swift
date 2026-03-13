@@ -45,6 +45,7 @@ struct ConsentScreen: View {
                         .foregroundStyle(Color.textPrimary)
                         .font(.system(size: 20))
                 }
+                .accessibilityLabel("Back")
                 .padding(.leading, 8)
 
                 Text("Sign In Request")
@@ -223,6 +224,7 @@ struct ConsentScreen: View {
             HStack(spacing: 8) {
                 Image(systemName: isSelected ? "checkmark.square.fill" : "square")
                     .foregroundStyle(isSelected ? Color.ssdidAccent : Color.textTertiary)
+                    .accessibilityLabel(isSelected ? "\(claim.key.capitalized) selected" : "\(claim.key.capitalized) not selected")
                 Text(claim.key.capitalized)
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(Color.textPrimary)

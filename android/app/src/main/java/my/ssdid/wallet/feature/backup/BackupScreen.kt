@@ -38,6 +38,10 @@ import my.ssdid.wallet.R
 import my.ssdid.wallet.domain.backup.BackupManager
 import my.ssdid.wallet.platform.biometric.BiometricAuthenticator
 import my.ssdid.wallet.platform.biometric.BiometricResult
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.ui.platform.LocalView
+import my.ssdid.wallet.ui.components.HapticManager
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
 
@@ -149,6 +153,12 @@ fun BackupScreen(
     val context = LocalContext.current
     val activity = context as? FragmentActivity
     val scope = rememberCoroutineScope()
+    val view = LocalView.current
+
+    // Haptic feedback on backup success
+    LaunchedEffect(state) {
+        if (state is BackupState.Success) HapticManager.success(view)
+    }
 
     // Auto-load backup file from share intent
     LaunchedEffect(viewModel.restoreUri) {
@@ -206,7 +216,7 @@ fun BackupScreen(
             Modifier.padding(start = 8.dp, end = 20.dp, top = 12.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
+            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary) }
             Spacer(Modifier.width(4.dp))
             Text("Backup & Export", style = MaterialTheme.typography.titleLarge)
         }

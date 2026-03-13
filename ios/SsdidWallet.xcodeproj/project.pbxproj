@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 63;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -24,6 +24,7 @@
 		13B758B70FCD797CD6EE099B /* InviteAcceptScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08F034773ABB5E39DD6D2B98 /* InviteAcceptScreen.swift */; };
 		169EAD5448E2582A0272D8B5 /* LocalizationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85DBFFB49B4FA5F0DDFA24B9 /* LocalizationManager.swift */; };
 		197A4201EE2A32276DD1530B /* Identity.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9A67835B6BAF26E99D578B1 /* Identity.swift */; };
+		1FACF123F17B72A56727BE87 /* SplashScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDC68C254CEB3F320CBFBE7E /* SplashScreen.swift */; };
 		21B97926CB51352CFFB9E420 /* WalletHomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56EA9DC9B66504E93267F77 /* WalletHomeScreen.swift */; };
 		255CBCAB77A910221B9DAC77 /* RevocationStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = E777CBF4BA31F05818B6C2EA /* RevocationStatus.swift */; };
 		25AD2A523EEBFDC66A768E73 /* AuthDtos.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8497FA480DAA74E7A5975EF8 /* AuthDtos.swift */; };
@@ -57,6 +58,7 @@
 		6A4D667049E9CF9F59E830C1 /* ProfileSetupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A7FAD32A652C96C229BEFE1 /* ProfileSetupScreen.swift */; };
 		74EE9B21FBCA1154E153B470 /* InviteDtos.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60C3A0304CF888F4F7D320CF /* InviteDtos.swift */; };
 		79656CCF74D5A25CB61B6272 /* InstitutionalSetupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C5771B6AC99929644562CF2 /* InstitutionalSetupScreen.swift */; };
+		7ABEBA22B98BE157D6EC5516 /* DidText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77A4AA06B8FF7C5FED101C29 /* DidText.swift */; };
 		7B50D8AC6DD18748DFC61C31 /* RevocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12D666A531A1CFAE8BDDCB22 /* RevocationManager.swift */; };
 		7BFF9EB410CF2111C1CD1302 /* TxHistoryScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2057980C3D89E456B7B639 /* TxHistoryScreen.swift */; };
 		7CA202C67D41F6052CE61DBC /* CredentialsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 021037A350A22341955C2E0D /* CredentialsScreen.swift */; };
@@ -84,6 +86,7 @@
 		B3FCBCA9E9E2A6A8F706161D /* ActivityRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5369E28526160FBC85378310 /* ActivityRecord.swift */; };
 		B4C1D4625F2A190095E6AFAD /* PqcProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3E735422C0CDF5B1A4CBEBA /* PqcProvider.swift */; };
 		B6259B9205C85DF4B4878784 /* KeychainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61EBC3510481A2B45D35D87D /* KeychainManager.swift */; };
+		B867682F2EAF19D8DD36A1EB /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45A68D4662AA1416242F3CD7 /* HapticManager.swift */; };
 		B8840C467479EA1EC2505D83 /* ActivityType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C25A893DCDF6F5201781254 /* ActivityType.swift */; };
 		B895B4851B52436AC5F68CD1 /* SsdidButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9454974AB83D4F413F66322 /* SsdidButton.swift */; };
 		B8998384A47A46D68B2707B5 /* Verifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD151205BA7415914053A8C /* Verifier.swift */; };
@@ -157,6 +160,7 @@
 		3D296D81D371037D0C6D38E7 /* DidDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DidDocument.swift; sourceTree = "<group>"; };
 		3FD3519F651716B6884707CA /* Vault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vault.swift; sourceTree = "<group>"; };
 		40A21FD338C737BE0E74AD2F /* BackupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupScreen.swift; sourceTree = "<group>"; };
+		45A68D4662AA1416242F3CD7 /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
 		45B7A80A92BA2FB3FDED8C4A /* SsdidClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SsdidClient.swift; sourceTree = "<group>"; };
 		468C6C6FF4716060B7EA0F53 /* ErrorBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorBanner.swift; sourceTree = "<group>"; };
 		469C289290048CAF9CD26E06 /* RegistryApi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistryApi.swift; sourceTree = "<group>"; };
@@ -181,11 +185,12 @@
 		6E60BFD3B53256F03BE345D0 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		729A1723ECFC5D9130597F2C /* CredentialOfferScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialOfferScreen.swift; sourceTree = "<group>"; };
 		735E80AA04A687A9984E6D05 /* ScanQrScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanQrScreen.swift; sourceTree = "<group>"; };
+		77A4AA06B8FF7C5FED101C29 /* DidText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DidText.swift; sourceTree = "<group>"; };
 		77C306D244AD5CD428551152 /* OnboardingScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScreen.swift; sourceTree = "<group>"; };
 		7EAD0D784DAA5FDDC605B566 /* DeviceInfoProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceInfoProvider.swift; sourceTree = "<group>"; };
 		8497FA480DAA74E7A5975EF8 /* AuthDtos.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthDtos.swift; sourceTree = "<group>"; };
 		85DBFFB49B4FA5F0DDFA24B9 /* LocalizationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationManager.swift; sourceTree = "<group>"; };
-		893874D5D6CAFB993028741F /* SsdidWallet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SsdidWallet.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		893874D5D6CAFB993028741F /* SsdidWallet.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SsdidWallet.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8AFB02858179C279940E04D0 /* VaultImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultImpl.swift; sourceTree = "<group>"; };
 		8E1FEF511A129675E5A9B796 /* CryptoProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CryptoProvider.swift; sourceTree = "<group>"; };
 		9190E3BB5E3D6CE7CFEE29A7 /* RegistrationScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationScreen.swift; sourceTree = "<group>"; };
@@ -222,6 +227,7 @@
 		E59859DA28D69CD47737C4E7 /* StatusListCredential.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusListCredential.swift; sourceTree = "<group>"; };
 		E777CBF4BA31F05818B6C2EA /* RevocationStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RevocationStatus.swift; sourceTree = "<group>"; };
 		E8CF6BA0086CD4502FB8565D /* LibOQS */ = {isa = PBXFileReference; lastKnownFileType = folder; name = LibOQS; path = Packages/LibOQS; sourceTree = SOURCE_ROOT; };
+		EDC68C254CEB3F320CBFBE7E /* SplashScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashScreen.swift; sourceTree = "<group>"; };
 		F06FFAF61D17CC664B493C24 /* Multibase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Multibase.swift; sourceTree = "<group>"; };
 		F0E6EBABAE6BD4EEA037DFC3 /* SettingsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsScreen.swift; sourceTree = "<group>"; };
 		F10F90351F1D90FBE4320F87 /* EmailApi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailApi.swift; sourceTree = "<group>"; };
@@ -410,6 +416,7 @@
 				1E95C6EA473EB5679AB47721 /* Registration */,
 				2A58E4B012DCB3215AFB7C1E /* Scan */,
 				87907F25B1EA3BBBC101EE19 /* Settings */,
+				4F87820D519A10374CFDCB11 /* Splash */,
 				2D111675C59D7C6FA5EB7557 /* Transaction */,
 			);
 			path = Feature;
@@ -431,6 +438,14 @@
 				3B00C2D5E6A165D21C92284D /* UrlValidator.swift */,
 			);
 			path = Security;
+			sourceTree = "<group>";
+		};
+		4F87820D519A10374CFDCB11 /* Splash */ = {
+			isa = PBXGroup;
+			children = (
+				EDC68C254CEB3F320CBFBE7E /* SplashScreen.swift */,
+			);
+			path = Splash;
 			sourceTree = "<group>";
 		};
 		528447F63ADF7513A3154AED /* Notify */ = {
@@ -491,7 +506,9 @@
 			isa = PBXGroup;
 			children = (
 				BEB759342B72885647D00887 /* AlgorithmBadge.swift */,
+				77A4AA06B8FF7C5FED101C29 /* DidText.swift */,
 				468C6C6FF4716060B7EA0F53 /* ErrorBanner.swift */,
+				45A68D4662AA1416242F3CD7 /* HapticManager.swift */,
 				0F93C6E13677EB154FBBB40D /* LoadingView.swift */,
 				C9454974AB83D4F413F66322 /* SsdidButton.swift */,
 				C51A6079AF1281D4E01E6A92 /* SsdidCard.swift */,
@@ -855,6 +872,7 @@
 				695D9D513ADCFB1F8530F0E3 /* XCLocalSwiftPackageReference "Packages/KazSign" */,
 				C739842A39A966593F976862 /* XCLocalSwiftPackageReference "Packages/LibOQS" */,
 			);
+			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -927,11 +945,13 @@
 				7EEE3F2F01DD1094C3F2D475 /* DeviceManagementScreen.swift in Sources */,
 				3649F2B3063BAF4BABA09AF1 /* Did.swift in Sources */,
 				092ED1F41BCC4D09ECF24B54 /* DidDocument.swift in Sources */,
+				7ABEBA22B98BE157D6EC5516 /* DidText.swift in Sources */,
 				8E5A377CDAF31EC2FEF0332B /* DriveApi.swift in Sources */,
 				D989D08588436CE47AFF1FFE /* DriveLoginScreen.swift in Sources */,
 				4C98E5B6A8C5BE3B72A252A4 /* EmailApi.swift in Sources */,
 				457777DF1FABA4A8A9396565 /* EmailVerificationScreen.swift in Sources */,
 				93505B75FC8924C7B13E70F7 /* ErrorBanner.swift in Sources */,
+				B867682F2EAF19D8DD36A1EB /* HapticManager.swift in Sources */,
 				042ED673CBDAB0C431FEAE98 /* HttpStatusListFetcher.swift in Sources */,
 				197A4201EE2A32276DD1530B /* Identity.swift in Sources */,
 				53D109D974591EA50D286C56 /* IdentityDetailScreen.swift in Sources */,
@@ -969,6 +989,7 @@
 				5D728E0A6D5EBFE5DA285DA4 /* SettingsScreen.swift in Sources */,
 				AE04AEE94142B6B4C7AB5717 /* SocialRecoveryRestoreScreen.swift in Sources */,
 				D73FFD574B9C8CD9B5DC2D01 /* SocialRecoverySetupScreen.swift in Sources */,
+				1FACF123F17B72A56727BE87 /* SplashScreen.swift in Sources */,
 				B895B4851B52436AC5F68CD1 /* SsdidButton.swift in Sources */,
 				32761BFB6C28964C0239A94A /* SsdidCard.swift in Sources */,
 				0A31E18B806C2ECDEB677F29 /* SsdidClient.swift in Sources */,
@@ -1097,14 +1118,14 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SsdidWallet.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SsdidWallet/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = SSDID;
+				INFOPLIST_KEY_CFBundleDisplayName = "SSDID Wallet";
 				INFOPLIST_KEY_NSCameraUsageDescription = "SSDID Wallet needs camera access to scan QR codes for identity verification and service registration.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "SSDID Wallet uses Face ID to protect your decentralized identity and authorize transactions.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = NO;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1113,10 +1134,6 @@
 				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = my.ssdid.wallet;
 				SDKROOT = iphoneos;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_STRICT_CONCURRENCY = minimal;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -1213,14 +1230,14 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SsdidWallet.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SsdidWallet/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = SSDID;
+				INFOPLIST_KEY_CFBundleDisplayName = "SSDID Wallet";
 				INFOPLIST_KEY_NSCameraUsageDescription = "SSDID Wallet needs camera access to scan QR codes for identity verification and service registration.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "SSDID Wallet uses Face ID to protect your decentralized identity and authorize transactions.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = NO;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1229,10 +1246,6 @@
 				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = my.ssdid.wallet;
 				SDKROOT = iphoneos;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_STRICT_CONCURRENCY = minimal;
 				TARGETED_DEVICE_FAMILY = 1;

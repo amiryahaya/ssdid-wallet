@@ -3,28 +3,43 @@ import SwiftUI
 struct RootView: View {
     @EnvironmentObject var coordinator: AppCoordinator
     @State private var router = AppRouter()
+    @State private var showSplash = true
 
     var body: some View {
-        NavigationStack(path: $router.navigationPath) {
-            Group {
-                if coordinator.isOnboarded {
-                    routeDestination(for: .walletHome)
-                } else {
-                    routeDestination(for: .onboarding)
+        ZStack {
+            NavigationStack(path: $router.navigationPath) {
+                Group {
+                    if coordinator.isOnboarded {
+                        routeDestination(for: .walletHome)
+                    } else {
+                        routeDestination(for: .onboarding)
+                    }
                 }
+                .navigationDestination(for: Route.self) { route in
+                    routeDestination(for: route)
+                        .navigationBarBackButtonHidden(true)
+                }
+                .navigationBarBackButtonHidden(true)
             }
-            .navigationDestination(for: Route.self) { route in
-                routeDestination(for: route)
-                    .navigationBarBackButtonHidden(true)
+            .environment(router)
+            .ssdidTheme()
+            .onChange(of: coordinator.pendingDeepLink) { _, newURL in
+                guard let url = newURL else { return }
+                _ = coordinator.consumeDeepLink()
+                routeDeepLink(url)
             }
-            .navigationBarBackButtonHidden(true)
+
+            if showSplash {
+                SplashScreen()
+                    .transition(.opacity)
+                    .zIndex(1)
+            }
         }
-        .environment(router)
-        .ssdidTheme()
-        .onChange(of: coordinator.pendingDeepLink) { _, newURL in
-            guard let url = newURL else { return }
-            _ = coordinator.consumeDeepLink()
-            routeDeepLink(url)
+        .task {
+            try? await Task.sleep(for: .seconds(1.5))
+            withAnimation(.easeOut(duration: 0.4)) {
+                showSplash = false
+            }
         }
     }
 

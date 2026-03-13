@@ -14,6 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -22,6 +24,10 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import my.ssdid.wallet.domain.model.Identity
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Fingerprint
 import my.ssdid.wallet.ui.theme.*
 import java.util.Locale
 
@@ -67,7 +73,7 @@ fun ConsentScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
-                Text("\u2190", color = TextPrimary, fontSize = 20.sp)
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
             }
             Spacer(Modifier.width(4.dp))
             Text("Sign In Request", style = MaterialTheme.typography.titleLarge)
@@ -86,7 +92,7 @@ fun ConsentScreen(
                     Modifier.padding(14.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("\u2717", fontSize = 16.sp, color = Danger, fontWeight = FontWeight.Bold)
+                    Icon(Icons.Default.Close, contentDescription = "Error", modifier = Modifier.size(16.dp), tint = Danger)
                     Spacer(Modifier.width(10.dp))
                     Text(
                         (state as ConsentState.Error).message,
@@ -209,10 +215,16 @@ fun ConsentScreen(
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(containerColor = BgCard)
                 ) {
+                    val claimLabel = claim.key.replaceFirstChar {
+                        if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
+                    }
                     Row(
                         Modifier
                             .clickable(enabled = !claim.required && !isSubmitting) {
                                 viewModel.toggleClaim(claim.key)
+                            }
+                            .semantics {
+                                contentDescription = "$claimLabel, ${if (isSelected) "selected" else "not selected"}, ${if (claim.required) "required" else "optional"}"
                             }
                             .padding(14.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -278,7 +290,7 @@ fun ConsentScreen(
                                 .background(AccentDim),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("\uD83D\uDD13", fontSize = 18.sp)
+                            Icon(Icons.Default.Fingerprint, contentDescription = "Biometric authentication", modifier = Modifier.size(18.dp), tint = Accent)
                         }
                         Spacer(Modifier.width(12.dp))
                         Column {
@@ -361,7 +373,10 @@ private fun IdentityCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(enabled = enabled, onClick = onClick),
+            .clickable(enabled = enabled, onClick = onClick)
+            .semantics {
+                contentDescription = "${identity.name}, ${if (isSelected) "selected" else "not selected"}"
+            },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected) AccentDim else BgCard

@@ -11,6 +11,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,6 +25,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import my.ssdid.wallet.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.vault.Vault
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import my.ssdid.wallet.ui.components.truncatedDid
 import my.ssdid.wallet.ui.theme.*
 import java.time.Instant
 import javax.inject.Inject
@@ -49,7 +55,7 @@ fun CredentialsScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
-                Text("\u2190", color = TextPrimary, fontSize = 20.sp)
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
             }
             Spacer(Modifier.width(4.dp))
             Text("Credentials", style = MaterialTheme.typography.titleLarge)
@@ -60,8 +66,12 @@ fun CredentialsScreen(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             items(credentials) { vc ->
+                val credType = vc.type.lastOrNull() ?: "Credential"
                 Card(
-                    Modifier.fillMaxWidth().clickable { onCredentialClick(vc.id) },
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable { onCredentialClick(vc.id) }
+                        .semantics { contentDescription = "$credType from ${vc.issuer}" },
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = BgCard)
                 ) {
@@ -78,7 +88,7 @@ fun CredentialsScreen(
                                 }
                             }
                             Spacer(Modifier.height(4.dp))
-                            Text(vc.id.takeLast(20), style = MaterialTheme.typography.headlineSmall)
+                            Text(vc.id.truncatedDid(), style = MaterialTheme.typography.headlineSmall)
                             Spacer(Modifier.height(4.dp))
                             Text("Issuer: ${vc.issuer}", fontFamily = FontFamily.Monospace, fontSize = 11.sp, color = TextTertiary, maxLines = 1)
                             Spacer(Modifier.height(8.dp))
@@ -93,11 +103,35 @@ fun CredentialsScreen(
 
             if (credentials.isEmpty()) {
                 item {
-                    Box(
-                        Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(BgCard).padding(32.dp),
-                        contentAlignment = Alignment.Center
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(BgCard)
+                            .padding(32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text("No credentials yet", color = TextSecondary)
+                        Box(
+                            modifier = Modifier
+                                .size(64.dp)
+                                .clip(CircleShape)
+                                .background(AccentDim),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("\uD83D\uDCC4", fontSize = 28.sp)
+                        }
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            "No credentials yet",
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = TextPrimary
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            "Register with a service to receive your first credential",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextSecondary
+                        )
                     }
                 }
             }

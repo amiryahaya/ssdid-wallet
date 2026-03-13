@@ -163,15 +163,6 @@ final class VaultImpl: Vault, @unchecked Sendable {
         var payload = optionsHash
         payload.append(docHash)
 
-        // DEBUG: remove after fixing proof verification
-        print("=== PROOF DEBUG ===")
-        print("OPTIONS JSON: \(optionsJson)")
-        print("DOC JSON: \(docJson)")
-        print("OPTIONS HASH: \(optionsHash.map { String(format: "%02x", $0) }.joined())")
-        print("DOC HASH: \(docHash.map { String(format: "%02x", $0) }.joined())")
-        print("PAYLOAD (\(payload.count) bytes): \(payload.map { String(format: "%02x", $0) }.joined())")
-        print("===================")
-
         let signatureData = try await sign(keyId: keyId, data: payload)
 
         return Proof(

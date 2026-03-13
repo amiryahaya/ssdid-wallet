@@ -67,9 +67,8 @@ struct OnboardingScreen: View {
                 router.push(.backupExport())
             } label: {
                 Text("Restore from Backup")
-                    .font(.ssdidCaption)
-                    .foregroundStyle(Color.textSecondary)
             }
+            .buttonStyle(.ssdidSecondary)
             .padding(.horizontal, 20)
             .padding(.bottom, 32)
             .padding(.top, 8)

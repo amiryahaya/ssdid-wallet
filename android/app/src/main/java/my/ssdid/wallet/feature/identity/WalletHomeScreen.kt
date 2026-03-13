@@ -11,6 +11,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -26,6 +28,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.vault.Vault
+import androidx.compose.foundation.shape.CircleShape
+import my.ssdid.wallet.ui.components.truncatedDid
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
 
@@ -73,7 +77,10 @@ fun WalletHomeScreen(
                 Text("IDENTITY WALLET", style = MaterialTheme.typography.labelMedium)
                 Text("Self-Sovereign Digital ID", style = MaterialTheme.typography.headlineLarge)
             }
-            IconButton(onClick = onSettings) {
+            IconButton(
+                onClick = onSettings,
+                modifier = Modifier.semantics { contentDescription = "Settings" }
+            ) {
                 Text("\u2699", fontSize = 22.sp, color = TextSecondary)
             }
         }
@@ -91,7 +98,10 @@ fun WalletHomeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text("MY IDENTITIES", style = MaterialTheme.typography.labelMedium)
-                    TextButton(onClick = onCreateIdentity) {
+                    TextButton(
+                        onClick = onCreateIdentity,
+                        modifier = Modifier.semantics { contentDescription = "Create new identity" }
+                    ) {
                         Text("+ New", color = Accent, fontSize = 13.sp)
                     }
                 }
@@ -103,16 +113,37 @@ fun WalletHomeScreen(
 
             if (identities.isEmpty()) {
                 item {
-                    Box(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(16.dp))
                             .background(BgCard)
                             .clickable(onClick = onCreateIdentity)
+                            .semantics { contentDescription = "Create your first identity" }
                             .padding(32.dp),
-                        contentAlignment = Alignment.Center
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text("Create your first identity", color = TextSecondary)
+                        Box(
+                            modifier = Modifier
+                                .size(64.dp)
+                                .clip(CircleShape)
+                                .background(AccentDim),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("\uD83D\uDC64", fontSize = 28.sp)
+                        }
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            "No identities yet",
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = TextPrimary
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            "Create your first identity to get started",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextSecondary
+                        )
                     }
                 }
             }
@@ -137,7 +168,10 @@ fun IdentityCard(identity: Identity, onClick: () -> Unit) {
     val algBgColor = if (identity.algorithm.isPostQuantum) PqcDim else ClassicalDim
 
     Card(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .semantics { contentDescription = "Identity: ${identity.name}, ${identity.algorithm.name.replace("_", "-")}" },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = BgCard)
     ) {
@@ -175,7 +209,7 @@ fun IdentityCard(identity: Identity, onClick: () -> Unit) {
             Text(identity.name, style = MaterialTheme.typography.headlineSmall)
             Spacer(Modifier.height(4.dp))
             Text(
-                identity.did,
+                identity.did.truncatedDid(),
                 fontFamily = FontFamily.Monospace,
                 fontSize = 12.sp,
                 color = TextSecondary,

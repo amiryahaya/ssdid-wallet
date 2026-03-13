@@ -61,7 +61,7 @@ struct CredentialsScreen: View {
 
                                     Spacer().frame(height: 4)
 
-                                    Text("Issuer: \(vc.issuer)")
+                                    Text("Issuer: \(vc.issuer.truncatedDid)")
                                         .font(.system(size: 11, design: .monospaced))
                                         .foregroundStyle(Color.textTertiary)
                                         .lineLimit(1)
@@ -88,13 +88,29 @@ struct CredentialsScreen: View {
                     }
 
                     if credentials.isEmpty {
-                        Text("No credentials yet")
-                            .font(.ssdidBody)
-                            .foregroundStyle(Color.textSecondary)
-                            .frame(maxWidth: .infinity)
-                            .padding(32)
-                            .background(Color.bgCard)
-                            .cornerRadius(16)
+                        VStack(spacing: 0) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(Color.accentDim)
+                                    .frame(width: 72, height: 72)
+                                Image(systemName: "doc.text")
+                                    .font(.system(size: 32))
+                                    .foregroundStyle(Color.ssdidAccent)
+                            }
+                            Spacer().frame(height: 16)
+                            Text("No credentials yet")
+                                .font(.ssdidHeadline)
+                                .foregroundStyle(Color.textPrimary)
+                            Spacer().frame(height: 4)
+                            Text("Register with a service to receive your first credential")
+                                .font(.system(size: 14))
+                                .foregroundStyle(Color.textSecondary)
+                                .multilineTextAlignment(.center)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(32)
+                        .background(Color.bgCard)
+                        .cornerRadius(16)
                     }
                 }
                 .padding(.horizontal, 20)

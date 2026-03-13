@@ -198,11 +198,13 @@ struct CreateIdentityScreen: View {
                 )
                 await MainActor.run {
                     isCreating = false
+                    HapticManager.notification(.success)
                     router.push(.biometricSetup)
                 }
             } catch {
                 await MainActor.run {
                     isCreating = false
+                    HapticManager.notification(.error)
                     errorMessage = error.localizedDescription
                 }
             }

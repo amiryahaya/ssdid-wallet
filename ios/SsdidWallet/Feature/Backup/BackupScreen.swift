@@ -329,6 +329,7 @@ struct BackupScreen: View {
 
             do {
                 let backupData = try await services.backupManager.createBackup(passphrase: passphrase)
+                HapticManager.notification(.success)
                 state = .success(backupData)
             } catch {
                 state = .error(error.localizedDescription)

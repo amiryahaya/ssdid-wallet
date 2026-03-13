@@ -233,6 +233,7 @@ struct RegistrationScreen: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 state = .inProgress(.verifying)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    HapticManager.notification(.success)
                     state = .success
                 }
             }

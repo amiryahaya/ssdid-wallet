@@ -33,6 +33,11 @@ import my.ssdid.wallet.R
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.recovery.social.SocialRecoveryManager
 import my.ssdid.wallet.domain.vault.Vault
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Remove
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
 
@@ -214,7 +219,7 @@ fun SocialRecoverySetupScreen(
             TextButton(
                 onClick = onBack,
                 modifier = Modifier.semantics { contentDescription = "Navigate back" }
-            ) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
+            ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary) }
             Spacer(Modifier.width(12.dp))
             Text(stringResource(R.string.social_setup_title), style = MaterialTheme.typography.titleLarge)
         }
@@ -287,7 +292,7 @@ private fun SetupFormContent(
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.semantics { contentDescription = "Decrease threshold" }
                         ) {
-                            Text("\u2212", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                            Icon(Icons.Default.Remove, contentDescription = "Decrease", modifier = Modifier.size(18.dp))
                         }
                         Spacer(Modifier.width(16.dp))
                         Text(
@@ -303,7 +308,7 @@ private fun SetupFormContent(
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.semantics { contentDescription = "Increase threshold" }
                         ) {
-                            Text("+", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                            Icon(Icons.Default.Add, contentDescription = "Increase", modifier = Modifier.size(18.dp))
                         }
                     }
                     Spacer(Modifier.height(8.dp))
@@ -477,7 +482,7 @@ private fun SuccessContent(
                     modifier = Modifier.padding(18.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("\u2713", fontSize = 18.sp, color = Success, fontWeight = FontWeight.Bold)
+                    Icon(Icons.Default.Check, contentDescription = "Success", modifier = Modifier.size(18.dp), tint = Success)
                     Spacer(Modifier.width(12.dp))
                     Text(
                         stringResource(R.string.social_success_message),

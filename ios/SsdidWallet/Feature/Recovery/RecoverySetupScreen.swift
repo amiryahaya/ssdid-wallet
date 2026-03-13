@@ -87,6 +87,7 @@ struct RecoverySetupScreen: View {
 
                             Button {
                                 UIPasteboard.general.string = keyBase64
+                                HapticManager.notification(.success)
                             } label: {
                                 Text("Copy to Clipboard")
                             }

@@ -28,6 +28,8 @@ import my.ssdid.wallet.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.revocation.RevocationManager
 import my.ssdid.wallet.domain.revocation.RevocationStatus
 import my.ssdid.wallet.domain.vault.Vault
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
 
@@ -97,7 +99,7 @@ fun CredentialDetailScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
+                IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary) }
                 Spacer(Modifier.width(4.dp))
                 Text("Credential Details", style = MaterialTheme.typography.titleLarge)
             }

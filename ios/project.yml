@@ -37,6 +37,8 @@ targets:
       properties:
         LSApplicationQueriesSchemes:
           - ssdid-drive
+        UILaunchScreen:
+          UIColorName: LaunchBackground
         CFBundleURLTypes:
           - CFBundleURLName: my.ssdid.wallet
             CFBundleURLSchemes:
@@ -53,7 +55,7 @@ targets:
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         INFOPLIST_KEY_CFBundleDisplayName: "SSDID Wallet"
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: true
-        INFOPLIST_KEY_UILaunchScreen_Generation: true
+        INFOPLIST_KEY_UILaunchScreen_Generation: false
         INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
         TARGETED_DEVICE_FAMILY: "1"
         INFOPLIST_KEY_NSCameraUsageDescription: "SSDID Wallet needs camera access to scan QR codes for identity verification and service registration."

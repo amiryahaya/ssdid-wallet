@@ -105,13 +105,29 @@ struct DeviceManagementScreen: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
 
                     if otherDevices.isEmpty {
-                        Text("No other devices enrolled")
-                            .font(.system(size: 14))
-                            .foregroundStyle(Color.textSecondary)
-                            .frame(maxWidth: .infinity)
-                            .padding(24)
-                            .background(Color.bgCard)
-                            .cornerRadius(12)
+                        VStack(spacing: 0) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(Color.accentDim)
+                                    .frame(width: 72, height: 72)
+                                Image(systemName: "laptopcomputer.and.iphone")
+                                    .font(.system(size: 32))
+                                    .foregroundStyle(Color.ssdidAccent)
+                            }
+                            Spacer().frame(height: 16)
+                            Text("No other devices enrolled")
+                                .font(.ssdidHeadline)
+                                .foregroundStyle(Color.textPrimary)
+                            Spacer().frame(height: 4)
+                            Text("Enroll additional devices for multi-device access")
+                                .font(.system(size: 14))
+                                .foregroundStyle(Color.textSecondary)
+                                .multilineTextAlignment(.center)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(24)
+                        .background(Color.bgCard)
+                        .cornerRadius(12)
                     } else {
                         ForEach(otherDevices) { device in
                             VStack(alignment: .leading, spacing: 0) {

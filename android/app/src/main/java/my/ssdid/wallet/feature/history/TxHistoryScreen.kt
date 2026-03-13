@@ -24,20 +24,31 @@ import kotlinx.coroutines.launch
 import my.ssdid.wallet.domain.history.ActivityRepository
 import my.ssdid.wallet.domain.model.ActivityRecord
 import my.ssdid.wallet.domain.model.ActivityType
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.FiberManualRecord
+import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.ui.graphics.vector.ImageVector
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
 
-private data class ActivityStyle(val icon: String, val color: Color, val dimColor: Color)
+private data class ActivityStyle(val icon: ImageVector, val color: Color, val dimColor: Color)
 
 private fun ActivityType.style(): ActivityStyle = when (this) {
-    ActivityType.IDENTITY_CREATED -> ActivityStyle("\u2B21", Accent, AccentDim)
-    ActivityType.SERVICE_REGISTERED -> ActivityStyle("\uD83D\uDD17", Success, SuccessDim)
-    ActivityType.AUTHENTICATED -> ActivityStyle("\u2713", Classical, ClassicalDim)
-    ActivityType.TX_SIGNED -> ActivityStyle("\u270E", Warning, WarningDim)
-    ActivityType.KEY_ROTATED -> ActivityStyle("\uD83D\uDD04", Pqc, PqcDim)
-    ActivityType.CREDENTIAL_RECEIVED -> ActivityStyle("\uD83D\uDCC4", Success, SuccessDim)
-    ActivityType.BACKUP_CREATED -> ActivityStyle("\uD83D\uDCBE", Accent, AccentDim)
-    else -> ActivityStyle("\u2022", TextSecondary, BgCard)
+    ActivityType.IDENTITY_CREATED -> ActivityStyle(Icons.Default.PersonAdd, Accent, AccentDim)
+    ActivityType.SERVICE_REGISTERED -> ActivityStyle(Icons.Default.Link, Success, SuccessDim)
+    ActivityType.AUTHENTICATED -> ActivityStyle(Icons.Default.Check, Classical, ClassicalDim)
+    ActivityType.TX_SIGNED -> ActivityStyle(Icons.Default.Edit, Warning, WarningDim)
+    ActivityType.KEY_ROTATED -> ActivityStyle(Icons.Default.Refresh, Pqc, PqcDim)
+    ActivityType.CREDENTIAL_RECEIVED -> ActivityStyle(Icons.Default.Description, Success, SuccessDim)
+    ActivityType.BACKUP_CREATED -> ActivityStyle(Icons.Default.Save, Accent, AccentDim)
+    else -> ActivityStyle(Icons.Default.FiberManualRecord, TextSecondary, BgCard)
 }
 
 @HiltViewModel
@@ -73,7 +84,7 @@ fun TxHistoryScreen(
             Modifier.padding(start = 8.dp, end = 20.dp, top = 12.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
+            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary) }
             Spacer(Modifier.width(4.dp))
             Text("Activity History", style = MaterialTheme.typography.titleLarge)
         }
@@ -93,7 +104,7 @@ fun TxHistoryScreen(
                             .background(BgCard),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("\uD83D\uDCCB", fontSize = 32.sp)
+                        Icon(Icons.Default.Description, contentDescription = "No activity", modifier = Modifier.size(32.dp), tint = TextSecondary)
                     }
                     Spacer(Modifier.height(16.dp))
                     Text("No activity yet", style = MaterialTheme.typography.headlineSmall, color = TextPrimary)
@@ -144,7 +155,7 @@ fun TxHistoryScreen(
                                         .background(style.dimColor),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text(style.icon, fontSize = 16.sp, color = style.color)
+                                    Icon(style.icon, contentDescription = null, modifier = Modifier.size(16.dp), tint = style.color)
                                 }
                                 Spacer(Modifier.width(12.dp))
                                 Column(Modifier.weight(1f)) {

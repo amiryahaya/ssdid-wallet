@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import my.ssdid.wallet.R
+import androidx.compose.foundation.BorderStroke
 import my.ssdid.wallet.ui.theme.*
 
 private data class OnboardingSlide(
@@ -142,17 +143,20 @@ fun OnboardingScreen(onComplete: () -> Unit, onRestore: () -> Unit = {}) {
             )
         }
 
-        TextButton(
+        OutlinedButton(
             onClick = onRestore,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp)
-                .padding(bottom = 32.dp)
+                .padding(bottom = 32.dp),
+            shape = RoundedCornerShape(12.dp),
+            border = BorderStroke(1.dp, Accent.copy(alpha = 0.3f)),
+            colors = ButtonDefaults.outlinedButtonColors(containerColor = AccentDim)
         ) {
             Text(
                 "Restore from Recovery Key",
-                fontSize = 14.sp,
-                color = TextSecondary
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = Accent
             )
         }
     }
