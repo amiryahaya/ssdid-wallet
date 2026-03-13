@@ -4,6 +4,7 @@ import my.ssdid.wallet.domain.transport.dto.*
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
 
 interface ServerApi {
     @POST("api/register")
@@ -26,4 +27,13 @@ interface ServerApi {
 
     @POST("api/auth/verify")
     suspend fun verifyAuth(@Body request: AuthVerifyRequest): AuthVerifyResponse
+
+    @GET("api/invitations/token/{token}")
+    suspend fun getInvitationByToken(@Path("token") token: String): InvitationDetailsResponse
+
+    @POST("api/invitations/token/{token}/accept-with-wallet")
+    suspend fun acceptWithWallet(
+        @Path("token") token: String,
+        @Body request: AcceptWithWalletRequest
+    ): AcceptWithWalletResponse
 }
