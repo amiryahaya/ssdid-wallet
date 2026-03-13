@@ -44,20 +44,9 @@ enum RevocationError: Error, LocalizedError {
     }
 }
 
-// MARK: - Base64URL decoding
+// MARK: - GZIP decompression
 
 private extension Data {
-    init?(base64URLEncoded string: String) {
-        var base64 = string
-            .replacingOccurrences(of: "-", with: "+")
-            .replacingOccurrences(of: "_", with: "/")
-        let remainder = base64.count % 4
-        if remainder > 0 {
-            base64.append(contentsOf: String(repeating: "=", count: 4 - remainder))
-        }
-        self.init(base64Encoded: base64)
-    }
-
     func gunzipped() throws -> Data {
         guard count > 0 else {
             throw RevocationError.decodingFailed("Empty data")
