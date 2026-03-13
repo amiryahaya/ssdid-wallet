@@ -32,6 +32,7 @@ import my.ssdid.wallet.feature.rotation.KeyRotationScreen
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import my.ssdid.wallet.feature.auth.DriveLoginScreen
+import my.ssdid.wallet.feature.invite.InviteAcceptScreen
 import my.ssdid.wallet.feature.scan.ScanQrScreen
 import my.ssdid.wallet.feature.settings.SettingsScreen
 import my.ssdid.wallet.feature.transaction.TxSigningScreen
@@ -352,6 +353,16 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
         composable(Screen.InstitutionalSetup.route) { backStackEntry ->
             backStackEntry.arguments?.getString("keyId") ?: return@composable
             InstitutionalSetupScreen(onBack = { navController.popBackStack() })
+        }
+        composable(
+            route = Screen.InviteAccept.route,
+            arguments = listOf(
+                navArgument("serverUrl") { type = NavType.StringType; defaultValue = "" },
+                navArgument("token") { type = NavType.StringType; defaultValue = "" },
+                navArgument("callbackUrl") { type = NavType.StringType; defaultValue = "" }
+            )
+        ) {
+            InviteAcceptScreen()
         }
         composable(Screen.SocialRecoveryRestore.route) {
             SocialRecoveryRestoreScreen(
