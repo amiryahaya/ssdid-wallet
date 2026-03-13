@@ -3,6 +3,7 @@ package my.ssdid.wallet.domain.vault
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.rotation.RotationEntry
+import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
 
 data class PreRotatedKeyData(
     val encryptedPrivateKey: ByteArray,
@@ -18,6 +19,11 @@ interface VaultStorage {
     suspend fun saveCredential(credential: VerifiableCredential)
     suspend fun listCredentials(): List<VerifiableCredential>
     suspend fun deleteCredential(credentialId: String)
+
+    // SD-JWT VC storage
+    suspend fun saveSdJwtVc(sdJwtVc: StoredSdJwtVc)
+    suspend fun listSdJwtVcs(): List<StoredSdJwtVc>
+    suspend fun deleteSdJwtVc(id: String)
 
     // Recovery key storage
     suspend fun saveRecoveryPublicKey(keyId: String, encryptedPublicKey: ByteArray)

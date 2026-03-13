@@ -134,6 +134,7 @@
 		AA11BB05C1D2E3F4A5B60005 /* SdJwtIssuer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC11DD05C1D2E3F4A5B60005 /* SdJwtIssuer.swift */; };
 		AA11BB06C1D2E3F4A5B60006 /* SdJwtParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC11DD06C1D2E3F4A5B60006 /* SdJwtParser.swift */; };
 		AA11BB07C1D2E3F4A5B60007 /* SdJwtVc.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC11DD07C1D2E3F4A5B60007 /* SdJwtVc.swift */; };
+		AA11BB09C1D2E3F4A5B60009 /* StoredSdJwtVc.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC11DD09C1D2E3F4A5B60009 /* StoredSdJwtVc.swift */; };
 		AA11BB08C1D2E3F4A5B60008 /* SdJwtParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC11DD08C1D2E3F4A5B60008 /* SdJwtParserTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -279,6 +280,7 @@
 		CC11DD05C1D2E3F4A5B60005 /* SdJwtIssuer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SdJwtIssuer.swift; sourceTree = "<group>"; };
 		CC11DD06C1D2E3F4A5B60006 /* SdJwtParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SdJwtParser.swift; sourceTree = "<group>"; };
 		CC11DD07C1D2E3F4A5B60007 /* SdJwtVc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SdJwtVc.swift; sourceTree = "<group>"; };
+		CC11DD09C1D2E3F4A5B60009 /* StoredSdJwtVc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredSdJwtVc.swift; sourceTree = "<group>"; };
 		CC11DD08C1D2E3F4A5B60008 /* SdJwtParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SdJwtParserTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -862,6 +864,7 @@
 				CC11DD05C1D2E3F4A5B60005 /* SdJwtIssuer.swift */,
 				CC11DD06C1D2E3F4A5B60006 /* SdJwtParser.swift */,
 				CC11DD07C1D2E3F4A5B60007 /* SdJwtVc.swift */,
+				CC11DD09C1D2E3F4A5B60009 /* StoredSdJwtVc.swift */,
 			);
 			path = SdJwt;
 			sourceTree = "<group>";
@@ -1115,6 +1118,7 @@
 				AA11BB05C1D2E3F4A5B60005 /* SdJwtIssuer.swift in Sources */,
 				AA11BB06C1D2E3F4A5B60006 /* SdJwtParser.swift in Sources */,
 				AA11BB07C1D2E3F4A5B60007 /* SdJwtVc.swift in Sources */,
+				AA11BB09C1D2E3F4A5B60009 /* StoredSdJwtVc.swift in Sources */,
 				21B97926CB51352CFFB9E420 /* WalletHomeScreen.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

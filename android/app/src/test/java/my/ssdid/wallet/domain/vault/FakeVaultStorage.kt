@@ -3,11 +3,13 @@ package my.ssdid.wallet.domain.vault
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.rotation.RotationEntry
+import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
 
 class FakeVaultStorage : VaultStorage {
     private val identities = mutableMapOf<String, Identity>()
     private val privateKeys = mutableMapOf<String, ByteArray>()
     private val credentials = mutableMapOf<String, VerifiableCredential>()
+    private val sdJwtVcs = mutableMapOf<String, StoredSdJwtVc>()
     private val recoveryKeys = mutableMapOf<String, ByteArray>()
     private val preRotatedKeys = mutableMapOf<String, PreRotatedKeyData>()
     private val rotationHistory = mutableMapOf<String, MutableList<RotationEntry>>()
@@ -23,6 +25,9 @@ class FakeVaultStorage : VaultStorage {
     override suspend fun saveCredential(credential: VerifiableCredential) { credentials[credential.id] = credential }
     override suspend fun listCredentials() = credentials.values.toList()
     override suspend fun deleteCredential(credentialId: String) { credentials.remove(credentialId) }
+    override suspend fun saveSdJwtVc(sdJwtVc: StoredSdJwtVc) { sdJwtVcs[sdJwtVc.id] = sdJwtVc }
+    override suspend fun listSdJwtVcs() = sdJwtVcs.values.toList()
+    override suspend fun deleteSdJwtVc(id: String) { sdJwtVcs.remove(id) }
     override suspend fun saveRecoveryPublicKey(keyId: String, encryptedPublicKey: ByteArray) { recoveryKeys[keyId] = encryptedPublicKey }
     override suspend fun getRecoveryPublicKey(keyId: String) = recoveryKeys[keyId]
     override suspend fun savePreRotatedKey(keyId: String, encryptedPrivateKey: ByteArray, publicKey: ByteArray) {
