@@ -31,6 +31,7 @@
 		25AD2A523EEBFDC66A768E73 /* AuthDtos.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8497FA480DAA74E7A5975EF8 /* AuthDtos.swift */; };
 		2CEA9E5E6BA508C343923DB4 /* PqcProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65EBC41C02E3686A0F945F7 /* PqcProviderTests.swift */; };
 		300A6B04667D9BB576A8D9AF /* VerifiableCredential.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A74A06329B8CF72F06B41D8 /* VerifiableCredential.swift */; };
+		A1B2C3D4E5F6789012345678 /* VerifiablePresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C3D4E5F6789012345678A1 /* VerifiablePresentation.swift */; };
 		32761BFB6C28964C0239A94A /* SsdidCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C51A6079AF1281D4E01E6A92 /* SsdidCard.swift */; };
 		32A14FDCA7B68E42EE8185A6 /* VaultStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA167CF225FDFA0E2F54E69C /* VaultStorage.swift */; };
 		360E608B1F5EC4B8F1E4BA6F /* RecoveryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0164BDCEADFC8DFED9F7654A /* RecoveryManager.swift */; };
@@ -176,6 +177,7 @@
 		33D5B3A2CC7DC4EEBB970301 /* SsdidTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SsdidTheme.swift; sourceTree = "<group>"; };
 		341180A7C9BC3040DBA8CA7C /* SocialRecoveryRestoreScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialRecoveryRestoreScreen.swift; sourceTree = "<group>"; };
 		3A74A06329B8CF72F06B41D8 /* VerifiableCredential.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifiableCredential.swift; sourceTree = "<group>"; };
+		B2C3D4E5F6789012345678A1 /* VerifiablePresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifiablePresentation.swift; sourceTree = "<group>"; };
 		3B00C2D5E6A165D21C92284D /* UrlValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrlValidator.swift; sourceTree = "<group>"; };
 		3D135F84693ECD15EAC937DD /* DeviceManagementScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceManagementScreen.swift; sourceTree = "<group>"; };
 		3D296D81D371037D0C6D38E7 /* DidDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DidDocument.swift; sourceTree = "<group>"; };
@@ -586,6 +588,7 @@
 				F9A67835B6BAF26E99D578B1 /* Identity.swift */,
 				F41276ECD689DC7E6C25979B /* Proof.swift */,
 				3A74A06329B8CF72F06B41D8 /* VerifiableCredential.swift */,
+				B2C3D4E5F6789012345678A1 /* VerifiablePresentation.swift */,
 				0864D8CCB4750CB46D2724F9 /* VerificationMethod.swift */,
 			);
 			path = Model;
@@ -1095,6 +1098,7 @@
 				F33DEFE80062571AE61DCC28 /* VaultImpl.swift in Sources */,
 				32A14FDCA7B68E42EE8185A6 /* VaultStorage.swift in Sources */,
 				300A6B04667D9BB576A8D9AF /* VerifiableCredential.swift in Sources */,
+				A1B2C3D4E5F6789012345678 /* VerifiablePresentation.swift in Sources */,
 				093576AB1A8A29B95B44C00A /* VerificationMethod.swift in Sources */,
 				B8998384A47A46D68B2707B5 /* Verifier.swift in Sources */,
 				15E3A62AF84972F98854E0E8 /* DidJwkResolver.swift in Sources */,
