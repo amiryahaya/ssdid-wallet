@@ -7,8 +7,15 @@ struct SdJwtVc {
 
     func present(selectedDisclosures: [Disclosure], kbJwt: String? = nil) throws -> String {
         var parts = [issuerJwt]
-        parts.append(contentsOf: try selectedDisclosures.map { try $0.encode() })
-        let suffix = kbJwt ?? ""
-        return parts.joined(separator: "~") + "~\(suffix)"
+        for d in selectedDisclosures {
+            parts.append(try d.encode())
+        }
+        if let kb = kbJwt {
+            return parts.joined(separator: "~") + "~\(kb)"
+        } else if !selectedDisclosures.isEmpty {
+            return parts.joined(separator: "~") + "~"
+        } else {
+            return issuerJwt
+        }
     }
 }

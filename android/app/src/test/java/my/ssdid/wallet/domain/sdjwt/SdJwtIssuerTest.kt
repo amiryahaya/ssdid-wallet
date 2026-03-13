@@ -117,6 +117,55 @@ class SdJwtIssuerTest {
         assertThat(parsed.disclosures[0].claimName).isEqualTo("name")
     }
 
+    // --- Empty claims map ---
+    @Test
+    fun `issue with empty claims produces no disclosures and empty _sd array`() {
+        val sdJwt = issuer.issue(
+            issuer = "did:key:z6MkIssuer",
+            subject = "did:key:z6MkHolder",
+            type = listOf("VerifiableCredential"),
+            claims = emptyMap(),
+            disclosable = emptySet(),
+            issuedAt = 1719792000
+        )
+
+        assertThat(sdJwt.disclosures).isEmpty()
+
+        val payloadJson = decodeJwtPart(sdJwt.issuerJwt.split(".")[1])
+        val sdArray = payloadJson["_sd"]?.jsonArray
+        assertThat(sdArray).isNotNull()
+        assertThat(sdArray).isEmpty()
+    }
+
+    // --- All claims disclosable ---
+    @Test
+    fun `issue with all claims disclosable has no visible claims in payload`() {
+        val claims = mapOf(
+            "name" to JsonPrimitive("Ahmad"),
+            "age" to JsonPrimitive(30),
+            "email" to JsonPrimitive("ahmad@example.com")
+        )
+        val sdJwt = issuer.issue(
+            issuer = "did:key:z6MkIssuer",
+            subject = "did:key:z6MkHolder",
+            type = listOf("VerifiableCredential"),
+            claims = claims,
+            disclosable = claims.keys,
+            issuedAt = 1719792000
+        )
+
+        assertThat(sdJwt.disclosures).hasSize(3)
+
+        val payloadJson = decodeJwtPart(sdJwt.issuerJwt.split(".")[1])
+        // None of the claim names should appear in the payload
+        for (claimName in claims.keys) {
+            assertThat(payloadJson.containsKey(claimName)).isFalse()
+        }
+        // _sd array should have 3 hashes
+        val sdArray = payloadJson["_sd"]?.jsonArray
+        assertThat(sdArray).hasSize(3)
+    }
+
     private fun decodeJwtPart(base64url: String): JsonObject {
         val json = String(Base64.getUrlDecoder().decode(base64url), Charsets.UTF_8)
         return Json.parseToJsonElement(json).jsonObject

@@ -97,9 +97,11 @@ class SdJwtIssuer(
         )
     }
 
+    private val secureRandom = SecureRandom()
+
     private fun generateSalt(): String {
         val bytes = ByteArray(16)
-        SecureRandom().nextBytes(bytes)
+        secureRandom.nextBytes(bytes)
         return base64UrlEncode(bytes)
     }
 

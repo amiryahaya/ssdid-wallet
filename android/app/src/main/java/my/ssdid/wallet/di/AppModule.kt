@@ -269,5 +269,5 @@ object AppModule {
         @ApplicationContext context: Context,
         notifyManager: NotifyManager,
         vault: Vault
-    ): NotifyLifecycleObserver = NotifyLifecycleObserver(context as android.app.Application, notifyManager, vault)
+    ): NotifyLifecycleObserver = NotifyLifecycleObserver(context.applicationContext as android.app.Application, notifyManager, vault)
 }

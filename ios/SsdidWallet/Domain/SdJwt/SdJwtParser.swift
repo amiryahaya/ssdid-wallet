@@ -9,7 +9,14 @@ enum SdJwtParser {
         let remaining = parts.dropFirst().filter { !$0.isEmpty }
 
         let lastPart = remaining.last
-        let isLastKbJwt = lastPart != nil && lastPart!.filter({ $0 == "." }).count == 2
+        let isLastKbJwt: Bool = {
+            guard let last = lastPart, last.filter({ $0 == "." }).count == 2 else { return false }
+            let headerB64 = String(last.prefix(while: { $0 != "." }))
+            guard let headerData = Data(base64URLEncoded: headerB64),
+                  let headerDict = try? JSONSerialization.jsonObject(with: headerData) as? [String: Any],
+                  let typ = headerDict["typ"] as? String else { return false }
+            return typ == "kb+jwt"
+        }()
 
         let disclosures: [Disclosure]
         let kbJwt: String?

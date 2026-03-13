@@ -8,7 +8,7 @@ struct Disclosure: Equatable {
     let encoded: String
 
     static func == (lhs: Disclosure, rhs: Disclosure) -> Bool {
-        lhs.salt == rhs.salt && lhs.claimName == rhs.claimName && lhs.encoded == rhs.encoded
+        lhs.salt == rhs.salt && lhs.claimName == rhs.claimName
     }
 
     init(salt: String, claimName: String, claimValue: Any, encoded: String = "") {

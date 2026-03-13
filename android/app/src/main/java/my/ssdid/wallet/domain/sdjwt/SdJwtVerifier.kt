@@ -1,6 +1,7 @@
 package my.ssdid.wallet.domain.sdjwt
 
 import kotlinx.serialization.json.*
+import my.ssdid.wallet.domain.crypto.CryptoProvider
 import my.ssdid.wallet.domain.crypto.Multibase
 import my.ssdid.wallet.domain.did.DidResolver
 import my.ssdid.wallet.domain.model.Algorithm
@@ -12,13 +13,13 @@ import java.util.Base64
  */
 class SdJwtVerifier(
     private val didResolver: DidResolver,
-    private val classicalVerify: (Algorithm, ByteArray, ByteArray, ByteArray) -> Boolean,
-    private val pqcVerify: (Algorithm, ByteArray, ByteArray, ByteArray) -> Boolean
+    private val classicalProvider: CryptoProvider,
+    private val pqcProvider: CryptoProvider
 ) {
     /**
      * Verification result containing the verified claims.
      */
-    data class VerificationResult(
+    data class SdJwtVerificationResult(
         val verified: Boolean,
         val issuer: String,
         val subject: String?,
@@ -37,31 +38,37 @@ class SdJwtVerifier(
         sdJwtVc: SdJwtVc,
         expectedAudience: String? = null,
         expectedNonce: String? = null
-    ): VerificationResult {
+    ): SdJwtVerificationResult {
         val errors = mutableListOf<String>()
 
         // 1. Decode JWT header and payload
         val jwtParts = sdJwtVc.issuerJwt.split(".")
         if (jwtParts.size != 3) {
-            return VerificationResult(false, "", null, emptyMap(), listOf("Invalid JWT structure"))
+            return SdJwtVerificationResult(false, "", null, emptyMap(), listOf("Invalid JWT structure"))
         }
 
         val header = decodeJsonPart(jwtParts[0])
+            ?: return SdJwtVerificationResult(false, "", null, emptyMap(), listOf("Malformed JWT header"))
         val payload = decodeJsonPart(jwtParts[1])
-        val signatureBytes = Base64.getUrlDecoder().decode(jwtParts[2])
+            ?: return SdJwtVerificationResult(false, "", null, emptyMap(), listOf("Malformed JWT payload"))
+        val signatureBytes = try {
+            Base64.getUrlDecoder().decode(jwtParts[2])
+        } catch (_: Exception) {
+            return SdJwtVerificationResult(false, "", null, emptyMap(), listOf("Malformed JWT signature"))
+        }
 
         val algName = header["alg"]?.jsonPrimitive?.content
-            ?: return VerificationResult(false, "", null, emptyMap(), listOf("Missing alg in header"))
+            ?: return SdJwtVerificationResult(false, "", null, emptyMap(), listOf("Missing alg in header"))
 
         val issuerDid = payload["iss"]?.jsonPrimitive?.content
-            ?: return VerificationResult(false, "", null, emptyMap(), listOf("Missing iss in payload"))
+            ?: return SdJwtVerificationResult(false, "", null, emptyMap(), listOf("Missing iss in payload"))
 
         val subject = payload["sub"]?.jsonPrimitive?.contentOrNull
 
         // 2. Resolve issuer DID and verify signature
         val docResult = didResolver.resolve(issuerDid)
         if (docResult.isFailure) {
-            return VerificationResult(
+            return SdJwtVerificationResult(
                 false, issuerDid, subject, emptyMap(),
                 listOf("Failed to resolve issuer DID: ${docResult.exceptionOrNull()?.message}")
             )
@@ -71,24 +78,33 @@ class SdJwtVerifier(
         if (doc.verificationMethod.isEmpty()) {
             errors.add("No verification methods in issuer DID document")
         } else {
-            val vm = doc.verificationMethod[0]
-            val algorithm = Algorithm.fromJwaName(algName)
-            if (algorithm == null) {
-                errors.add("Unsupported JWT algorithm: $algName")
+            val kid = header["kid"]?.jsonPrimitive?.contentOrNull
+            val vm = if (kid != null) {
+                doc.verificationMethod.find { it.id == kid }
             } else {
-                val publicKey = resolvePublicKey(vm.publicKeyMultibase)
-                    ?: resolvePublicKeyFromJwk(vm.publicKeyJwk)
-                if (publicKey == null) {
-                    errors.add("Could not resolve public key from verification method")
+                doc.verificationMethod.firstOrNull()
+            }
+            if (vm == null) {
+                errors.add("No matching verification method found")
+            } else {
+                val algorithm = Algorithm.fromJwaName(algName)
+                if (algorithm == null) {
+                    errors.add("Unsupported JWT algorithm: $algName")
                 } else {
-                    try {
-                        val signingInput = "${jwtParts[0]}.${jwtParts[1]}".toByteArray(Charsets.UTF_8)
-                        val verifyFn = if (algorithm.isPostQuantum) pqcVerify else classicalVerify
-                        if (!verifyFn(algorithm, publicKey, signatureBytes, signingInput)) {
-                            errors.add("Signature verification failed")
+                    val publicKey = resolvePublicKey(vm.publicKeyMultibase)
+                        ?: resolvePublicKeyFromJwk(vm.publicKeyJwk)
+                    if (publicKey == null) {
+                        errors.add("Could not resolve public key from verification method")
+                    } else {
+                        try {
+                            val signingInput = "${jwtParts[0]}.${jwtParts[1]}".toByteArray(Charsets.UTF_8)
+                            val provider = if (algorithm.isPostQuantum) pqcProvider else classicalProvider
+                            if (!provider.verify(algorithm, publicKey, signatureBytes, signingInput)) {
+                                errors.add("Signature verification failed")
+                            }
+                        } catch (e: Exception) {
+                            errors.add("Signature verification error: ${e.message}")
                         }
-                    } catch (e: Exception) {
-                        errors.add("Signature verification error: ${e.message}")
                     }
                 }
             }
@@ -101,7 +117,20 @@ class SdJwtVerifier(
             }
         }
 
-        // 4. Verify disclosure hashes match _sd array
+        // 3b. Check not-before
+        payload["nbf"]?.jsonPrimitive?.longOrNull?.let { nbf ->
+            if (System.currentTimeMillis() / 1000 < nbf) {
+                errors.add("SD-JWT VC not yet valid (nbf)")
+            }
+        }
+
+        // 4. Validate _sd_alg
+        val sdAlg = payload["_sd_alg"]?.jsonPrimitive?.contentOrNull
+        if (sdJwtVc.disclosures.isNotEmpty() && (sdAlg == null || sdAlg != "sha-256")) {
+            errors.add("Missing or unsupported _sd_alg: $sdAlg")
+        }
+
+        // 5. Verify disclosure hashes match _sd array
         val sdArray = payload["_sd"]?.jsonArray?.map { it.jsonPrimitive.content }?.toSet() ?: emptySet()
         val disclosedClaims = mutableMapOf<String, JsonElement>()
 
@@ -109,70 +138,88 @@ class SdJwtVerifier(
             val hash = disclosure.hash()
             if (hash !in sdArray) {
                 errors.add("Disclosure hash mismatch for claim '${disclosure.claimName}'")
+            } else {
+                disclosedClaims[disclosure.claimName] = disclosure.claimValue
             }
-            disclosedClaims[disclosure.claimName] = disclosure.claimValue
         }
 
         // Add always-visible claims from payload
         for ((key, value) in payload) {
-            if (key !in setOf("iss", "sub", "vct", "iat", "exp", "_sd", "_sd_alg", "cnf")) {
+            if (key !in setOf("iss", "sub", "vct", "iat", "exp", "nbf", "_sd", "_sd_alg", "cnf")) {
                 disclosedClaims[key] = value
             }
         }
 
-        // 5. Verify KB-JWT if present
+        // 6. Verify KB-JWT if present
         if (sdJwtVc.keyBindingJwt != null) {
             val kbParts = sdJwtVc.keyBindingJwt.split(".")
             if (kbParts.size == 3) {
                 val kbHeader = decodeJsonPart(kbParts[0])
                 val kbPayload = decodeJsonPart(kbParts[1])
-                val kbSignatureBytes = Base64.getUrlDecoder().decode(kbParts[2])
 
-                if (expectedAudience != null) {
-                    val aud = kbPayload["aud"]?.jsonPrimitive?.content
-                    if (aud != expectedAudience) {
-                        errors.add("KB-JWT audience mismatch: expected $expectedAudience, got $aud")
+                if (kbHeader == null || kbPayload == null) {
+                    errors.add("Malformed KB-JWT")
+                } else {
+                    val kbSignatureBytes = try {
+                        Base64.getUrlDecoder().decode(kbParts[2])
+                    } catch (_: Exception) {
+                        errors.add("Malformed KB-JWT signature")
+                        null
                     }
-                }
 
-                if (expectedNonce != null) {
-                    val nonce = kbPayload["nonce"]?.jsonPrimitive?.content
-                    if (nonce != expectedNonce) {
-                        errors.add("KB-JWT nonce mismatch")
-                    }
-                }
-
-                // Verify KB-JWT cryptographic signature using holder's key from cnf claim
-                val cnf = payload["cnf"]?.jsonObject
-                val holderJwk = cnf?.get("jwk")?.jsonObject
-                if (holderJwk != null) {
-                    val kbAlgName = kbHeader["alg"]?.jsonPrimitive?.content
-                    val kbAlgorithm = if (kbAlgName != null) Algorithm.fromJwaName(kbAlgName) else null
-                    if (kbAlgorithm == null) {
-                        errors.add("Unsupported KB-JWT algorithm: $kbAlgName")
-                    } else {
-                        val holderKey = resolvePublicKeyFromJwk(holderJwk)
-                        if (holderKey == null) {
-                            errors.add("Could not resolve holder public key from cnf claim")
-                        } else {
-                            try {
-                                val kbSigningInput = "${kbParts[0]}.${kbParts[1]}".toByteArray(Charsets.UTF_8)
-                                val verifyFn = if (kbAlgorithm.isPostQuantum) pqcVerify else classicalVerify
-                                if (!verifyFn(kbAlgorithm, holderKey, kbSignatureBytes, kbSigningInput)) {
-                                    errors.add("KB-JWT signature verification failed")
-                                }
-                            } catch (e: Exception) {
-                                errors.add("KB-JWT signature verification error: ${e.message}")
-                            }
+                    if (expectedAudience != null) {
+                        val aud = kbPayload["aud"]?.jsonPrimitive?.content
+                        if (aud != expectedAudience) {
+                            errors.add("KB-JWT audience mismatch: expected $expectedAudience, got $aud")
                         }
                     }
+
+                    if (expectedNonce != null) {
+                        val nonce = kbPayload["nonce"]?.jsonPrimitive?.content
+                        if (nonce != expectedNonce) {
+                            errors.add("KB-JWT nonce mismatch")
+                        }
+                    }
+
+                    // KB-JWT iat freshness check
+                    val kbIat = kbPayload["iat"]?.jsonPrimitive?.longOrNull
+                    val nowSec = System.currentTimeMillis() / 1000
+                    if (kbIat == null || kotlin.math.abs(nowSec - kbIat) > 300) {
+                        errors.add("KB-JWT iat missing or outside 5-minute freshness window")
+                    }
+
+                    // Verify KB-JWT cryptographic signature using holder's key from cnf claim
+                    val cnf = payload["cnf"]?.jsonObject
+                    val holderJwk = cnf?.get("jwk")?.jsonObject
+                    if (holderJwk != null) {
+                        val kbAlgName = kbHeader["alg"]?.jsonPrimitive?.content
+                        val kbAlgorithm = if (kbAlgName != null) Algorithm.fromJwaName(kbAlgName) else null
+                        if (kbAlgorithm == null) {
+                            errors.add("Unsupported KB-JWT algorithm: $kbAlgName")
+                        } else if (kbSignatureBytes != null) {
+                            val holderKey = resolvePublicKeyFromJwk(holderJwk)
+                            if (holderKey == null) {
+                                errors.add("Could not resolve holder public key from cnf claim")
+                            } else {
+                                try {
+                                    val kbSigningInput = "${kbParts[0]}.${kbParts[1]}".toByteArray(Charsets.UTF_8)
+                                    val provider = if (kbAlgorithm.isPostQuantum) pqcProvider else classicalProvider
+                                    if (!provider.verify(kbAlgorithm, holderKey, kbSignatureBytes, kbSigningInput)) {
+                                        errors.add("KB-JWT signature verification failed")
+                                    }
+                                } catch (e: Exception) {
+                                    errors.add("KB-JWT signature verification error: ${e.message}")
+                                }
+                            }
+                        }
+                    } else {
+                        errors.add("KB-JWT present but cnf/jwk missing in issuer JWT — holder binding cannot be verified")
+                    }
                 }
-                // If no cnf/jwk present, KB-JWT signature cannot be verified — that's acceptable
-                // as the issuer may not have included a cnf claim
             }
         }
 
-        return VerificationResult(
+        return SdJwtVerificationResult(
             verified = errors.isEmpty(),
             issuer = issuerDid,
             subject = subject,
@@ -222,8 +269,12 @@ class SdJwtVerifier(
         }
     }
 
-    private fun decodeJsonPart(base64url: String): JsonObject {
-        val json = String(Base64.getUrlDecoder().decode(base64url), Charsets.UTF_8)
-        return Json.parseToJsonElement(json).jsonObject
+    private fun decodeJsonPart(base64url: String): JsonObject? {
+        return try {
+            val json = String(Base64.getUrlDecoder().decode(base64url), Charsets.UTF_8)
+            Json.parseToJsonElement(json).jsonObject
+        } catch (_: Exception) {
+            null
+        }
     }
 }

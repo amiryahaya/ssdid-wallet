@@ -4,7 +4,7 @@ import java.security.MessageDigest
 import java.util.Base64
 import kotlinx.serialization.json.*
 
-data class Disclosure(
+class Disclosure(
     val salt: String,
     val claimName: String,
     val claimValue: JsonElement,
@@ -15,7 +15,7 @@ data class Disclosure(
             "Unsupported hash algorithm: $algorithm. Only sha-256 is supported."
         }
         val input = encode()
-        val digest = MessageDigest.getInstance("SHA-256").digest(input.toByteArray(Charsets.US_ASCII))
+        val digest = MessageDigest.getInstance("SHA-256").digest(input.toByteArray(Charsets.UTF_8))
         return Base64.getUrlEncoder().withoutPadding().encodeToString(digest)
     }
 
@@ -29,6 +29,21 @@ data class Disclosure(
         return Base64.getUrlEncoder().withoutPadding()
             .encodeToString(array.toString().toByteArray(Charsets.UTF_8))
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Disclosure) return false
+        return salt == other.salt && claimName == other.claimName && claimValue == other.claimValue
+    }
+
+    override fun hashCode(): Int {
+        var result = salt.hashCode()
+        result = 31 * result + claimName.hashCode()
+        result = 31 * result + claimValue.hashCode()
+        return result
+    }
+
+    override fun toString(): String = "Disclosure(salt=$salt, claimName=$claimName, claimValue=$claimValue)"
 
     companion object {
         fun decode(base64url: String): Disclosure {

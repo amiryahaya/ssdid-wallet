@@ -10,7 +10,12 @@ data class SdJwtVc(
         for (d in selectedDisclosures) {
             parts.add(d.encode())
         }
-        val suffix = kbJwt ?: ""
-        return parts.joinToString("~") + "~$suffix"
+        return if (kbJwt != null) {
+            parts.joinToString("~") + "~$kbJwt"
+        } else if (selectedDisclosures.isNotEmpty()) {
+            parts.joinToString("~") + "~"
+        } else {
+            issuerJwt
+        }
     }
 }

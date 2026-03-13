@@ -1,7 +1,7 @@
 package my.ssdid.wallet.domain.sdjwt
 
 import com.google.common.truth.Truth.assertThat
-import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.*
 import org.junit.Test
 
 class SdJwtParserTest {
@@ -77,5 +77,47 @@ class SdJwtParserTest {
         } catch (e: IllegalArgumentException) {
             assertThat(e.message).contains("Unsupported hash algorithm")
         }
+    }
+
+    // --- Empty string input ---
+    @Test
+    fun `parse empty string returns SdJwtVc with empty issuerJwt`() {
+        val parsed = SdJwtParser.parse("")
+        assertThat(parsed.issuerJwt).isEmpty()
+        assertThat(parsed.disclosures).isEmpty()
+        assertThat(parsed.keyBindingJwt).isNull()
+    }
+
+    // --- Non-primitive claim value (JsonObject) round-trip ---
+    @Test
+    fun `disclosure with JsonObject value round-trips`() {
+        val objValue = buildJsonObject {
+            put("street", "123 Main St")
+            put("city", "KL")
+        }
+        val original = Disclosure("salt-obj", "address", objValue)
+        val encoded = original.encode()
+        val decoded = Disclosure.decode(encoded)
+
+        assertThat(decoded.salt).isEqualTo("salt-obj")
+        assertThat(decoded.claimName).isEqualTo("address")
+        assertThat(decoded.claimValue).isEqualTo(objValue)
+    }
+
+    // --- Disclosure with JsonArray value round-trip ---
+    @Test
+    fun `disclosure with JsonArray value round-trips`() {
+        val arrValue = buildJsonArray {
+            add("reading")
+            add("coding")
+            add(42)
+        }
+        val original = Disclosure("salt-arr", "hobbies", arrValue)
+        val encoded = original.encode()
+        val decoded = Disclosure.decode(encoded)
+
+        assertThat(decoded.salt).isEqualTo("salt-arr")
+        assertThat(decoded.claimName).isEqualTo("hobbies")
+        assertThat(decoded.claimValue).isEqualTo(arrValue)
     }
 }

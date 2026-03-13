@@ -14,7 +14,7 @@ class SdJwtIssuer {
         issuer: String,
         subject: String,
         type: [String],
-        claims: [String: String],
+        claims: [String: Any],
         disclosable: Set<String>,
         holderKeyJwk: [String: String]? = nil,
         issuedAt: Int = Int(Date().timeIntervalSince1970),
@@ -22,7 +22,7 @@ class SdJwtIssuer {
     ) throws -> SdJwtVc {
         var disclosures: [Disclosure] = []
         var sdHashes: [String] = []
-        var visibleClaims: [String: String] = [:]
+        var visibleClaims: [String: Any] = [:]
 
         for (name, value) in claims {
             if disclosable.contains(name) {

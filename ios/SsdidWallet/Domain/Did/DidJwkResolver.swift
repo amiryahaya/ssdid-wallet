@@ -6,16 +6,19 @@ final class DidJwkResolver: DidResolver {
             throw DidResolutionError.unsupportedMethod(did)
         }
         let encoded = String(did.dropFirst("did:jwk:".count))
-        guard let jwkData = Data(base64Encoded: base64UrlToBase64(encoded)),
+        guard let jwkData = Data(base64URLEncoded: encoded),
               let jwkDict = try? JSONSerialization.jsonObject(with: jwkData) as? [String: Any]
         else {
             throw DidResolutionError.invalidJwk
         }
 
-        // Convert JWK dictionary values to strings for publicKeyJwk
+        // Only extract values that are strings, skipping numeric/boolean/nested values
         var publicKeyJwk: [String: String] = [:]
         for (key, value) in jwkDict {
-            publicKeyJwk[key] = "\(value)"
+            if let strValue = value as? String {
+                publicKeyJwk[key] = strValue
+            }
+            // Skip non-string values rather than mangling them
         }
 
         let keyId = "\(did)#0"
@@ -27,12 +30,5 @@ final class DidJwkResolver: DidResolver {
             id: did, controller: did, verificationMethod: [vm],
             authentication: [keyId], assertionMethod: [keyId], capabilityInvocation: [keyId]
         )
-    }
-
-    private func base64UrlToBase64(_ input: String) -> String {
-        var s = input.replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/")
-        let remainder = s.count % 4
-        if remainder > 0 { s += String(repeating: "=", count: 4 - remainder) }
-        return s
     }
 }
