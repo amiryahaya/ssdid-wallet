@@ -57,7 +57,9 @@ fun NotificationsScreen(
     viewModel: NotificationsViewModel = hiltViewModel()
 ) {
     val notifications by viewModel.notifications.collectAsState()
-    val sorted = notifications.sortedByDescending { it.receivedAt }
+    val sorted = notifications.sortedByDescending {
+        runCatching { java.time.Instant.parse(it.receivedAt) }.getOrElse { java.time.Instant.EPOCH }
+    }
 
     Column(
         modifier = Modifier

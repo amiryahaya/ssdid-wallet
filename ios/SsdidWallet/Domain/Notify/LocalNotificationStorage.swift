@@ -11,6 +11,9 @@ final class LocalNotificationStorage: ObservableObject {
         notifications.filter { !$0.isRead }.count
     }
 
+    /// Maximum stored notifications. Oldest are evicted on save.
+    static let maxNotifications = 500
+
     private let fileURL: URL
 
     init() {
@@ -20,8 +23,23 @@ final class LocalNotificationStorage: ObservableObject {
     }
 
     func save(_ notification: LocalNotification) {
+        // Preserve isRead if notification already exists locally (avoids resurrecting read notifications on re-fetch)
+        let existing = notifications.first { $0.id == notification.id }
+        let merged = existing != nil ? LocalNotification(
+            id: notification.id,
+            mailboxId: notification.mailboxId,
+            identityName: notification.identityName,
+            payload: notification.payload,
+            priority: notification.priority,
+            receivedAt: notification.receivedAt,
+            isRead: existing!.isRead
+        ) : notification
         notifications.removeAll { $0.id == notification.id }
-        notifications.insert(notification, at: 0)
+        notifications.insert(merged, at: 0)
+        // Trim to capacity
+        if notifications.count > Self.maxNotifications {
+            notifications = Array(notifications.prefix(Self.maxNotifications))
+        }
         persist()
     }
 
@@ -46,11 +64,17 @@ final class LocalNotificationStorage: ObservableObject {
     // MARK: - Private
 
     private func persist() {
-        do {
-            let data = try JSONEncoder().encode(notifications)
-            try data.write(to: fileURL, options: .atomic)
-        } catch {
-            print("LocalNotificationStorage: failed to persist — \(error)")
+        let snapshot = notifications
+        let url = fileURL
+        Task.detached(priority: .utility) {
+            do {
+                let data = try JSONEncoder().encode(snapshot)
+                try data.write(to: url, options: .atomic)
+            } catch {
+                #if DEBUG
+                print("LocalNotificationStorage: failed to persist — \(error)")
+                #endif
+            }
         }
     }
 

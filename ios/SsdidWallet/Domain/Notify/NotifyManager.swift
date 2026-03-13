@@ -183,7 +183,13 @@ final class NotifyManager {
             )
             try? await center.add(request)
 
-            try? await ackPending(notificationId: notification.notificationId)
+            do {
+                try await ackPending(notificationId: notification.notificationId)
+            } catch {
+                #if DEBUG
+                print("[NotifyManager] ack failed for \(notification.notificationId): \(error)")
+                #endif
+            }
         }
     }
 

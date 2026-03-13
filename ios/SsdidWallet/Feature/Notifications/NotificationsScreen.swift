@@ -6,7 +6,12 @@ struct NotificationsScreen: View {
 
     var body: some View {
         let storage = services.localNotificationStorage
-        let sorted = storage.notifications.sorted { $0.receivedAt > $1.receivedAt }
+        let isoFormatter = ISO8601DateFormatter()
+        let sorted = storage.notifications.sorted {
+            let d0 = isoFormatter.date(from: $0.receivedAt) ?? .distantPast
+            let d1 = isoFormatter.date(from: $1.receivedAt) ?? .distantPast
+            return d0 > d1
+        }
 
         VStack(spacing: 0) {
             // Header
