@@ -19,7 +19,14 @@ final class LocalNotificationStorage: ObservableObject {
     init() {
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         self.fileURL = docs.appendingPathComponent("local_notifications.json")
-        self.notifications = Self.load(from: fileURL)
+        // Defer disk read off the main actor to avoid blocking app launch.
+        let url = self.fileURL
+        Task {
+            let loaded = await Task.detached(priority: .userInitiated) {
+                Self.load(from: url)
+            }.value
+            self.notifications = loaded
+        }
     }
 
     func save(_ notification: LocalNotification) {
@@ -78,7 +85,7 @@ final class LocalNotificationStorage: ObservableObject {
         }
     }
 
-    private static func load(from url: URL) -> [LocalNotification] {
+    private nonisolated static func load(from url: URL) -> [LocalNotification] {
         guard let data = try? Data(contentsOf: url) else { return [] }
         return (try? JSONDecoder().decode([LocalNotification].self, from: data)) ?? []
     }

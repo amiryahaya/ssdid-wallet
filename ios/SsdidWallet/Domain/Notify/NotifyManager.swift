@@ -53,7 +53,11 @@ final class NotifyManager {
         guard !isRegistering else { return }
         isRegistering = true
         defer { isRegistering = false }
-        guard (try? keychainManager.loadSecret(alias: Self.inboxSecretAlias)) == nil else { return }
+
+        // Distinguish "no secret stored" (nil) from "keychain error" (throw).
+        // Using try? here would mask keychain failures and trigger a spurious re-registration.
+        let existingSecret = try keychainManager.loadSecret(alias: Self.inboxSecretAlias)
+        guard existingSecret == nil else { return }
 
         // Register with no devices; APNs token is supplied later via registerAPNsToken(_:).
         let response = try await api.registerInbox(
