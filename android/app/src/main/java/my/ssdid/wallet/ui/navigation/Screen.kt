@@ -83,4 +83,8 @@ sealed class Screen(val route: String) {
         fun createRoute(keyId: String, mode: String) =
             "device_enroll/${Uri.encode(keyId)}?mode=${Uri.encode(mode)}"
     }
+    object InviteAccept : Screen("invite_accept?serverUrl={serverUrl}&token={token}&callbackUrl={callbackUrl}") {
+        fun createRoute(serverUrl: String, token: String, callbackUrl: String = "") =
+            "invite_accept?serverUrl=${Uri.encode(serverUrl)}&token=${Uri.encode(token)}&callbackUrl=${Uri.encode(callbackUrl)}"
+    }
 }
