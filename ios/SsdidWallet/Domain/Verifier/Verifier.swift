@@ -19,18 +19,18 @@ protocol Verifier {
 /// and verifies signatures using the appropriate CryptoProvider.
 final class VerifierImpl: Verifier {
 
-    private let registryApi: RegistryApi
+    private let didResolver: DidResolver
     private let classicalProvider: CryptoProvider
     private let pqcProvider: CryptoProvider
 
-    init(registryApi: RegistryApi, classicalProvider: CryptoProvider, pqcProvider: CryptoProvider) {
-        self.registryApi = registryApi
+    init(didResolver: DidResolver, classicalProvider: CryptoProvider, pqcProvider: CryptoProvider) {
+        self.didResolver = didResolver
         self.classicalProvider = classicalProvider
         self.pqcProvider = pqcProvider
     }
 
     func resolveDid(did: String) async throws -> DidDocument {
-        return try await registryApi.resolveDid(did: did)
+        return try await didResolver.resolve(did: did)
     }
 
     func verifySignature(did: String, keyId: String, signature: Data, data: Data) async throws -> Bool {

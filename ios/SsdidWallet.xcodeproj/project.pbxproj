@@ -117,6 +117,15 @@
 		F33DEFE80062571AE61DCC28 /* VaultImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AFB02858179C279940E04D0 /* VaultImpl.swift */; };
 		F5EF73E8741E7E0666FF4B59 /* KeyRotationScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A5DFFD93FBB406C89165243 /* KeyRotationScreen.swift */; };
 		FB1CC1B487CB6211BA519C54 /* RecoverySetupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01BB201CB4CDEB28460D9CD1 /* RecoverySetupScreen.swift */; };
+		0B73683A3E398E4069BC47B2 /* DidResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = C39D866477A45BFB0159013B /* DidResolver.swift */; };
+		58A72093608F2F3985946F35 /* DidResolutionError.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA63480DDA8347CD8C718BB0 /* DidResolutionError.swift */; };
+		D5EAA70DA8E9D0C0CFB2D8A0 /* Multicodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B7E2CCCBFAA8A784D7F216A /* Multicodec.swift */; };
+		826FAEF3D90263B6667A94C6 /* DidKeyResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C7D53A3375B53911C34748 /* DidKeyResolver.swift */; };
+		15E3A62AF84972F98854E0E8 /* DidJwkResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D89D1A57F1337987565BEACE /* DidJwkResolver.swift */; };
+		E4333E9658D30DBB73AC6CD8 /* SsdidRegistryResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32E725F905F51063BF5B4348 /* SsdidRegistryResolver.swift */; };
+		EAAC167B625A72012EAD3AC0 /* MultiMethodResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B35216566D2EA628C2F32F0 /* MultiMethodResolver.swift */; };
+		90568A408BDCED6A75B2A6B8 /* DidKeyResolverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74B63E4AEB87C1FB7A71BA17 /* DidKeyResolverTests.swift */; };
+		2142EA6AABB6C952853CDA39 /* DidJwkResolverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 796E2847CEC9A652C226FEA4 /* DidJwkResolverTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -244,6 +253,15 @@
 		F8FB97CF1C8FE5180AA42125 /* NotifyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotifyManager.swift; sourceTree = "<group>"; };
 		F9A67835B6BAF26E99D578B1 /* Identity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Identity.swift; sourceTree = "<group>"; };
 		FA167CF225FDFA0E2F54E69C /* VaultStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultStorage.swift; sourceTree = "<group>"; };
+		C39D866477A45BFB0159013B /* DidResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DidResolver.swift; sourceTree = "<group>"; };
+		FA63480DDA8347CD8C718BB0 /* DidResolutionError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DidResolutionError.swift; sourceTree = "<group>"; };
+		4B7E2CCCBFAA8A784D7F216A /* Multicodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Multicodec.swift; sourceTree = "<group>"; };
+		E3C7D53A3375B53911C34748 /* DidKeyResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DidKeyResolver.swift; sourceTree = "<group>"; };
+		D89D1A57F1337987565BEACE /* DidJwkResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DidJwkResolver.swift; sourceTree = "<group>"; };
+		32E725F905F51063BF5B4348 /* SsdidRegistryResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SsdidRegistryResolver.swift; sourceTree = "<group>"; };
+		7B35216566D2EA628C2F32F0 /* MultiMethodResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiMethodResolver.swift; sourceTree = "<group>"; };
+		74B63E4AEB87C1FB7A71BA17 /* DidKeyResolverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DidKeyResolverTests.swift; sourceTree = "<group>"; };
+		796E2847CEC9A652C226FEA4 /* DidJwkResolverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DidJwkResolverTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -312,6 +330,8 @@
 			isa = PBXGroup;
 			children = (
 				69A3BC89A6C2482C86EE38D0 /* BackupCryptoTests.swift */,
+				796E2847CEC9A652C226FEA4 /* DidJwkResolverTests.swift */,
+				74B63E4AEB87C1FB7A71BA17 /* DidKeyResolverTests.swift */,
 				E1869678D7810D9602D67163 /* CanonicalJsonTests.swift */,
 				620815538E471B53257CD2D9 /* ClassicalProviderTests.swift */,
 				B65EBC41C02E3686A0F945F7 /* PqcProviderTests.swift */,
@@ -343,6 +363,7 @@
 				54FB19D9D627C5967016D5C0 /* Backup */,
 				8117F7EF987EF565E9496897 /* Credential */,
 				61EB16A58C8EA2F210A04725 /* Crypto */,
+				33C9503F60E061ACB5A891B4 /* Did */,
 				B9645243F5AF498B5FC64657 /* Device */,
 				CA3B73099932B673F015A859 /* History */,
 				725746F12E407511D002606B /* Model */,
@@ -810,6 +831,20 @@
 			path = Sentry;
 			sourceTree = "<group>";
 		};
+		33C9503F60E061ACB5A891B4 /* Did */ = {
+			isa = PBXGroup;
+			children = (
+				D89D1A57F1337987565BEACE /* DidJwkResolver.swift */,
+				E3C7D53A3375B53911C34748 /* DidKeyResolver.swift */,
+				FA63480DDA8347CD8C718BB0 /* DidResolutionError.swift */,
+				C39D866477A45BFB0159013B /* DidResolver.swift */,
+				7B35216566D2EA628C2F32F0 /* MultiMethodResolver.swift */,
+				4B7E2CCCBFAA8A784D7F216A /* Multicodec.swift */,
+				32E725F905F51063BF5B4348 /* SsdidRegistryResolver.swift */,
+			);
+			path = Did;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -921,6 +956,8 @@
 				43236B7D8BEA1F07545BF9AA /* ClassicalProviderTests.swift in Sources */,
 				2CEA9E5E6BA508C343923DB4 /* PqcProviderTests.swift in Sources */,
 				6062AC039A5D28436A33DFCE /* SsdidWalletTests.swift in Sources */,
+				2142EA6AABB6C952853CDA39 /* DidJwkResolverTests.swift in Sources */,
+				90568A408BDCED6A75B2A6B8 /* DidKeyResolverTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1027,6 +1064,13 @@
 				300A6B04667D9BB576A8D9AF /* VerifiableCredential.swift in Sources */,
 				093576AB1A8A29B95B44C00A /* VerificationMethod.swift in Sources */,
 				B8998384A47A46D68B2707B5 /* Verifier.swift in Sources */,
+				15E3A62AF84972F98854E0E8 /* DidJwkResolver.swift in Sources */,
+				826FAEF3D90263B6667A94C6 /* DidKeyResolver.swift in Sources */,
+				58A72093608F2F3985946F35 /* DidResolutionError.swift in Sources */,
+				0B73683A3E398E4069BC47B2 /* DidResolver.swift in Sources */,
+				EAAC167B625A72012EAD3AC0 /* MultiMethodResolver.swift in Sources */,
+				D5EAA70DA8E9D0C0CFB2D8A0 /* Multicodec.swift in Sources */,
+				E4333E9658D30DBB73AC6CD8 /* SsdidRegistryResolver.swift in Sources */,
 				21B97926CB51352CFFB9E420 /* WalletHomeScreen.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

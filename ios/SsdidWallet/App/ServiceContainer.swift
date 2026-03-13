@@ -50,8 +50,14 @@ final class ServiceContainer: ObservableObject {
 
         self.httpClient = SsdidHttpClient()
         let httpClient = self.httpClient
+        let ssdidRegistryResolver = SsdidRegistryResolver(registryApi: httpClient.registry)
+        let didResolver = MultiMethodResolver(
+            ssdidResolver: ssdidRegistryResolver,
+            keyResolver: DidKeyResolver(),
+            jwkResolver: DidJwkResolver()
+        )
         let verifier = VerifierImpl(
-            registryApi: httpClient.registry,
+            didResolver: didResolver,
             classicalProvider: classical,
             pqcProvider: pqc
         )
