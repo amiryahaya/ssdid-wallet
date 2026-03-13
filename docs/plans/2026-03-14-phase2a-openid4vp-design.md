@@ -2,7 +2,27 @@
 
 ## Goal
 
-Add OpenID for Verifiable Presentations (OpenID4VP) 1.0 support to the SSDID Wallet, enabling credential presentation to external verifiers via the standard protocol. Supports both Presentation Exchange 2.0 and DCQL query languages. Coexists with existing `ssdid://` flow — no breaking changes.
+Add OpenID for Verifiable Presentations (OpenID4VP) 1.0 support to the SSDID Wallet, replacing the custom `ssdid://authenticate` flow with the standard protocol for credential presentation. Supports both Presentation Exchange 2.0 and DCQL query languages. SSDID-network services become OpenID4VP verifiers alongside external verifiers.
+
+## Protocol Migration Strategy
+
+**Hybrid approach:** Migrate authentication/verification to OpenID4VP. Keep custom protocol for operations with no standard equivalent.
+
+| Flow | Protocol | Rationale |
+|------|----------|-----------|
+| Credential presentation/verification | **`openid4vp://`** (NEW) | Standard protocol, replaces `ssdid://authenticate` |
+| DID registration with registry | `ssdid://register` (KEEP) | No standard exists |
+| Key rotation | `ssdid://` (KEEP) | No standard exists |
+| Device pairing | `ssdid://` (KEEP) | No standard exists |
+| Invitation acceptance | `ssdid://invite` (KEEP) | No standard exists; DIDComm v2 deferred to Phase 3 |
+| Transaction signing | `ssdid://sign` (KEEP) | No standard exists |
+| Credential issuance | `ssdid://credential-offer` → **`openid-credential-offer://`** (Phase 2b) | OpenID4VCI standard, deferred |
+
+**Migration path for `ssdid://authenticate`:**
+1. Wallet adds OpenID4VP support (this phase)
+2. SSDID-network backend services updated to send OpenID4VP Authorization Requests (parallel backend work)
+3. `ssdid://authenticate` deprecated but kept for backward compatibility during transition
+4. Eventually removed once all services migrated
 
 ## Context
 
@@ -244,12 +264,14 @@ vp_token=<sd-jwt-presentation>
 - Existing `ScanQrScreen` already decodes arbitrary URLs — no changes needed
 - QR content containing `openid4vp://...` routes through `DeepLinkHandler`
 
-### Backward Compatibility
+### Backward Compatibility & Migration
 
-- Existing `ssdid://` deep links with `requestedClaims` JSON continue to work unchanged
+- `ssdid://register`, `ssdid://sign`, `ssdid://invite` — unchanged, kept permanently
+- `ssdid://authenticate` — deprecated but kept during transition; wallet supports both paths
 - `ConsentScreen` operates in two modes:
-  1. Legacy mode: `requestedClaims` string from `ssdid://` (existing behavior)
-  2. OpenID4VP mode: `CredentialQuery` from PE/DCQL matching (new behavior)
+  1. Legacy mode: `requestedClaims` string from `ssdid://` (existing behavior, deprecated)
+  2. OpenID4VP mode: `CredentialQuery` from PE/DCQL matching (new standard path)
+- SSDID-network services will migrate to sending `openid4vp://` requests (parallel backend work, not part of this wallet plan)
 
 ## Testing Strategy
 
@@ -286,6 +308,8 @@ test-vectors/oid4vp/
 | Credential sources | SD-JWT VC + identity claims | Preserves existing user claims alongside new format |
 | ConsentScreen | Extend existing, dual-mode | No breaking changes, code reuse |
 | Deep link | Coexist ssdid:// + openid4vp:// | No breaking changes |
+| Auth migration | ssdid://authenticate deprecated, OpenID4VP replaces | One verification protocol to maintain and certify |
+| Invitation flow | Keep ssdid://invite | No standard exists; DIDComm v2 deferred |
 
 ## References
 
