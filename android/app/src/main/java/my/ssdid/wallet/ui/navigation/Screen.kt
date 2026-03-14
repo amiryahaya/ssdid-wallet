@@ -89,4 +89,8 @@ sealed class Screen(val route: String) {
         fun createRoute(serverUrl: String, token: String, callbackUrl: String = "") =
             "invite_accept?serverUrl=${Uri.encode(serverUrl)}&token=${Uri.encode(token)}&callbackUrl=${Uri.encode(callbackUrl)}"
     }
+    object PresentationRequest : Screen("presentation_request?uri={uri}") {
+        fun createRoute(encodedUri: String): String =
+            "presentation_request?uri=${Uri.encode(encodedUri)}"
+    }
 }

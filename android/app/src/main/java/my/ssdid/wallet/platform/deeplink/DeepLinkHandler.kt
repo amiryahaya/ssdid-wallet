@@ -39,6 +39,7 @@ data class DeepLinkAction(
         "sign" -> Screen.TxSigning.createRoute(serverUrl, sessionToken)
         "credential-offer" -> Screen.CredentialOffer.createRoute(issuerUrl, offerId)
         "invite" -> Screen.InviteAccept.createRoute(serverUrl, token, callbackUrl)
+        "presentation-request" -> Screen.PresentationRequest.createRoute(serverUrl)
         else -> null
     }
 }
@@ -68,6 +69,12 @@ object DeepLinkHandler {
     }
 
     fun parse(uri: Uri): DeepLinkAction? {
+        if (uri.scheme == "openid4vp") {
+            return DeepLinkAction(
+                action = "presentation-request",
+                serverUrl = uri.toString()
+            )
+        }
         if (uri.scheme != "ssdid") return null
         val action = uri.host ?: return null
         if (action !in VALID_ACTIONS) return null

@@ -168,6 +168,7 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
                         }
                         "sign" -> navController.navigate(Screen.TxSigning.createRoute(payload.serverUrl, payload.sessionToken))
                         "credential-offer" -> navController.navigate(Screen.CredentialOffer.createRoute(payload.issuerUrl, payload.offerId))
+                        "presentation-request" -> navController.navigate(Screen.PresentationRequest.createRoute(payload.serverUrl))
                     }
                 }
             )
@@ -381,6 +382,15 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
             )
         ) {
             InviteAcceptScreen()
+        }
+        composable(
+            route = Screen.PresentationRequest.route,
+            arguments = listOf(
+                navArgument("uri") { type = NavType.StringType; defaultValue = "" }
+            )
+        ) {
+            // Placeholder — real PresentationRequestScreen will be added in Task 17
+            androidx.compose.material3.Text("Presentation Request")
         }
         composable(Screen.SocialRecoveryRestore.route) {
             SocialRecoveryRestoreScreen(
