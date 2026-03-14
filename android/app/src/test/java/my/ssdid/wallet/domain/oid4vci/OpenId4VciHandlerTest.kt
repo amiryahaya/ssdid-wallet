@@ -2,6 +2,7 @@ package my.ssdid.wallet.domain.oid4vci
 
 import com.google.common.truth.Truth.assertThat
 import io.mockk.*
+import kotlinx.coroutines.test.runTest
 import my.ssdid.wallet.domain.vault.Vault
 import org.junit.Before
 import org.junit.Test
@@ -28,7 +29,7 @@ class OpenId4VciHandlerTest {
     }
 
     @Test
-    fun acceptOfferPreAuthorizedCodeSuccess() {
+    fun acceptOfferPreAuthorizedCodeSuccess() = runTest {
         val offer = CredentialOffer(
             credentialIssuer = "https://issuer.example.com",
             credentialConfigurationIds = listOf("UnivDegree"),
@@ -77,7 +78,7 @@ class OpenId4VciHandlerTest {
     }
 
     @Test
-    fun acceptOfferDeferredResult() {
+    fun acceptOfferDeferredResult() = runTest {
         val offer = CredentialOffer(
             credentialIssuer = "https://issuer.example.com",
             credentialConfigurationIds = listOf("Diploma"),
@@ -120,7 +121,7 @@ class OpenId4VciHandlerTest {
     }
 
     @Test
-    fun acceptOfferFailsWithNoPreAuthCode() {
+    fun acceptOfferFailsWithNoPreAuthCode() = runTest {
         val offer = CredentialOffer(
             credentialIssuer = "https://issuer.example.com",
             credentialConfigurationIds = listOf("x"),
@@ -150,7 +151,7 @@ class OpenId4VciHandlerTest {
     }
 
     @Test
-    fun acceptOfferFailsWhenNonceUnavailable() {
+    fun acceptOfferFailsWhenNonceUnavailable() = runTest {
         val offer = CredentialOffer(
             credentialIssuer = "https://issuer.example.com",
             credentialConfigurationIds = listOf("Test"),
@@ -187,7 +188,7 @@ class OpenId4VciHandlerTest {
     }
 
     @Test
-    fun acceptOfferUnexpectedResponseReturnsFailed() {
+    fun acceptOfferUnexpectedResponseReturnsFailed() = runTest {
         val offer = CredentialOffer(
             credentialIssuer = "https://issuer.example.com",
             credentialConfigurationIds = listOf("Test"),

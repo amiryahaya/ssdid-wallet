@@ -157,6 +157,10 @@ class CredentialOfferViewModel @Inject constructor(
                 walletDid = identity.did,
                 keyId = identity.keyId,
                 algorithm = identity.algorithm.toJwaName(),
+                // runBlocking is necessary here: ProofJwtBuilder.build() takes a synchronous
+                // signer lambda (ByteArray) -> ByteArray, but vault.sign() is a suspend fun.
+                // This is safe because we're inside viewModelScope.launch which runs on
+                // Dispatchers.Main, and vault.sign dispatches to IO internally.
                 signer = { data ->
                     runBlocking { vault.sign(identity.keyId, data).getOrThrow() }
                 }

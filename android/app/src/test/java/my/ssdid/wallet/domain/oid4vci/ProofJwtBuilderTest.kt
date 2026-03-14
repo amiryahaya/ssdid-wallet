@@ -35,6 +35,8 @@ class ProofJwtBuilderTest {
         assertThat(payloadJson).contains("https://issuer.example.com")
         assertThat(payloadJson).contains("c-nonce-1")
         assertThat(payloadJson).contains("1700000000")
+        // exp = iat + 120 = 1700000120
+        assertThat(payloadJson).contains("1700000120")
     }
 
     @Test

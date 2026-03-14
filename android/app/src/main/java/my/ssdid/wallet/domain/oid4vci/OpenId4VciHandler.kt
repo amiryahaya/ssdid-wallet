@@ -1,6 +1,5 @@
 package my.ssdid.wallet.domain.oid4vci
 
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
 import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
 import my.ssdid.wallet.domain.vault.Vault
@@ -13,11 +12,13 @@ data class CredentialOfferReview(
 
 sealed class IssuanceResult {
     data class Success(val credential: StoredSdJwtVc) : IssuanceResult()
-    data class Deferred(
+    class Deferred(
         val transactionId: String,
         val deferredEndpoint: String,
         val accessToken: String
-    ) : IssuanceResult()
+    ) : IssuanceResult() {
+        override fun toString() = "Deferred(transactionId=$transactionId, deferredEndpoint=$deferredEndpoint, accessToken=<redacted>)"
+    }
     data class Failed(val error: String) : IssuanceResult()
 }
 
@@ -41,7 +42,7 @@ class OpenId4VciHandler(
         )
     }
 
-    fun acceptOffer(
+    suspend fun acceptOffer(
         offer: CredentialOffer,
         metadata: IssuerMetadata,
         selectedConfigId: String,
@@ -81,7 +82,7 @@ class OpenId4VciHandler(
         )
     }
 
-    private fun requestCredential(
+    private suspend fun requestCredential(
         metadata: IssuerMetadata,
         accessToken: String,
         selectedConfigId: String,
@@ -143,7 +144,7 @@ class OpenId4VciHandler(
                 issuedAt = System.currentTimeMillis() / 1000
             )
 
-            runBlocking { vault.storeStoredSdJwtVc(storedVc) }
+            vault.storeStoredSdJwtVc(storedVc)
             return IssuanceResult.Success(storedVc)
         }
 

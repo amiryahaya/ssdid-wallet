@@ -42,6 +42,7 @@ object ProofJwtBuilder {
             put("iss", walletDid)
             put("aud", issuerUrl)
             put("iat", issuedAt)
+            put("exp", issuedAt + 120L)
             put("nonce", nonce)
         }
 

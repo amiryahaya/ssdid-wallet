@@ -2,6 +2,7 @@ package my.ssdid.wallet.domain.oid4vp
 
 import com.google.common.truth.Truth.assertThat
 import io.mockk.*
+import kotlinx.coroutines.test.runTest
 import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
 import my.ssdid.wallet.domain.vault.Vault
 import org.junit.Before
@@ -41,7 +42,7 @@ class OpenId4VpHandlerTest {
     }
 
     @Test
-    fun processRequestByValueWithPd() {
+    fun processRequestByValueWithPd() = runTest {
         val pd = """{"id":"pd-1","input_descriptors":[{"id":"id-1","format":{"vc+sd-jwt":{}},"constraints":{"fields":[{"path":["$.vct"],"filter":{"const":"IdentityCredential"}}]}}]}"""
         val uri = "openid4vp://?response_type=vp_token&client_id=https://v.example.com&response_uri=https://v.example.com/cb&nonce=n-1&response_mode=direct_post&presentation_definition=${java.net.URLEncoder.encode(pd, "UTF-8")}"
 
@@ -55,7 +56,7 @@ class OpenId4VpHandlerTest {
     }
 
     @Test
-    fun processRequestByReference() {
+    fun processRequestByReference() = runTest {
         val requestJson = """{"client_id":"https://v.example.com","response_uri":"https://v.example.com/cb","nonce":"n-1","response_mode":"direct_post","presentation_definition":{"id":"pd-1","input_descriptors":[{"id":"id-1","format":{"vc+sd-jwt":{}},"constraints":{"fields":[{"path":["$.vct"],"filter":{"const":"IdentityCredential"}}]}}]}}"""
         every { transport.fetchRequestObject("https://v.example.com/request/123") } returns requestJson
         coEvery { vault.listStoredSdJwtVcs() } returns listOf(testCredential)
@@ -66,7 +67,7 @@ class OpenId4VpHandlerTest {
     }
 
     @Test
-    fun processRequestNoMatchPostsError() {
+    fun processRequestNoMatchPostsError() = runTest {
         val pd = """{"id":"pd-1","input_descriptors":[{"id":"id-1","format":{"vc+sd-jwt":{}},"constraints":{"fields":[{"path":["$.vct"],"filter":{"const":"DriverLicense"}}]}}]}"""
         val uri = "openid4vp://?response_type=vp_token&client_id=https://v.example.com&response_uri=https://v.example.com/cb&nonce=n-1&response_mode=direct_post&presentation_definition=${java.net.URLEncoder.encode(pd, "UTF-8")}"
         coEvery { vault.listStoredSdJwtVcs() } returns listOf(testCredential)

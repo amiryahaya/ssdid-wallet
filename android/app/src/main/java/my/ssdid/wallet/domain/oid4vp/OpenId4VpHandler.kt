@@ -1,6 +1,7 @@
 package my.ssdid.wallet.domain.oid4vp
 
-import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
 import my.ssdid.wallet.domain.vault.Vault
 
 class NoMatchingCredentialsException(message: String) : Exception(message)
@@ -17,7 +18,7 @@ class OpenId4VpHandler(
     private val vault: Vault
 ) {
 
-    fun processRequest(uri: String): Result<PresentationReviewResult> = runCatching {
+    suspend fun processRequest(uri: String): Result<PresentationReviewResult> = runCatching {
         val parsed = AuthorizationRequest.parse(uri).getOrThrow()
 
         val authRequest = if (parsed.requestUri != null) {
@@ -27,7 +28,7 @@ class OpenId4VpHandler(
             parsed
         }
 
-        val storedVcs = runBlocking { vault.listStoredSdJwtVcs() }
+        val storedVcs = vault.listStoredSdJwtVcs()
 
         val matches = when {
             authRequest.presentationDefinition != null ->
@@ -47,7 +48,7 @@ class OpenId4VpHandler(
         PresentationReviewResult(authRequest, matches)
     }
 
-    fun submitPresentation(
+    suspend fun submitPresentation(
         authRequest: AuthorizationRequest,
         matchResult: MatchResult,
         selectedClaims: List<String>,
@@ -68,9 +69,14 @@ class OpenId4VpHandler(
             signer = signer
         )
 
-        val definitionId = authRequest.presentationDefinition?.get("id")
-            ?.let { it.toString().trim('"') }
-            ?: throw IllegalStateException("Missing presentation_definition id")
+        val definitionId = when {
+            authRequest.presentationDefinition != null ->
+                authRequest.presentationDefinition["id"]?.jsonPrimitive?.contentOrNull
+                    ?: throw IllegalStateException("Missing presentation_definition id")
+            authRequest.dcqlQuery != null ->
+                matchResult.descriptorId  // DCQL uses the credential query id
+            else -> throw IllegalStateException("No query type in authorization request")
+        }
 
         val submission = PresentationSubmission.create(
             definitionId = definitionId,
