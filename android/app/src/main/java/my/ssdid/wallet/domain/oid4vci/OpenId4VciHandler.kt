@@ -1,6 +1,8 @@
 package my.ssdid.wallet.domain.oid4vci
 
 import kotlinx.serialization.json.*
+import my.ssdid.wallet.domain.mdoc.CborCodec
+import my.ssdid.wallet.domain.mdoc.StoredMDoc
 import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
 import my.ssdid.wallet.domain.vault.Vault
 
@@ -12,6 +14,7 @@ data class CredentialOfferReview(
 
 sealed class IssuanceResult {
     data class Success(val credential: StoredSdJwtVc) : IssuanceResult()
+    data class MDocSuccess(val mdoc: StoredMDoc) : IssuanceResult()
     class Deferred(
         val transactionId: String,
         val deferredEndpoint: String,
@@ -103,14 +106,32 @@ class OpenId4VciHandler(
             signer = signer
         )
 
-        val requestBody = buildJsonObject {
-            put("format", "vc+sd-jwt")
-            putJsonObject("credential_definition") {
-                put("vct", selectedConfigId)
+        // Determine format from credential configuration
+        val configObj = metadata.credentialConfigurationsSupported[selectedConfigId]
+        val format = configObj?.get("format")?.jsonPrimitive?.contentOrNull ?: "vc+sd-jwt"
+        val isMDoc = format == "mso_mdoc"
+
+        val requestBody = if (isMDoc) {
+            val doctype = configObj?.get("doctype")?.jsonPrimitive?.contentOrNull
+                ?: selectedConfigId
+            buildJsonObject {
+                put("format", "mso_mdoc")
+                put("doctype", doctype)
+                putJsonObject("proof") {
+                    put("proof_type", "jwt")
+                    put("jwt", proofJwt)
+                }
             }
-            putJsonObject("proof") {
-                put("proof_type", "jwt")
-                put("jwt", proofJwt)
+        } else {
+            buildJsonObject {
+                put("format", "vc+sd-jwt")
+                putJsonObject("credential_definition") {
+                    put("vct", selectedConfigId)
+                }
+                putJsonObject("proof") {
+                    put("proof_type", "jwt")
+                    put("jwt", proofJwt)
+                }
             }
         }
 
@@ -131,6 +152,10 @@ class OpenId4VciHandler(
                     nonce,
                     response["c_nonce_expires_in"]?.jsonPrimitive?.intOrNull ?: 300
                 )
+            }
+
+            if (isMDoc) {
+                return handleMDocCredential(credential, selectedConfigId, keyId, metadata)
             }
 
             val storedVc = StoredSdJwtVc(
@@ -160,5 +185,44 @@ class OpenId4VciHandler(
         }
 
         return IssuanceResult.Failed("Unexpected response from credential endpoint")
+    }
+
+    private suspend fun handleMDocCredential(
+        credentialBase64: String,
+        selectedConfigId: String,
+        keyId: String,
+        metadata: IssuerMetadata
+    ): IssuanceResult.MDocSuccess {
+        val cborBytes = android.util.Base64.decode(credentialBase64, android.util.Base64.URL_SAFE or android.util.Base64.NO_WRAP)
+        val decoded = CborCodec.decodeMap(cborBytes)
+
+        @Suppress("UNCHECKED_CAST")
+        val docType = decoded["docType"] as? String ?: selectedConfigId
+
+        // Extract nameSpace keys from the decoded CBOR
+        @Suppress("UNCHECKED_CAST")
+        val nameSpacesRaw = decoded["nameSpaces"] as? Map<String, Any> ?: emptyMap()
+        val nameSpaces = nameSpacesRaw.mapValues { (_, v) ->
+            when (v) {
+                is List<*> -> v.filterIsInstance<String>()
+                is Map<*, *> -> v.keys.filterIsInstance<String>()
+                else -> emptyList()
+            }
+        }
+
+        val configObj = metadata.credentialConfigurationsSupported[selectedConfigId]
+        val configDoctype = configObj?.get("doctype")?.jsonPrimitive?.contentOrNull
+
+        val storedMDoc = StoredMDoc(
+            id = java.util.UUID.randomUUID().toString(),
+            docType = configDoctype ?: docType,
+            issuerSignedCbor = cborBytes,
+            deviceKeyId = keyId,
+            issuedAt = System.currentTimeMillis() / 1000,
+            nameSpaces = nameSpaces
+        )
+
+        vault.storeMDoc(storedMDoc)
+        return IssuanceResult.MDocSuccess(storedMDoc)
     }
 }

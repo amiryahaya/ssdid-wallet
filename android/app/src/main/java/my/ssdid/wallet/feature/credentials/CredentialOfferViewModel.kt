@@ -168,6 +168,7 @@ class CredentialOfferViewModel @Inject constructor(
                 onSuccess = { result ->
                     _state.value = when (result) {
                         is IssuanceResult.Success -> CredentialOfferUiState.Success
+                        is IssuanceResult.MDocSuccess -> CredentialOfferUiState.Success
                         is IssuanceResult.Deferred -> CredentialOfferUiState.Deferred(result.transactionId)
                         is IssuanceResult.Failed -> CredentialOfferUiState.Error(result.error)
                     }
