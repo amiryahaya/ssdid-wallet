@@ -149,8 +149,7 @@ struct RootView: View {
         case .inviteAccept(let serverUrl, let token, let callbackUrl):
             InviteAcceptScreen(serverUrl: serverUrl, token: token, callbackUrl: callbackUrl)
         case .presentationRequest(let uri):
-            // TODO: Replace with dedicated PresentationRequestScreen
-            Text("Presentation Request: \(uri)")
+            PresentationRequestScreen(uri: uri)
         }
     }
 }
