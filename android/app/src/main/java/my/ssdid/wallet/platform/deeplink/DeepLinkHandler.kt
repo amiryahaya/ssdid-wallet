@@ -40,7 +40,7 @@ data class DeepLinkAction(
         "credential-offer" -> Screen.CredentialOffer.createRoute(issuerUrl, offerId)
         "openid-credential-offer" -> Screen.CredentialOffer.createRoute("", callbackUrl)
         "invite" -> Screen.InviteAccept.createRoute(serverUrl, token, callbackUrl)
-        "openid4vp" -> null // TODO: route to PresentationRequest screen (Task 11)
+        "openid4vp" -> Screen.PresentationRequest.createRoute(callbackUrl)
         else -> null
     }
 }

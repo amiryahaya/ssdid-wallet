@@ -1,0 +1,12 @@
+{
+  "description": "Valid authorization request with request_uri reference",
+  "input": {
+    "uri": "openid4vp://?client_id=https://verifier.example.com&request_uri=https://verifier.example.com/request/abc123"
+  },
+  "expected": {
+    "valid": true,
+    "client_id": "https://verifier.example.com",
+    "request_uri": "https://verifier.example.com/request/abc123",
+    "requires_fetch": true
+  }
+}

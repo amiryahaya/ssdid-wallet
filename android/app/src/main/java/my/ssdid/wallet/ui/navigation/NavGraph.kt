@@ -37,6 +37,7 @@ import my.ssdid.wallet.feature.presentation.PresentationRequestScreen
 import my.ssdid.wallet.feature.scan.ScanQrScreen
 import my.ssdid.wallet.feature.settings.SettingsScreen
 import my.ssdid.wallet.feature.notifications.NotificationsScreen
+import my.ssdid.wallet.feature.presentation.PresentationRequestScreen
 import my.ssdid.wallet.feature.transaction.TxSigningScreen
 
 @Composable
@@ -169,6 +170,7 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
                         }
                         "sign" -> navController.navigate(Screen.TxSigning.createRoute(payload.serverUrl, payload.sessionToken))
                         "credential-offer" -> navController.navigate(Screen.CredentialOffer.createRoute(payload.issuerUrl, payload.offerId))
+                        "presentation-request" -> navController.navigate(Screen.PresentationRequest.createRoute(payload.serverUrl))
                     }
                 }
             )
@@ -382,6 +384,19 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
             )
         ) {
             InviteAcceptScreen()
+        }
+        composable(
+            route = Screen.PresentationRequest.route,
+            arguments = listOf(
+                navArgument("uri") { type = NavType.StringType; defaultValue = "" }
+            )
+        ) {
+            PresentationRequestScreen(
+                onBack = { navController.popBackStack() },
+                onComplete = {
+                    navController.popBackStack(Screen.WalletHome.route, inclusive = false)
+                }
+            )
         }
         composable(Screen.SocialRecoveryRestore.route) {
             SocialRecoveryRestoreScreen(

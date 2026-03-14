@@ -24,6 +24,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>ssdid</string>
+				<string>openid4vp</string>
 			</array>
 		</dict>
 		<dict>

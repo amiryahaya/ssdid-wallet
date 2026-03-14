@@ -23,6 +23,7 @@
 		11F1DA07A22E5689707FA23A /* ActivityRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0124DE6830FE4BC3B8391B5A /* ActivityRepository.swift */; };
 		136BD0485E3A34912E85BA64 /* DeepLinkHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF3C32F383CC9B23373C734 /* DeepLinkHandler.swift */; };
 		13B758B70FCD797CD6EE099B /* InviteAcceptScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08F034773ABB5E39DD6D2B98 /* InviteAcceptScreen.swift */; };
+		14A3B7C8D9E0F1A2B3C4D5E6 /* PresentationRequestScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25B4C8D9E0F1A2B3C4D5E7F8 /* PresentationRequestScreen.swift */; };
 		169EAD5448E2582A0272D8B5 /* LocalizationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85DBFFB49B4FA5F0DDFA24B9 /* LocalizationManager.swift */; };
 		197A4201EE2A32276DD1530B /* Identity.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9A67835B6BAF26E99D578B1 /* Identity.swift */; };
 		1FACF123F17B72A56727BE87 /* SplashScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDC68C254CEB3F320CBFBE7E /* SplashScreen.swift */; };
@@ -142,6 +143,22 @@
 		AA11BB12C1D2E3F4A5B60012 /* MultiMethodResolverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC11DD12C1D2E3F4A5B60012 /* MultiMethodResolverTests.swift */; };
 		AA11BB13C1D2E3F4A5B60013 /* MulticodecTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC11DD13C1D2E3F4A5B60013 /* MulticodecTests.swift */; };
 		AA11BB14C1D2E3F4A5B60014 /* StoredSdJwtVcTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC11DD14C1D2E3F4A5B60014 /* StoredSdJwtVcTests.swift */; };
+		DD22BB01A1B2C3D4E5F60001 /* AuthorizationRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA01A1B2C3D4E5F60001 /* AuthorizationRequest.swift */; };
+		DD22BB02A1B2C3D4E5F60002 /* CredentialQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA02A1B2C3D4E5F60002 /* CredentialQuery.swift */; };
+		DD22BB03A1B2C3D4E5F60003 /* OpenId4VpError.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA03A1B2C3D4E5F60003 /* OpenId4VpError.swift */; };
+		DD22BB04A1B2C3D4E5F60004 /* AuthorizationRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA04A1B2C3D4E5F60004 /* AuthorizationRequestTests.swift */; };
+		DD22BB05A1B2C3D4E5F60005 /* PresentationDefinitionMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA05A1B2C3D4E5F60005 /* PresentationDefinitionMatcher.swift */; };
+		DD22BB06A1B2C3D4E5F60006 /* DcqlMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA06A1B2C3D4E5F60006 /* DcqlMatcher.swift */; };
+		DD22BB07A1B2C3D4E5F60007 /* PresentationDefinitionMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA07A1B2C3D4E5F60007 /* PresentationDefinitionMatcherTests.swift */; };
+		DD22BB08A1B2C3D4E5F60008 /* DcqlMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA08A1B2C3D4E5F60008 /* DcqlMatcherTests.swift */; };
+		DD22BB09A1B2C3D4E5F60009 /* VpTokenBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA09A1B2C3D4E5F60009 /* VpTokenBuilder.swift */; };
+		DD22BB10A1B2C3D4E5F60010 /* PresentationSubmission.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA10A1B2C3D4E5F60010 /* PresentationSubmission.swift */; };
+		DD22BB11A1B2C3D4E5F60011 /* VpTokenBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA11A1B2C3D4E5F60011 /* VpTokenBuilderTests.swift */; };
+		DD22BB12A1B2C3D4E5F60012 /* OpenId4VpTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA12A1B2C3D4E5F60012 /* OpenId4VpTransport.swift */; };
+		DD22BB14A1B2C3D4E5F60014 /* OpenId4VpHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA14A1B2C3D4E5F60014 /* OpenId4VpHandler.swift */; };
+		DD22BB15A1B2C3D4E5F60015 /* OpenId4VpHandlerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA15A1B2C3D4E5F60015 /* OpenId4VpHandlerTests.swift */; };
+		DD22BB13A1B2C3D4E5F60013 /* OpenId4VpTransportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA13A1B2C3D4E5F60013 /* OpenId4VpTransportTests.swift */; };
+		DD22BB16A1B2C3D4E5F60016 /* OpenId4VpIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA16A1B2C3D4E5F60016 /* OpenId4VpIntegrationTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -156,6 +173,22 @@
 
 /* Begin PBXFileReference section */
 		00CDDDC89BA9C750FA2E2019 /* SettingsRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRepository.swift; sourceTree = "<group>"; };
+		DD22AA01A1B2C3D4E5F60001 /* AuthorizationRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorizationRequest.swift; sourceTree = "<group>"; };
+		DD22AA02A1B2C3D4E5F60002 /* CredentialQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialQuery.swift; sourceTree = "<group>"; };
+		DD22AA03A1B2C3D4E5F60003 /* OpenId4VpError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenId4VpError.swift; sourceTree = "<group>"; };
+		DD22AA04A1B2C3D4E5F60004 /* AuthorizationRequestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorizationRequestTests.swift; sourceTree = "<group>"; };
+		DD22AA05A1B2C3D4E5F60005 /* PresentationDefinitionMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationDefinitionMatcher.swift; sourceTree = "<group>"; };
+		DD22AA06A1B2C3D4E5F60006 /* DcqlMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DcqlMatcher.swift; sourceTree = "<group>"; };
+		DD22AA07A1B2C3D4E5F60007 /* PresentationDefinitionMatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationDefinitionMatcherTests.swift; sourceTree = "<group>"; };
+		DD22AA08A1B2C3D4E5F60008 /* DcqlMatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DcqlMatcherTests.swift; sourceTree = "<group>"; };
+		DD22AA09A1B2C3D4E5F60009 /* VpTokenBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VpTokenBuilder.swift; sourceTree = "<group>"; };
+		DD22AA10A1B2C3D4E5F60010 /* PresentationSubmission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationSubmission.swift; sourceTree = "<group>"; };
+		DD22AA11A1B2C3D4E5F60011 /* VpTokenBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VpTokenBuilderTests.swift; sourceTree = "<group>"; };
+		DD22AA12A1B2C3D4E5F60012 /* OpenId4VpTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenId4VpTransport.swift; sourceTree = "<group>"; };
+		DD22AA13A1B2C3D4E5F60013 /* OpenId4VpTransportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenId4VpTransportTests.swift; sourceTree = "<group>"; };
+		DD22AA14A1B2C3D4E5F60014 /* OpenId4VpHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenId4VpHandler.swift; sourceTree = "<group>"; };
+		DD22AA15A1B2C3D4E5F60015 /* OpenId4VpHandlerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenId4VpHandlerTests.swift; sourceTree = "<group>"; };
+		DD22AA16A1B2C3D4E5F60016 /* OpenId4VpIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenId4VpIntegrationTests.swift; sourceTree = "<group>"; };
 		0124DE6830FE4BC3B8391B5A /* ActivityRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityRepository.swift; sourceTree = "<group>"; };
 		0164BDCEADFC8DFED9F7654A /* RecoveryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryManager.swift; sourceTree = "<group>"; };
 		01BB201CB4CDEB28460D9CD1 /* RecoverySetupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoverySetupScreen.swift; sourceTree = "<group>"; };
@@ -169,6 +202,7 @@
 		1094A1213DE08F5A317DBCD6 /* DriveApi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveApi.swift; sourceTree = "<group>"; };
 		12D666A531A1CFAE8BDDCB22 /* RevocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RevocationManager.swift; sourceTree = "<group>"; };
 		18327CF1CBB3FD635354927D /* ProfileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileManager.swift; sourceTree = "<group>"; };
+		25B4C8D9E0F1A2B3C4D5E7F8 /* PresentationRequestScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationRequestScreen.swift; sourceTree = "<group>"; };
 		1C2C982E606F4F5D11B8589F /* SsdidWalletTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = SsdidWalletTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1C5771B6AC99929644562CF2 /* InstitutionalSetupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstitutionalSetupScreen.swift; sourceTree = "<group>"; };
 		1CEE96DC224F655B1B274BAC /* ServerApi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerApi.swift; sourceTree = "<group>"; };
@@ -361,6 +395,7 @@
 		1DAEDF0F34C61B531009AAB8 /* SsdidWalletTests */ = {
 			isa = PBXGroup;
 			children = (
+				DD22AA04A1B2C3D4E5F60004 /* AuthorizationRequestTests.swift */,
 				69A3BC89A6C2482C86EE38D0 /* BackupCryptoTests.swift */,
 				796E2847CEC9A652C226FEA4 /* DidJwkResolverTests.swift */,
 				74B63E4AEB87C1FB7A71BA17 /* DidKeyResolverTests.swift */,
@@ -373,6 +408,12 @@
 				CC11DD10C1D2E3F4A5B60010 /* SdJwtIssuerTests.swift */,
 				CC11DD08C1D2E3F4A5B60008 /* SdJwtParserTests.swift */,
 				CC11DD14C1D2E3F4A5B60014 /* StoredSdJwtVcTests.swift */,
+				DD22AA07A1B2C3D4E5F60007 /* PresentationDefinitionMatcherTests.swift */,
+				DD22AA08A1B2C3D4E5F60008 /* DcqlMatcherTests.swift */,
+				DD22AA11A1B2C3D4E5F60011 /* VpTokenBuilderTests.swift */,
+				DD22AA13A1B2C3D4E5F60013 /* OpenId4VpTransportTests.swift */,
+				DD22AA15A1B2C3D4E5F60015 /* OpenId4VpHandlerTests.swift */,
+				DD22AA16A1B2C3D4E5F60016 /* OpenId4VpIntegrationTests.swift */,
 				31F41C58074608E9C2F2FD80 /* SsdidWalletTests.swift */,
 			);
 			path = SsdidWalletTests;
@@ -407,6 +448,7 @@
 				CA3B73099932B673F015A859 /* History */,
 				725746F12E407511D002606B /* Model */,
 				528447F63ADF7513A3154AED /* Notify */,
+				DD22CC01A1B2C3D4E5F60001 /* Oid4vp */,
 				B80F52F06C4DE698C3F443A8 /* Profile */,
 				7467A80EA4287890F6E9A193 /* Recovery */,
 				F61097ADD203396F8E37BC02 /* Revocation */,
@@ -479,6 +521,7 @@
 				B73E6928BA304F2139BACCD3 /* Invite */,
 				D3033D23312A94944AE65C4B /* Notifications */,
 				879352BD0BE91B8E91A8ADD8 /* Onboarding */,
+				36C5D9E0F1A2B3C4D5E6F7A8 /* Presentation */,
 				2BA277F44DECA0212F4F663C /* Profile */,
 				2D94D1F0CBF5B7174B605CA2 /* Recovery */,
 				1E95C6EA473EB5679AB47721 /* Registration */,
@@ -639,6 +682,22 @@
 			path = Verifier;
 			sourceTree = "<group>";
 		};
+		DD22CC01A1B2C3D4E5F60001 /* Oid4vp */ = {
+			isa = PBXGroup;
+			children = (
+				DD22AA01A1B2C3D4E5F60001 /* AuthorizationRequest.swift */,
+				DD22AA02A1B2C3D4E5F60002 /* CredentialQuery.swift */,
+				DD22AA03A1B2C3D4E5F60003 /* OpenId4VpError.swift */,
+				DD22AA05A1B2C3D4E5F60005 /* PresentationDefinitionMatcher.swift */,
+				DD22AA06A1B2C3D4E5F60006 /* DcqlMatcher.swift */,
+				DD22AA10A1B2C3D4E5F60010 /* PresentationSubmission.swift */,
+				DD22AA09A1B2C3D4E5F60009 /* VpTokenBuilder.swift */,
+				DD22AA12A1B2C3D4E5F60012 /* OpenId4VpTransport.swift */,
+				DD22AA14A1B2C3D4E5F60014 /* OpenId4VpHandler.swift */,
+			);
+			path = Oid4vp;
+			sourceTree = "<group>";
+		};
 		792BB6524E2FAD8DCEDCBADB /* Rotation */ = {
 			isa = PBXGroup;
 			children = (
@@ -744,6 +803,14 @@
 				29500872D47064A269CB5F22 /* InviteAcceptViewModel.swift */,
 			);
 			path = Invite;
+			sourceTree = "<group>";
+		};
+		36C5D9E0F1A2B3C4D5E6F7A8 /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				25B4C8D9E0F1A2B3C4D5E7F8 /* PresentationRequestScreen.swift */,
+			);
+			path = Presentation;
 			sourceTree = "<group>";
 		};
 		B80F52F06C4DE698C3F443A8 /* Profile */ = {
@@ -1020,6 +1087,13 @@
 				AA11BB12C1D2E3F4A5B60012 /* MultiMethodResolverTests.swift in Sources */,
 				AA11BB13C1D2E3F4A5B60013 /* MulticodecTests.swift in Sources */,
 				AA11BB14C1D2E3F4A5B60014 /* StoredSdJwtVcTests.swift in Sources */,
+				DD22BB04A1B2C3D4E5F60004 /* AuthorizationRequestTests.swift in Sources */,
+				DD22BB07A1B2C3D4E5F60007 /* PresentationDefinitionMatcherTests.swift in Sources */,
+				DD22BB08A1B2C3D4E5F60008 /* DcqlMatcherTests.swift in Sources */,
+				DD22BB11A1B2C3D4E5F60011 /* VpTokenBuilderTests.swift in Sources */,
+				DD22BB13A1B2C3D4E5F60013 /* OpenId4VpTransportTests.swift in Sources */,
+				DD22BB15A1B2C3D4E5F60015 /* OpenId4VpHandlerTests.swift in Sources */,
+				DD22BB16A1B2C3D4E5F60016 /* OpenId4VpIntegrationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1128,6 +1202,16 @@
 				A1B2C3D4E5F6789012345678 /* VerifiablePresentation.swift in Sources */,
 				093576AB1A8A29B95B44C00A /* VerificationMethod.swift in Sources */,
 				B8998384A47A46D68B2707B5 /* Verifier.swift in Sources */,
+				DD22BB01A1B2C3D4E5F60001 /* AuthorizationRequest.swift in Sources */,
+				DD22BB02A1B2C3D4E5F60002 /* CredentialQuery.swift in Sources */,
+				DD22BB03A1B2C3D4E5F60003 /* OpenId4VpError.swift in Sources */,
+				DD22BB05A1B2C3D4E5F60005 /* PresentationDefinitionMatcher.swift in Sources */,
+				14A3B7C8D9E0F1A2B3C4D5E6 /* PresentationRequestScreen.swift in Sources */,
+				DD22BB06A1B2C3D4E5F60006 /* DcqlMatcher.swift in Sources */,
+				DD22BB10A1B2C3D4E5F60010 /* PresentationSubmission.swift in Sources */,
+				DD22BB09A1B2C3D4E5F60009 /* VpTokenBuilder.swift in Sources */,
+				DD22BB12A1B2C3D4E5F60012 /* OpenId4VpTransport.swift in Sources */,
+				DD22BB14A1B2C3D4E5F60014 /* OpenId4VpHandler.swift in Sources */,
 				15E3A62AF84972F98854E0E8 /* DidJwkResolver.swift in Sources */,
 				826FAEF3D90263B6667A94C6 /* DidKeyResolver.swift in Sources */,
 				58A72093608F2F3985946F35 /* DidResolutionError.swift in Sources */,

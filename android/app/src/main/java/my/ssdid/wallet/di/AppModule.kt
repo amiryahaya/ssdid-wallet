@@ -44,6 +44,10 @@ import my.ssdid.wallet.platform.device.AndroidDeviceInfoProvider
 import my.ssdid.wallet.domain.vault.KeystoreManager
 import my.ssdid.wallet.domain.settings.SettingsRepository
 import my.ssdid.wallet.platform.storage.DataStoreSettingsRepository
+import my.ssdid.wallet.domain.oid4vp.DcqlMatcher
+import my.ssdid.wallet.domain.oid4vp.OpenId4VpHandler
+import my.ssdid.wallet.domain.oid4vp.OpenId4VpTransport
+import my.ssdid.wallet.domain.oid4vp.PresentationDefinitionMatcher
 import my.ssdid.wallet.domain.notify.AndroidNotifyDispatcher
 import my.ssdid.wallet.domain.notify.LocalNotificationStorage
 import my.ssdid.wallet.domain.notify.NotifyLifecycleObserver
@@ -54,10 +58,6 @@ import my.ssdid.wallet.domain.oid4vci.NonceManager
 import my.ssdid.wallet.domain.oid4vci.OpenId4VciHandler
 import my.ssdid.wallet.domain.oid4vci.OpenId4VciTransport
 import my.ssdid.wallet.domain.oid4vci.TokenClient
-import my.ssdid.wallet.domain.oid4vp.DcqlMatcher
-import my.ssdid.wallet.domain.oid4vp.OpenId4VpHandler
-import my.ssdid.wallet.domain.oid4vp.OpenId4VpTransport
-import my.ssdid.wallet.domain.oid4vp.PresentationDefinitionMatcher
 import my.ssdid.wallet.domain.transport.EmailVerifyApi
 import my.ssdid.wallet.domain.transport.NotifyApi
 import okhttp3.CertificatePinner

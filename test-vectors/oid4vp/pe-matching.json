@@ -1,0 +1,81 @@
+{
+  "description": "Presentation Exchange 2.0 credential matching scenarios",
+  "vectors": [
+    {
+      "description": "Single SD-JWT VC matches by vct and format",
+      "presentation_definition": {
+        "id": "req-1",
+        "input_descriptors": [{
+          "id": "emp-cred",
+          "format": { "vc+sd-jwt": { "alg": ["EdDSA"] } },
+          "constraints": {
+            "fields": [
+              { "path": ["$.vct"], "filter": { "const": "VerifiedEmployee" } },
+              { "path": ["$.name"] },
+              { "path": ["$.department"], "optional": true }
+            ]
+          }
+        }]
+      },
+      "stored_credentials": [
+        {
+          "type": "sd-jwt-vc",
+          "vct": "VerifiedEmployee",
+          "claims": { "name": "Ahmad", "department": "Engineering", "employeeId": "EMP-1234" },
+          "disclosable_claims": ["name", "department"]
+        }
+      ],
+      "expected": {
+        "matched": true,
+        "matched_credential_index": 0,
+        "required_claims": ["name"],
+        "optional_claims": ["department"]
+      }
+    },
+    {
+      "description": "No credential matches vct filter",
+      "presentation_definition": {
+        "id": "req-2",
+        "input_descriptors": [{
+          "id": "gov-id",
+          "format": { "vc+sd-jwt": {} },
+          "constraints": {
+            "fields": [
+              { "path": ["$.vct"], "filter": { "const": "GovernmentId" } }
+            ]
+          }
+        }]
+      },
+      "stored_credentials": [
+        {
+          "type": "sd-jwt-vc",
+          "vct": "VerifiedEmployee",
+          "claims": { "name": "Ahmad" },
+          "disclosable_claims": ["name"]
+        }
+      ],
+      "expected": { "matched": false }
+    },
+    {
+      "description": "Multiple credentials, one matches",
+      "presentation_definition": {
+        "id": "req-3",
+        "input_descriptors": [{
+          "id": "emp-cred",
+          "format": { "vc+sd-jwt": {} },
+          "constraints": {
+            "fields": [
+              { "path": ["$.vct"], "filter": { "const": "VerifiedEmployee" } },
+              { "path": ["$.name"] }
+            ]
+          }
+        }]
+      },
+      "stored_credentials": [
+        { "type": "sd-jwt-vc", "vct": "UniversityDegree", "claims": { "degree": "BSc" }, "disclosable_claims": ["degree"] },
+        { "type": "sd-jwt-vc", "vct": "VerifiedEmployee", "claims": { "name": "Ahmad" }, "disclosable_claims": ["name"] }
+      ],
+      "expected": { "matched": true, "matched_credential_index": 1 }
+    }
+  ]
+}
