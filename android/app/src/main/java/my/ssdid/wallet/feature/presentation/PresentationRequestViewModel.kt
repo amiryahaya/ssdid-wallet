@@ -7,10 +7,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import my.ssdid.wallet.domain.oid4vp.AuthorizationRequest
 import my.ssdid.wallet.domain.oid4vp.MatchResult
+import my.ssdid.wallet.domain.oid4vp.NoMatchingCredentialsException
 import my.ssdid.wallet.domain.oid4vp.OpenId4VpHandler
 import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
 import my.ssdid.wallet.domain.vault.Vault
@@ -96,11 +98,9 @@ class PresentationRequestViewModel @Inject constructor(
                         )
                     },
                     onFailure = { error ->
-                        val message = error.message ?: "Failed to process request"
-                        if (message.contains("No stored credentials", ignoreCase = true)) {
-                            _state.value = UiState.NoCredentials
-                        } else {
-                            _state.value = UiState.Error(message)
+                        when (error) {
+                            is NoMatchingCredentialsException -> _state.value = UiState.NoCredentials
+                            else -> _state.value = UiState.Error(error.message ?: "Failed to process request")
                         }
                     }
                 )
@@ -111,22 +111,24 @@ class PresentationRequestViewModel @Inject constructor(
     }
 
     fun toggleClaim(claimName: String) {
-        val current = _state.value
-        if (current !is UiState.CredentialMatch) return
-
-        val updatedClaims = current.claims.map { item ->
-            if (item.name == claimName && !item.required) {
-                item.copy(selected = !item.selected)
-            } else {
-                item
-            }
+        _state.update { current ->
+            if (current !is UiState.CredentialMatch) return@update current
+            current.copy(claims = current.claims.map { item ->
+                if (item.name == claimName && !item.required) item.copy(selected = !item.selected)
+                else item
+            })
         }
-        _state.value = current.copy(claims = updatedClaims)
     }
 
     fun approve() {
-        val current = _state.value
-        if (current !is UiState.CredentialMatch) return
+        // Atomically capture state and transition to Submitting
+        var captured: UiState.CredentialMatch? = null
+        _state.update { current ->
+            if (current !is UiState.CredentialMatch) return@update current
+            captured = current
+            UiState.Submitting
+        }
+        val current = captured ?: return
 
         val authRequest = current.authRequest
         val matchResult = current.matchResult
@@ -135,11 +137,7 @@ class PresentationRequestViewModel @Inject constructor(
             .filter { it.selected && it.available }
             .map { it.name }
             .toSet()
-
-        // Find the identity that owns this credential (match by DID subject)
         val subjectDid = storedVc.subject
-
-        _state.value = UiState.Submitting
 
         viewModelScope.launch(Dispatchers.IO) {
             try {

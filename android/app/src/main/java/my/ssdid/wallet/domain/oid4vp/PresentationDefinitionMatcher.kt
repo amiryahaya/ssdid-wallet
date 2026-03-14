@@ -17,7 +17,8 @@ class PresentationDefinitionMatcher {
         val pd = Json.parseToJsonElement(presentationDefinitionJson).jsonObject
         val descriptors = pd["input_descriptors"]?.jsonArray?.map { desc ->
             val obj = desc.jsonObject
-            val id = obj["id"]!!.jsonPrimitive.content
+            val id = obj["id"]?.jsonPrimitive?.content
+                ?: throw IllegalArgumentException("input_descriptor missing required 'id' field")
             val format = obj["format"]?.jsonObject?.keys?.firstOrNull() ?: "vc+sd-jwt"
             val fields = obj["constraints"]?.jsonObject
                 ?.get("fields")?.jsonArray ?: JsonArray(emptyList())

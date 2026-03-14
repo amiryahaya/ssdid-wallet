@@ -13,7 +13,10 @@ struct PresentationSubmission: Codable {
 
     func toJson() throws -> String {
         let data = try JSONEncoder().encode(self)
-        return String(data: data, encoding: .utf8) ?? "{}"
+        guard let json = String(data: data, encoding: .utf8) else {
+            throw OpenId4VpError.invalidRequestObject
+        }
+        return json
     }
 }
 

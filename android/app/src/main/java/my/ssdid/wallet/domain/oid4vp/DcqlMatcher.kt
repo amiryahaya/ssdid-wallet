@@ -19,7 +19,8 @@ class DcqlMatcher {
 
         val descriptors = credentials.map { cred ->
             val obj = cred.jsonObject
-            val id = obj["id"]!!.jsonPrimitive.content
+            val id = obj["id"]?.jsonPrimitive?.content
+                ?: throw IllegalArgumentException("DCQL credential missing required 'id' field")
             val format = obj["format"]?.jsonPrimitive?.content ?: "vc+sd-jwt"
             val vctFilter = obj["meta"]?.jsonObject
                 ?.get("vct_values")?.jsonArray

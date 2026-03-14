@@ -8,10 +8,10 @@ class OpenId4VpHandler {
         let query: CredentialQuery
     }
 
-    let transport: OpenId4VpTransport
-    let peMatcher: PresentationDefinitionMatcher
-    let dcqlMatcher: DcqlMatcher
-    let vpTokenBuilder: VpTokenBuilder
+    private let transport: OpenId4VpTransport
+    private let peMatcher: PresentationDefinitionMatcher
+    private let dcqlMatcher: DcqlMatcher
+    private let vpTokenBuilder: VpTokenBuilder
 
     init(
         transport: OpenId4VpTransport,

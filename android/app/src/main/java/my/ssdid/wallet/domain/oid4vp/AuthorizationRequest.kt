@@ -27,6 +27,7 @@ data class AuthorizationRequest(
 
             // By-reference: only client_id and request_uri needed
             if (requestUri != null) {
+                require(requestUri.startsWith("https://")) { "request_uri must be HTTPS: $requestUri" }
                 validateClientId(clientId)
                 return@runCatching AuthorizationRequest(
                     clientId = clientId,

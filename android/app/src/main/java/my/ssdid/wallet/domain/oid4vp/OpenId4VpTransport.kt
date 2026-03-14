@@ -24,6 +24,8 @@ class OpenId4VpTransport(private val client: OkHttpClient) {
         presentationSubmission: PresentationSubmission?,
         state: String?
     ): Result<Unit> = runCatching {
+        // Note: HTTPS is enforced by AuthorizationRequest parser — not re-validated here
+        // to keep transport testable with MockWebServer (http://localhost).
         val formBuilder = FormBody.Builder()
             .add("vp_token", vpToken)
         presentationSubmission?.let {
@@ -47,6 +49,8 @@ class OpenId4VpTransport(private val client: OkHttpClient) {
         error: String,
         state: String?
     ): Result<Unit> = runCatching {
+        // Note: HTTPS is enforced by AuthorizationRequest parser — not re-validated here
+        // to keep transport testable with MockWebServer (http://localhost).
         val formBuilder = FormBody.Builder()
             .add("error", error)
         state?.let { formBuilder.add("state", it) }

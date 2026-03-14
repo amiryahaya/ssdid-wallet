@@ -42,8 +42,9 @@ class OpenId4VpHandler(
         }
 
         if (matchResults.isEmpty()) {
+            // Best-effort error notification; don't let transport failure mask the real result
             authRequest.responseUri?.let { responseUri ->
-                transport.postError(responseUri, "access_denied", authRequest.state)
+                runCatching { transport.postError(responseUri, "access_denied", authRequest.state) }
             }
             throw NoMatchingCredentialsException("No stored credentials match the request")
         }
@@ -72,7 +73,8 @@ class OpenId4VpHandler(
 
         val submission = if (authRequest.presentationDefinition != null) {
             val pd = Json.parseToJsonElement(authRequest.presentationDefinition!!).jsonObject
-            val definitionId = pd["id"]?.jsonPrimitive?.content ?: "unknown"
+            val definitionId = pd["id"]?.jsonPrimitive?.content
+                ?: throw IllegalStateException("presentation_definition missing 'id' field")
             PresentationSubmission(
                 id = UUID.randomUUID().toString(),
                 definitionId = definitionId,

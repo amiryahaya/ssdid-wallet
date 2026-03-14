@@ -66,6 +66,9 @@ class OpenId4VpTransport {
     }
 
     private func post(to urlString: String, body: String) throws {
+        guard urlString.hasPrefix("https://") else {
+            throw OpenId4VpError.nonHttpsResponseUri(urlString)
+        }
         guard let url = URL(string: urlString) else {
             throw OpenId4VpError.invalidResponseUri(urlString)
         }

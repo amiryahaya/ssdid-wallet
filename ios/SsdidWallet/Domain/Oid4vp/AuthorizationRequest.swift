@@ -31,6 +31,9 @@ struct AuthorizationRequest {
 
             // By-reference: only client_id and request_uri needed
             if let requestUri = requestUri {
+                guard requestUri.hasPrefix("https://") else {
+                    throw OpenId4VpError.nonHttpsResponseUri(requestUri)
+                }
                 try validateClientId(clientId)
                 return AuthorizationRequest(
                     clientId: clientId,
