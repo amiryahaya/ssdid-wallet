@@ -11,6 +11,10 @@ import my.ssdid.wallet.BuildConfig
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.backup.BackupManager
 import my.ssdid.wallet.domain.credential.CredentialIssuanceManager
+import my.ssdid.wallet.domain.crypto.X25519Provider
+import my.ssdid.wallet.domain.didcomm.DIDCommPacker
+import my.ssdid.wallet.domain.didcomm.DIDCommTransport
+import my.ssdid.wallet.domain.didcomm.DIDCommUnpacker
 import my.ssdid.wallet.domain.device.DeviceInfoProvider
 import my.ssdid.wallet.domain.device.DeviceManager
 import my.ssdid.wallet.domain.crypto.ClassicalProvider
@@ -279,6 +283,23 @@ object AppModule {
         notifyManager: NotifyManager,
         vault: Vault
     ): NotifyLifecycleObserver = NotifyLifecycleObserver(context.applicationContext as android.app.Application, notifyManager, vault)
+
+    @Provides
+    @Singleton
+    fun provideX25519Provider(): X25519Provider = X25519Provider()
+
+    @Provides
+    @Singleton
+    fun provideDIDCommPacker(x25519: X25519Provider): DIDCommPacker = DIDCommPacker(x25519)
+
+    @Provides
+    @Singleton
+    fun provideDIDCommUnpacker(x25519: X25519Provider): DIDCommUnpacker = DIDCommUnpacker(x25519)
+
+    @Provides
+    @Singleton
+    fun provideDIDCommTransport(okHttpClient: OkHttpClient): DIDCommTransport =
+        DIDCommTransport(okHttpClient)
 
     @Provides
     @Singleton
