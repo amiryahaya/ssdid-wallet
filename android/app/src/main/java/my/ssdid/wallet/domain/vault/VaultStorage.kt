@@ -25,6 +25,12 @@ interface VaultStorage {
     suspend fun listSdJwtVcs(): List<StoredSdJwtVc>
     suspend fun deleteSdJwtVc(id: String)
 
+    // mdoc/mDL storage
+    suspend fun saveMDoc(mdoc: my.ssdid.wallet.domain.mdoc.StoredMDoc)
+    suspend fun listMDocs(): List<my.ssdid.wallet.domain.mdoc.StoredMDoc>
+    suspend fun getMDoc(id: String): my.ssdid.wallet.domain.mdoc.StoredMDoc?
+    suspend fun deleteMDoc(id: String)
+
     // Recovery key storage
     suspend fun saveRecoveryPublicKey(keyId: String, encryptedPublicKey: ByteArray)
     suspend fun getRecoveryPublicKey(keyId: String): ByteArray?

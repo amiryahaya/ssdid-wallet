@@ -23,6 +23,12 @@ protocol VaultStorage {
     func listSdJwtVcs() async -> [StoredSdJwtVc]
     func deleteSdJwtVc(id: String) async throws
 
+    // mdoc / mDL storage
+    func saveMDoc(_ mdoc: StoredMDoc) async throws
+    func listMDocs() async -> [StoredMDoc]
+    func getMDoc(id: String) async -> StoredMDoc?
+    func deleteMDoc(id: String) async throws
+
     // Recovery key storage
     func saveRecoveryPublicKey(keyId: String, encryptedPublicKey: Data) async throws
     func getRecoveryPublicKey(keyId: String) async -> Data?
@@ -51,6 +57,7 @@ final class FileVaultStorage: VaultStorage {
         static let identities = "ssdid_vault_identities"
         static let credentials = "ssdid_vault_credentials"
         static let sdJwtVcs = "ssdid_vault_sd_jwt_vcs"
+        static let mdocs = "ssdid_vault_mdocs"
         static let onboarding = "ssdid_onboarding_completed"
     }
 
@@ -158,6 +165,38 @@ final class FileVaultStorage: VaultStorage {
         vcs.removeAll { $0.id == id }
         let data = try encoder.encode(vcs)
         defaults.set(data, forKey: Keys.sdJwtVcs)
+    }
+
+    // MARK: - mdoc / mDL
+
+    func saveMDoc(_ mdoc: StoredMDoc) async throws {
+        var mdocs = await listMDocs()
+
+        if let index = mdocs.firstIndex(where: { $0.id == mdoc.id }) {
+            mdocs[index] = mdoc
+        } else {
+            mdocs.append(mdoc)
+        }
+
+        let data = try encoder.encode(mdocs)
+        defaults.set(data, forKey: Keys.mdocs)
+    }
+
+    func listMDocs() async -> [StoredMDoc] {
+        guard let data = defaults.data(forKey: Keys.mdocs) else { return [] }
+        return (try? decoder.decode([StoredMDoc].self, from: data)) ?? []
+    }
+
+    func getMDoc(id: String) async -> StoredMDoc? {
+        let mdocs = await listMDocs()
+        return mdocs.first { $0.id == id }
+    }
+
+    func deleteMDoc(id: String) async throws {
+        var mdocs = await listMDocs()
+        mdocs.removeAll { $0.id == id }
+        let data = try encoder.encode(mdocs)
+        defaults.set(data, forKey: Keys.mdocs)
     }
 
     // MARK: - Recovery Keys

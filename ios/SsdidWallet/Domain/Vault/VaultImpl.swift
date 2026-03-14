@@ -195,6 +195,24 @@ final class VaultImpl: Vault, @unchecked Sendable {
         try await storage.deleteCredential(credentialId: credentialId)
     }
 
+    // MARK: - mdoc / mDL
+
+    func storeMDoc(_ mdoc: StoredMDoc) async throws {
+        try await storage.saveMDoc(mdoc)
+    }
+
+    func listMDocs() async -> [StoredMDoc] {
+        return await storage.listMDocs()
+    }
+
+    func getMDoc(id: String) async -> StoredMDoc? {
+        return await storage.getMDoc(id: id)
+    }
+
+    func deleteMDoc(id: String) async throws {
+        try await storage.deleteMDoc(id: id)
+    }
+
     // MARK: - Canonical JSON
 
     /// Produces deterministic JSON by recursively sorting dictionary keys.

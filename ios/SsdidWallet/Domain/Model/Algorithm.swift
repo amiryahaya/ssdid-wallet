@@ -32,6 +32,9 @@ enum Algorithm: String, Codable, CaseIterable, Identifiable {
     case SLH_DSA_SHAKE_256S
     case SLH_DSA_SHAKE_256F
 
+    // Key Agreement
+    case X25519
+
     var id: String { rawValue }
 
     var w3cType: String {
@@ -57,6 +60,7 @@ enum Algorithm: String, Codable, CaseIterable, Identifiable {
         case .SLH_DSA_SHAKE_192F: return "SlhDsaShake192fVerificationKey2024"
         case .SLH_DSA_SHAKE_256S: return "SlhDsaShake256sVerificationKey2024"
         case .SLH_DSA_SHAKE_256F: return "SlhDsaShake256fVerificationKey2024"
+        case .X25519:            return "X25519KeyAgreementKey2020"
         }
     }
 
@@ -83,6 +87,7 @@ enum Algorithm: String, Codable, CaseIterable, Identifiable {
         case .SLH_DSA_SHAKE_192F: return "SlhDsaShake192fSignature2024"
         case .SLH_DSA_SHAKE_256S: return "SlhDsaShake256sSignature2024"
         case .SLH_DSA_SHAKE_256F: return "SlhDsaShake256fSignature2024"
+        case .X25519:            return ""
         }
     }
 
@@ -101,6 +106,13 @@ enum Algorithm: String, Codable, CaseIterable, Identifiable {
         case .KAZ_SIGN_192: return 192
         case .KAZ_SIGN_256: return 256
         default: return nil
+        }
+    }
+
+    var isKeyAgreement: Bool {
+        switch self {
+        case .X25519: return true
+        default: return false
         }
     }
 

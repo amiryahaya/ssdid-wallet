@@ -57,6 +57,33 @@ class DcqlMatcherTest {
         assertThat(results).isEmpty()
     }
 
+    // --- G14: null format branch in matchAll ---
+
+    @Test
+    fun matchAllWithNullFormatMatchesSdJwt() {
+        // When format is null in matchAll, it should match SD-JWT credentials
+        val dcql = json.parseToJsonElement("""{"credentials":[{"id":"cred-1","meta":{"vct_values":["IdentityCredential"]}}]}""") as JsonObject
+        val results = matcher.matchAll(dcql, listOf(credential), emptyList())
+        assertThat(results).hasSize(1)
+        assertThat(results[0].descriptorId).isEqualTo("cred-1")
+    }
+
+    @Test
+    fun matchAllWithMsoMdocFormatMatchesMDocs() {
+        val mdoc = my.ssdid.wallet.domain.mdoc.StoredMDoc(
+            id = "mdoc-1",
+            docType = "org.iso.18013.5.1.mDL",
+            issuerSignedCbor = byteArrayOf(),
+            deviceKeyId = "key-1",
+            issuedAt = 1700000000L,
+            nameSpaces = mapOf("org.iso.18013.5.1" to listOf("family_name"))
+        )
+        val dcql = json.parseToJsonElement("""{"credentials":[{"id":"cred-1","format":"mso_mdoc","meta":{"doctype_value":"org.iso.18013.5.1.mDL"}}]}""") as JsonObject
+        val results = matcher.matchAll(dcql, emptyList(), listOf(mdoc))
+        assertThat(results).hasSize(1)
+        assertThat(results[0].descriptorId).isEqualTo("cred-1")
+    }
+
     @Test
     fun matchWithoutClaimsSpec() {
         val dcql = json.parseToJsonElement("""{"credentials":[{"id":"cred-1","format":"vc+sd-jwt","meta":{"vct_values":["IdentityCredential"]}}]}""") as JsonObject

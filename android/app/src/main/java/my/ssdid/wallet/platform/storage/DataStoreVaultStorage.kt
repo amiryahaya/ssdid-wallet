@@ -15,6 +15,7 @@ import kotlinx.serialization.json.Json
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.rotation.RotationEntry
+import my.ssdid.wallet.domain.mdoc.StoredMDoc
 import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
 import my.ssdid.wallet.domain.vault.PreRotatedKeyData
 import my.ssdid.wallet.domain.vault.VaultStorage
@@ -132,6 +133,76 @@ class DataStoreVaultStorage(private val context: Context) : VaultStorage {
             prefs[sdJwtVcsKey] = json.encodeToString(vcs)
         }
     }
+
+    // ---------- mdoc/mDL ----------
+
+    private val mdocsKey = stringPreferencesKey("mdocs")
+
+    override suspend fun saveMDoc(mdoc: StoredMDoc) {
+        val mdocs = listMDocs().toMutableList()
+        mdocs.removeAll { it.id == mdoc.id }
+        mdocs.add(mdoc)
+        context.dataStore.edit { prefs ->
+            prefs[mdocsKey] = json.encodeToString(mdocs.map { mdocToJson(it) })
+        }
+    }
+
+    override suspend fun listMDocs(): List<StoredMDoc> {
+        val jsonStr = context.dataStore.data.map { it[mdocsKey] }.first() ?: return emptyList()
+        return try {
+            val entries: List<MDocEntry> = json.decodeFromString(jsonStr)
+            entries.map { it.toStoredMDoc() }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to deserialize mdocs — data may be corrupted", e)
+            emptyList()
+        }
+    }
+
+    override suspend fun getMDoc(id: String): StoredMDoc? {
+        return listMDocs().find { it.id == id }
+    }
+
+    override suspend fun deleteMDoc(id: String) {
+        val mdocs = listMDocs().filter { it.id != id }
+        context.dataStore.edit { prefs ->
+            prefs[mdocsKey] = json.encodeToString(mdocs.map { mdocToJson(it) })
+        }
+    }
+
+    /**
+     * Internal serializable representation of StoredMDoc.
+     * ByteArray fields are Base64-encoded for JSON storage.
+     */
+    @kotlinx.serialization.Serializable
+    private data class MDocEntry(
+        val id: String,
+        val docType: String,
+        val issuerSignedCbor: String, // Base64
+        val deviceKeyId: String,
+        val issuedAt: Long,
+        val expiresAt: Long? = null,
+        val nameSpaces: Map<String, List<String>> = emptyMap()
+    ) {
+        fun toStoredMDoc() = StoredMDoc(
+            id = id,
+            docType = docType,
+            issuerSignedCbor = Base64.getDecoder().decode(issuerSignedCbor),
+            deviceKeyId = deviceKeyId,
+            issuedAt = issuedAt,
+            expiresAt = expiresAt,
+            nameSpaces = nameSpaces
+        )
+    }
+
+    private fun mdocToJson(mdoc: StoredMDoc) = MDocEntry(
+        id = mdoc.id,
+        docType = mdoc.docType,
+        issuerSignedCbor = Base64.getEncoder().encodeToString(mdoc.issuerSignedCbor),
+        deviceKeyId = mdoc.deviceKeyId,
+        issuedAt = mdoc.issuedAt,
+        expiresAt = mdoc.expiresAt,
+        nameSpaces = mdoc.nameSpaces
+    )
 
     // ---------- Recovery keys ----------
 

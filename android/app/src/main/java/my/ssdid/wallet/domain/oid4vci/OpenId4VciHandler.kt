@@ -1,6 +1,8 @@
 package my.ssdid.wallet.domain.oid4vci
 
 import kotlinx.serialization.json.*
+import my.ssdid.wallet.domain.mdoc.CborCodec
+import my.ssdid.wallet.domain.mdoc.StoredMDoc
 import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
 import my.ssdid.wallet.domain.vault.Vault
 
@@ -12,6 +14,7 @@ data class CredentialOfferReview(
 
 sealed class IssuanceResult {
     data class Success(val credential: StoredSdJwtVc) : IssuanceResult()
+    data class MDocSuccess(val mdoc: StoredMDoc) : IssuanceResult()
     class Deferred(
         val transactionId: String,
         val deferredEndpoint: String,
@@ -103,14 +106,32 @@ class OpenId4VciHandler(
             signer = signer
         )
 
-        val requestBody = buildJsonObject {
-            put("format", "vc+sd-jwt")
-            putJsonObject("credential_definition") {
-                put("vct", selectedConfigId)
+        // Determine format from credential configuration
+        val configObj = metadata.credentialConfigurationsSupported[selectedConfigId]
+        val format = configObj?.get("format")?.jsonPrimitive?.contentOrNull ?: "vc+sd-jwt"
+        val isMDoc = format == "mso_mdoc"
+
+        val requestBody = if (isMDoc) {
+            val doctype = configObj?.get("doctype")?.jsonPrimitive?.contentOrNull
+                ?: selectedConfigId
+            buildJsonObject {
+                put("format", "mso_mdoc")
+                put("doctype", doctype)
+                putJsonObject("proof") {
+                    put("proof_type", "jwt")
+                    put("jwt", proofJwt)
+                }
             }
-            putJsonObject("proof") {
-                put("proof_type", "jwt")
-                put("jwt", proofJwt)
+        } else {
+            buildJsonObject {
+                put("format", "vc+sd-jwt")
+                putJsonObject("credential_definition") {
+                    put("vct", selectedConfigId)
+                }
+                putJsonObject("proof") {
+                    put("proof_type", "jwt")
+                    put("jwt", proofJwt)
+                }
             }
         }
 
@@ -131,6 +152,10 @@ class OpenId4VciHandler(
                     nonce,
                     response["c_nonce_expires_in"]?.jsonPrimitive?.intOrNull ?: 300
                 )
+            }
+
+            if (isMDoc) {
+                return handleMDocCredential(credential, selectedConfigId, keyId, metadata)
             }
 
             val storedVc = StoredSdJwtVc(
@@ -160,5 +185,41 @@ class OpenId4VciHandler(
         }
 
         return IssuanceResult.Failed("Unexpected response from credential endpoint")
+    }
+
+    private suspend fun handleMDocCredential(
+        credentialBase64: String,
+        selectedConfigId: String,
+        keyId: String,
+        metadata: IssuerMetadata
+    ): IssuanceResult.MDocSuccess {
+        val cborBytes = java.util.Base64.getUrlDecoder().decode(credentialBase64)
+
+        // Parse the IssuerSigned to extract element identifiers per namespace
+        val issuerSigned = my.ssdid.wallet.domain.mdoc.MsoParser.parseIssuerSigned(cborBytes)
+        val decoded = CborCodec.decodeMap(cborBytes)
+
+        @Suppress("UNCHECKED_CAST")
+        val docType = decoded["docType"] as? String ?: selectedConfigId
+
+        // Extract element identifiers from parsed IssuerSignedItems
+        val nameSpaces = issuerSigned.nameSpaces.mapValues { (_, items) ->
+            items.map { it.elementIdentifier }
+        }
+
+        val configObj = metadata.credentialConfigurationsSupported[selectedConfigId]
+        val configDoctype = configObj?.get("doctype")?.jsonPrimitive?.contentOrNull
+
+        val storedMDoc = StoredMDoc(
+            id = java.util.UUID.randomUUID().toString(),
+            docType = configDoctype ?: docType,
+            issuerSignedCbor = cborBytes,
+            deviceKeyId = keyId,
+            issuedAt = System.currentTimeMillis() / 1000,
+            nameSpaces = nameSpaces
+        )
+
+        vault.storeMDoc(storedMDoc)
+        return IssuanceResult.MDocSuccess(storedMDoc)
     }
 }

@@ -13,6 +13,8 @@ data class DidDocument(
     val authentication: List<String> = emptyList(),
     val assertionMethod: List<String> = emptyList(),
     val capabilityInvocation: List<String> = emptyList(),
+    val keyAgreement: List<String> = emptyList(),
+    val service: List<Service> = emptyList(),
     val nextKeyHash: String? = null
 ) {
     companion object {
@@ -43,4 +45,11 @@ data class VerificationMethod(
     val controller: String,
     val publicKeyMultibase: String = "",
     val publicKeyJwk: JsonObject? = null
+)
+
+@Serializable
+data class Service(
+    val id: String,
+    val type: String,
+    val serviceEndpoint: String
 )

@@ -64,4 +64,18 @@ protocol Vault: Sendable {
 
     /// Deletes a credential by its ID.
     func deleteCredential(credentialId: String) async throws
+
+    // MARK: - mdoc / mDL
+
+    /// Stores an mdoc credential.
+    func storeMDoc(_ mdoc: StoredMDoc) async throws
+
+    /// Lists all stored mdoc credentials.
+    func listMDocs() async -> [StoredMDoc]
+
+    /// Retrieves an mdoc by its ID.
+    func getMDoc(id: String) async -> StoredMDoc?
+
+    /// Deletes an mdoc by its ID.
+    func deleteMDoc(id: String) async throws
 }
