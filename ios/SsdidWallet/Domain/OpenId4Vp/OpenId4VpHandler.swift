@@ -111,9 +111,15 @@ final class OpenId4VpHandler {
             signer: signer
         )
 
-        guard let pd = authRequest.presentationDefinition,
-              let definitionId = pd["id"] as? String else {
-            throw OpenId4VpError.invalidRequest("Missing presentation_definition id")
+        // Determine definition ID from PE or DCQL query
+        let definitionId: String
+        if let pd = authRequest.presentationDefinition,
+           let pdId = pd["id"] as? String {
+            definitionId = pdId
+        } else if authRequest.dcqlQuery != nil {
+            definitionId = matchResult.descriptorId
+        } else {
+            throw OpenId4VpError.invalidRequest("Missing presentation_definition id or dcql_query")
         }
 
         let submission = PresentationSubmission.create(

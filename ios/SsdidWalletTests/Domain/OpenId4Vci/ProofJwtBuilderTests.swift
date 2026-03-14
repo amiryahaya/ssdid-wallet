@@ -112,6 +112,25 @@ final class ProofJwtBuilderTests: XCTestCase {
         XCTAssertTrue(payloadJson.contains("https://my-issuer.example.com"))
     }
 
+    func testPayloadContainsExpClaim() throws {
+        let iat: Int64 = 1_700_000_000
+        let jwt = ProofJwtBuilder.build(
+            algorithm: "EdDSA",
+            keyId: "did:ssdid:holder#k",
+            walletDid: "did:ssdid:holder",
+            issuerUrl: "https://issuer.example.com",
+            nonce: "nonce-exp",
+            signer: signer,
+            issuedAt: iat
+        )
+
+        let parts = jwt.split(separator: ".")
+        let payloadJson = try decodeBase64Url(String(parts[1]))
+        XCTAssertTrue(payloadJson.contains("\"exp\""))
+        // exp should be iat + 120
+        XCTAssertTrue(payloadJson.contains("\(iat + 120)"))
+    }
+
     // MARK: - Helpers
 
     private func decodeBase64Url(_ base64url: String) throws -> String {

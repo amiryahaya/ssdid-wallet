@@ -1,11 +1,15 @@
 import Foundation
 
 /// Response from a token endpoint exchange.
-struct TokenResponse {
+struct TokenResponse: CustomStringConvertible {
     let accessToken: String
     let tokenType: String
     let cNonce: String?
     let cNonceExpiresIn: Int?
+
+    var description: String {
+        "TokenResponse(accessToken=REDACTED, tokenType=\(tokenType), cNonce=\(cNonce != nil ? "present" : "nil"))"
+    }
 }
 
 /// Handles OAuth 2.0 token exchange for OpenID4VCI flows.

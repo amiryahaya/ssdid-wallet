@@ -71,6 +71,29 @@ final class IssuerMetadataResolverTests: XCTestCase {
         }
     }
 
+    func testRejectsLoopbackAuthorizationServer() async {
+        let fetcher = MockMetadataFetcher(responses: [
+            ".well-known/openid-credential-issuer": """
+            {
+                "credential_endpoint": "https://issuer.example.com/credential",
+                "credential_configurations_supported": {},
+                "authorization_server": "https://localhost/evil"
+            }
+            """,
+            ".well-known/oauth-authorization-server": """
+            {"token_endpoint": "https://localhost/token"}
+            """
+        ])
+
+        let resolver = IssuerMetadataResolver(fetcher: fetcher)
+        do {
+            _ = try await resolver.resolve(issuerUrl: "https://issuer.example.com")
+            XCTFail("Should have rejected loopback authorization_server")
+        } catch {
+            XCTAssertTrue("\(error)".lowercased().contains("loopback") || "\(error)".lowercased().contains("not allowed"))
+        }
+    }
+
     func testFailsOnFetchError() async {
         let fetcher = MockMetadataFetcher(responses: [:])
         let resolver = IssuerMetadataResolver(fetcher: fetcher)

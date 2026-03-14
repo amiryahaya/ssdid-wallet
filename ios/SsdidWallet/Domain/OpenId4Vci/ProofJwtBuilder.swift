@@ -36,6 +36,7 @@ enum ProofJwtBuilder {
             "iss": walletDid,
             "aud": issuerUrl,
             "iat": issuedAt,
+            "exp": issuedAt + 120,
             "nonce": nonce
         ]
 
