@@ -533,14 +533,15 @@ class DeepLinkHandlerTest {
     }
 
     @Test
-    fun `toNavRoute returns null for openid4vp action`() {
+    fun `toNavRoute routes openid4vp action to PresentationRequest`() {
         val deepLink = DeepLinkAction(
             action = "openid4vp",
             serverUrl = "",
             callbackUrl = "openid4vp://?client_id=https://verifier.example.com"
         )
         val route = deepLink.toNavRoute()
-        assertThat(route).isNull() // TODO: will route to PresentationRequest in Task 11
+        assertThat(route).isNotNull()
+        assertThat(route).contains("presentation_request")
     }
 
     // --- openid-credential-offer scheme tests ---
