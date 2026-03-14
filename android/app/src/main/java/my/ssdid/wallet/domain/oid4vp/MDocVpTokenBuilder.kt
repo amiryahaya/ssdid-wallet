@@ -1,6 +1,5 @@
 package my.ssdid.wallet.domain.oid4vp
 
-import android.util.Base64
 import com.upokecenter.cbor.CBORObject
 import my.ssdid.wallet.domain.mdoc.CborCodec
 import my.ssdid.wallet.domain.mdoc.IssuerSigned
@@ -43,14 +42,26 @@ object MDocVpTokenBuilder {
         deviceAuth.Add(CBORObject.FromObject(storedMDoc.docType))
         deviceAuth.Add(CBORObject.NewMap()) // empty DeviceNameSpaces
 
-        val deviceAuthBytes = deviceAuth.EncodeToBytes()
+        // Wrap DeviceAuthentication in tag 24 (encoded CBOR data item) per ISO 18013-5 §9.1.3
+        val deviceAuthTagged = CBORObject.FromObjectAndTag(deviceAuth.EncodeToBytes(), 24)
 
-        // Sign DeviceAuthentication
-        val signature = signer(deviceAuthBytes)
+        // Build COSE Sig_structure per RFC 9052 §4.4 and ISO 18013-5 §9.1.3:
+        // Sig_structure = ["Signature1", body_protected, external_aad, payload]
+        // - external_aad is empty (SessionTranscript is already in DeviceAuthentication)
+        // - payload is the tag-24-wrapped DeviceAuthentication bstr
+        val protectedHeaders = byteArrayOf() // empty protected headers
+        val sigStructure = CBORObject.NewArray()
+        sigStructure.Add(CBORObject.FromObject("Signature1"))
+        sigStructure.Add(CBORObject.FromObject(protectedHeaders))
+        sigStructure.Add(CBORObject.FromObject(byteArrayOf())) // external_aad: empty
+        sigStructure.Add(CBORObject.FromObject(deviceAuthTagged.EncodeToBytes())) // payload: #6.24(DeviceAuthentication)
+
+        // Sign the Sig_structure
+        val signature = signer(sigStructure.EncodeToBytes())
 
         // Build COSE_Sign1 for deviceSignature
         val coseSign1 = CBORObject.NewArray()
-        coseSign1.Add(CBORObject.FromObject(byteArrayOf())) // protected
+        coseSign1.Add(CBORObject.FromObject(protectedHeaders)) // protected
         coseSign1.Add(CBORObject.NewMap()) // unprotected
         coseSign1.Add(CBORObject.Null) // payload is detached
         coseSign1.Add(CBORObject.FromObject(signature))
@@ -83,7 +94,7 @@ object MDocVpTokenBuilder {
 
         // Base64url encode the CBOR bytes
         val responseBytes = deviceResponse.EncodeToBytes()
-        return Base64.encodeToString(responseBytes, Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
+        return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(responseBytes)
     }
 
     private fun encodeIssuerSigned(issuerSigned: IssuerSigned): CBORObject {

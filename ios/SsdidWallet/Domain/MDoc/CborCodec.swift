@@ -218,7 +218,10 @@ enum CborCodec {
 
     // MARK: - Digest helper
 
-    /// Compute SHA-256 digest of CBOR-encoded IssuerSignedItem, matching ISO 18013-5.
+    /// Compute digest of CBOR-encoded IssuerSignedItem, matching ISO 18013-5.
+    ///
+    /// Per ISO 18013-5, the digest is computed over the tag-24-wrapped encoding
+    /// of the IssuerSignedItem (encoded CBOR data item tag wraps the item bytes).
     static func digestIssuerSignedItem(_ item: IssuerSignedItem, algorithm: String = "SHA-256") -> Data? {
         let itemMap: [String: Any] = [
             "digestID": item.digestId,
@@ -228,13 +231,21 @@ enum CborCodec {
         ]
         let encoded = encodeMap(itemMap)
 
+        // Wrap in CBOR tag 24 (encoded CBOR data item)
+        var tagged = Data()
+        // Tag 24 = major type 6 (0xc0) + additional 24 = 0xd8 0x18
+        tagged.append(0xd8)
+        tagged.append(0x18)
+        // Then the bstr containing the encoded item
+        encodeBytes(encoded, into: &tagged)
+
         switch algorithm {
         case "SHA-256":
-            return Data(SHA256.hash(data: encoded))
+            return Data(SHA256.hash(data: tagged))
         case "SHA-384":
-            return Data(SHA384.hash(data: encoded))
+            return Data(SHA384.hash(data: tagged))
         case "SHA-512":
-            return Data(SHA512.hash(data: encoded))
+            return Data(SHA512.hash(data: tagged))
         default:
             return nil
         }

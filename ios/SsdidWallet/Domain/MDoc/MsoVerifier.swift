@@ -5,6 +5,9 @@ import CryptoKit
 enum MsoVerifier {
 
     /// Verify that an IssuerSignedItem's digest matches the expected value in the MSO.
+    ///
+    /// Per ISO 18013-5, the digest is computed over the tag-24-wrapped CBOR encoding
+    /// of the IssuerSignedItem (i.e., the encoded CBOR data item tag wraps the item bytes).
     static func verifyDigest(
         item: IssuerSignedItem,
         mso: MobileSecurityObject,

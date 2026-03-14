@@ -11,6 +11,7 @@ import my.ssdid.wallet.BuildConfig
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.backup.BackupManager
 import my.ssdid.wallet.domain.credential.CredentialIssuanceManager
+import my.ssdid.wallet.domain.crypto.KeyAgreementProvider
 import my.ssdid.wallet.domain.crypto.X25519Provider
 import my.ssdid.wallet.domain.didcomm.DIDCommPacker
 import my.ssdid.wallet.domain.didcomm.DIDCommTransport
@@ -286,15 +287,15 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideX25519Provider(): X25519Provider = X25519Provider()
+    fun provideKeyAgreementProvider(): KeyAgreementProvider = X25519Provider()
 
     @Provides
     @Singleton
-    fun provideDIDCommPacker(x25519: X25519Provider): DIDCommPacker = DIDCommPacker(x25519)
+    fun provideDIDCommPacker(keyAgreement: KeyAgreementProvider): DIDCommPacker = DIDCommPacker(keyAgreement)
 
     @Provides
     @Singleton
-    fun provideDIDCommUnpacker(x25519: X25519Provider): DIDCommUnpacker = DIDCommUnpacker(x25519)
+    fun provideDIDCommUnpacker(keyAgreement: KeyAgreementProvider): DIDCommUnpacker = DIDCommUnpacker(keyAgreement)
 
     @Provides
     @Singleton

@@ -193,21 +193,18 @@ class OpenId4VciHandler(
         keyId: String,
         metadata: IssuerMetadata
     ): IssuanceResult.MDocSuccess {
-        val cborBytes = android.util.Base64.decode(credentialBase64, android.util.Base64.URL_SAFE or android.util.Base64.NO_WRAP)
+        val cborBytes = java.util.Base64.getUrlDecoder().decode(credentialBase64)
+
+        // Parse the IssuerSigned to extract element identifiers per namespace
+        val issuerSigned = my.ssdid.wallet.domain.mdoc.MsoParser.parseIssuerSigned(cborBytes)
         val decoded = CborCodec.decodeMap(cborBytes)
 
         @Suppress("UNCHECKED_CAST")
         val docType = decoded["docType"] as? String ?: selectedConfigId
 
-        // Extract nameSpace keys from the decoded CBOR
-        @Suppress("UNCHECKED_CAST")
-        val nameSpacesRaw = decoded["nameSpaces"] as? Map<String, Any> ?: emptyMap()
-        val nameSpaces = nameSpacesRaw.mapValues { (_, v) ->
-            when (v) {
-                is List<*> -> v.filterIsInstance<String>()
-                is Map<*, *> -> v.keys.filterIsInstance<String>()
-                else -> emptyList()
-            }
+        // Extract element identifiers from parsed IssuerSignedItems
+        val nameSpaces = issuerSigned.nameSpaces.mapValues { (_, items) ->
+            items.map { it.elementIdentifier }
         }
 
         val configObj = metadata.credentialConfigurationsSupported[selectedConfigId]

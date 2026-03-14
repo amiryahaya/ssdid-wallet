@@ -33,6 +33,24 @@ class SsdidCredentialProviderService : CredentialProviderService() {
 
     internal val matcher = CredentialMatcher()
 
+    /**
+     * Interface for retrieving stored credentials. Allows the service to be
+     * tested without a full Vault/DataStore dependency.
+     */
+    interface CredentialSource {
+        fun getSdJwtVcs(): List<StoredSdJwtVc>
+        fun getMDocs(): List<StoredMDoc>
+    }
+
+    /**
+     * Provides the credential source for this service instance.
+     * Override in Hilt-injected subclass or set via [credentialSourceProvider]
+     * for testing.
+     */
+    private fun getCredentialSource(): CredentialSource? {
+        return credentialSourceProvider?.invoke()
+    }
+
     override fun onBeginGetCredentialRequest(
         request: BeginGetCredentialRequest,
         cancellationSignal: CancellationSignal,
@@ -45,13 +63,9 @@ class SsdidCredentialProviderService : CredentialProviderService() {
                 return
             }
 
-            // Retrieve stored credentials.
-            // In a production service these would be loaded from the Vault
-            // asynchronously. For the skeleton we load from the companion
-            // object which tests can populate, and a real Hilt-injected
-            // implementation would replace this.
-            val sdJwtVcs = credentialSource?.getSdJwtVcs() ?: emptyList()
-            val mdocs = credentialSource?.getMDocs() ?: emptyList()
+            val source = getCredentialSource()
+            val sdJwtVcs = source?.getSdJwtVcs() ?: emptyList()
+            val mdocs = source?.getMDocs() ?: emptyList()
 
             val matched = matcher.matchAll(sdJwtVcs, mdocs)
 
@@ -64,13 +78,17 @@ class SsdidCredentialProviderService : CredentialProviderService() {
             val firstOption = options.first()
 
             for ((index, entry) in matched.withIndex()) {
+                // Target the main launcher activity for credential selection UI.
+                // The EXTRA_CREDENTIAL_ID extra identifies which credential was chosen.
+                val intent = Intent(CREDENTIAL_SELECTION_ACTION).apply {
+                    setPackage(packageName)
+                    putExtra(EXTRA_CREDENTIAL_ID, entry.id)
+                }
                 val pendingIntent = PendingIntent.getActivity(
                     this,
                     PENDING_INTENT_BASE_CODE + index,
-                    Intent().apply {
-                        putExtra(EXTRA_CREDENTIAL_ID, entry.id)
-                    },
-                    PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                    intent,
+                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
                 )
 
                 val credentialEntry = CustomCredentialEntry(
@@ -109,26 +127,18 @@ class SsdidCredentialProviderService : CredentialProviderService() {
         callback.onResult(null)
     }
 
-    /**
-     * Interface for retrieving stored credentials. Allows the service to be
-     * tested without a full Vault/DataStore dependency.
-     */
-    interface CredentialSource {
-        fun getSdJwtVcs(): List<StoredSdJwtVc>
-        fun getMDocs(): List<StoredMDoc>
-    }
-
     companion object {
         private const val TAG = "SsdidCredentialProvider"
         internal const val EXTRA_CREDENTIAL_ID = "my.ssdid.wallet.CREDENTIAL_ID"
+        internal const val CREDENTIAL_SELECTION_ACTION = "my.ssdid.wallet.CREDENTIAL_SELECTION"
         internal const val PENDING_INTENT_BASE_CODE = 100
 
         /**
-         * Credential source that the service reads from. In production this
-         * would be replaced by a Hilt-injected Vault; for tests it can be
-         * set directly.
+         * Provider function for the credential source. In production this
+         * would be replaced by a Hilt-injected approach; for tests it can
+         * be set to a lambda returning a mock [CredentialSource].
          */
         @Volatile
-        var credentialSource: CredentialSource? = null
+        var credentialSourceProvider: (() -> CredentialSource?)? = null
     }
 }

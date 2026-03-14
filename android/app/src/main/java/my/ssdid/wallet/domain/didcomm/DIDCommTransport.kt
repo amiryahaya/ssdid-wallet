@@ -14,9 +14,10 @@ class DIDCommTransport(private val httpClient: OkHttpClient) {
             .post(packed.toRequestBody(mediaType))
             .build()
 
-        val response = httpClient.newCall(request).execute()
-        if (!response.isSuccessful) {
-            throw DIDCommTransportException("HTTP ${response.code}: ${response.message}")
+        httpClient.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                throw DIDCommTransportException("HTTP ${response.code}: ${response.message}")
+            }
         }
     }
 }
