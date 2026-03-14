@@ -29,12 +29,13 @@ class OpenId4VpHandler(
         }
 
         val storedVcs = vault.listStoredSdJwtVcs()
+        val storedMDocs = vault.listMDocs()
 
         val matches = when {
             authRequest.presentationDefinition != null ->
-                peMatcher.match(authRequest.presentationDefinition, storedVcs)
+                peMatcher.matchAll(authRequest.presentationDefinition, storedVcs, storedMDocs)
             authRequest.dcqlQuery != null ->
-                dcqlMatcher.match(authRequest.dcqlQuery, storedVcs)
+                dcqlMatcher.matchAll(authRequest.dcqlQuery, storedVcs, storedMDocs)
             else -> emptyList()
         }
 
@@ -60,15 +61,36 @@ class OpenId4VpHandler(
         val nonce = authRequest.nonce
             ?: throw IllegalStateException("No nonce in authorization request")
 
-        val storedVc = (matchResult.credentialRef as CredentialRef.SdJwt).credential
-        val vpToken = VpTokenBuilder.build(
-            storedSdJwtVc = storedVc,
-            selectedClaims = selectedClaims,
-            audience = authRequest.clientId,
-            nonce = nonce,
-            algorithm = algorithm,
-            signer = signer
-        )
+        val vpToken = when (val ref = matchResult.credentialRef) {
+            is CredentialRef.SdJwt -> VpTokenBuilder.build(
+                storedSdJwtVc = ref.credential,
+                selectedClaims = selectedClaims,
+                audience = authRequest.clientId,
+                nonce = nonce,
+                algorithm = algorithm,
+                signer = signer
+            )
+            is CredentialRef.MDoc -> {
+                // Convert selectedClaims to namespace->elements map
+                val requestedElements = selectedClaims.groupBy(
+                    keySelector = { it.substringBefore("/") },
+                    valueTransform = { it.substringAfter("/") }
+                ).ifEmpty {
+                    // Fallback: treat claims as elements in the first namespace
+                    ref.credential.nameSpaces.keys.firstOrNull()?.let { ns ->
+                        mapOf(ns to selectedClaims)
+                    } ?: emptyMap()
+                }
+                MDocVpTokenBuilder.build(
+                    storedMDoc = ref.credential,
+                    requestedElements = requestedElements,
+                    clientId = authRequest.clientId,
+                    responseUri = responseUri,
+                    nonce = nonce,
+                    signer = signer
+                )
+            }
+        }
 
         val definitionId = when {
             authRequest.presentationDefinition != null ->
