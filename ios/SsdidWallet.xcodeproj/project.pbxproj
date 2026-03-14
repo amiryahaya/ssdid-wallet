@@ -158,6 +158,7 @@
 		DD22BB14A1B2C3D4E5F60014 /* OpenId4VpHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA14A1B2C3D4E5F60014 /* OpenId4VpHandler.swift */; };
 		DD22BB15A1B2C3D4E5F60015 /* OpenId4VpHandlerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA15A1B2C3D4E5F60015 /* OpenId4VpHandlerTests.swift */; };
 		DD22BB13A1B2C3D4E5F60013 /* OpenId4VpTransportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA13A1B2C3D4E5F60013 /* OpenId4VpTransportTests.swift */; };
+		DD22BB16A1B2C3D4E5F60016 /* OpenId4VpIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD22AA16A1B2C3D4E5F60016 /* OpenId4VpIntegrationTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -187,6 +188,7 @@
 		DD22AA13A1B2C3D4E5F60013 /* OpenId4VpTransportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenId4VpTransportTests.swift; sourceTree = "<group>"; };
 		DD22AA14A1B2C3D4E5F60014 /* OpenId4VpHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenId4VpHandler.swift; sourceTree = "<group>"; };
 		DD22AA15A1B2C3D4E5F60015 /* OpenId4VpHandlerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenId4VpHandlerTests.swift; sourceTree = "<group>"; };
+		DD22AA16A1B2C3D4E5F60016 /* OpenId4VpIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenId4VpIntegrationTests.swift; sourceTree = "<group>"; };
 		0124DE6830FE4BC3B8391B5A /* ActivityRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityRepository.swift; sourceTree = "<group>"; };
 		0164BDCEADFC8DFED9F7654A /* RecoveryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryManager.swift; sourceTree = "<group>"; };
 		01BB201CB4CDEB28460D9CD1 /* RecoverySetupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoverySetupScreen.swift; sourceTree = "<group>"; };
@@ -411,6 +413,7 @@
 				DD22AA11A1B2C3D4E5F60011 /* VpTokenBuilderTests.swift */,
 				DD22AA13A1B2C3D4E5F60013 /* OpenId4VpTransportTests.swift */,
 				DD22AA15A1B2C3D4E5F60015 /* OpenId4VpHandlerTests.swift */,
+				DD22AA16A1B2C3D4E5F60016 /* OpenId4VpIntegrationTests.swift */,
 				31F41C58074608E9C2F2FD80 /* SsdidWalletTests.swift */,
 			);
 			path = SsdidWalletTests;
@@ -1090,6 +1093,7 @@
 				DD22BB11A1B2C3D4E5F60011 /* VpTokenBuilderTests.swift in Sources */,
 				DD22BB13A1B2C3D4E5F60013 /* OpenId4VpTransportTests.swift in Sources */,
 				DD22BB15A1B2C3D4E5F60015 /* OpenId4VpHandlerTests.swift in Sources */,
+				DD22BB16A1B2C3D4E5F60016 /* OpenId4VpIntegrationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
