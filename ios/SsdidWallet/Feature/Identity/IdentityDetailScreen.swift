@@ -73,6 +73,7 @@ struct IdentityDetailScreen: View {
                                 Spacer()
                                 Button {
                                     UIPasteboard.general.string = id.did
+                                    HapticManager.notification(.success)
                                     didCopied = true
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                                         didCopied = false

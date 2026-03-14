@@ -1,0 +1,18 @@
+{
+  "description": "Resolve did:jwk for Ed25519 JWK",
+  "input": {
+    "did": "did:jwk:eyJrdHkiOiJPS1AiLCJjcnYiOiJFZDI1NTE5IiwieCI6IjBCRTBfRGdLbzdkZjM2VjJfSEVhbEpXTkJwRmo4Wm5mTmNLN0JKNmpIdVEifQ"
+  },
+  "expected": {
+    "id": "did:jwk:eyJrdHkiOiJPS1AiLCJjcnYiOiJFZDI1NTE5IiwieCI6IjBCRTBfRGdLbzdkZjM2VjJfSEVhbEpXTkJwRmo4Wm5mTmNLN0JKNmpIdVEifQ",
+    "verificationMethod": [
+      {
+        "type": "JsonWebKey2020",
+        "publicKeyJwk": {
+          "kty": "OKP",
+          "crv": "Ed25519"
+        }
+      }
+    ]
+  }
+}

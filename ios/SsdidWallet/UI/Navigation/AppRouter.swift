@@ -34,6 +34,7 @@ enum Route: Hashable {
     case credentialOffer(issuerUrl: String, offerId: String)
     case settings
     case txHistory
+    case notifications
     case recoverySetup(keyId: String)
     case keyRotation(keyId: String)
     case backupExport(restoreUri: String? = nil)
@@ -44,6 +45,7 @@ enum Route: Hashable {
     case deviceManagement(keyId: String)
     case deviceEnroll(keyId: String, mode: String)
     case inviteAccept(serverUrl: String, token: String, callbackUrl: String)
+    case presentationRequest(uri: String)
 }
 
 // MARK: - AppRouter

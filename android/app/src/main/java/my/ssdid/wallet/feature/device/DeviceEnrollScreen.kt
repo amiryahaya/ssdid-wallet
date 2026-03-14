@@ -27,6 +27,8 @@ import my.ssdid.wallet.domain.device.DeviceManager
 import my.ssdid.wallet.domain.device.PairingData
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.vault.Vault
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
 
@@ -148,7 +150,7 @@ fun DeviceEnrollScreen(
             Modifier.padding(start = 8.dp, end = 20.dp, top = 12.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
+            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary) }
             Spacer(Modifier.width(4.dp))
             Text(
                 if (isPrimary) "Enroll New Device" else "Join as Device",

@@ -275,9 +275,13 @@ struct TxSigningScreen: View {
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
             if timerSeconds > 0 {
                 timerSeconds -= 1
+                if timerSeconds == 10 {
+                    HapticManager.notification(.warning)
+                }
             } else {
                 timer?.invalidate()
                 if case .idle = state {
+                    HapticManager.notification(.error)
                     state = .failed("Challenge expired. Please scan QR again.")
                 }
             }
@@ -287,6 +291,7 @@ struct TxSigningScreen: View {
     private func signTransaction() {
         state = .loading
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            HapticManager.notification(.success)
             state = .confirmed
             timer?.invalidate()
         }

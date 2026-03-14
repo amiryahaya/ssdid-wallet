@@ -31,6 +31,11 @@ import kotlinx.serialization.json.Json
 import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.domain.vault.VaultImpl
 import my.ssdid.wallet.domain.vault.VaultStorage
+import my.ssdid.wallet.domain.did.DidJwkResolver
+import my.ssdid.wallet.domain.did.DidKeyResolver
+import my.ssdid.wallet.domain.did.DidResolver
+import my.ssdid.wallet.domain.did.MultiMethodResolver
+import my.ssdid.wallet.domain.did.SsdidRegistryResolver
 import my.ssdid.wallet.domain.verifier.Verifier
 import my.ssdid.wallet.domain.verifier.VerifierImpl
 import my.ssdid.wallet.platform.biometric.BiometricAuthenticator
@@ -39,12 +44,18 @@ import my.ssdid.wallet.platform.device.AndroidDeviceInfoProvider
 import my.ssdid.wallet.domain.vault.KeystoreManager
 import my.ssdid.wallet.domain.settings.SettingsRepository
 import my.ssdid.wallet.platform.storage.DataStoreSettingsRepository
+import my.ssdid.wallet.domain.oid4vp.DcqlMatcher
+import my.ssdid.wallet.domain.oid4vp.OpenId4VpHandler
+import my.ssdid.wallet.domain.oid4vp.OpenId4VpTransport
+import my.ssdid.wallet.domain.oid4vp.PresentationDefinitionMatcher
 import my.ssdid.wallet.domain.notify.AndroidNotifyDispatcher
+import my.ssdid.wallet.domain.notify.LocalNotificationStorage
 import my.ssdid.wallet.domain.notify.NotifyLifecycleObserver
 import my.ssdid.wallet.domain.notify.NotifyManager
 import my.ssdid.wallet.domain.notify.NotifyStorage
 import my.ssdid.wallet.domain.transport.EmailVerifyApi
 import my.ssdid.wallet.domain.transport.NotifyApi
+import okhttp3.CertificatePinner
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
@@ -76,7 +87,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
-        return OkHttpClient.Builder()
+        val builder = OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(10, TimeUnit.SECONDS)
             .addInterceptor(RetryInterceptor())
@@ -85,7 +96,17 @@ object AppModule {
                 level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.HEADERS
                         else HttpLoggingInterceptor.Level.NONE
             })
-            .build()
+
+        if (!BuildConfig.DEBUG) {
+            // TODO: Replace placeholder pins with actual certificate SHA-256 pins before production release
+            val pinner = CertificatePinner.Builder()
+                .add("registry.ssdid.my", "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+                .add("notify.ssdid.my", "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+                .build()
+            builder.certificatePinner(pinner)
+        }
+
+        return builder.build()
     }
 
     @Provides
@@ -108,11 +129,18 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideDidResolver(httpClient: SsdidHttpClient): DidResolver {
+        val ssdidResolver = SsdidRegistryResolver(httpClient.registry)
+        return MultiMethodResolver(ssdidResolver, DidKeyResolver(), DidJwkResolver())
+    }
+
+    @Provides
+    @Singleton
     fun provideVerifier(
-        httpClient: SsdidHttpClient,
+        didResolver: DidResolver,
         @Named("classical") classical: CryptoProvider,
         @Named("pqc") pqc: CryptoProvider
-    ): Verifier = VerifierImpl(httpClient.registry, classical, pqc)
+    ): Verifier = VerifierImpl(didResolver, classical, pqc)
 
     @Provides
     @Singleton
@@ -220,11 +248,18 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideLocalNotificationStorage(
+        @ApplicationContext context: Context
+    ): LocalNotificationStorage = LocalNotificationStorage(context)
+
+    @Provides
+    @Singleton
     fun provideNotifyManager(
         notifyApi: NotifyApi,
         storage: NotifyStorage,
-        dispatcher: AndroidNotifyDispatcher
-    ): NotifyManager = NotifyManager(notifyApi, storage, dispatcher)
+        dispatcher: AndroidNotifyDispatcher,
+        localNotificationStorage: LocalNotificationStorage
+    ): NotifyManager = NotifyManager(notifyApi, storage, dispatcher, localNotificationStorage)
 
     @Provides
     @Singleton
@@ -238,5 +273,27 @@ object AppModule {
         @ApplicationContext context: Context,
         notifyManager: NotifyManager,
         vault: Vault
-    ): NotifyLifecycleObserver = NotifyLifecycleObserver(context as android.app.Application, notifyManager, vault)
+    ): NotifyLifecycleObserver = NotifyLifecycleObserver(context.applicationContext as android.app.Application, notifyManager, vault)
+
+    @Provides
+    @Singleton
+    fun provideOpenId4VpTransport(okHttpClient: OkHttpClient): OpenId4VpTransport =
+        OpenId4VpTransport(okHttpClient)
+
+    @Provides
+    @Singleton
+    fun providePresentationDefinitionMatcher(): PresentationDefinitionMatcher =
+        PresentationDefinitionMatcher()
+
+    @Provides
+    @Singleton
+    fun provideDcqlMatcher(): DcqlMatcher = DcqlMatcher()
+
+    @Provides
+    @Singleton
+    fun provideOpenId4VpHandler(
+        transport: OpenId4VpTransport,
+        peMatcher: PresentationDefinitionMatcher,
+        dcqlMatcher: DcqlMatcher
+    ): OpenId4VpHandler = OpenId4VpHandler(transport, peMatcher, dcqlMatcher)
 }

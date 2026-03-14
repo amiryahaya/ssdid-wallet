@@ -17,6 +17,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import my.ssdid.wallet.ui.theme.*
 
 @Composable
@@ -162,12 +165,7 @@ fun InviteAcceptScreen(
                                 Modifier.padding(14.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(
-                                    "\u2717",
-                                    fontSize = 16.sp,
-                                    color = Danger,
-                                    fontWeight = FontWeight.Bold
-                                )
+                                Icon(Icons.Default.Close, contentDescription = "Error", modifier = Modifier.size(16.dp), tint = Danger)
                                 Spacer(Modifier.width(10.dp))
                                 Text(
                                     uiState.error!!,
@@ -230,12 +228,7 @@ fun InviteAcceptScreen(
                                     Modifier.padding(14.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text(
-                                        "\u2713",
-                                        fontSize = 16.sp,
-                                        color = Success,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                                    Icon(Icons.Default.Check, contentDescription = "Verified", modifier = Modifier.size(16.dp), tint = Success)
                                     Spacer(Modifier.width(10.dp))
                                     Text(
                                         "Email verified: ${uiState.walletEmail}",

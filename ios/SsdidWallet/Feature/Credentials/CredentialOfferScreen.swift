@@ -252,6 +252,7 @@ struct CredentialOfferScreen: View {
     private func acceptOffer() {
         state = .accepting
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            HapticManager.notification(.success)
             state = .success
         }
     }

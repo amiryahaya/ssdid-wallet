@@ -18,6 +18,11 @@ protocol VaultStorage {
     func listCredentials() async -> [VerifiableCredential]
     func deleteCredential(credentialId: String) async throws
 
+    // SD-JWT VC storage
+    func saveSdJwtVc(_ sdJwtVc: StoredSdJwtVc) async throws
+    func listSdJwtVcs() async -> [StoredSdJwtVc]
+    func deleteSdJwtVc(id: String) async throws
+
     // Recovery key storage
     func saveRecoveryPublicKey(keyId: String, encryptedPublicKey: Data) async throws
     func getRecoveryPublicKey(keyId: String) async -> Data?
@@ -45,6 +50,7 @@ final class FileVaultStorage: VaultStorage {
     private enum Keys {
         static let identities = "ssdid_vault_identities"
         static let credentials = "ssdid_vault_credentials"
+        static let sdJwtVcs = "ssdid_vault_sd_jwt_vcs"
         static let onboarding = "ssdid_onboarding_completed"
     }
 
@@ -125,6 +131,33 @@ final class FileVaultStorage: VaultStorage {
         credentials.removeAll { $0.id == credentialId }
         let data = try encoder.encode(credentials)
         defaults.set(data, forKey: Keys.credentials)
+    }
+
+    // MARK: - SD-JWT VCs
+
+    func saveSdJwtVc(_ sdJwtVc: StoredSdJwtVc) async throws {
+        var vcs = await listSdJwtVcs()
+
+        if let index = vcs.firstIndex(where: { $0.id == sdJwtVc.id }) {
+            vcs[index] = sdJwtVc
+        } else {
+            vcs.append(sdJwtVc)
+        }
+
+        let data = try encoder.encode(vcs)
+        defaults.set(data, forKey: Keys.sdJwtVcs)
+    }
+
+    func listSdJwtVcs() async -> [StoredSdJwtVc] {
+        guard let data = defaults.data(forKey: Keys.sdJwtVcs) else { return [] }
+        return (try? decoder.decode([StoredSdJwtVc].self, from: data)) ?? []
+    }
+
+    func deleteSdJwtVc(id: String) async throws {
+        var vcs = await listSdJwtVcs()
+        vcs.removeAll { $0.id == id }
+        let data = try encoder.encode(vcs)
+        defaults.set(data, forKey: Keys.sdJwtVcs)
     }
 
     // MARK: - Recovery Keys

@@ -16,7 +16,7 @@ import kotlinx.serialization.json.jsonPrimitive
 
 @Serializable
 data class VerifiableCredential(
-    @SerialName("@context") val context: List<String> = listOf("https://www.w3.org/2018/credentials/v1"),
+    @SerialName("@context") val context: List<String> = listOf("https://www.w3.org/ns/credentials/v2"),
     val id: String,
     val type: List<String>,
     val issuer: String,

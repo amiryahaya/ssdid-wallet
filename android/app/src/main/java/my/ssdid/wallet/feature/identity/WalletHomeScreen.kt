@@ -11,6 +11,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -20,19 +22,33 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import my.ssdid.wallet.domain.model.Identity
+import my.ssdid.wallet.domain.notify.LocalNotificationStorage
 import my.ssdid.wallet.domain.vault.Vault
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.Icon
+import my.ssdid.wallet.ui.components.truncatedDid
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
 
 @HiltViewModel
-class WalletHomeViewModel @Inject constructor(private val vault: Vault) : ViewModel() {
+class WalletHomeViewModel @Inject constructor(
+    private val vault: Vault,
+    private val localNotificationStorage: LocalNotificationStorage
+) : ViewModel() {
     private val _identities = MutableStateFlow<List<Identity>>(emptyList())
     val identities = _identities.asStateFlow()
+
+    val unreadNotificationCount = localNotificationStorage.unreadCount
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     init { refresh() }
 
@@ -49,6 +65,7 @@ fun WalletHomeScreen(
     onCredentials: () -> Unit,
     onHistory: () -> Unit,
     onSettings: () -> Unit,
+    onNotifications: () -> Unit,
     viewModel: WalletHomeViewModel = hiltViewModel()
 ) {
     val identities by viewModel.identities.collectAsState()
@@ -69,11 +86,43 @@ fun WalletHomeScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Top
         ) {
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text("IDENTITY WALLET", style = MaterialTheme.typography.labelMedium)
                 Text("Self-Sovereign Digital ID", style = MaterialTheme.typography.headlineLarge)
             }
-            IconButton(onClick = onSettings) {
+            val unreadCount by viewModel.unreadNotificationCount.collectAsState()
+            // Notifications bell
+            Box {
+                IconButton(
+                    onClick = onNotifications,
+                    modifier = Modifier.semantics { contentDescription = "Notifications" }
+                ) {
+                    Icon(Icons.Default.Notifications, contentDescription = "Notifications", tint = TextSecondary)
+                }
+                if (unreadCount > 0) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .offset(x = (-4).dp, y = 4.dp)
+                            .size(18.dp)
+                            .clip(CircleShape)
+                            .background(Danger),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            if (unreadCount > 99) "99+" else unreadCount.toString(),
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = BgPrimary
+                        )
+                    }
+                }
+            }
+            // Settings gear
+            IconButton(
+                onClick = onSettings,
+                modifier = Modifier.semantics { contentDescription = "Settings" }
+            ) {
                 Text("\u2699", fontSize = 22.sp, color = TextSecondary)
             }
         }
@@ -91,7 +140,10 @@ fun WalletHomeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text("MY IDENTITIES", style = MaterialTheme.typography.labelMedium)
-                    TextButton(onClick = onCreateIdentity) {
+                    TextButton(
+                        onClick = onCreateIdentity,
+                        modifier = Modifier.semantics { contentDescription = "Create new identity" }
+                    ) {
                         Text("+ New", color = Accent, fontSize = 13.sp)
                     }
                 }
@@ -103,16 +155,37 @@ fun WalletHomeScreen(
 
             if (identities.isEmpty()) {
                 item {
-                    Box(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(16.dp))
                             .background(BgCard)
                             .clickable(onClick = onCreateIdentity)
+                            .semantics { contentDescription = "Create your first identity" }
                             .padding(32.dp),
-                        contentAlignment = Alignment.Center
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text("Create your first identity", color = TextSecondary)
+                        Box(
+                            modifier = Modifier
+                                .size(64.dp)
+                                .clip(CircleShape)
+                                .background(AccentDim),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("\uD83D\uDC64", fontSize = 28.sp)
+                        }
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            "No identities yet",
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = TextPrimary
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            "Create your first identity to get started",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextSecondary
+                        )
                     }
                 }
             }
@@ -137,7 +210,10 @@ fun IdentityCard(identity: Identity, onClick: () -> Unit) {
     val algBgColor = if (identity.algorithm.isPostQuantum) PqcDim else ClassicalDim
 
     Card(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .semantics { contentDescription = "Identity: ${identity.name}, ${identity.algorithm.name.replace("_", "-")}" },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = BgCard)
     ) {
@@ -175,7 +251,7 @@ fun IdentityCard(identity: Identity, onClick: () -> Unit) {
             Text(identity.name, style = MaterialTheme.typography.headlineSmall)
             Spacer(Modifier.height(4.dp))
             Text(
-                identity.did,
+                identity.did.truncatedDid(),
                 fontFamily = FontFamily.Monospace,
                 fontSize = 12.sp,
                 color = TextSecondary,

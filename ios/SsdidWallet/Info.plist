@@ -24,6 +24,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>ssdid</string>
+				<string>openid4vp</string>
 			</array>
 		</dict>
 	</array>
@@ -33,5 +34,10 @@
 	<array>
 		<string>ssdid-drive</string>
 	</array>
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string>LaunchBackground</string>
+	</dict>
 </dict>
 </plist>

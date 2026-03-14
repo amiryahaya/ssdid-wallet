@@ -30,6 +30,9 @@ import my.ssdid.wallet.R
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.recovery.institutional.InstitutionalRecoveryManager
 import my.ssdid.wallet.domain.vault.Vault
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
 
@@ -156,7 +159,7 @@ fun InstitutionalSetupScreen(
             TextButton(
                 onClick = onBack,
                 modifier = Modifier.semantics { contentDescription = "Navigate back" }
-            ) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
+            ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary) }
             Spacer(Modifier.width(12.dp))
             Text(stringResource(R.string.institutional_title), style = MaterialTheme.typography.titleLarge)
         }
@@ -214,7 +217,7 @@ private fun SuccessContent(orgName: String, onDone: () -> Unit) {
                         .semantics { contentDescription = "Success" },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("\u2713", fontSize = 24.sp, color = Success, fontWeight = FontWeight.Bold)
+                    Icon(Icons.Default.Check, contentDescription = "Success", modifier = Modifier.size(24.dp), tint = Success)
                 }
                 Spacer(Modifier.height(16.dp))
                 Text(

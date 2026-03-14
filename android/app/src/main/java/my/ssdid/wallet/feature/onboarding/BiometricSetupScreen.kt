@@ -12,6 +12,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Fingerprint
 import my.ssdid.wallet.ui.theme.*
 
 @Composable
@@ -36,7 +38,7 @@ fun BiometricSetupScreen(
                 .background(AccentDim),
             contentAlignment = Alignment.Center
         ) {
-            Text("\uD83D\uDD13", fontSize = 52.sp)
+            Icon(Icons.Default.Fingerprint, contentDescription = "Biometric", modifier = Modifier.size(52.dp), tint = Accent)
         }
 
         Spacer(Modifier.height(40.dp))

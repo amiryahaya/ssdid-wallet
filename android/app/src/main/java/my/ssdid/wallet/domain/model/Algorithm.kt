@@ -133,6 +133,39 @@ enum class Algorithm(
 
     companion object {
         /**
+         * JWA algorithm name to Algorithm mapping.
+         * See RFC 7518 / IANA JOSE registry.
+         */
+        private val jwaMap = mapOf(
+            "EdDSA" to ED25519,
+            "ES256" to ECDSA_P256,
+            "ES384" to ECDSA_P384,
+            "KAZ128" to KAZ_SIGN_128,
+            "KAZ192" to KAZ_SIGN_192,
+            "KAZ256" to KAZ_SIGN_256,
+            "ML-DSA-44" to ML_DSA_44,
+            "ML-DSA-65" to ML_DSA_65,
+            "ML-DSA-87" to ML_DSA_87,
+            "SLH-DSA-SHA2-128s" to SLH_DSA_SHA2_128S,
+            "SLH-DSA-SHA2-128f" to SLH_DSA_SHA2_128F,
+            "SLH-DSA-SHA2-192s" to SLH_DSA_SHA2_192S,
+            "SLH-DSA-SHA2-192f" to SLH_DSA_SHA2_192F,
+            "SLH-DSA-SHA2-256s" to SLH_DSA_SHA2_256S,
+            "SLH-DSA-SHA2-256f" to SLH_DSA_SHA2_256F,
+            "SLH-DSA-SHAKE-128s" to SLH_DSA_SHAKE_128S,
+            "SLH-DSA-SHAKE-128f" to SLH_DSA_SHAKE_128F,
+            "SLH-DSA-SHAKE-192s" to SLH_DSA_SHAKE_192S,
+            "SLH-DSA-SHAKE-192f" to SLH_DSA_SHAKE_192F,
+            "SLH-DSA-SHAKE-256s" to SLH_DSA_SHAKE_256S,
+            "SLH-DSA-SHAKE-256f" to SLH_DSA_SHAKE_256F
+        )
+
+        /**
+         * Reverse lookup from JWA algorithm name (e.g., "EdDSA", "ES256").
+         */
+        fun fromJwaName(name: String): Algorithm? = jwaMap[name]
+
+        /**
          * Reverse lookup from W3C verification method type.
          * For KAZ-Sign (shared w3cType), returns KAZ_SIGN_128 as default;
          * the actual level is detected from key size at runtime.

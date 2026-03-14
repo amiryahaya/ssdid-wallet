@@ -8,7 +8,13 @@ import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.spec.GCMParameterSpec
 
-class AndroidKeystoreManager : KeystoreManager {
+class AndroidKeystoreManager(
+    // TODO: Enable biometric gating (set to true) before production release.
+    // When enabled, keystore keys require biometric authentication via BiometricPrompt
+    // before encrypt/decrypt operations. Kept false by default to avoid breaking tests
+    // (Robolectric does not support biometric hardware).
+    private val requireBiometric: Boolean = false
+) : KeystoreManager {
     private val keyStore = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
 
     override fun generateWrappingKey(alias: String) {
@@ -21,8 +27,10 @@ class AndroidKeystoreManager : KeystoreManager {
             .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
             .setKeySize(256)
 
-        // TODO: Re-enable with proper BiometricPrompt flow before encrypt/decrypt
-        // .setUserAuthenticationRequired(true)
+        if (requireBiometric) {
+            builder.setUserAuthenticationRequired(true)
+            builder.setUserAuthenticationParameters(30, KeyProperties.AUTH_BIOMETRIC_STRONG)
+        }
 
         val spec = builder.build()
         val keyGen = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")

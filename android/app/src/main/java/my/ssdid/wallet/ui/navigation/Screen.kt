@@ -59,6 +59,7 @@ sealed class Screen(val route: String) {
     }
     object Settings : Screen("settings")
     object TxHistory : Screen("tx_history")
+    object Notifications : Screen("notifications")
     object RecoverySetup : Screen("recovery_setup/{keyId}") {
         fun createRoute(keyId: String) = "recovery_setup/${Uri.encode(keyId)}"
     }
@@ -87,5 +88,9 @@ sealed class Screen(val route: String) {
     object InviteAccept : Screen("invite_accept?serverUrl={serverUrl}&token={token}&callbackUrl={callbackUrl}") {
         fun createRoute(serverUrl: String, token: String, callbackUrl: String = "") =
             "invite_accept?serverUrl=${Uri.encode(serverUrl)}&token=${Uri.encode(token)}&callbackUrl=${Uri.encode(callbackUrl)}"
+    }
+    object PresentationRequest : Screen("presentation_request?uri={uri}") {
+        fun createRoute(encodedUri: String): String =
+            "presentation_request?uri=${Uri.encode(encodedUri)}"
     }
 }

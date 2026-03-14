@@ -27,6 +27,12 @@ import my.ssdid.wallet.domain.credential.CredentialIssuanceManager
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.transport.dto.CredentialOfferResponse
 import my.ssdid.wallet.domain.vault.Vault
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.ui.platform.LocalView
+import my.ssdid.wallet.ui.components.HapticManager
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
 
@@ -95,6 +101,12 @@ fun CredentialOfferScreen(
     val state by viewModel.state.collectAsState()
     val identities by viewModel.identities.collectAsState()
     val selectedIdentity by viewModel.selectedIdentity.collectAsState()
+    val view = LocalView.current
+
+    // Haptic feedback on credential accepted
+    LaunchedEffect(state) {
+        if (state is CredentialOfferState.Success) HapticManager.success(view)
+    }
 
     Column(
         modifier = Modifier
@@ -107,7 +119,7 @@ fun CredentialOfferScreen(
             Modifier.padding(start = 8.dp, end = 20.dp, top = 12.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
+            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary) }
             Spacer(Modifier.width(4.dp))
             Text("Credential Offer", style = MaterialTheme.typography.titleLarge)
         }
@@ -163,7 +175,7 @@ fun CredentialOfferScreen(
                             .background(SuccessDim),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("\u2713", fontSize = 32.sp, color = Success, fontWeight = FontWeight.Bold)
+                        Icon(Icons.Default.Check, contentDescription = "Success", modifier = Modifier.size(32.dp), tint = Success)
                     }
                     Spacer(Modifier.height(20.dp))
                     Text("Credential Accepted", style = MaterialTheme.typography.headlineSmall, color = TextPrimary)
@@ -198,7 +210,7 @@ fun CredentialOfferScreen(
                             .background(DangerDim),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("\u2717", fontSize = 32.sp, color = Danger, fontWeight = FontWeight.Bold)
+                        Icon(Icons.Default.Close, contentDescription = "Error", modifier = Modifier.size(32.dp), tint = Danger)
                     }
                     Spacer(Modifier.height(20.dp))
                     Text("Offer Failed", style = MaterialTheme.typography.headlineSmall, color = TextPrimary)

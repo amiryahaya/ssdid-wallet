@@ -1,6 +1,7 @@
 import Foundation
 import Security
 import CryptoKit
+import LocalAuthentication
 
 /// Errors specific to Keychain operations.
 enum KeychainError: Error, LocalizedError {
@@ -10,6 +11,8 @@ enum KeychainError: Error, LocalizedError {
     case decryptionFailed(String)
     case deleteFailed(OSStatus)
     case unexpectedError(String)
+    case accessControlCreationFailed
+    case biometricAuthFailed(String)
 
     var errorDescription: String? {
         switch self {
@@ -25,6 +28,10 @@ enum KeychainError: Error, LocalizedError {
             return "Keychain key deletion failed: \(status)"
         case .unexpectedError(let reason):
             return "Keychain unexpected error: \(reason)"
+        case .accessControlCreationFailed:
+            return "Keychain access control creation failed"
+        case .biometricAuthFailed(let reason):
+            return "Biometric authentication failed: \(reason)"
         }
     }
 }
@@ -45,8 +52,17 @@ final class KeychainManager: KeychainManagerProtocol {
 
     private let servicePrefix: String
 
-    init(servicePrefix: String = "my.ssdid.wallet") {
+    /// When true, sensitive wrapping keys are protected with biometric authentication
+    /// (Face ID / Touch ID). The biometric check uses `.biometryCurrentSet`, meaning
+    /// stored keys are invalidated if the enrolled biometrics change.
+    ///
+    /// - Important: Defaults to `false` for development.
+    // TODO: Set requireBiometric = true before production release.
+    let requireBiometric: Bool
+
+    init(servicePrefix: String = "my.ssdid.wallet", requireBiometric: Bool = false) {
         self.servicePrefix = servicePrefix
+        self.requireBiometric = requireBiometric
     }
 
     private func serviceKey(alias: String) -> String {
@@ -71,13 +87,29 @@ final class KeychainManager: KeychainManagerProtocol {
         deleteKey(alias: alias)
 
         // Store in Keychain
-        let query: [String: Any] = [
+        var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: serviceKey(alias: alias),
             kSecAttrAccount as String: alias,
-            kSecValueData as String: keyData,
-            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+            kSecValueData as String: keyData
         ]
+
+        if requireBiometric {
+            // Protect the wrapping key with biometric authentication.
+            // .biometryCurrentSet invalidates the key if biometrics are re-enrolled.
+            var error: Unmanaged<CFError>?
+            guard let accessControl = SecAccessControlCreateWithFlags(
+                kCFAllocatorDefault,
+                kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+                .biometryCurrentSet,
+                &error
+            ) else {
+                throw KeychainError.accessControlCreationFailed
+            }
+            query[kSecAttrAccessControl as String] = accessControl
+        } else {
+            query[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+        }
 
         let status = SecItemAdd(query as CFDictionary, nil)
         guard status == errSecSuccess else {
@@ -135,13 +167,27 @@ final class KeychainManager: KeychainManagerProtocol {
 
         deleteSecret(alias: alias)
 
-        let query: [String: Any] = [
+        var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: serviceKey(alias: alias),
             kSecAttrAccount as String: alias,
-            kSecValueData as String: data,
-            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+            kSecValueData as String: data
         ]
+
+        if requireBiometric {
+            var acError: Unmanaged<CFError>?
+            guard let accessControl = SecAccessControlCreateWithFlags(
+                kCFAllocatorDefault,
+                kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+                .biometryCurrentSet,
+                &acError
+            ) else {
+                throw KeychainError.accessControlCreationFailed
+            }
+            query[kSecAttrAccessControl as String] = accessControl
+        } else {
+            query[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+        }
 
         let status = SecItemAdd(query as CFDictionary, nil)
         guard status == errSecSuccess else {
@@ -205,7 +251,7 @@ final class KeychainManager: KeychainManagerProtocol {
     // MARK: - Private
 
     private func loadKey(alias: String) throws -> Data {
-        let query: [String: Any] = [
+        var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: serviceKey(alias: alias),
             kSecAttrAccount as String: alias,
@@ -213,10 +259,21 @@ final class KeychainManager: KeychainManagerProtocol {
             kSecMatchLimit as String: kSecMatchLimitOne
         ]
 
+        if requireBiometric {
+            // Provide an LAContext so the system prompts for biometric authentication
+            // when retrieving a key protected with SecAccessControl.
+            let context = LAContext()
+            context.localizedReason = "Authenticate to access wallet keys"
+            query[kSecUseAuthenticationContext as String] = context
+        }
+
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
 
         guard status == errSecSuccess, let data = result as? Data else {
+            if status == errSecAuthFailed || status == errSecUserCanceled {
+                throw KeychainError.biometricAuthFailed("Authentication required to access key '\(alias)'")
+            }
             throw KeychainError.keyNotFound(alias)
         }
         return data

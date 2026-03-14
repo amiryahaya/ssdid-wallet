@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
@@ -14,6 +15,7 @@ import kotlinx.serialization.json.Json
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.rotation.RotationEntry
+import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
 import my.ssdid.wallet.domain.vault.PreRotatedKeyData
 import my.ssdid.wallet.domain.vault.VaultStorage
 import java.io.File
@@ -29,6 +31,7 @@ class DataStoreVaultStorage(private val context: Context) : VaultStorage {
 
     private val identitiesKey = stringPreferencesKey("identities")
     private val credentialsKey = stringPreferencesKey("credentials")
+    private val sdJwtVcsKey = stringPreferencesKey("sd_jwt_vcs")
 
     private val keysDir: File
         get() = File(context.filesDir, "keys").also { it.mkdirs() }
@@ -36,13 +39,13 @@ class DataStoreVaultStorage(private val context: Context) : VaultStorage {
     // ---------- Identity ----------
 
     override suspend fun saveIdentity(identity: Identity, encryptedPrivateKey: ByteArray) {
+        saveKeyFile(identity.keyId, encryptedPrivateKey)  // key file first
         val identities = listIdentities().toMutableList()
         identities.removeAll { it.keyId == identity.keyId }
         identities.add(identity)
         context.dataStore.edit { prefs ->
             prefs[identitiesKey] = json.encodeToString(identities)
         }
-        saveKeyFile(identity.keyId, encryptedPrivateKey)
     }
 
     override suspend fun getIdentity(keyId: String): Identity? {
@@ -99,6 +102,34 @@ class DataStoreVaultStorage(private val context: Context) : VaultStorage {
         val credentials = listCredentials().filter { it.id != credentialId }
         context.dataStore.edit { prefs ->
             prefs[credentialsKey] = json.encodeToString(credentials)
+        }
+    }
+
+    // ---------- SD-JWT VCs ----------
+
+    override suspend fun saveSdJwtVc(sdJwtVc: StoredSdJwtVc) {
+        val vcs = listSdJwtVcs().toMutableList()
+        vcs.removeAll { it.id == sdJwtVc.id }
+        vcs.add(sdJwtVc)
+        context.dataStore.edit { prefs ->
+            prefs[sdJwtVcsKey] = json.encodeToString(vcs)
+        }
+    }
+
+    override suspend fun listSdJwtVcs(): List<StoredSdJwtVc> {
+        val jsonStr = context.dataStore.data.map { it[sdJwtVcsKey] }.first() ?: return emptyList()
+        return try {
+            json.decodeFromString(jsonStr)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to deserialize SD-JWT VCs — data may be corrupted", e)
+            emptyList()
+        }
+    }
+
+    override suspend fun deleteSdJwtVc(id: String) {
+        val vcs = listSdJwtVcs().filter { it.id != id }
+        context.dataStore.edit { prefs ->
+            prefs[sdJwtVcsKey] = json.encodeToString(vcs)
         }
     }
 
@@ -174,15 +205,15 @@ class DataStoreVaultStorage(private val context: Context) : VaultStorage {
 
     // ---------- Onboarding state ----------
 
-    private val onboardingCompletedKey = stringPreferencesKey("onboarding_completed")
+    private val onboardingCompletedKey = booleanPreferencesKey("onboarding_completed")
 
     override suspend fun isOnboardingCompleted(): Boolean {
-        return context.dataStore.data.map { it[onboardingCompletedKey] }.first() == "true"
+        return context.dataStore.data.map { it[onboardingCompletedKey] }.first() == true
     }
 
     override suspend fun setOnboardingCompleted() {
         context.dataStore.edit { prefs ->
-            prefs[onboardingCompletedKey] = "true"
+            prefs[onboardingCompletedKey] = true
         }
     }
 

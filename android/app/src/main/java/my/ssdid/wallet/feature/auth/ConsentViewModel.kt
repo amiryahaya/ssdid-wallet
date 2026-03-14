@@ -83,6 +83,9 @@ class ConsentViewModel @Inject constructor(
     private val _selectedClaims = MutableStateFlow<Set<String>>(emptySet())
     val selectedClaims = _selectedClaims.asStateFlow()
 
+    private val _credentialFormat = MutableStateFlow("vc") // "vc" or "sd-jwt-vc"
+    val credentialFormat = _credentialFormat.asStateFlow()
+
     private val _serverName = MutableStateFlow("")
     val serverName = _serverName.asStateFlow()
 
@@ -109,6 +112,9 @@ class ConsentViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     init {
+        // Set credential format from navigation args
+        _credentialFormat.value = savedStateHandle.get<String>("credentialFormat") ?: "vc"
+
         viewModelScope.launch {
             val allIdentities = vault.listIdentities()
             val filtered = if (acceptedAlgorithmNames.isEmpty()) allIdentities

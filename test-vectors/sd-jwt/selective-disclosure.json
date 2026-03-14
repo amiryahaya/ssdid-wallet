@@ -1,0 +1,17 @@
+{
+  "description": "Present SD-JWT VC disclosing only 'name', hiding 'department'",
+  "input": {
+    "sd_jwt": "<issued from basic-issuance>",
+    "disclose": ["name"],
+    "hide": ["department"],
+    "audience": "https://verifier.example.com",
+    "nonce": "abc123"
+  },
+  "expected": {
+    "disclosed_claims": ["name", "employeeId"],
+    "hidden_claims": ["department"],
+    "has_key_binding_jwt": true,
+    "kb_jwt_aud": "https://verifier.example.com",
+    "kb_jwt_nonce": "abc123"
+  }
+}

@@ -5,15 +5,15 @@ import io.mockk.*
 import kotlinx.coroutines.test.runTest
 import my.ssdid.wallet.domain.crypto.CryptoProvider
 import my.ssdid.wallet.domain.crypto.Multibase
+import my.ssdid.wallet.domain.did.DidResolver
 import my.ssdid.wallet.domain.model.*
-import my.ssdid.wallet.domain.transport.RegistryApi
 import org.junit.Before
 import org.junit.Test
 
 class VerifierImplTest {
 
     private lateinit var verifier: VerifierImpl
-    private lateinit var registryApi: RegistryApi
+    private lateinit var didResolver: DidResolver
     private lateinit var classicalProvider: CryptoProvider
     private lateinit var pqcProvider: CryptoProvider
 
@@ -39,17 +39,17 @@ class VerifierImplTest {
 
     @Before
     fun setup() {
-        registryApi = mockk()
+        didResolver = mockk()
         classicalProvider = mockk()
         pqcProvider = mockk()
-        verifier = VerifierImpl(registryApi, classicalProvider, pqcProvider)
+        verifier = VerifierImpl(didResolver, classicalProvider, pqcProvider)
     }
 
     // --- resolveDid ---
 
     @Test
     fun `resolveDid returns document from registry`() = runTest {
-        coEvery { registryApi.resolveDid(serverDid) } returns serverDidDoc
+        coEvery { didResolver.resolve(serverDid) } returns Result.success(serverDidDoc)
 
         val result = verifier.resolveDid(serverDid)
 
@@ -59,7 +59,7 @@ class VerifierImplTest {
 
     @Test
     fun `resolveDid fails when registry throws`() = runTest {
-        coEvery { registryApi.resolveDid(any()) } throws RuntimeException("not found")
+        coEvery { didResolver.resolve(any()) } returns Result.failure(RuntimeException("not found"))
 
         val result = verifier.resolveDid(serverDid)
 
@@ -70,7 +70,7 @@ class VerifierImplTest {
 
     @Test
     fun `verifySignature resolves DID and verifies with classical provider`() = runTest {
-        coEvery { registryApi.resolveDid(serverDid) } returns serverDidDoc
+        coEvery { didResolver.resolve(serverDid) } returns Result.success(serverDidDoc)
         every { classicalProvider.verify(Algorithm.ED25519, publicKeyBytes, any(), any()) } returns true
 
         val signature = "test-signature".toByteArray()
@@ -99,7 +99,7 @@ class VerifierImplTest {
             authentication = listOf(serverKeyId),
             assertionMethod = listOf(serverKeyId)
         )
-        coEvery { registryApi.resolveDid(serverDid) } returns pqcDoc
+        coEvery { didResolver.resolve(serverDid) } returns Result.success(pqcDoc)
         every { pqcProvider.verify(Algorithm.KAZ_SIGN_128, pqcKeyBytes, any(), any()) } returns true
 
         val result = verifier.verifySignature(serverDid, serverKeyId, "sig".toByteArray(), "data".toByteArray())
@@ -110,7 +110,7 @@ class VerifierImplTest {
 
     @Test
     fun `verifySignature fails when keyId not found in document`() = runTest {
-        coEvery { registryApi.resolveDid(serverDid) } returns serverDidDoc
+        coEvery { didResolver.resolve(serverDid) } returns Result.success(serverDidDoc)
 
         val result = verifier.verifySignature(serverDid, "did:ssdid:server#key-999", "sig".toByteArray(), "data".toByteArray())
 
@@ -134,7 +134,7 @@ class VerifierImplTest {
             authentication = listOf(serverKeyId),
             assertionMethod = listOf(serverKeyId)
         )
-        coEvery { registryApi.resolveDid(serverDid) } returns badDoc
+        coEvery { didResolver.resolve(serverDid) } returns Result.success(badDoc)
 
         val result = verifier.verifySignature(serverDid, serverKeyId, "sig".toByteArray(), "data".toByteArray())
 
@@ -146,7 +146,7 @@ class VerifierImplTest {
 
     @Test
     fun `verifyChallengeResponse decodes multibase and delegates to verifySignature`() = runTest {
-        coEvery { registryApi.resolveDid(serverDid) } returns serverDidDoc
+        coEvery { didResolver.resolve(serverDid) } returns Result.success(serverDidDoc)
         val signatureBytes = "raw-signature".toByteArray()
         val signedChallenge = Multibase.encode(signatureBytes)
         every { classicalProvider.verify(Algorithm.ED25519, publicKeyBytes, signatureBytes, any()) } returns true
@@ -179,7 +179,7 @@ class VerifierImplTest {
             authentication = listOf(issuerKeyId),
             assertionMethod = listOf(issuerKeyId)
         )
-        coEvery { registryApi.resolveDid(issuerDid) } returns issuerDoc
+        coEvery { didResolver.resolve(issuerDid) } returns Result.success(issuerDoc)
 
         val vc = VerifiableCredential(
             id = "urn:uuid:vc-1",
@@ -239,7 +239,7 @@ class VerifierImplTest {
             authentication = emptyList(),
             assertionMethod = emptyList()
         )
-        coEvery { registryApi.resolveDid(issuerDid) } returns issuerDoc
+        coEvery { didResolver.resolve(issuerDid) } returns Result.success(issuerDoc)
 
         val vc = VerifiableCredential(
             id = "urn:uuid:test",
@@ -281,7 +281,7 @@ class VerifierImplTest {
             authentication = listOf(issuerKeyId),
             assertionMethod = listOf(issuerKeyId)
         )
-        coEvery { registryApi.resolveDid(issuerDid) } returns issuerDoc
+        coEvery { didResolver.resolve(issuerDid) } returns Result.success(issuerDoc)
         every { classicalProvider.verify(any(), any(), any(), any()) } returns true
 
         val vc = VerifiableCredential(

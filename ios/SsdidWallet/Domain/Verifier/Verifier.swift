@@ -19,18 +19,18 @@ protocol Verifier {
 /// and verifies signatures using the appropriate CryptoProvider.
 final class VerifierImpl: Verifier {
 
-    private let registryApi: RegistryApi
+    private let didResolver: DidResolver
     private let classicalProvider: CryptoProvider
     private let pqcProvider: CryptoProvider
 
-    init(registryApi: RegistryApi, classicalProvider: CryptoProvider, pqcProvider: CryptoProvider) {
-        self.registryApi = registryApi
+    init(didResolver: DidResolver, classicalProvider: CryptoProvider, pqcProvider: CryptoProvider) {
+        self.didResolver = didResolver
         self.classicalProvider = classicalProvider
         self.pqcProvider = pqcProvider
     }
 
     func resolveDid(did: String) async throws -> DidDocument {
-        return try await registryApi.resolveDid(did: did)
+        return try await didResolver.resolve(did: did)
     }
 
     func verifySignature(did: String, keyId: String, signature: Data, data: Data) async throws -> Bool {
@@ -56,9 +56,15 @@ final class VerifierImpl: Verifier {
     }
 
     func verifyCredential(credential: VerifiableCredential) async throws -> Bool {
+        let formatter = ISO8601DateFormatter()
+
+        // Check not-before (nbf): credential must not be used before issuance date
+        if let issuedDate = formatter.date(from: credential.issuanceDate), issuedDate > Date() {
+            throw VerifierError.credentialNotYetValid(credential.issuanceDate)
+        }
+
         // Check expiration
         if let expirationDate = credential.expirationDate {
-            let formatter = ISO8601DateFormatter()
             if let expDate = formatter.date(from: expirationDate), expDate < Date() {
                 throw VerifierError.credentialExpired(expirationDate)
             }
@@ -103,7 +109,7 @@ final class VerifierImpl: Verifier {
         }
         dict.removeValue(forKey: "proof")
 
-        return Data(VaultImpl.canonicalJson(dict).utf8)
+        return Data(JsonUtils.canonicalJson(dict).utf8)
     }
 }
 
@@ -112,6 +118,7 @@ enum VerifierError: Error, LocalizedError {
     case keyNotFound(keyId: String, did: String)
     case unknownAlgorithmType(String)
     case credentialExpired(String)
+    case credentialNotYetValid(String)
     case serializationFailed
 
     var errorDescription: String? {
@@ -122,6 +129,8 @@ enum VerifierError: Error, LocalizedError {
             return "Unknown W3C verification method type: \(type)"
         case .credentialExpired(let date):
             return "Credential expired at \(date)"
+        case .credentialNotYetValid(let date):
+            return "Credential not yet valid until \(date)"
         case .serializationFailed:
             return "Failed to serialize credential for verification"
         }

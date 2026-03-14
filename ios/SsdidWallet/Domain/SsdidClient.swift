@@ -73,10 +73,8 @@ final class SsdidClient: @unchecked Sendable {
                 domain: nil
             )
 
-            _ = try await httpClient.registry.registerDid(request: RegisterDidRequest(
-                didDocument: didDoc,
-                proof: proof
-            ))
+            let request = RegisterDidRequest(didDocument: didDoc, proof: proof)
+            _ = try await httpClient.registry.registerDid(request: request)
         } catch {
             // Roll back: remove the locally saved identity on failure
             try? await vault.deleteIdentity(keyId: identity.keyId)
@@ -281,13 +279,35 @@ final class SsdidClient: @unchecked Sendable {
 
     // MARK: - Helpers
 
-    /// Converts an Encodable value to a [String: Any] dictionary.
+    /// Converts an Encodable value to a [String: Any] dictionary, stripping null values
+    /// to match Android's `explicitNulls = false` behaviour and the registry's canonical JSON.
     private func encodableToDict<T: Encodable>(_ value: T) throws -> [String: Any] {
         let data = try JSONEncoder().encode(value)
         guard let dict = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             throw SsdidClientError.serializationFailed("Failed to convert to dictionary")
         }
-        return dict
+        return stripNulls(dict)
+    }
+
+    /// Recursively removes NSNull / nil entries from a JSON-compatible dictionary.
+    private func stripNulls(_ dict: [String: Any]) -> [String: Any] {
+        var result = [String: Any]()
+        for (key, value) in dict {
+            if value is NSNull { continue }
+            if let nested = value as? [String: Any] {
+                result[key] = stripNulls(nested)
+            } else if let array = value as? [Any] {
+                result[key] = array.map { element in
+                    if let nestedDict = element as? [String: Any] {
+                        return stripNulls(nestedDict) as Any
+                    }
+                    return element
+                }
+            } else {
+                result[key] = value
+            }
+        }
+        return result
     }
 }
 

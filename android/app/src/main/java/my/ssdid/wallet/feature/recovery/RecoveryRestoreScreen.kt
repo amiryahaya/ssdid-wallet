@@ -2,6 +2,7 @@ package my.ssdid.wallet.feature.recovery
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -30,6 +31,11 @@ import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.recovery.RecoveryManager
 import my.ssdid.wallet.domain.vault.VaultStorage
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Group
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
 
@@ -108,6 +114,7 @@ fun RecoveryRestoreScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .imePadding()
             .background(BgPrimary)
             .statusBarsPadding()
     ) {
@@ -116,7 +123,7 @@ fun RecoveryRestoreScreen(
             TextButton(
                 onClick = onBack,
                 modifier = Modifier.semantics { contentDescription = "Navigate back" }
-            ) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
+            ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary) }
             Spacer(Modifier.width(12.dp))
             Text(stringResource(R.string.restore_title), style = MaterialTheme.typography.titleLarge)
         }
@@ -147,7 +154,7 @@ fun RecoveryRestoreScreen(
                                     .background(SuccessDim),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text("\u2713", fontSize = 28.sp, color = Success, fontWeight = FontWeight.Bold)
+                                Icon(Icons.Default.Check, contentDescription = "Success", modifier = Modifier.size(28.dp), tint = Success)
                             }
                             Spacer(Modifier.height(16.dp))
                             Text(
@@ -207,13 +214,13 @@ fun RecoveryRestoreScreen(
                                 modifier = Modifier.padding(18.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("\uD83D\uDC65", fontSize = 24.sp)
+                                Icon(Icons.Default.Group, contentDescription = "Social Recovery", modifier = Modifier.size(24.dp), tint = Accent)
                                 Spacer(Modifier.width(12.dp))
                                 Column(Modifier.weight(1f)) {
                                     Text(stringResource(R.string.restore_social_title), style = MaterialTheme.typography.titleMedium)
                                     Text(stringResource(R.string.restore_social_desc), fontSize = 12.sp, color = TextSecondary)
                                 }
-                                Text("\u203A", fontSize = 20.sp, color = TextTertiary)
+                                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = TextTertiary)
                             }
                         }
                     }

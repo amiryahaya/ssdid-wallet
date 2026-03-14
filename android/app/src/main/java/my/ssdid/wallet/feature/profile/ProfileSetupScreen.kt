@@ -2,6 +2,7 @@ package my.ssdid.wallet.feature.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -16,6 +17,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import my.ssdid.wallet.ui.theme.*
 
 @Composable
@@ -51,6 +54,7 @@ fun ProfileSetupScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .imePadding()
             .background(BgPrimary)
             .statusBarsPadding()
     ) {
@@ -61,7 +65,7 @@ fun ProfileSetupScreen(
         ) {
             if (onBack != null) {
                 IconButton(onClick = onBack) {
-                    Text("\u2190", color = TextPrimary, fontSize = 20.sp)
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
                 }
                 Spacer(Modifier.width(4.dp))
             } else {

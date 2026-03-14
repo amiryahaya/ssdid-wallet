@@ -9,10 +9,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import my.ssdid.wallet.platform.i18n.LocalizationManager
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import my.ssdid.wallet.ui.theme.*
 
 @Composable
@@ -43,7 +48,7 @@ fun SettingsScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
-                Text("\u2190", color = TextPrimary, fontSize = 20.sp)
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
             }
             Spacer(Modifier.width(4.dp))
             Text("Settings", style = MaterialTheme.typography.titleLarge)
@@ -149,10 +154,13 @@ fun SettingsItem(
                 Switch(
                     checked = checked,
                     onCheckedChange = { onToggle?.invoke(it) },
+                    modifier = Modifier.semantics {
+                        contentDescription = "$title, ${if (checked) "enabled" else "disabled"}"
+                    },
                     colors = SwitchDefaults.colors(checkedTrackColor = Accent)
                 )
             } else {
-                Text("\u203A", color = TextTertiary, fontSize = 18.sp)
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = TextTertiary)
             }
         }
     }

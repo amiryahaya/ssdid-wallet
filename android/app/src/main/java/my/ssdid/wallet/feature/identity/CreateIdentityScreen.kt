@@ -23,6 +23,10 @@ import kotlinx.serialization.json.Json
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.vault.VaultStorage
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.ui.platform.LocalView
+import my.ssdid.wallet.ui.components.HapticManager
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
 
@@ -74,10 +78,19 @@ fun CreateIdentityScreen(
     onCreated: () -> Unit,
     viewModel: CreateIdentityViewModel = hiltViewModel()
 ) {
+    val view = LocalView.current
     var name by remember { mutableStateOf("") }
-    var selectedAlgo by remember { mutableStateOf(viewModel.acceptedAlgorithms.first()) }
+    var selectedAlgo by remember {
+        val preferred = viewModel.acceptedAlgorithms.find { it == Algorithm.KAZ_SIGN_192 }
+        mutableStateOf(preferred ?: viewModel.acceptedAlgorithms.first())
+    }
     val isCreating by viewModel.isCreating.collectAsState()
     val error by viewModel.error.collectAsState()
+
+    // Haptic feedback on error
+    LaunchedEffect(error) {
+        if (error != null) HapticManager.error(view)
+    }
 
     Column(
         modifier = Modifier.fillMaxSize().background(BgPrimary).statusBarsPadding()
@@ -87,7 +100,7 @@ fun CreateIdentityScreen(
             Modifier.padding(start = 8.dp, end = 20.dp, top = 12.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
+            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary) }
             Spacer(Modifier.width(4.dp))
             Text("Create Identity", style = MaterialTheme.typography.titleLarge)
         }
@@ -163,7 +176,12 @@ fun CreateIdentityScreen(
 
         // Footer
         Button(
-            onClick = { if (name.isNotBlank()) viewModel.createIdentity(name, selectedAlgo, onCreated) },
+            onClick = {
+                if (name.isNotBlank()) viewModel.createIdentity(name, selectedAlgo) {
+                    HapticManager.success(view)
+                    onCreated()
+                }
+            },
             modifier = Modifier.fillMaxWidth().padding(20.dp),
             enabled = name.isNotBlank() && !isCreating,
             shape = RoundedCornerShape(12.dp),

@@ -28,6 +28,8 @@ import my.ssdid.wallet.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.revocation.RevocationManager
 import my.ssdid.wallet.domain.revocation.RevocationStatus
 import my.ssdid.wallet.domain.vault.Vault
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
 
@@ -97,7 +99,7 @@ fun CredentialDetailScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
+                IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary) }
                 Spacer(Modifier.width(4.dp))
                 Text("Credential Details", style = MaterialTheme.typography.titleLarge)
             }
@@ -124,10 +126,28 @@ fun CredentialDetailScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(
-                                    vc.type.lastOrNull() ?: "Credential",
-                                    style = MaterialTheme.typography.headlineSmall
-                                )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        vc.type.lastOrNull() ?: "Credential",
+                                        style = MaterialTheme.typography.headlineSmall
+                                    )
+                                    if (vc.type.contains("SdJwtVerifiableCredential")) {
+                                        Spacer(Modifier.width(8.dp))
+                                        Box(
+                                            Modifier
+                                                .clip(RoundedCornerShape(4.dp))
+                                                .background(AccentDim)
+                                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                                        ) {
+                                            Text(
+                                                "SD-JWT VC",
+                                                fontSize = 9.sp,
+                                                color = Accent,
+                                                fontWeight = FontWeight.SemiBold
+                                            )
+                                        }
+                                    }
+                                }
                                 val isExpired = vc.expirationDate?.let {
                                     try { Instant.now().isAfter(Instant.parse(it)) } catch (_: Exception) { false }
                                 } ?: false

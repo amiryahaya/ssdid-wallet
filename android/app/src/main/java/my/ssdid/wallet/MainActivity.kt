@@ -6,6 +6,9 @@ import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -14,9 +17,11 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import my.ssdid.wallet.domain.vault.VaultStorage
+import my.ssdid.wallet.feature.splash.SplashScreen
 import my.ssdid.wallet.platform.deeplink.DeepLinkHandler
 import my.ssdid.wallet.ui.navigation.Screen
 import my.ssdid.wallet.ui.navigation.SsdidNavGraph
@@ -36,6 +41,7 @@ class MainActivity : FragmentActivity() {
         setContent {
             SsdidTheme {
                 var startDestination by remember { mutableStateOf<String?>(null) }
+                var showSplash by remember { mutableStateOf(true) }
 
                 LaunchedEffect(Unit) {
                     startDestination = if (vaultStorage.isOnboardingCompleted()) {
@@ -43,9 +49,18 @@ class MainActivity : FragmentActivity() {
                     } else {
                         Screen.Onboarding.route
                     }
+                    delay(1500)
+                    showSplash = false
                 }
 
-                if (startDestination != null) {
+                AnimatedVisibility(
+                    visible = showSplash,
+                    exit = fadeOut(animationSpec = tween(400))
+                ) {
+                    SplashScreen()
+                }
+
+                if (!showSplash && startDestination != null) {
                     val navController = rememberNavController()
                     SsdidNavGraph(navController = navController, startDestination = startDestination!!)
 

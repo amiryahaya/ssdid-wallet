@@ -2,6 +2,7 @@ package my.ssdid.wallet.domain.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
 
 @Serializable
 data class DidDocument(
@@ -40,5 +41,6 @@ data class VerificationMethod(
     val id: String,
     val type: String,
     val controller: String,
-    val publicKeyMultibase: String
+    val publicKeyMultibase: String = "",
+    val publicKeyJwk: JsonObject? = null
 )

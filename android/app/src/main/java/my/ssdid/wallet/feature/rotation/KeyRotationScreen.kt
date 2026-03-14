@@ -27,6 +27,11 @@ import my.ssdid.wallet.domain.rotation.KeyRotationManager
 import my.ssdid.wallet.domain.rotation.RotationEntry
 import my.ssdid.wallet.domain.rotation.RotationStatus
 import my.ssdid.wallet.domain.vault.Vault
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Warning
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
 
@@ -112,7 +117,7 @@ fun KeyRotationScreen(
             Modifier.padding(start = 8.dp, end = 20.dp, top = 12.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
+            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary) }
             Spacer(Modifier.width(4.dp))
             Text("Key Rotation", style = MaterialTheme.typography.titleLarge)
         }
@@ -189,7 +194,7 @@ fun KeyRotationScreen(
                         status?.let { s ->
                             if (s.hasPreCommitment) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text("\u2713", color = Success, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                                    Icon(Icons.Default.Check, contentDescription = "Pre-committed", modifier = Modifier.size(16.dp), tint = Success)
                                     Spacer(Modifier.width(8.dp))
                                     Text("Next key pre-committed", fontSize = 14.sp, color = Success)
                                 }
@@ -205,7 +210,7 @@ fun KeyRotationScreen(
                                 }
                             } else {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text("\u26A0", color = Warning, fontSize = 16.sp)
+                                    Icon(Icons.Default.Warning, contentDescription = "Warning", modifier = Modifier.size(16.dp), tint = Warning)
                                     Spacer(Modifier.width(8.dp))
                                     Text("No pre-commitment", fontSize = 14.sp, color = Warning)
                                 }
@@ -252,7 +257,9 @@ fun KeyRotationScreen(
                             CircularProgressIndicator(Modifier.size(20.dp), color = BgPrimary, strokeWidth = 2.dp)
                             Spacer(Modifier.width(10.dp))
                         }
-                        Text("\uD83D\uDD04  Rotate Now", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                        Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("Rotate Now", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
             }
@@ -330,7 +337,7 @@ fun KeyRotationScreen(
                                     .background(PqcDim),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text("\uD83D\uDD04", fontSize = 14.sp)
+                                Icon(Icons.Default.Refresh, contentDescription = "Rotated", modifier = Modifier.size(14.dp), tint = Pqc)
                             }
                             Spacer(Modifier.width(12.dp))
                             Column(Modifier.weight(1f)) {

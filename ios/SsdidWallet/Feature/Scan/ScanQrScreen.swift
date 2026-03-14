@@ -112,6 +112,7 @@ struct ScanQrScreen: View {
                 qrFormatRow("SSDID Authentication", format: "ssdid://authenticate?server_url=...")
                 qrFormatRow("SSDID Transaction", format: "ssdid://sign?server_url=...&session_token=...")
                 qrFormatRow("Credential Offer", format: "ssdid://credential-offer?issuer_url=...")
+                qrFormatRow("OpenID4VP Request", format: "openid4vp://authorize?...")
             }
             .ssdidCard()
             .padding(.horizontal, 20)
@@ -205,6 +206,8 @@ struct ScanQrScreen: View {
                 token: token,
                 callbackUrl: callbackUrl
             ))
+        case .presentationRequest(let uri):
+            router.push(.presentationRequest(uri: uri))
         }
     }
 }

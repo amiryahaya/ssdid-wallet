@@ -20,6 +20,7 @@ final class NotifyManager {
 
     private let api: NotifyApi
     private let keychainManager: KeychainManager
+    private let localNotificationStorage: LocalNotificationStorage
 
     // MARK: - State
 
@@ -35,9 +36,10 @@ final class NotifyManager {
 
     // MARK: - Init
 
-    init(api: NotifyApi, keychainManager: KeychainManager) {
+    init(api: NotifyApi, keychainManager: KeychainManager, localNotificationStorage: LocalNotificationStorage) {
         self.api = api
         self.keychainManager = keychainManager
+        self.localNotificationStorage = localNotificationStorage
     }
 
     // MARK: - Inbox
@@ -51,7 +53,11 @@ final class NotifyManager {
         guard !isRegistering else { return }
         isRegistering = true
         defer { isRegistering = false }
-        guard (try? keychainManager.loadSecret(alias: Self.inboxSecretAlias)) == nil else { return }
+
+        // Distinguish "no secret stored" (nil) from "keychain error" (throw).
+        // Using try? here would mask keychain failures and trigger a spurious re-registration.
+        let existingSecret = try keychainManager.loadSecret(alias: Self.inboxSecretAlias)
+        guard existingSecret == nil else { return }
 
         // Register with no devices; APNs token is supplied later via registerAPNsToken(_:).
         let response = try await api.registerInbox(
@@ -158,6 +164,17 @@ final class NotifyManager {
         for notification in pending {
             let identityName = mailboxToName[notification.mailboxId]
 
+            // Save locally first
+            localNotificationStorage.save(LocalNotification(
+                id: notification.notificationId,
+                mailboxId: notification.mailboxId,
+                identityName: identityName,
+                payload: notification.payload,
+                priority: notification.priority ?? "normal",
+                receivedAt: notification.receivedAt ?? "",
+                isRead: false
+            ))
+
             let content = UNMutableNotificationContent()
             content.title = identityName.map { "SSDID — \($0)" } ?? "SSDID"
             content.body = notification.payload
@@ -166,12 +183,17 @@ final class NotifyManager {
             let request = UNNotificationRequest(
                 identifier: notification.notificationId,
                 content: content,
-                trigger: nil // Deliver immediately
+                trigger: nil
             )
             try? await center.add(request)
 
-            // Acknowledge — failure means re-fetch next time, acceptable
-            try? await ackPending(notificationId: notification.notificationId)
+            do {
+                try await ackPending(notificationId: notification.notificationId)
+            } catch {
+                #if DEBUG
+                print("[NotifyManager] ack failed for \(notification.notificationId): \(error)")
+                #endif
+            }
         }
     }
 

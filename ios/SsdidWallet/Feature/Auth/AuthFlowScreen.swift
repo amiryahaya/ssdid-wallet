@@ -26,6 +26,7 @@ struct AuthFlowScreen: View {
                         .foregroundStyle(Color.textPrimary)
                         .font(.system(size: 20))
                 }
+                .accessibilityLabel("Back")
                 .padding(.leading, 8)
 
                 Text("Authentication")
@@ -144,6 +145,7 @@ struct AuthFlowScreen: View {
                 Image(systemName: isSelected ? "largecircle.fill.circle" : "circle")
                     .foregroundStyle(isSelected ? Color.ssdidAccent : Color.textTertiary)
                     .font(.system(size: 20))
+                    .accessibilityLabel(isSelected ? "Selected" : "Not selected")
                 VStack(alignment: .leading, spacing: 2) {
                     Text(identity.name)
                         .font(.system(size: 14, weight: .medium))
@@ -216,6 +218,7 @@ struct AuthFlowScreen: View {
     private func authenticate() {
         state = .loading
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            HapticManager.notification(.success)
             state = .success(sessionToken: "mock-session-token")
         }
     }

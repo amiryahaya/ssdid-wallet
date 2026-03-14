@@ -9,6 +9,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -29,6 +33,12 @@ import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.platform.biometric.BiometricAuthenticator
 import my.ssdid.wallet.platform.biometric.BiometricResult
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.ui.platform.LocalView
+import my.ssdid.wallet.ui.components.HapticManager
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
 
@@ -122,6 +132,16 @@ fun TxSigningScreen(
     val activity = context as? FragmentActivity
     val scope = rememberCoroutineScope()
     var signing by remember { mutableStateOf(false) }
+    val view = LocalView.current
+
+    // Haptic feedback on transaction result
+    LaunchedEffect(state) {
+        when (state) {
+            is TxState.Confirmed -> HapticManager.success(view)
+            is TxState.Failed -> HapticManager.error(view)
+            else -> {}
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -134,7 +154,7 @@ fun TxSigningScreen(
             Modifier.padding(start = 8.dp, end = 20.dp, top = 12.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
+            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary) }
             Spacer(Modifier.width(4.dp))
             Text("Sign Transaction", style = MaterialTheme.typography.titleLarge)
         }
@@ -201,6 +221,7 @@ fun TxSigningScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text("Challenge expires in", fontSize = 13.sp, color = TextSecondary)
+                                    val timerText = "${timerSeconds / 60}:${String.format(java.util.Locale.ROOT, "%02d", timerSeconds % 60)}"
                                     Box(
                                         Modifier
                                             .clip(RoundedCornerShape(6.dp))
@@ -208,9 +229,13 @@ fun TxSigningScreen(
                                                 if (timerSeconds > 30) SuccessDim else if (timerSeconds > 10) WarningDim else DangerDim
                                             )
                                             .padding(horizontal = 10.dp, vertical = 4.dp)
+                                            .semantics {
+                                                contentDescription = "Challenge expires in $timerText"
+                                                liveRegion = LiveRegionMode.Polite
+                                            }
                                     ) {
                                         Text(
-                                            "${timerSeconds / 60}:${String.format(java.util.Locale.ROOT, "%02d", timerSeconds % 60)}",
+                                            timerText,
                                             fontSize = 13.sp,
                                             fontWeight = FontWeight.Bold,
                                             fontFamily = FontFamily.Monospace,
@@ -322,7 +347,7 @@ fun TxSigningScreen(
                             .background(SuccessDim),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("\u2713", fontSize = 32.sp, color = Success, fontWeight = FontWeight.Bold)
+                        Icon(Icons.Default.Check, contentDescription = "Success", modifier = Modifier.size(32.dp), tint = Success)
                     }
                     Spacer(Modifier.height(20.dp))
                     Text("Transaction Confirmed", style = MaterialTheme.typography.headlineSmall, color = TextPrimary)
@@ -357,7 +382,7 @@ fun TxSigningScreen(
                             .background(DangerDim),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("\u2717", fontSize = 32.sp, color = Danger, fontWeight = FontWeight.Bold)
+                        Icon(Icons.Default.Close, contentDescription = "Error", modifier = Modifier.size(32.dp), tint = Danger)
                     }
                     Spacer(Modifier.height(20.dp))
                     Text("Transaction Failed", style = MaterialTheme.typography.headlineSmall, color = TextPrimary)

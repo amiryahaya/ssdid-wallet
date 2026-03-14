@@ -21,6 +21,26 @@ struct WalletHomeScreen: View {
 
                 Spacer()
 
+                // Notifications bell with badge
+                Button { router.push(.notifications) } label: {
+                    ZStack(alignment: .topTrailing) {
+                        Image(systemName: "bell")
+                            .font(.system(size: 22))
+                            .foregroundStyle(Color.textSecondary)
+                        if services.localNotificationStorage.unreadCount > 0 {
+                            Text(services.localNotificationStorage.unreadCount > 99
+                                 ? "99+"
+                                 : "\(services.localNotificationStorage.unreadCount)")
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundStyle(Color.bgPrimary)
+                                .frame(minWidth: 16, minHeight: 16)
+                                .background(Color.danger)
+                                .clipShape(Circle())
+                                .offset(x: 6, y: -6)
+                        }
+                    }
+                }
+
                 Button { router.push(.settings) } label: {
                     Image(systemName: "gearshape")
                         .font(.system(size: 22))
@@ -46,13 +66,29 @@ struct WalletHomeScreen: View {
 
                     if identities.isEmpty {
                         Button { router.push(.createIdentity()) } label: {
-                            Text("Create your first identity")
-                                .font(.ssdidBody)
-                                .foregroundStyle(Color.textSecondary)
-                                .frame(maxWidth: .infinity)
-                                .padding(32)
-                                .background(Color.bgCard)
-                                .cornerRadius(16)
+                            VStack(spacing: 0) {
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .fill(Color.accentDim)
+                                        .frame(width: 72, height: 72)
+                                    Image(systemName: "person.crop.circle.badge.plus")
+                                        .font(.system(size: 32))
+                                        .foregroundStyle(Color.ssdidAccent)
+                                }
+                                Spacer().frame(height: 16)
+                                Text("No identities yet")
+                                    .font(.ssdidHeadline)
+                                    .foregroundStyle(Color.textPrimary)
+                                Spacer().frame(height: 4)
+                                Text("Create your first identity to get started")
+                                    .font(.system(size: 14))
+                                    .foregroundStyle(Color.textSecondary)
+                                    .multilineTextAlignment(.center)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(32)
+                            .background(Color.bgCard)
+                            .cornerRadius(16)
                         }
                     } else {
                         ForEach(identities) { identity in
@@ -134,11 +170,10 @@ struct WalletHomeScreen: View {
 
                 Spacer().frame(height: 4)
 
-                Text(identity.did)
+                Text(identity.did.truncatedDid)
                     .font(.ssdidMono)
                     .foregroundStyle(Color.textSecondary)
                     .lineLimit(1)
-                    .truncationMode(.middle)
 
                 Spacer().frame(height: 12)
 

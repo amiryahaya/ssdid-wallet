@@ -28,6 +28,9 @@ import my.ssdid.wallet.domain.device.DeviceInfo
 import my.ssdid.wallet.domain.device.DeviceManager
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.vault.Vault
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
 
@@ -98,7 +101,7 @@ fun DeviceManagementScreen(
             Modifier.padding(start = 8.dp, end = 20.dp, top = 12.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
+            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary) }
             Spacer(Modifier.width(4.dp))
             Text("Devices", style = MaterialTheme.typography.titleLarge)
         }
@@ -186,15 +189,35 @@ fun DeviceManagementScreen(
 
             if (otherDevices.isEmpty()) {
                 item {
-                    Box(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp))
                             .background(BgCard)
-                            .padding(24.dp),
-                        contentAlignment = Alignment.Center
+                            .padding(32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text("No other devices enrolled", color = TextSecondary, fontSize = 14.sp)
+                        Box(
+                            modifier = Modifier
+                                .size(64.dp)
+                                .clip(CircleShape)
+                                .background(AccentDim),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("\uD83D\uDCF1", fontSize = 28.sp)
+                        }
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            "No other devices enrolled",
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = TextPrimary
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            "Enroll additional devices for multi-device access",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextSecondary
+                        )
                     }
                 }
             } else {

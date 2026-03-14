@@ -30,6 +30,9 @@ import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.recovery.social.SocialRecoveryManager
 import my.ssdid.wallet.domain.vault.VaultStorage
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import my.ssdid.wallet.ui.theme.*
 import java.util.Base64 as JBase64
 import javax.inject.Inject
@@ -165,7 +168,7 @@ fun SocialRecoveryRestoreScreen(
             TextButton(
                 onClick = onBack,
                 modifier = Modifier.semantics { contentDescription = "Navigate back" }
-            ) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
+            ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary) }
             Spacer(Modifier.width(12.dp))
             Text(stringResource(R.string.social_restore_title), style = MaterialTheme.typography.titleLarge)
         }
@@ -196,7 +199,7 @@ fun SocialRecoveryRestoreScreen(
                                     .semantics { contentDescription = "Success" },
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text("\u2713", fontSize = 28.sp, color = Success, fontWeight = FontWeight.Bold)
+                                Icon(Icons.Default.Check, contentDescription = "Success", modifier = Modifier.size(28.dp), tint = Success)
                             }
                             Spacer(Modifier.height(16.dp))
                             Text(

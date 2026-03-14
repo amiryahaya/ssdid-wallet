@@ -24,6 +24,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -38,6 +40,8 @@ import com.google.mlkit.vision.common.InputImage
 import my.ssdid.wallet.BuildConfig
 import my.ssdid.wallet.platform.scan.QrPayload
 import my.ssdid.wallet.platform.scan.QrScanner
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import my.ssdid.wallet.ui.theme.*
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
@@ -80,7 +84,7 @@ fun ScanQrScreen(
             Modifier.padding(start = 8.dp, end = 20.dp, top = 12.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBack) { Text("\u2190", color = TextPrimary, fontSize = 20.sp) }
+            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary) }
             Spacer(Modifier.width(4.dp))
             Text("Scan QR Code", style = MaterialTheme.typography.titleLarge)
         }
@@ -100,7 +104,9 @@ fun ScanQrScreen(
             when {
                 hasCameraPermission -> {
                     CameraPreview(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .semantics { contentDescription = "QR code scanner" },
                         onScanned = onScanned
                     )
                 }

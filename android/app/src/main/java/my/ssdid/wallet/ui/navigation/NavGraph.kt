@@ -35,6 +35,8 @@ import my.ssdid.wallet.feature.auth.DriveLoginScreen
 import my.ssdid.wallet.feature.invite.InviteAcceptScreen
 import my.ssdid.wallet.feature.scan.ScanQrScreen
 import my.ssdid.wallet.feature.settings.SettingsScreen
+import my.ssdid.wallet.feature.notifications.NotificationsScreen
+import my.ssdid.wallet.feature.presentation.PresentationRequestScreen
 import my.ssdid.wallet.feature.transaction.TxSigningScreen
 
 @Composable
@@ -101,7 +103,8 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
                 onScanQr = { navController.navigate(Screen.ScanQr.route) },
                 onCredentials = { navController.navigate(Screen.Credentials.route) },
                 onHistory = { navController.navigate(Screen.TxHistory.route) },
-                onSettings = { navController.navigate(Screen.Settings.route) }
+                onSettings = { navController.navigate(Screen.Settings.route) },
+                onNotifications = { navController.navigate(Screen.Notifications.route) }
             )
         }
         composable(
@@ -166,6 +169,7 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
                         }
                         "sign" -> navController.navigate(Screen.TxSigning.createRoute(payload.serverUrl, payload.sessionToken))
                         "credential-offer" -> navController.navigate(Screen.CredentialOffer.createRoute(payload.issuerUrl, payload.offerId))
+                        "presentation-request" -> navController.navigate(Screen.PresentationRequest.createRoute(payload.serverUrl))
                     }
                 }
             )
@@ -303,6 +307,9 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
         composable(Screen.TxHistory.route) {
             TxHistoryScreen(onBack = { navController.popBackStack() })
         }
+        composable(Screen.Notifications.route) {
+            NotificationsScreen(onBack = { navController.popBackStack() })
+        }
         composable(Screen.RecoverySetup.route) { backStackEntry ->
             backStackEntry.arguments?.getString("keyId") ?: return@composable
             RecoverySetupScreen(
@@ -376,6 +383,19 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
             )
         ) {
             InviteAcceptScreen()
+        }
+        composable(
+            route = Screen.PresentationRequest.route,
+            arguments = listOf(
+                navArgument("uri") { type = NavType.StringType; defaultValue = "" }
+            )
+        ) {
+            PresentationRequestScreen(
+                onBack = { navController.popBackStack() },
+                onComplete = {
+                    navController.popBackStack(Screen.WalletHome.route, inclusive = false)
+                }
+            )
         }
         composable(Screen.SocialRecoveryRestore.route) {
             SocialRecoveryRestoreScreen(

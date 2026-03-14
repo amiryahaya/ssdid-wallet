@@ -1,8 +1,9 @@
 import Foundation
 
-struct VerificationMethod: Codable {
+struct VerificationMethod: Codable, Equatable {
     let id: String
     let type: String
     let controller: String
-    let publicKeyMultibase: String
+    var publicKeyMultibase: String = ""
+    var publicKeyJwk: [String: String]? = nil
 }

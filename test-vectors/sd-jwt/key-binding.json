@@ -1,0 +1,17 @@
+{
+  "description": "Key Binding JWT proves holder controls key in cnf claim",
+  "input": {
+    "holder_did": "did:key:z6MkjchhfUsD6mmvni8mCdXHw216Xrm9bQe2mBH1P5RDjVJG",
+    "audience": "https://verifier.example.com",
+    "nonce": "abc123",
+    "iat": 1719792000,
+    "sd_jwt_hash_alg": "sha-256"
+  },
+  "expected": {
+    "typ": "kb+jwt",
+    "has_aud": true,
+    "has_nonce": true,
+    "has_iat": true,
+    "has_sd_hash": true
+  }
+}
