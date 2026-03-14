@@ -2,6 +2,7 @@ package my.ssdid.wallet.domain.vault
 
 import kotlinx.serialization.json.JsonObject
 import my.ssdid.wallet.domain.model.*
+import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
 
 interface Vault {
     suspend fun createIdentity(name: String, algorithm: Algorithm): Result<Identity>
@@ -17,4 +18,5 @@ interface Vault {
     suspend fun deleteCredential(credentialId: String): Result<Unit>
     suspend fun getEncryptedPrivateKey(keyId: String): ByteArray?
     suspend fun saveIdentity(identity: Identity, encryptedPrivateKey: ByteArray)
+    suspend fun listStoredSdJwtVcs(): List<StoredSdJwtVc>
 }
