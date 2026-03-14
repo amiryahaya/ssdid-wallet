@@ -49,6 +49,10 @@ import my.ssdid.wallet.domain.notify.LocalNotificationStorage
 import my.ssdid.wallet.domain.notify.NotifyLifecycleObserver
 import my.ssdid.wallet.domain.notify.NotifyManager
 import my.ssdid.wallet.domain.notify.NotifyStorage
+import my.ssdid.wallet.domain.oid4vp.DcqlMatcher
+import my.ssdid.wallet.domain.oid4vp.OpenId4VpHandler
+import my.ssdid.wallet.domain.oid4vp.OpenId4VpTransport
+import my.ssdid.wallet.domain.oid4vp.PresentationDefinitionMatcher
 import my.ssdid.wallet.domain.transport.EmailVerifyApi
 import my.ssdid.wallet.domain.transport.NotifyApi
 import okhttp3.CertificatePinner
@@ -270,4 +274,21 @@ object AppModule {
         notifyManager: NotifyManager,
         vault: Vault
     ): NotifyLifecycleObserver = NotifyLifecycleObserver(context.applicationContext as android.app.Application, notifyManager, vault)
+
+    @Provides
+    @Singleton
+    fun provideOpenId4VpTransport(okHttpClient: OkHttpClient): OpenId4VpTransport =
+        OpenId4VpTransport(okHttpClient)
+
+    @Provides
+    @Singleton
+    fun provideOpenId4VpHandler(
+        transport: OpenId4VpTransport,
+        vault: Vault
+    ): OpenId4VpHandler = OpenId4VpHandler(
+        transport = transport,
+        peMatcher = PresentationDefinitionMatcher(),
+        dcqlMatcher = DcqlMatcher(),
+        vault = vault
+    )
 }

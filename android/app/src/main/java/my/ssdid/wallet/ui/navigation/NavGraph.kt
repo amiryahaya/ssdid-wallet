@@ -33,6 +33,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import my.ssdid.wallet.feature.auth.DriveLoginScreen
 import my.ssdid.wallet.feature.invite.InviteAcceptScreen
+import my.ssdid.wallet.feature.presentation.PresentationRequestScreen
 import my.ssdid.wallet.feature.scan.ScanQrScreen
 import my.ssdid.wallet.feature.settings.SettingsScreen
 import my.ssdid.wallet.feature.notifications.NotificationsScreen
@@ -389,6 +390,19 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
                     navController.navigate(Screen.WalletHome.route) {
                         popUpTo(Screen.SocialRecoveryRestore.route) { inclusive = true }
                     }
+                }
+            )
+        }
+        composable(
+            Screen.PresentationRequest.route,
+            arguments = listOf(
+                navArgument("rawUri") { type = NavType.StringType; defaultValue = "" }
+            )
+        ) {
+            PresentationRequestScreen(
+                onBack = { navController.popBackStack() },
+                onComplete = {
+                    navController.popBackStack(Screen.WalletHome.route, inclusive = false)
                 }
             )
         }
