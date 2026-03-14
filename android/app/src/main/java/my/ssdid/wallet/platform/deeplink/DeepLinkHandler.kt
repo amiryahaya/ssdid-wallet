@@ -40,6 +40,7 @@ data class DeepLinkAction(
         "credential-offer" -> Screen.CredentialOffer.createRoute(issuerUrl, offerId)
         "openid-credential-offer" -> Screen.CredentialOffer.createRoute("", callbackUrl)
         "invite" -> Screen.InviteAccept.createRoute(serverUrl, token, callbackUrl)
+        "authorize" -> Screen.PresentationRequest.createRoute(callbackUrl)
         "openid4vp" -> Screen.PresentationRequest.createRoute(callbackUrl)
         else -> null
     }
@@ -51,7 +52,7 @@ object DeepLinkHandler {
      * Parses a deep link URI with scheme `ssdid://`.
      * Returns null if the URI is not a valid SSDID deep link.
      */
-    private val VALID_ACTIONS = setOf("register", "authenticate", "sign", "credential-offer", "invite")
+    private val VALID_ACTIONS = setOf("register", "authenticate", "sign", "credential-offer", "invite", "authorize")
     private val json = Json { ignoreUnknownKeys = true }
 
     private val ALLOWED_CALLBACK_SCHEMES = setOf("https")
@@ -81,6 +82,30 @@ object DeepLinkHandler {
     private fun parseSsdid(uri: Uri): DeepLinkAction? {
         val action = uri.host ?: return null
         if (action !in VALID_ACTIONS) return null
+
+        if (action == "authorize") {
+            val dcqlQuery = uri.getQueryParameter("dcql_query") ?: return null
+            val responseUrl = uri.getQueryParameter("response_url") ?: return null
+            val callbackScheme = uri.getQueryParameter("callback_scheme") ?: return null
+            val nonce = uri.getQueryParameter("nonce") ?: return null
+            if (!UrlValidator.isValidServerUrl(responseUrl)) return null
+            if (!isValidCallbackUrl(callbackScheme)) return null
+            // Build an openid4vp-compatible URI that the existing handler understands
+            val oid4vpUri = Uri.Builder()
+                .scheme("openid4vp")
+                .appendQueryParameter("client_id", responseUrl)
+                .appendQueryParameter("response_uri", responseUrl)
+                .appendQueryParameter("response_mode", "direct_post")
+                .appendQueryParameter("nonce", nonce)
+                .appendQueryParameter("dcql_query", dcqlQuery)
+                .build()
+            return DeepLinkAction(
+                action = "authorize",
+                serverUrl = "",
+                callbackUrl = oid4vpUri.toString(),
+                sessionId = callbackScheme  // store callback_scheme in sessionId field
+            )
+        }
 
         if (action == "credential-offer") {
             val issuerUrl = uri.getQueryParameter("issuer_url") ?: return null
