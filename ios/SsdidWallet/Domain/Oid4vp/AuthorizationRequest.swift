@@ -75,6 +75,10 @@ struct AuthorizationRequest {
                 throw OpenId4VpError.ambiguousQuery
             }
 
+            if presentationDefinition == nil && dcqlQuery == nil {
+                throw OpenId4VpError.noQuery
+            }
+
             let state = param("state")
 
             // Validate client_id is HTTPS URL or DID

@@ -95,9 +95,17 @@ class OpenId4VpHandler {
 
         // Build presentation submission if this was a PE request
         let presentationSubmission: PresentationSubmission?
-        if authRequest.presentationDefinition != nil {
+        if let pdJson = authRequest.presentationDefinition {
+            let definitionId: String
+            if let data = pdJson.data(using: .utf8),
+               let pd = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let id = pd["id"] as? String {
+                definitionId = id
+            } else {
+                definitionId = "unknown"
+            }
             presentationSubmission = vpTokenBuilder.buildPresentationSubmission(
-                definitionId: matchResult.descriptorId,
+                definitionId: definitionId,
                 descriptorId: matchResult.descriptorId
             )
         } else {

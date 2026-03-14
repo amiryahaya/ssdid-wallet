@@ -135,6 +135,23 @@ final class AuthorizationRequestTests: XCTestCase {
         }
     }
 
+    func testRejectsNeitherPresentationDefinitionNorDcqlQuery() {
+        let uri = "openid4vp://?response_type=vp_token&client_id=https://v.example.com"
+            + "&nonce=abc&response_mode=direct_post&response_uri=https://v.example.com/r"
+
+        let result = AuthorizationRequest.parse(uri)
+
+        switch result {
+        case .success:
+            XCTFail("Expected failure for missing query")
+        case .failure(let error):
+            XCTAssertTrue(
+                error.localizedDescription.contains("No query"),
+                "Error should mention missing query: \(error.localizedDescription)"
+            )
+        }
+    }
+
     func testAcceptsDidAsClientId() {
         let uri = "openid4vp://?response_type=vp_token"
             + "&client_id=did:web:verifier.example.com"

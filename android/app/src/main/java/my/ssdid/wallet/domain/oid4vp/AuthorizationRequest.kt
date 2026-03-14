@@ -59,6 +59,12 @@ data class AuthorizationRequest(
                 )
             }
 
+            if (presentationDefinition == null && dcqlQuery == null) {
+                throw IllegalArgumentException(
+                    "Missing required query: neither presentation_definition nor dcql_query present"
+                )
+            }
+
             val state = uri.getQueryParameter("state")
 
             // Validate client_id is HTTPS URL or DID
@@ -80,15 +86,49 @@ data class AuthorizationRequest(
             val obj = Json.parseToJsonElement(json).jsonObject
             val clientId = obj["client_id"]?.jsonPrimitive?.content
                 ?: throw IllegalArgumentException("Missing client_id in request object")
+
+            validateClientId(clientId)
+
+            val responseType = obj["response_type"]?.jsonPrimitive?.content
+                ?: throw IllegalArgumentException("Missing response_type in request object")
+            require(responseType == "vp_token") { "Unsupported response_type: $responseType" }
+
+            val nonce = obj["nonce"]?.jsonPrimitive?.content
+                ?: throw IllegalArgumentException("Missing nonce in request object")
+
+            val responseMode = obj["response_mode"]?.jsonPrimitive?.content ?: "direct_post"
+            require(responseMode == "direct_post") { "Unsupported response_mode: $responseMode" }
+
+            val responseUri = obj["response_uri"]?.jsonPrimitive?.content
+                ?: throw IllegalArgumentException("Missing response_uri in request object")
+            require(responseUri.startsWith("https://")) {
+                "response_uri must be HTTPS: $responseUri"
+            }
+
+            val presentationDefinition = obj["presentation_definition"]?.toString()
+            val dcqlQuery = obj["dcql_query"]?.toString()
+
+            if (presentationDefinition != null && dcqlQuery != null) {
+                throw IllegalArgumentException(
+                    "Request is ambiguous: both presentation_definition and dcql_query present"
+                )
+            }
+
+            if (presentationDefinition == null && dcqlQuery == null) {
+                throw IllegalArgumentException(
+                    "Missing required query: neither presentation_definition nor dcql_query present"
+                )
+            }
+
             AuthorizationRequest(
                 clientId = clientId,
-                responseType = obj["response_type"]?.jsonPrimitive?.content,
-                responseMode = obj["response_mode"]?.jsonPrimitive?.content,
-                responseUri = obj["response_uri"]?.jsonPrimitive?.content,
-                nonce = obj["nonce"]?.jsonPrimitive?.content,
+                responseType = responseType,
+                responseMode = responseMode,
+                responseUri = responseUri,
+                nonce = nonce,
                 state = obj["state"]?.jsonPrimitive?.content,
-                presentationDefinition = obj["presentation_definition"]?.toString(),
-                dcqlQuery = obj["dcql_query"]?.toString()
+                presentationDefinition = presentationDefinition,
+                dcqlQuery = dcqlQuery
             )
         }
 

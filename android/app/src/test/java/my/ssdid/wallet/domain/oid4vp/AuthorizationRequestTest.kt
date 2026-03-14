@@ -102,6 +102,16 @@ class AuthorizationRequestTest {
     }
 
     @Test
+    fun `parse rejects neither presentation_definition nor dcql_query`() {
+        val uri = "openid4vp://?response_type=vp_token&client_id=https://v.example.com" +
+            "&nonce=abc&response_mode=direct_post&response_uri=https://v.example.com/r"
+
+        val result = AuthorizationRequest.parse(uri)
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()?.message).contains("neither")
+    }
+
+    @Test
     fun `parse accepts DID as client_id`() {
         val uri = "openid4vp://?response_type=vp_token" +
             "&client_id=did:web:verifier.example.com" +
