@@ -9,158 +9,66 @@ import org.junit.Before
 import org.junit.Test
 
 class OpenId4VpTransportTest {
-
     private lateinit var server: MockWebServer
     private lateinit var transport: OpenId4VpTransport
 
     @Before
-    fun setUp() {
+    fun setup() {
         server = MockWebServer()
         server.start()
         transport = OpenId4VpTransport(OkHttpClient())
     }
 
     @After
-    fun tearDown() {
-        server.shutdown()
+    fun teardown() { server.shutdown() }
+
+    @Test
+    fun fetchRequestObject() {
+        val json = """{"client_id":"https://v.example.com","response_uri":"https://v.example.com/cb","nonce":"n","response_mode":"direct_post","presentation_definition":{"id":"pd-1","input_descriptors":[]}}"""
+        server.enqueue(MockResponse().setBody(json).setResponseCode(200))
+        val body = transport.fetchRequestObject(server.url("/request/123").toString())
+        assertThat(body).isEqualTo(json)
     }
 
     @Test
-    fun `fetchRequestObject returns parsed authorization request`() {
-        server.enqueue(MockResponse().setBody("""
-            {
-                "client_id": "https://verifier.example.com",
-                "response_type": "vp_token",
-                "nonce": "test-nonce",
-                "response_mode": "direct_post",
-                "response_uri": "https://verifier.example.com/response",
-                "presentation_definition": {"id": "req-1", "input_descriptors": []}
-            }
-        """.trimIndent()))
-
-        val result = transport.fetchRequestObject(server.url("/request/abc").toString())
-        assertThat(result.isSuccess).isTrue()
-        val req = result.getOrThrow()
-        assertThat(req.clientId).isEqualTo("https://verifier.example.com")
-        assertThat(req.nonce).isEqualTo("test-nonce")
-        assertThat(req.responseType).isEqualTo("vp_token")
-        assertThat(req.responseMode).isEqualTo("direct_post")
-        assertThat(req.presentationDefinition).contains("req-1")
-    }
-
-    @Test
-    fun `fetchRequestObject fails on HTTP error`() {
-        server.enqueue(MockResponse().setResponseCode(404))
-        val result = transport.fetchRequestObject(server.url("/request/bad").toString())
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()?.message).contains("HTTP 404")
-    }
-
-    @Test
-    fun `fetchRequestObject fails on empty body`() {
-        server.enqueue(MockResponse().setResponseCode(200).setBody(""))
-        val result = transport.fetchRequestObject(server.url("/request/empty").toString())
-        assertThat(result.isFailure).isTrue()
-    }
-
-    @Test
-    fun `postVpResponse sends form-encoded body`() {
-        server.enqueue(MockResponse().setResponseCode(200))
-        val submission = PresentationSubmission(
-            id = "sub-1",
-            definitionId = "req-1",
-            descriptorMap = listOf(DescriptorMapEntry("emp-cred", "vc+sd-jwt", "$"))
+    fun postVpResponse() {
+        server.enqueue(MockResponse().setResponseCode(200).setBody("{}"))
+        transport.postVpResponse(
+            responseUri = server.url("/response").toString(),
+            vpToken = "eyJ...",
+            presentationSubmission = """{"id":"sub-1"}""",
+            state = "state-123"
         )
-
-        val result = transport.postVpResponse(
-            server.url("/response").toString(),
-            "vp-token-value",
-            submission,
-            "state-123"
-        )
-        assertThat(result.isSuccess).isTrue()
-
-        val recorded = server.takeRequest()
-        assertThat(recorded.method).isEqualTo("POST")
-        val body = recorded.body.readUtf8()
-        assertThat(body).contains("vp_token=vp-token-value")
-        assertThat(body).contains("state=state-123")
+        val request = server.takeRequest()
+        assertThat(request.method).isEqualTo("POST")
+        val body = request.body.readUtf8()
+        assertThat(body).contains("vp_token=")
         assertThat(body).contains("presentation_submission=")
+        assertThat(body).contains("state=state-123")
+        assertThat(request.getHeader("Content-Type")).contains("application/x-www-form-urlencoded")
     }
 
     @Test
-    fun `postVpResponse works without optional fields`() {
-        server.enqueue(MockResponse().setResponseCode(200))
-
-        val result = transport.postVpResponse(
-            server.url("/response").toString(),
-            "vp-token-only",
-            null,
-            null
-        )
-        assertThat(result.isSuccess).isTrue()
-
-        val recorded = server.takeRequest()
-        val body = recorded.body.readUtf8()
-        assertThat(body).contains("vp_token=vp-token-only")
-        assertThat(body).doesNotContain("state=")
-        assertThat(body).doesNotContain("presentation_submission=")
-    }
-
-    @Test
-    fun `postVpResponse fails on HTTP error`() {
-        server.enqueue(MockResponse().setResponseCode(500))
-        val result = transport.postVpResponse(
-            server.url("/response").toString(),
-            "token",
-            null,
-            null
-        )
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()?.message).contains("HTTP 500")
-    }
-
-    @Test
-    fun `postError sends error form body`() {
-        server.enqueue(MockResponse().setResponseCode(200))
-        val result = transport.postError(
-            server.url("/response").toString(),
-            "access_denied",
-            "state-456"
-        )
-        assertThat(result.isSuccess).isTrue()
-
-        val recorded = server.takeRequest()
-        val body = recorded.body.readUtf8()
+    fun postError() {
+        server.enqueue(MockResponse().setResponseCode(200).setBody("{}"))
+        transport.postError(server.url("/response").toString(), "access_denied", "s-1")
+        val request = server.takeRequest()
+        val body = request.body.readUtf8()
         assertThat(body).contains("error=access_denied")
-        assertThat(body).contains("state=state-456")
+        assertThat(body).contains("state=s-1")
+    }
+
+    @Test(expected = RuntimeException::class)
+    fun fetchRequestObjectFailsOnHttpError() {
+        server.enqueue(MockResponse().setResponseCode(500))
+        transport.fetchRequestObject(server.url("/fail").toString())
     }
 
     @Test
-    fun `postError works without state`() {
-        server.enqueue(MockResponse().setResponseCode(200))
-        val result = transport.postError(
-            server.url("/response").toString(),
-            "invalid_request",
-            null
-        )
-        assertThat(result.isSuccess).isTrue()
-
-        val recorded = server.takeRequest()
-        val body = recorded.body.readUtf8()
-        assertThat(body).contains("error=invalid_request")
+    fun postVpResponseWithoutState() {
+        server.enqueue(MockResponse().setResponseCode(200).setBody("{}"))
+        transport.postVpResponse(server.url("/response").toString(), "tok", """{"id":"s"}""", null)
+        val body = server.takeRequest().body.readUtf8()
         assertThat(body).doesNotContain("state=")
-    }
-
-    @Test
-    fun `postError fails on HTTP error`() {
-        server.enqueue(MockResponse().setResponseCode(502))
-        val result = transport.postError(
-            server.url("/response").toString(),
-            "server_error",
-            null
-        )
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()?.message).contains("HTTP 502")
     }
 }

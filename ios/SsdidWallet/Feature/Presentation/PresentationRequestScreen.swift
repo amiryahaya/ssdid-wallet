@@ -1,48 +1,20 @@
 import SwiftUI
 
+/// Adapts any VaultStorage to the SdJwtVcStore protocol required by OpenId4VpHandler.
+private struct VaultStorageSdJwtVcAdapter: SdJwtVcStore {
+    let storage: VaultStorage
+    func listSdJwtVcs() async -> [StoredSdJwtVc] {
+        await storage.listSdJwtVcs()
+    }
+}
+
 struct PresentationRequestScreen: View {
     @Environment(AppRouter.self) private var router
+    @EnvironmentObject private var services: ServiceContainer
 
-    let uri: String
+    let rawUri: String
 
-    @State private var state: ViewState = .loading
-    @State private var selectedClaims: Set<String> = []
-
-    private let handler: OpenId4VpHandler
-
-    init(uri: String) {
-        self.uri = uri
-        let transport = OpenId4VpTransport()
-        self.handler = OpenId4VpHandler(
-            transport: transport,
-            peMatcher: PresentationDefinitionMatcher(),
-            dcqlMatcher: DcqlMatcher(),
-            vpTokenBuilder: VpTokenBuilder()
-        )
-    }
-
-    enum ViewState {
-        case loading
-        case matched(ProcessedInfo)
-        case submitting
-        case success
-        case error(String)
-        case noCredentials
-    }
-
-    struct ProcessedInfo {
-        let authRequest: AuthorizationRequest
-        let matchResult: MatchResult
-        let credentialType: String
-        let claims: [ClaimEntry]
-    }
-
-    struct ClaimEntry: Identifiable {
-        let id: String
-        let name: String
-        let required: Bool
-        let available: Bool
-    }
+    @State private var viewModel: PresentationRequestViewModel?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -53,10 +25,9 @@ struct PresentationRequestScreen: View {
                         .foregroundStyle(Color.textPrimary)
                         .font(.system(size: 20))
                 }
-                .accessibilityLabel("Back")
                 .padding(.leading, 8)
 
-                Text("Presentation Request")
+                Text("Share Credentials")
                     .font(.ssdidHeadline)
                     .foregroundStyle(Color.textPrimary)
 
@@ -65,274 +36,223 @@ struct PresentationRequestScreen: View {
             .padding(.vertical, 12)
             .padding(.trailing, 20)
 
-            Group {
-                switch state {
-                case .loading:
-                    Spacer()
-                    ProgressView("Processing request...")
-                    Spacer()
-                case .matched(let info):
-                    matchedView(info)
-                case .submitting:
-                    Spacer()
-                    VStack(spacing: 12) {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle())
-                        Text("Sharing presentation...")
-                            .font(.system(size: 14))
-                            .foregroundStyle(Color.textSecondary)
-                    }
-                    Spacer()
-                case .success:
-                    successView()
-                case .error(let msg):
-                    errorView(msg)
-                case .noCredentials:
-                    noCredentialsView()
-                }
+            if let viewModel {
+                stateContent(viewModel)
+            } else {
+                loadingView(message: "Initializing...")
             }
         }
         .background(Color.bgPrimary)
-        .onAppear { processRequest() }
+        .onAppear {
+            if viewModel == nil {
+                let transport = OpenId4VpTransport()
+                let vcStore = VaultStorageSdJwtVcAdapter(storage: services.storage)
+                let handler = OpenId4VpHandler(transport: transport, vcStore: vcStore)
+                let vm = PresentationRequestViewModel(handler: handler, vault: services.vault)
+                viewModel = vm
+                vm.processRequest(rawUri: rawUri)
+            }
+        }
     }
 
     @ViewBuilder
-    private func matchedView(_ info: ProcessedInfo) -> some View {
+    private func stateContent(_ vm: PresentationRequestViewModel) -> some View {
+        switch vm.state {
+        case .loading:
+            loadingView(message: "Processing request...")
+
+        case .credentialMatch(let verifierName, let claims, _, _):
+            credentialMatchContent(verifierName: verifierName, claims: claims, vm: vm)
+
+        case .submitting:
+            loadingView(message: "Sharing credentials...")
+
+        case .success:
+            successView()
+
+        case .error(let message):
+            errorView(message: message)
+        }
+    }
+
+    // MARK: - Loading
+
+    @ViewBuilder
+    private func loadingView(message: String) -> some View {
+        Spacer()
+        VStack(spacing: 16) {
+            ProgressView()
+                .progressViewStyle(CircularProgressViewStyle(tint: Color.ssdidAccent))
+            Text(message)
+                .font(.system(size: 14))
+                .foregroundStyle(Color.textSecondary)
+        }
+        Spacer()
+    }
+
+    // MARK: - Credential Match
+
+    @ViewBuilder
+    private func credentialMatchContent(
+        verifierName: String,
+        claims: [PresentationRequestViewModel.ClaimItem],
+        vm: PresentationRequestViewModel
+    ) -> some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: 8) {
-                // Verifier info card
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Verifier")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(Color.textPrimary)
-                    Text(info.authRequest.clientId)
-                        .font(.ssdidMono)
+            LazyVStack(alignment: .leading, spacing: 12) {
+                // Verifier info
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("VERIFIER")
+                        .font(.ssdidCaption)
                         .foregroundStyle(Color.textTertiary)
-                        .lineLimit(1)
-                    Spacer().frame(height: 4)
-                    Text("This verifier is requesting to view selected credentials from your wallet.")
-                        .font(.system(size: 13))
-                        .foregroundStyle(Color.textSecondary)
-                }
-                .ssdidCard()
-
-                // Credential type section
-                Spacer().frame(height: 4)
-                Text("CREDENTIAL")
-                    .font(.ssdidCaption)
-                    .foregroundStyle(Color.textTertiary)
-
-                HStack(spacing: 12) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color.accentDim)
-                            .frame(width: 36, height: 36)
-                        Image(systemName: "person.text.rectangle")
-                            .font(.system(size: 18))
+                    Spacer().frame(height: 8)
+                    HStack(spacing: 8) {
+                        Image(systemName: "building.2")
                             .foregroundStyle(Color.ssdidAccent)
-                    }
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(info.credentialType)
+                            .font(.system(size: 16))
+                        Text(verifierName)
                             .font(.system(size: 14, weight: .medium))
                             .foregroundStyle(Color.textPrimary)
-                        Text("Matching credential found")
-                            .font(.system(size: 12))
-                            .foregroundStyle(Color.textTertiary)
+                            .lineLimit(1)
                     }
-                    Spacer()
                 }
                 .ssdidCard()
 
                 // Claims section
-                Spacer().frame(height: 4)
-                Text("REQUESTED INFORMATION")
-                    .font(.ssdidCaption)
-                    .foregroundStyle(Color.textTertiary)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("REQUESTED CLAIMS")
+                        .font(.ssdidCaption)
+                        .foregroundStyle(Color.textTertiary)
+                    Spacer().frame(height: 8)
 
-                ForEach(info.claims) { claim in
-                    claimRow(claim)
+                    ForEach(claims) { claim in
+                        claimRow(claim: claim, vm: vm)
+                    }
                 }
+                .ssdidCard()
             }
             .padding(.horizontal, 20)
         }
 
-        // Footer buttons
-        VStack(spacing: 8) {
-            Button {
-                approve(info)
-            } label: {
-                Text("Approve")
-            }
-            .buttonStyle(.ssdidPrimary(enabled: true))
+        // Action buttons
+        HStack(spacing: 12) {
+            Button { vm.decline() } label: { Text("Decline") }
+                .buttonStyle(.ssdidDanger)
 
-            Button {
-                decline(info)
-            } label: {
-                Text("Decline")
-            }
-            .buttonStyle(.ssdidSecondary)
+            Button { vm.approve() } label: { Text("Share") }
+                .buttonStyle(.ssdidPrimary)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
     }
 
     @ViewBuilder
-    private func claimRow(_ claim: ClaimEntry) -> some View {
-        let isSelected = selectedClaims.contains(claim.name)
+    private func claimRow(
+        claim: PresentationRequestViewModel.ClaimItem,
+        vm: PresentationRequestViewModel
+    ) -> some View {
         Button {
             if !claim.required {
-                if isSelected { selectedClaims.remove(claim.name) }
-                else { selectedClaims.insert(claim.name) }
+                vm.toggleClaim(name: claim.name)
             }
         } label: {
-            HStack(spacing: 8) {
-                Image(systemName: isSelected ? "checkmark.square.fill" : "square")
-                    .foregroundStyle(isSelected ? Color.ssdidAccent : Color.textTertiary)
-                    .accessibilityLabel(isSelected ? "\(claim.name.capitalized) selected" : "\(claim.name.capitalized) not selected")
-                Text(claim.name.capitalized)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(Color.textPrimary)
-                Spacer()
-                if !claim.available {
-                    Text("Unavailable")
-                        .font(.system(size: 11))
-                        .foregroundStyle(Color.textTertiary)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(Color.bgPrimary)
-                        .cornerRadius(6)
-                } else {
-                    Text(claim.required ? "Required" : "Optional")
-                        .font(.system(size: 11))
-                        .foregroundStyle(claim.required ? Color.ssdidAccent : Color.textTertiary)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(claim.required ? Color.accentDim : Color.bgPrimary)
-                        .cornerRadius(6)
+            HStack(spacing: 10) {
+                Image(systemName: claim.selected ? "checkmark.square.fill" : "square")
+                    .foregroundStyle(claim.required ? Color.textTertiary : Color.ssdidAccent)
+                    .font(.system(size: 18))
+
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 4) {
+                        Text(claim.name)
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundStyle(Color.textPrimary)
+                        if claim.required {
+                            Text("Required")
+                                .font(.system(size: 10))
+                                .foregroundStyle(Color.warning)
+                        } else {
+                            Text("Optional")
+                                .font(.system(size: 10))
+                                .foregroundStyle(Color.textTertiary)
+                        }
+                    }
+                    if !claim.value.isEmpty {
+                        Text(claim.value)
+                            .font(.system(size: 12))
+                            .foregroundStyle(Color.textSecondary)
+                            .lineLimit(1)
+                    }
                 }
+
+                Spacer()
             }
-            .padding(14)
-            .background(Color.bgCard)
-            .cornerRadius(12)
+            .padding(.vertical, 6)
         }
         .disabled(claim.required)
     }
 
+    // MARK: - Success
+
     @ViewBuilder
     private func successView() -> some View {
         Spacer()
-        VStack(spacing: 16) {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 60))
-                .foregroundStyle(Color.ssdidAccent)
-            Text("Presentation shared successfully")
-                .font(.system(size: 16, weight: .medium))
+        VStack(spacing: 0) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color.successDim)
+                    .frame(width: 72, height: 72)
+                Image(systemName: "checkmark")
+                    .font(.system(size: 32, weight: .bold))
+                    .foregroundStyle(Color.success)
+            }
+            Spacer().frame(height: 20)
+            Text("Credentials Shared")
+                .font(.ssdidHeadline)
                 .foregroundStyle(Color.textPrimary)
+            Spacer().frame(height: 8)
+            Text("Your credentials have been shared with the verifier.")
+                .font(.system(size: 14))
+                .foregroundStyle(Color.textSecondary)
+                .multilineTextAlignment(.center)
         }
+        .padding(.horizontal, 32)
         Spacer()
         Button {
+            HapticManager.notification(.success)
             router.pop()
-        } label: {
-            Text("Done")
-        }
-        .buttonStyle(.ssdidPrimary(enabled: true))
-        .padding(.horizontal, 20)
-        .padding(.vertical, 12)
+        } label: { Text("Done") }
+            .buttonStyle(.ssdidPrimary)
+            .padding(20)
     }
 
+    // MARK: - Error
+
     @ViewBuilder
-    private func errorView(_ message: String) -> some View {
+    private func errorView(message: String) -> some View {
         Spacer()
-        VStack(spacing: 16) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 60))
-                .foregroundStyle(.orange)
+        VStack(spacing: 0) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color.dangerDim)
+                    .frame(width: 72, height: 72)
+                Image(systemName: "xmark")
+                    .font(.system(size: 32, weight: .bold))
+                    .foregroundStyle(Color.danger)
+            }
+            Spacer().frame(height: 20)
+            Text("Request Failed")
+                .font(.ssdidHeadline)
+                .foregroundStyle(Color.textPrimary)
+            Spacer().frame(height: 8)
             Text(message)
                 .font(.system(size: 14))
                 .foregroundStyle(Color.textSecondary)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 20)
-            Button {
-                processRequest()
-            } label: {
-                Text("Try Again")
-            }
-            .buttonStyle(.ssdidPrimary(enabled: true))
-            .padding(.horizontal, 40)
         }
+        .padding(.horizontal, 32)
         Spacer()
-    }
-
-    @ViewBuilder
-    private func noCredentialsView() -> some View {
-        Spacer()
-        VStack(spacing: 16) {
-            Image(systemName: "exclamationmark.circle.fill")
-                .font(.system(size: 60))
-                .foregroundStyle(Color.textTertiary)
-            Text("No matching credentials")
-                .font(.system(size: 16, weight: .medium))
-                .foregroundStyle(Color.textPrimary)
-            Text("Your wallet does not contain credentials that match this request.")
-                .font(.system(size: 13))
-                .foregroundStyle(Color.textSecondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
-        }
-        Spacer()
-        Button {
-            router.pop()
-        } label: {
-            Text("Go Back")
-        }
-        .buttonStyle(.ssdidSecondary)
-        .padding(.horizontal, 20)
-        .padding(.vertical, 12)
-    }
-
-    // MARK: - Actions
-
-    private func processRequest() {
-        state = .loading
-        // Load stored VCs (empty for now - real implementation would load from vault)
-        let storedVcs: [StoredSdJwtVc] = []
-
-        do {
-            let result = try handler.processRequest(uri: uri, storedVcs: storedVcs)
-            guard let firstMatch = result.matchResults.first else {
-                state = .noCredentials
-                return
-            }
-
-            let claims = firstMatch.availableClaims.values
-                .sorted { $0.name < $1.name }
-                .map { ClaimEntry(id: $0.name, name: $0.name, required: $0.required, available: $0.available) }
-
-            // Pre-select all available claims
-            for claim in claims where claim.available {
-                selectedClaims.insert(claim.name)
-            }
-
-            state = .matched(ProcessedInfo(
-                authRequest: result.authRequest,
-                matchResult: firstMatch,
-                credentialType: firstMatch.credentialType,
-                claims: claims
-            ))
-        } catch {
-            state = .error(error.localizedDescription)
-        }
-    }
-
-    private func approve(_ info: ProcessedInfo) {
-        state = .submitting
-        // Build selected claims set from toggle state
-        // Real implementation would retrieve stored VC and signer from vault
-        state = .success
-    }
-
-    private func decline(_ info: ProcessedInfo) {
-        try? handler.declineRequest(authRequest: info.authRequest)
-        router.pop()
+        Button { router.pop() } label: { Text("Go Back") }
+            .buttonStyle(.ssdidDanger)
+            .padding(20)
     }
 }

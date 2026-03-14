@@ -231,3 +231,148 @@ const result = await verifier.verifyPresentation(vpToken, { sessionId, nonce });
 - **Phase 1:** Wallet can receive and present SD-JWT VCs from external issuers using did:key/did:jwk. SDK can issue and verify SD-JWT VCs on the SSDID network.
 - **Phase 2:** Wallet passes OpenID Foundation conformance tests. External verifiers can request credentials via OpenID4VP. External issuers can issue via OpenID4VCI. OpenID4VP + OpenID4VCI certified.
 - **Phase 3:** Wallet handles mdoc credentials. HAIP 1.0 certification obtained. SDK at v1.0 production-ready on npm + Maven Central + Swift Package Manager.
+
+---
+
+## Appendix: .NET SDK Design (Ssdid.Interop)
+
+> **Status:** Approved design, implementation deferred until after Phase 2b (wallet OpenID4VCI).
+> **Rationale:** Wallet protocol work must solidify first — the SDK extracts and generalizes what ssdid-drive already has, plus new OpenID4VP/VCI support.
+
+### Two-Project Structure
+
+#### `Ssdid.Interop.Abstractions` (netstandard2.1, zero dependencies)
+
+Interfaces + DTOs only. Application code references this to stay decoupled from SDK internals.
+
+```
+Ssdid.Interop.Abstractions/
+├── Auth/
+│   ├── ISsdidAuthService.cs          ← challenge-response protocol
+│   └── ISsdidIdentityProvider.cs     ← server identity (DID, keys, signing)
+├── Crypto/
+│   ├── ICryptoProvider.cs            ← verify/sign operations
+│   └── ICryptoProviderFactory.cs
+├── Did/
+│   ├── IDidResolver.cs               ← resolve DID → Document
+│   └── DidDocument.cs                ← W3C DID Core 1.1 DTOs
+├── Credentials/
+│   ├── ISsdidCredentialStore.cs      ← HOST implements
+│   └── VerifiableCredential.cs       ← W3C VC DTOs
+├── OpenId4Vp/
+│   ├── IOpenId4VpVerifier.cs         ← verify presentations
+│   └── DTOs/
+├── OpenId4Vci/
+│   ├── IOpenId4VciIssuer.cs          ← issue credentials
+│   └── DTOs/
+├── Session/
+│   └── ISsdidSessionStore.cs         ← protocol-transient state
+├── Audit/
+│   └── ISsdidAuditLog.cs             ← HOST implements
+├── User/
+│   └── ISsdidUserResolver.cs         ← HOST implements
+└── Common/
+    ├── SsdidAlgorithm.cs
+    ├── ProofType.cs
+    └── Result.cs
+```
+
+#### `Ssdid.Interop` (net10.0, concrete implementations)
+
+Dependencies: BouncyCastle, StackExchange.Redis, Microsoft.Extensions.DependencyInjection, Microsoft.AspNetCore.Routing (optional).
+
+```
+Ssdid.Interop/
+├── Auth/
+│   └── SsdidAuthService.cs           ← extracted from ssdid-drive
+├── Crypto/
+│   ├── CryptoProviderFactory.cs
+│   └── Providers/ (Ed25519, ECDSA, ML-DSA, SLH-DSA, KazSign)
+├── Did/
+│   ├── RegistryDidResolver.cs        ← HTTP client to registry.ssdid.my
+│   └── SsdidCrypto.cs                ← canonical JSON, multibase, W3C payload
+├── OpenId4Vp/
+│   └── OpenId4VpVerifier.cs
+├── OpenId4Vci/
+│   └── OpenId4VciIssuer.cs
+├── Session/
+│   ├── RedisSsdidSessionStore.cs
+│   └── InMemorySsdidSessionStore.cs
+├── AspNet/
+│   ├── SsdidAuthMiddleware.cs
+│   ├── SsdidEndpointExtensions.cs    ← app.MapSsdidEndpoints()
+│   └── CurrentUserAccessor.cs
+├── DependencyInjection/
+│   └── SsdidServiceCollectionExtensions.cs
+└── Identity/
+    └── SsdidServerIdentity.cs
+```
+
+### Interface Contracts
+
+**Host implements (3 interfaces):**
+
+| Interface | Purpose |
+|---|---|
+| `ISsdidCredentialStore` | Credential persistence (GetById, Query, Store, Revoke) |
+| `ISsdidAuditLog` | Compliance audit logging |
+| `ISsdidUserResolver` | Maps DID to host's domain user (ResolveByDid, CreateOrUpdate) |
+
+**SDK provides (7 interfaces):**
+
+| Interface | Purpose |
+|---|---|
+| `ISsdidAuthService` | Challenge-response registration + authentication |
+| `IDidResolver` | DID → Document resolution via registry |
+| `ICryptoProviderFactory` | Multi-algorithm sign/verify (6 algorithms) |
+| `IOpenId4VpVerifier` | Create authorization requests, process VP responses |
+| `IOpenId4VciIssuer` | Create offers, token exchange, issue credentials |
+| `ISsdidSessionStore` | Protocol-transient state (nonce, session, challenge) |
+| `ISsdidIdentityProvider` | Server DID, key management, signing |
+
+### DI Registration
+
+```csharp
+// Simple path
+services.AddSsdidInterop(options =>
+{
+    options.RegistryUrl = "https://registry.ssdid.my";
+    options.IdentityPath = "data/server-identity.json";
+    options.Algorithm = "KazSignVerificationKey2024";
+    options.UseRedisSessionStore("localhost:6379");
+    options.UseCredentialStore<MyCredentialStore>();
+    options.UseUserResolver<MyUserResolver>();
+    options.UseAuditLog<MyAuditLog>();
+});
+
+// ASP.NET endpoints (opt-in)
+app.MapSsdidAuthEndpoints();
+app.MapSsdidOid4vpEndpoints();
+app.MapSsdidOid4vciEndpoints();
+```
+
+### Persistence Model
+
+- **SDK manages:** Protocol-transient state (nonces, sessions, challenges) via `ISsdidSessionStore`
+- **Host manages:** Domain-persistent state (users, credentials, audit logs) via host interfaces
+- **Redis:** SDK ships `RedisSsdidSessionStore` (given connection string) + `InMemorySsdidSessionStore` (for tests)
+- **Key prefix:** `ssdid:` — no collision with host Redis data
+
+### Migration Path for ssdid-drive
+
+Extract ~10 files from `SsdidDrive.Api/Ssdid/` and `SsdidDrive.Api/Crypto/` into SDK. ssdid-drive keeps `Features/`, `Data/`, `Common/` and adds 3 small adapter classes (`DriveUserResolver`, `DriveCredentialStore`, `DriveAuditLog`).
+
+### Testing Strategy
+
+- **SDK unit tests:** `InMemorySsdidSessionStore`, fake host implementations
+- **SDK integration tests:** Real Redis (db=15), mock registry
+- **Host tests:** Mock `ISsdidAuthService` etc. — never SDK internals
+- **Shared test vectors:** Same JSON fixtures as wallet (cross-platform parity)
+
+### NuGet Packages
+
+| Package | Target | Dependencies |
+|---|---|---|
+| `Ssdid.Interop.Abstractions` | netstandard2.1 | none |
+| `Ssdid.Interop` | net10.0 | BouncyCastle, StackExchange.Redis, MS DI |
+| `Ssdid.Interop.Native.KazSign` | runtime-specific | Native C library per ABI |

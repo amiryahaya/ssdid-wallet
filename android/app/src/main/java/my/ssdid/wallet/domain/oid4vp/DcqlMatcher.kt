@@ -5,43 +5,52 @@ import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
 
 class DcqlMatcher {
 
-    fun match(
-        dcqlJson: String,
-        storedCredentials: List<StoredSdJwtVc>
-    ): List<MatchResult> {
-        val query = toCredentialQuery(dcqlJson)
-        return PresentationDefinitionMatcher.matchQuery(query, storedCredentials)
+    fun match(dcql: JsonObject, credentials: List<StoredSdJwtVc>): List<MatchResult> {
+        val credSpecs = dcql["credentials"]?.jsonArray ?: return emptyList()
+        val results = mutableListOf<MatchResult>()
+
+        for (spec in credSpecs) {
+            val obj = spec.jsonObject
+            val id = obj["id"]?.jsonPrimitive?.contentOrNull ?: continue
+            val format = obj["format"]?.jsonPrimitive?.contentOrNull
+            if (format != null && format != "vc+sd-jwt") continue
+
+            val vctValues = obj["meta"]?.jsonObject
+                ?.get("vct_values")?.jsonArray
+                ?.map { it.jsonPrimitive.content }?.toSet()
+
+            val claimsSpec = obj["claims"]?.jsonArray
+
+            for (cred in credentials) {
+                if (vctValues != null && cred.type !in vctValues) continue
+
+                val (required, optional) = if (claimsSpec != null) {
+                    extractClaims(claimsSpec, cred)
+                } else {
+                    cred.disclosableClaims to emptyList<String>()
+                }
+
+                results.add(MatchResult(cred, id, required, optional))
+            }
+        }
+        return results
     }
 
-    fun toCredentialQuery(dcqlJson: String): CredentialQuery {
-        val root = Json.parseToJsonElement(dcqlJson).jsonObject
-        val credentials = root["credentials"]?.jsonArray ?: return CredentialQuery(emptyList())
-
-        val descriptors = credentials.map { cred ->
-            val obj = cred.jsonObject
-            val id = obj["id"]?.jsonPrimitive?.content
-                ?: throw IllegalArgumentException("DCQL credential missing required 'id' field")
-            val format = obj["format"]?.jsonPrimitive?.content ?: "vc+sd-jwt"
-            val vctFilter = obj["meta"]?.jsonObject
-                ?.get("vct_values")?.jsonArray
-                ?.firstOrNull()?.jsonPrimitive?.content
-
-            val requiredClaims = mutableListOf<String>()
-            val optionalClaims = mutableListOf<String>()
-
-            obj["claims"]?.jsonArray?.forEach { claim ->
-                val claimObj = claim.jsonObject
-                val path = claimObj["path"]?.jsonArray?.firstOrNull()?.jsonPrimitive?.content ?: return@forEach
-                val optional = claimObj["optional"]?.jsonPrimitive?.booleanOrNull ?: false
-                if (optional) optionalClaims.add(path) else requiredClaims.add(path)
+    private fun extractClaims(
+        claimsSpec: JsonArray,
+        cred: StoredSdJwtVc
+    ): Pair<List<String>, List<String>> {
+        val required = mutableListOf<String>()
+        val optional = mutableListOf<String>()
+        for (claim in claimsSpec) {
+            val obj = claim.jsonObject
+            val paths = obj["path"]?.jsonArray?.map { it.jsonPrimitive.content } ?: continue
+            val isOptional = obj["optional"]?.jsonPrimitive?.booleanOrNull == true
+            val claimName = paths.firstOrNull() ?: continue
+            if (claimName in cred.claims || claimName in cred.disclosableClaims) {
+                if (isOptional) optional.add(claimName) else required.add(claimName)
             }
-
-            CredentialQueryDescriptor(
-                id = id, format = format, vctFilter = vctFilter,
-                requiredClaims = requiredClaims, optionalClaims = optionalClaims
-            )
         }
-
-        return CredentialQuery(descriptors)
+        return required to optional
     }
 }

@@ -520,4 +520,72 @@ class DeepLinkHandlerTest {
     fun `isValidCallbackUrl accepts https with valid host`() {
         assertThat(DeepLinkHandler.isValidCallbackUrl("https://app.example.com/cb")).isTrue()
     }
+
+    // --- OpenID4VP scheme tests ---
+
+    @Test
+    fun `parse openid4vp URI returns openid4vp action`() {
+        val uri = Uri.parse("openid4vp://?client_id=https://verifier.example.com&request_uri=https://verifier.example.com/request/123")
+        val action = DeepLinkHandler.parse(uri)
+        assertThat(action).isNotNull()
+        assertThat(action!!.action).isEqualTo("openid4vp")
+        assertThat(action.callbackUrl).contains("openid4vp://")
+    }
+
+    @Test
+    fun `toNavRoute routes openid4vp action to PresentationRequest`() {
+        val deepLink = DeepLinkAction(
+            action = "openid4vp",
+            serverUrl = "",
+            callbackUrl = "openid4vp://?client_id=https://verifier.example.com"
+        )
+        val route = deepLink.toNavRoute()
+        assertThat(route).isNotNull()
+        assertThat(route).contains("presentation_request")
+    }
+
+    // --- openid-credential-offer scheme tests ---
+
+    @Test
+    fun `parse credential offer by value returns correct action`() {
+        val offerJson = """{"credential_issuer":"https://issuer.example.com","credential_configuration_ids":["x"],"grants":{"authorization_code":{}}}"""
+        val uri = Uri.parse("openid-credential-offer://?credential_offer=${Uri.encode(offerJson)}")
+        val action = DeepLinkHandler.parse(uri)
+        assertThat(action).isNotNull()
+        assertThat(action!!.action).isEqualTo("openid-credential-offer")
+    }
+
+    @Test
+    fun `parse credential offer by reference returns correct action`() {
+        val uri = Uri.parse("openid-credential-offer://?credential_offer_uri=https://issuer.example.com/offers/123")
+        val action = DeepLinkHandler.parse(uri)
+        assertThat(action).isNotNull()
+        assertThat(action!!.action).isEqualTo("openid-credential-offer")
+    }
+
+    @Test
+    fun `parse credential offer rejects HTTP credential_offer_uri`() {
+        val uri = Uri.parse("openid-credential-offer://?credential_offer_uri=http://bad.com/offer")
+        val action = DeepLinkHandler.parse(uri)
+        assertThat(action).isNull()
+    }
+
+    @Test
+    fun `parse credential offer rejects missing params`() {
+        val uri = Uri.parse("openid-credential-offer://")
+        val action = DeepLinkHandler.parse(uri)
+        assertThat(action).isNull()
+    }
+
+    @Test
+    fun `toNavRoute returns credential offer route for openid-credential-offer action`() {
+        val deepLink = DeepLinkAction(
+            action = "openid-credential-offer",
+            serverUrl = "",
+            callbackUrl = "https://issuer.example.com/offers/123"
+        )
+        val route = deepLink.toNavRoute()
+        assertThat(route).isNotNull()
+        assertThat(route).contains("credential_offer")
+    }
 }

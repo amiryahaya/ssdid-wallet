@@ -1,151 +1,69 @@
 package my.ssdid.wallet.domain.oid4vp
 
 import com.google.common.truth.Truth.assertThat
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
 import org.junit.Test
 
 class PresentationDefinitionMatcherTest {
-
+    private val json = Json { ignoreUnknownKeys = true }
     private val matcher = PresentationDefinitionMatcher()
 
-    private val employeeVc = StoredSdJwtVc(
-        id = "vc-1",
-        compact = "eyJ...",
-        issuer = "did:ssdid:issuer1",
-        subject = "did:ssdid:holder1",
-        type = "VerifiedEmployee",
-        claims = mapOf("name" to "Ahmad", "department" to "Engineering", "employeeId" to "EMP-1234"),
-        disclosableClaims = listOf("name", "department"),
-        issuedAt = 1719792000
+    private val credential = StoredSdJwtVc(
+        id = "vc-1", compact = "eyJ...~disc1~disc2~",
+        issuer = "did:ssdid:issuer1", subject = "did:ssdid:holder1",
+        type = "IdentityCredential",
+        claims = mapOf("name" to "Ahmad", "email" to "ahmad@example.com"),
+        disclosableClaims = listOf("name", "email"),
+        issuedAt = 1700000000L
     )
 
     @Test
-    fun `matches credential by vct and returns required and optional claims`() {
-        val pd = """
-        {
-          "id": "req-1",
-          "input_descriptors": [{
-            "id": "emp-cred",
-            "format": { "vc+sd-jwt": { "alg": ["EdDSA"] } },
-            "constraints": {
-              "fields": [
-                { "path": ["$.vct"], "filter": { "const": "VerifiedEmployee" } },
-                { "path": ["$.name"] },
-                { "path": ["$.department"], "optional": true }
-              ]
-            }
-          }]
-        }
-        """.trimIndent()
-
-        val results = matcher.match(pd, listOf(employeeVc))
+    fun matchByVct() {
+        val pd = json.parseToJsonElement("""{"id":"pd-1","input_descriptors":[{"id":"id-1","format":{"vc+sd-jwt":{}},"constraints":{"fields":[{"path":["$.vct"],"filter":{"const":"IdentityCredential"}}]}}]}""") as JsonObject
+        val results = matcher.match(pd, listOf(credential))
         assertThat(results).hasSize(1)
-        assertThat(results[0].descriptorId).isEqualTo("emp-cred")
-        assertThat(results[0].credentialId).isEqualTo("vc-1")
-
-        val claims = results[0].availableClaims
-        assertThat(claims["name"]?.required).isTrue()
-        assertThat(claims["name"]?.available).isTrue()
-        assertThat(claims["department"]?.required).isFalse()
-        assertThat(claims["department"]?.available).isTrue()
+        assertThat(results[0].credential.id).isEqualTo("vc-1")
+        assertThat(results[0].descriptorId).isEqualTo("id-1")
     }
 
     @Test
-    fun `returns empty when no credential matches vct filter`() {
-        val pd = """
-        {
-          "id": "req-2",
-          "input_descriptors": [{
-            "id": "gov-id",
-            "format": { "vc+sd-jwt": {} },
-            "constraints": {
-              "fields": [
-                { "path": ["$.vct"], "filter": { "const": "GovernmentId" } }
-              ]
-            }
-          }]
-        }
-        """.trimIndent()
-
-        val results = matcher.match(pd, listOf(employeeVc))
+    fun noMatchWhenVctDiffers() {
+        val pd = json.parseToJsonElement("""{"id":"pd-1","input_descriptors":[{"id":"id-1","format":{"vc+sd-jwt":{}},"constraints":{"fields":[{"path":["$.vct"],"filter":{"const":"DriverLicense"}}]}}]}""") as JsonObject
+        val results = matcher.match(pd, listOf(credential))
         assertThat(results).isEmpty()
     }
 
     @Test
-    fun `returns empty when required claim not available`() {
-        val pd = """
-        {
-          "id": "req-3",
-          "input_descriptors": [{
-            "id": "id-cred",
-            "format": { "vc+sd-jwt": {} },
-            "constraints": {
-              "fields": [
-                { "path": ["$.vct"], "filter": { "const": "VerifiedEmployee" } },
-                { "path": ["$.national_id"] }
-              ]
-            }
-          }]
-        }
-        """.trimIndent()
+    fun matchWithClaimFields() {
+        val pd = json.parseToJsonElement("""{"id":"pd-1","input_descriptors":[{"id":"id-1","format":{"vc+sd-jwt":{}},"constraints":{"fields":[{"path":["$.vct"],"filter":{"const":"IdentityCredential"}},{"path":["$.name"]},{"path":["$.email"],"optional":true}]}}]}""") as JsonObject
+        val results = matcher.match(pd, listOf(credential))
+        assertThat(results).hasSize(1)
+        assertThat(results[0].requiredClaims).contains("name")
+        assertThat(results[0].optionalClaims).contains("email")
+    }
 
-        val results = matcher.match(pd, listOf(employeeVc))
+    @Test
+    fun skipNonSdJwtFormat() {
+        val pd = json.parseToJsonElement("""{"id":"pd-1","input_descriptors":[{"id":"id-1","format":{"jwt_vp":{}},"constraints":{"fields":[{"path":["$.vct"],"filter":{"const":"IdentityCredential"}}]}}]}""") as JsonObject
+        val results = matcher.match(pd, listOf(credential))
         assertThat(results).isEmpty()
     }
 
     @Test
-    fun `selects correct credential from multiple stored`() {
-        val degreeVc = StoredSdJwtVc(
-            id = "vc-2", compact = "eyJ...", issuer = "did:ssdid:uni",
-            subject = "did:ssdid:holder1", type = "UniversityDegree",
-            claims = mapOf("degree" to "BSc"), disclosableClaims = listOf("degree"),
-            issuedAt = 1719792000
-        )
-
-        val pd = """
-        {
-          "id": "req-4",
-          "input_descriptors": [{
-            "id": "emp-cred",
-            "format": { "vc+sd-jwt": {} },
-            "constraints": {
-              "fields": [
-                { "path": ["$.vct"], "filter": { "const": "VerifiedEmployee" } },
-                { "path": ["$.name"] }
-              ]
-            }
-          }]
-        }
-        """.trimIndent()
-
-        val results = matcher.match(pd, listOf(degreeVc, employeeVc))
-        assertThat(results).hasSize(1)
-        assertThat(results[0].credentialId).isEqualTo("vc-1")
+    fun missingDescriptorId() {
+        val pd = json.parseToJsonElement("""{"id":"pd-1","input_descriptors":[{"format":{"vc+sd-jwt":{}},"constraints":{"fields":[]}}]}""") as JsonObject
+        val results = matcher.match(pd, listOf(credential))
+        assertThat(results).isEmpty()
     }
 
     @Test
-    fun `converts to CredentialQuery`() {
-        val pd = """
-        {
-          "id": "req-1",
-          "input_descriptors": [{
-            "id": "emp-cred",
-            "format": { "vc+sd-jwt": {} },
-            "constraints": {
-              "fields": [
-                { "path": ["$.vct"], "filter": { "const": "VerifiedEmployee" } },
-                { "path": ["$.name"] },
-                { "path": ["$.department"], "optional": true }
-              ]
-            }
-          }]
-        }
-        """.trimIndent()
-
-        val query = matcher.toCredentialQuery(pd)
-        assertThat(query.descriptors).hasSize(1)
-        assertThat(query.descriptors[0].vctFilter).isEqualTo("VerifiedEmployee")
-        assertThat(query.descriptors[0].requiredClaims).containsExactly("name")
-        assertThat(query.descriptors[0].optionalClaims).containsExactly("department")
+    fun multipleCredentials() {
+        val cred2 = StoredSdJwtVc(id = "vc-2", compact = "eyJ2...~", issuer = "did:ssdid:i2", subject = "did:ssdid:h", type = "DriverLicense", claims = mapOf("license_number" to "DL123"), disclosableClaims = listOf("license_number"), issuedAt = 1700000000L)
+        val pd = json.parseToJsonElement("""{"id":"pd-1","input_descriptors":[{"id":"id-1","format":{"vc+sd-jwt":{}},"constraints":{"fields":[{"path":["$.vct"],"filter":{"const":"DriverLicense"}}]}}]}""") as JsonObject
+        val results = matcher.match(pd, listOf(credential, cred2))
+        assertThat(results).hasSize(1)
+        assertThat(results[0].credential.id).isEqualTo("vc-2")
     }
 }

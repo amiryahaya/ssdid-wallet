@@ -3,90 +3,71 @@ package my.ssdid.wallet.domain.oid4vp
 import kotlinx.serialization.json.*
 import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
 
+data class MatchResult(
+    val credential: StoredSdJwtVc,
+    val descriptorId: String,
+    val requiredClaims: List<String>,
+    val optionalClaims: List<String>
+)
+
 class PresentationDefinitionMatcher {
 
-    fun match(
-        presentationDefinitionJson: String,
-        storedCredentials: List<StoredSdJwtVc>
-    ): List<MatchResult> {
-        val query = toCredentialQuery(presentationDefinitionJson)
-        return matchQuery(query, storedCredentials)
-    }
+    fun match(pd: JsonObject, credentials: List<StoredSdJwtVc>): List<MatchResult> {
+        val descriptors = pd["input_descriptors"]?.jsonArray ?: return emptyList()
+        val results = mutableListOf<MatchResult>()
 
-    fun toCredentialQuery(presentationDefinitionJson: String): CredentialQuery {
-        val pd = Json.parseToJsonElement(presentationDefinitionJson).jsonObject
-        val descriptors = pd["input_descriptors"]?.jsonArray?.map { desc ->
+        for (desc in descriptors) {
             val obj = desc.jsonObject
-            val id = obj["id"]?.jsonPrimitive?.content
-                ?: throw IllegalArgumentException("input_descriptor missing required 'id' field")
-            val format = obj["format"]?.jsonObject?.keys?.firstOrNull() ?: "vc+sd-jwt"
-            val fields = obj["constraints"]?.jsonObject
-                ?.get("fields")?.jsonArray ?: JsonArray(emptyList())
+            val descriptorId = obj["id"]?.jsonPrimitive?.contentOrNull ?: continue
+            val format = obj["format"]?.jsonObject
+            if (format != null && !format.containsKey("vc+sd-jwt")) continue
+            val fields = obj["constraints"]?.jsonObject?.get("fields")?.jsonArray ?: continue
 
-            var vctFilter: String? = null
-            val requiredClaims = mutableListOf<String>()
-            val optionalClaims = mutableListOf<String>()
-
-            for (field in fields) {
-                val fieldObj = field.jsonObject
-                val path = fieldObj["path"]?.jsonArray?.firstOrNull()?.jsonPrimitive?.content ?: continue
-                val filter = fieldObj["filter"]?.jsonObject
-                val optional = fieldObj["optional"]?.jsonPrimitive?.booleanOrNull ?: false
-
-                if (path == "$.vct" && filter != null) {
-                    vctFilter = filter["const"]?.jsonPrimitive?.content
-                    continue
-                }
-
-                val claimName = path.removePrefix("$.")
-                if (optional) {
-                    optionalClaims.add(claimName)
-                } else {
-                    requiredClaims.add(claimName)
+            for (cred in credentials) {
+                if (matchesConstraints(cred, fields)) {
+                    val (required, optional) = extractClaims(fields, cred)
+                    results.add(MatchResult(cred, descriptorId, required, optional))
                 }
             }
-
-            CredentialQueryDescriptor(
-                id = id, format = format, vctFilter = vctFilter,
-                requiredClaims = requiredClaims, optionalClaims = optionalClaims
-            )
-        } ?: emptyList()
-
-        return CredentialQuery(descriptors)
+        }
+        return results
     }
 
-    companion object {
-        fun matchQuery(
-            query: CredentialQuery,
-            storedCredentials: List<StoredSdJwtVc>
-        ): List<MatchResult> {
-            val results = mutableListOf<MatchResult>()
-            for (descriptor in query.descriptors) {
-                for (credential in storedCredentials) {
-                    if (descriptor.vctFilter != null && credential.type != descriptor.vctFilter) continue
-                    val allClaims = credential.claims.keys
-                    val hasAllRequired = descriptor.requiredClaims.all { it in allClaims }
-                    if (!hasAllRequired) continue
+    private fun matchesConstraints(cred: StoredSdJwtVc, fields: JsonArray): Boolean {
+        for (field in fields) {
+            val obj = field.jsonObject
+            val isOptional = obj["optional"]?.jsonPrimitive?.booleanOrNull == true
+            if (isOptional) continue
+            val paths = obj["path"]?.jsonArray?.map { it.jsonPrimitive.content } ?: continue
+            val filterConst = obj["filter"]?.jsonObject?.get("const")?.jsonPrimitive?.contentOrNull
 
-                    val claimInfoMap = mutableMapOf<String, ClaimInfo>()
-                    for (claim in descriptor.requiredClaims) {
-                        claimInfoMap[claim] = ClaimInfo(claim, required = true, available = claim in allClaims)
-                    }
-                    for (claim in descriptor.optionalClaims) {
-                        claimInfoMap[claim] = ClaimInfo(claim, required = false, available = claim in allClaims)
-                    }
-
-                    results.add(MatchResult(
-                        descriptorId = descriptor.id,
-                        credentialId = credential.id,
-                        credentialType = credential.type,
-                        availableClaims = claimInfoMap,
-                        source = CredentialSource.SD_JWT_VC
-                    ))
-                    break
+            for (path in paths) {
+                if (path == "$.vct" && filterConst != null) {
+                    if (cred.type != filterConst) return false
+                } else {
+                    val claimName = path.removePrefix("$.")
+                    if (claimName !in cred.claims && claimName !in cred.disclosableClaims) return false
                 }
             }
-            return results
         }
+        return true
+    }
+
+    private fun extractClaims(fields: JsonArray, cred: StoredSdJwtVc): Pair<List<String>, List<String>> {
+        val required = mutableListOf<String>()
+        val optional = mutableListOf<String>()
+        for (field in fields) {
+            val obj = field.jsonObject
+            val paths = obj["path"]?.jsonArray?.map { it.jsonPrimitive.content } ?: continue
+            val isOptional = obj["optional"]?.jsonPrimitive?.booleanOrNull == true
+            for (path in paths) {
+                if (path == "$.vct") continue
+                val claimName = path.removePrefix("$.")
+                if (claimName in cred.claims || claimName in cred.disclosableClaims) {
+                    if (isOptional) optional.add(claimName) else required.add(claimName)
+                }
+            }
+        }
+        return required to optional
     }
 }

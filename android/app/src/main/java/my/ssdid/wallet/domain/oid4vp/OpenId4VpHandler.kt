@@ -1,107 +1,88 @@
 package my.ssdid.wallet.domain.oid4vp
 
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
-import my.ssdid.wallet.domain.sdjwt.SdJwtParser
-import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
-import java.util.UUID
+import my.ssdid.wallet.domain.vault.Vault
+
+class NoMatchingCredentialsException(message: String) : Exception(message)
+
+data class PresentationReviewResult(
+    val authRequest: AuthorizationRequest,
+    val matches: List<MatchResult>
+)
 
 class OpenId4VpHandler(
     private val transport: OpenId4VpTransport,
     private val peMatcher: PresentationDefinitionMatcher,
-    private val dcqlMatcher: DcqlMatcher
+    private val dcqlMatcher: DcqlMatcher,
+    private val vault: Vault
 ) {
-    data class ProcessedRequest(
-        val authRequest: AuthorizationRequest,
-        val matchResults: List<MatchResult>,
-        val query: CredentialQuery
-    )
 
-    fun processRequest(uri: String, storedVcs: List<StoredSdJwtVc>): Result<ProcessedRequest> = runCatching {
-        var authRequest = AuthorizationRequest.parse(uri).getOrThrow()
+    suspend fun processRequest(uri: String): Result<PresentationReviewResult> = runCatching {
+        val parsed = AuthorizationRequest.parse(uri).getOrThrow()
 
-        // Fetch request object if by-reference
-        authRequest.requestUri?.let { uri ->
-            authRequest = transport.fetchRequestObject(uri).getOrThrow()
+        val authRequest = if (parsed.requestUri != null) {
+            val json = transport.fetchRequestObject(parsed.requestUri)
+            AuthorizationRequest.parseJson(json).getOrThrow()
+        } else {
+            parsed
         }
 
-        // Match using appropriate query language
-        val (matchResults, query) = when {
-            authRequest.presentationDefinition != null -> {
-                val pd = authRequest.presentationDefinition
-                val q = peMatcher.toCredentialQuery(pd)
-                peMatcher.match(pd, storedVcs) to q
-            }
-            authRequest.dcqlQuery != null -> {
-                val dq = authRequest.dcqlQuery
-                val q = dcqlMatcher.toCredentialQuery(dq)
-                dcqlMatcher.match(dq, storedVcs) to q
-            }
-            else -> throw IllegalStateException("No query in authorization request")
+        val storedVcs = vault.listStoredSdJwtVcs()
+
+        val matches = when {
+            authRequest.presentationDefinition != null ->
+                peMatcher.match(authRequest.presentationDefinition, storedVcs)
+            authRequest.dcqlQuery != null ->
+                dcqlMatcher.match(authRequest.dcqlQuery, storedVcs)
+            else -> emptyList()
         }
 
-        if (matchResults.isEmpty()) {
-            // Best-effort error notification; don't let transport failure mask the real result
+        if (matches.isEmpty()) {
             authRequest.responseUri?.let { responseUri ->
                 runCatching { transport.postError(responseUri, "access_denied", authRequest.state) }
             }
             throw NoMatchingCredentialsException("No stored credentials match the request")
         }
 
-        ProcessedRequest(authRequest, matchResults, query)
+        PresentationReviewResult(authRequest, matches)
     }
 
-    fun submitPresentation(
+    suspend fun submitPresentation(
         authRequest: AuthorizationRequest,
         matchResult: MatchResult,
-        storedVc: StoredSdJwtVc,
-        selectedClaims: Set<String>,
+        selectedClaims: List<String>,
         algorithm: String,
         signer: (ByteArray) -> ByteArray
     ): Result<Unit> = runCatching {
-        val sdJwtVc = SdJwtParser.parse(storedVc.compact)
+        val responseUri = authRequest.responseUri
+            ?: throw IllegalStateException("No response_uri in authorization request")
+        val nonce = authRequest.nonce
+            ?: throw IllegalStateException("No nonce in authorization request")
 
         val vpToken = VpTokenBuilder.build(
-            credential = sdJwtVc,
-            selectedClaimNames = selectedClaims,
+            storedSdJwtVc = matchResult.credential,
+            selectedClaims = selectedClaims,
             audience = authRequest.clientId,
-            nonce = authRequest.nonce ?: throw IllegalStateException("Missing nonce"),
+            nonce = nonce,
             algorithm = algorithm,
             signer = signer
         )
 
-        val submission = if (authRequest.presentationDefinition != null) {
-            val pd = Json.parseToJsonElement(authRequest.presentationDefinition!!).jsonObject
-            val definitionId = pd["id"]?.jsonPrimitive?.content
-                ?: throw IllegalStateException("presentation_definition missing 'id' field")
-            PresentationSubmission(
-                id = UUID.randomUUID().toString(),
-                definitionId = definitionId,
-                descriptorMap = listOf(
-                    DescriptorMapEntry(
-                        id = matchResult.descriptorId,
-                        format = "vc+sd-jwt",
-                        path = "$"
-                    )
-                )
-            )
-        } else null
-
-        transport.postVpResponse(
-            responseUri = authRequest.responseUri
-                ?: throw IllegalStateException("Missing response_uri"),
-            vpToken = vpToken,
-            presentationSubmission = submission,
-            state = authRequest.state
-        ).getOrThrow()
-    }
-
-    fun declineRequest(authRequest: AuthorizationRequest): Result<Unit> = runCatching {
-        authRequest.responseUri?.let { uri ->
-            transport.postError(uri, "access_denied", authRequest.state).getOrThrow()
+        val definitionId = when {
+            authRequest.presentationDefinition != null ->
+                authRequest.presentationDefinition["id"]?.jsonPrimitive?.contentOrNull
+                    ?: throw IllegalStateException("Missing presentation_definition id")
+            authRequest.dcqlQuery != null ->
+                matchResult.descriptorId  // DCQL uses the credential query id
+            else -> throw IllegalStateException("No query type in authorization request")
         }
+
+        val submission = PresentationSubmission.create(
+            definitionId = definitionId,
+            descriptorIds = listOf(matchResult.descriptorId)
+        )
+
+        transport.postVpResponse(responseUri, vpToken, submission.toJson(), authRequest.state)
     }
 }
-
-class NoMatchingCredentialsException(message: String) : Exception(message)

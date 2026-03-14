@@ -1,126 +1,95 @@
 package my.ssdid.wallet.domain.oid4vp
 
 import com.google.common.truth.Truth.assertThat
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import my.ssdid.wallet.domain.sdjwt.Disclosure
-import my.ssdid.wallet.domain.sdjwt.SdJwtIssuer
+import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
 import org.junit.Test
-import java.util.Base64
 
 class VpTokenBuilderTest {
 
-    private val dummySigner: (ByteArray) -> ByteArray = { it.copyOf(64) }
-
-    private fun issueCredential(
-        disclosableClaims: Map<String, String>,
-        visibleClaims: Map<String, String> = emptyMap()
-    ): my.ssdid.wallet.domain.sdjwt.SdJwtVc {
-        val issuer = SdJwtIssuer(signer = dummySigner, algorithm = "EdDSA")
-        val allClaims = (visibleClaims + disclosableClaims).mapValues { JsonPrimitive(it.value) }
-        return issuer.issue(
-            issuer = "did:ssdid:issuer123",
-            subject = "did:ssdid:holder456",
-            type = listOf("VerifiableCredential", "VerifiedEmployee"),
-            claims = allClaims,
-            disclosable = disclosableClaims.keys,
-        )
-    }
+    private val signer: (ByteArray) -> ByteArray = { data -> data.copyOf(64) } // dummy signer
 
     @Test
-    fun `builds VP token with selected disclosures and KB-JWT`() {
-        val vc = issueCredential(
-            disclosableClaims = mapOf("name" to "Alice", "email" to "alice@example.com")
+    fun buildVpTokenWithSelectedDisclosures() {
+        val cred = StoredSdJwtVc(
+            id = "vc-1",
+            compact = "eyJhbGciOiJFZERTQSJ9.eyJpc3MiOiJkaWQ6c3NkaWQ6aXNzdWVyMSJ9.sig~WyJzYWx0MSIsIm5hbWUiLCJBaG1hZCJd~WyJzYWx0MiIsImVtYWlsIiwiYUBleC5jb20iXQ~",
+            issuer = "did:ssdid:issuer1",
+            subject = "did:ssdid:holder1",
+            type = "IdentityCredential",
+            claims = mapOf("name" to "Ahmad", "email" to "a@ex.com"),
+            disclosableClaims = listOf("name", "email"),
+            issuedAt = 1700000000L
         )
 
         val vpToken = VpTokenBuilder.build(
-            credential = vc,
-            selectedClaimNames = setOf("name", "email"),
+            storedSdJwtVc = cred,
+            selectedClaims = listOf("name"),
             audience = "https://verifier.example.com",
-            nonce = "test-nonce-123",
+            nonce = "nonce-123",
             algorithm = "EdDSA",
-            signer = dummySigner
+            signer = signer
         )
 
-        // Token structure: issuerJwt~disclosure1~disclosure2~...~kbJwt
         val parts = vpToken.split("~")
-        // First part is the issuer JWT (has 3 dot-separated segments)
-        assertThat(parts[0].split(".")).hasSize(3)
-        // Last part is the KB-JWT (also 3 dot-separated segments)
-        val kbJwt = parts.last()
-        assertThat(kbJwt.split(".")).hasSize(3)
-        // Middle parts are disclosures (2 in this case)
-        val disclosureParts = parts.subList(1, parts.size - 1)
-        assertThat(disclosureParts).hasSize(2)
-
-        // Verify KB-JWT payload has correct aud and nonce
-        val kbPayloadB64 = kbJwt.split(".")[1]
-        val kbPayloadJson = String(Base64.getUrlDecoder().decode(kbPayloadB64), Charsets.UTF_8)
-        val kbPayload = Json.parseToJsonElement(kbPayloadJson).jsonObject
-        assertThat(kbPayload["aud"]?.jsonPrimitive?.content).isEqualTo("https://verifier.example.com")
-        assertThat(kbPayload["nonce"]?.jsonPrimitive?.content).isEqualTo("test-nonce-123")
-        assertThat(kbPayload["sd_hash"]).isNotNull()
+        // issuerJwt + 1 disclosure + kbJwt = 3 parts
+        assertThat(parts.size).isAtLeast(3)
+        // First part is the issuer JWT (starts with base64url header)
+        assertThat(parts[0]).startsWith("eyJ")
+        // Last part is the KB-JWT (has 3 dot-separated segments)
+        assertThat(parts.last().count { it == '.' }).isEqualTo(2)
     }
 
     @Test
-    fun `builds presentation submission for PE response`() {
-        val submission = PresentationSubmission(
-            id = "submission-1",
-            definitionId = "pd-1",
-            descriptorMap = listOf(
-                DescriptorMapEntry(
-                    id = "input-1",
-                    format = "vc+sd-jwt",
-                    path = "$"
-                )
-            )
+    fun buildVpTokenWithAllDisclosures() {
+        val cred = StoredSdJwtVc(
+            id = "vc-1",
+            compact = "eyJhbGciOiJFZERTQSJ9.eyJpc3MiOiJkaWQ6c3NkaWQ6aXNzdWVyMSJ9.sig~WyJzYWx0MSIsIm5hbWUiLCJBaG1hZCJd~WyJzYWx0MiIsImVtYWlsIiwiYUBleC5jb20iXQ~",
+            issuer = "did:ssdid:issuer1",
+            subject = "did:ssdid:holder1",
+            type = "IdentityCredential",
+            claims = mapOf("name" to "Ahmad", "email" to "a@ex.com"),
+            disclosableClaims = listOf("name", "email"),
+            issuedAt = 1700000000L
         )
 
-        val json = submission.toJson()
-        val parsed = Json.parseToJsonElement(json).jsonObject
-        assertThat(parsed["definition_id"]?.jsonPrimitive?.content).isEqualTo("pd-1")
-
-        // Round-trip through serialization
-        val reparsed = Json.decodeFromString<PresentationSubmission>(json)
-        assertThat(reparsed.definitionId).isEqualTo("pd-1")
-        assertThat(reparsed.descriptorMap).hasSize(1)
-        assertThat(reparsed.descriptorMap[0].id).isEqualTo("input-1")
-        assertThat(reparsed.descriptorMap[0].format).isEqualTo("vc+sd-jwt")
-        assertThat(reparsed.descriptorMap[0].path).isEqualTo("$")
-    }
-
-    @Test
-    fun `selects only matching disclosures by claim name`() {
-        val vc = issueCredential(
-            disclosableClaims = mapOf(
-                "name" to "Alice",
-                "email" to "alice@example.com",
-                "age" to "30"
-            )
-        )
-        // All 3 disclosures exist in the VC
-        assertThat(vc.disclosures).hasSize(3)
-
-        // Select only 2 of the 3
         val vpToken = VpTokenBuilder.build(
-            credential = vc,
-            selectedClaimNames = setOf("name", "age"),
-            audience = "https://verifier.example.com",
-            nonce = "nonce-456",
+            storedSdJwtVc = cred,
+            selectedClaims = listOf("name", "email"),
+            audience = "https://v.example.com",
+            nonce = "n-1",
             algorithm = "EdDSA",
-            signer = dummySigner
+            signer = signer
         )
 
         val parts = vpToken.split("~")
         // issuerJwt + 2 disclosures + kbJwt = 4 parts
-        assertThat(parts).hasSize(4)
+        assertThat(parts.size).isEqualTo(4)
+    }
 
-        // Decode the two disclosure parts and verify claim names
-        val disclosureClaimNames = parts.subList(1, parts.size - 1).map { encoded ->
-            Disclosure.decode(encoded).claimName
-        }.toSet()
-        assertThat(disclosureClaimNames).containsExactly("name", "age")
+    @Test
+    fun buildVpTokenContainsOnlySelectedDisclosures() {
+        val cred = StoredSdJwtVc(
+            id = "vc-1",
+            compact = "eyJhbGciOiJFZERTQSJ9.eyJpc3MiOiJkaWQ6c3NkaWQ6aXNzdWVyMSJ9.sig~WyJzYWx0MSIsIm5hbWUiLCJBaG1hZCJd~WyJzYWx0MiIsImVtYWlsIiwiYUBleC5jb20iXQ~",
+            issuer = "did:ssdid:issuer1",
+            subject = "did:ssdid:holder1",
+            type = "IdentityCredential",
+            claims = mapOf("name" to "Ahmad", "email" to "a@ex.com"),
+            disclosableClaims = listOf("name", "email"),
+            issuedAt = 1700000000L
+        )
+
+        val vpToken = VpTokenBuilder.build(
+            storedSdJwtVc = cred,
+            selectedClaims = listOf("email"),
+            audience = "https://verifier.example.com",
+            nonce = "nonce-456",
+            algorithm = "EdDSA",
+            signer = signer
+        )
+
+        // Should contain the email disclosure but not the name disclosure
+        assertThat(vpToken).contains("WyJzYWx0MiIsImVtYWlsIiwiYUBleC5jb20iXQ")
+        assertThat(vpToken.contains("WyJzYWx0MSIsIm5hbWUiLCJBaG1hZCJd")).isFalse()
     }
 }

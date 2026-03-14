@@ -8,7 +8,8 @@ enum DeepLinkAction: Equatable {
     case credentialOffer(issuerUrl: String, offerId: String)
     case login(serverUrl: String, serviceName: String?, challengeId: String?, callbackUrl: String, requestedClaims: String?)
     case invite(serverUrl: String, token: String, callbackUrl: String)
-    case presentationRequest(uri: String)
+    case openid4vp(rawUri: String)
+    case openidCredentialOffer(offerData: String)
 }
 
 /// Errors specific to deep link parsing.
@@ -22,7 +23,7 @@ enum DeepLinkError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidScheme(let scheme):
-            return "Invalid URL scheme: \(scheme). Expected 'ssdid' or 'openid4vp'"
+            return "Invalid URL scheme: \(scheme). Expected 'ssdid', 'openid4vp', or 'openid-credential-offer'"
         case .invalidHost(let host):
             return "Unknown deep link action: \(host)"
         case .missingRequiredParameter(let param):
@@ -46,17 +47,26 @@ final class DeepLinkHandler {
 
     /// Parses a URL into a DeepLinkAction.
     func parse(url: URL) throws -> DeepLinkAction {
-        let scheme = url.scheme ?? "nil"
-
-        // Handle openid4vp:// URIs — the entire URL is the presentation request URI.
-        if scheme == "openid4vp" {
-            return .presentationRequest(uri: url.absoluteString)
+        guard let scheme = url.scheme?.lowercased() else {
+            throw DeepLinkError.invalidScheme("nil")
         }
 
-        guard scheme == "ssdid" else {
+        switch scheme {
+        case "ssdid":
+            return try parseSsdid(url: url)
+        case "openid4vp":
+            return .openid4vp(rawUri: url.absoluteString)
+        case "openid-credential-offer":
+            return try parseCredentialOffer(url: url)
+        default:
             throw DeepLinkError.invalidScheme(scheme)
         }
+    }
 
+    // MARK: - Scheme Parsers
+
+    /// Parses an ssdid:// URL into a DeepLinkAction.
+    private func parseSsdid(url: URL) throws -> DeepLinkAction {
         guard let host = url.host else {
             throw DeepLinkError.invalidURL(url.absoluteString)
         }
@@ -142,6 +152,21 @@ final class DeepLinkHandler {
         default:
             throw DeepLinkError.invalidHost(host)
         }
+    }
+
+    /// Parses an openid-credential-offer:// URL into a DeepLinkAction.
+    private func parseCredentialOffer(url: URL) throws -> DeepLinkAction {
+        let params = parseQueryParameters(url: url)
+        if let offerJson = params["credential_offer"] {
+            return .openidCredentialOffer(offerData: offerJson)
+        }
+        if let offerUri = params["credential_offer_uri"] {
+            guard offerUri.hasPrefix("https://") else {
+                throw DeepLinkError.unsafeURL("credential_offer_uri must be HTTPS")
+            }
+            return .openidCredentialOffer(offerData: offerUri)
+        }
+        throw DeepLinkError.missingRequiredParameter("credential_offer or credential_offer_uri")
     }
 
     /// Parses a URL string into a DeepLinkAction.

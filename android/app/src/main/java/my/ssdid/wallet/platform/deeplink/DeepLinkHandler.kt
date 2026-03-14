@@ -38,8 +38,9 @@ data class DeepLinkAction(
         }
         "sign" -> Screen.TxSigning.createRoute(serverUrl, sessionToken)
         "credential-offer" -> Screen.CredentialOffer.createRoute(issuerUrl, offerId)
+        "openid-credential-offer" -> Screen.CredentialOffer.createRoute("", callbackUrl)
         "invite" -> Screen.InviteAccept.createRoute(serverUrl, token, callbackUrl)
-        "presentation-request" -> Screen.PresentationRequest.createRoute(serverUrl)
+        "openid4vp" -> Screen.PresentationRequest.createRoute(callbackUrl)
         else -> null
     }
 }
@@ -69,13 +70,15 @@ object DeepLinkHandler {
     }
 
     fun parse(uri: Uri): DeepLinkAction? {
-        if (uri.scheme == "openid4vp") {
-            return DeepLinkAction(
-                action = "presentation-request",
-                serverUrl = uri.toString()
-            )
+        return when (uri.scheme) {
+            "ssdid" -> parseSsdid(uri)
+            "openid4vp" -> parseOpenId4Vp(uri)
+            "openid-credential-offer" -> parseCredentialOfferScheme(uri)
+            else -> null
         }
-        if (uri.scheme != "ssdid") return null
+    }
+
+    private fun parseSsdid(uri: Uri): DeepLinkAction? {
         val action = uri.host ?: return null
         if (action !in VALID_ACTIONS) return null
 
@@ -126,6 +129,27 @@ object DeepLinkHandler {
             token = token,
             requestedClaims = requestedClaims,
             acceptedAlgorithms = acceptedAlgorithms
+        )
+    }
+
+    private fun parseOpenId4Vp(uri: Uri): DeepLinkAction? {
+        // Pass full URI to be parsed by OpenId4VpHandler later
+        return DeepLinkAction(
+            action = "openid4vp",
+            serverUrl = "",
+            callbackUrl = uri.toString()  // store raw URI for handler
+        )
+    }
+
+    private fun parseCredentialOfferScheme(uri: Uri): DeepLinkAction? {
+        val offerJson = uri.getQueryParameter("credential_offer")
+        val offerUri = uri.getQueryParameter("credential_offer_uri")
+        if (offerJson == null && offerUri == null) return null
+        if (offerUri != null && !offerUri.startsWith("https://")) return null
+        return DeepLinkAction(
+            action = "openid-credential-offer",
+            serverUrl = "",
+            callbackUrl = offerJson ?: offerUri ?: ""
         )
     }
 }

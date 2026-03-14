@@ -6,91 +6,27 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import my.ssdid.wallet.domain.credential.CredentialIssuanceManager
-import my.ssdid.wallet.domain.model.Identity
-import my.ssdid.wallet.domain.transport.dto.CredentialOfferResponse
-import my.ssdid.wallet.domain.vault.Vault
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.ui.platform.LocalView
+import androidx.compose.material.icons.filled.Schedule
+import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.ui.components.HapticManager
 import my.ssdid.wallet.ui.theme.*
-import javax.inject.Inject
-
-sealed class CredentialOfferState {
-    object Loading : CredentialOfferState()
-    data class OfferLoaded(val offer: CredentialOfferResponse) : CredentialOfferState()
-    object Accepting : CredentialOfferState()
-    object Success : CredentialOfferState()
-    data class Error(val message: String) : CredentialOfferState()
-}
-
-@HiltViewModel
-class CredentialOfferViewModel @Inject constructor(
-    private val issuanceManager: CredentialIssuanceManager,
-    private val vault: Vault,
-    savedStateHandle: SavedStateHandle
-) : ViewModel() {
-
-    val issuerUrl: String = savedStateHandle["issuerUrl"] ?: ""
-    val offerId: String = savedStateHandle["offerId"] ?: ""
-
-    private val _state = MutableStateFlow<CredentialOfferState>(CredentialOfferState.Loading)
-    val state = _state.asStateFlow()
-
-    private val _identities = MutableStateFlow<List<Identity>>(emptyList())
-    val identities = _identities.asStateFlow()
-
-    private val _selectedIdentity = MutableStateFlow<Identity?>(null)
-    val selectedIdentity = _selectedIdentity.asStateFlow()
-
-    init {
-        viewModelScope.launch {
-            _identities.value = vault.listIdentities()
-            fetchOffer()
-        }
-    }
-
-    private suspend fun fetchOffer() {
-        _state.value = CredentialOfferState.Loading
-        issuanceManager.fetchOffer(issuerUrl, offerId)
-            .onSuccess { _state.value = CredentialOfferState.OfferLoaded(it) }
-            .onFailure { _state.value = CredentialOfferState.Error(it.message ?: "Failed to fetch offer") }
-    }
-
-    fun selectIdentity(identity: Identity) {
-        _selectedIdentity.value = identity
-    }
-
-    fun accept() {
-        val identity = _selectedIdentity.value ?: return
-        viewModelScope.launch {
-            _state.value = CredentialOfferState.Accepting
-            issuanceManager.acceptOffer(issuerUrl, offerId, identity)
-                .onSuccess { _state.value = CredentialOfferState.Success }
-                .onFailure { _state.value = CredentialOfferState.Error(it.message ?: "Failed to accept offer") }
-        }
-    }
-}
 
 @Composable
 fun CredentialOfferScreen(
@@ -99,13 +35,10 @@ fun CredentialOfferScreen(
     viewModel: CredentialOfferViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
-    val identities by viewModel.identities.collectAsState()
-    val selectedIdentity by viewModel.selectedIdentity.collectAsState()
     val view = LocalView.current
 
-    // Haptic feedback on credential accepted
     LaunchedEffect(state) {
-        if (state is CredentialOfferState.Success) HapticManager.success(view)
+        if (state is CredentialOfferUiState.Success) HapticManager.success(view)
     }
 
     Column(
@@ -119,130 +52,75 @@ fun CredentialOfferScreen(
             Modifier.padding(start = 8.dp, end = 20.dp, top = 12.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary) }
+            IconButton(onClick = onBack) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary)
+            }
             Spacer(Modifier.width(4.dp))
             Text("Credential Offer", style = MaterialTheme.typography.titleLarge)
         }
 
         when (val currentState = state) {
-            is CredentialOfferState.Loading -> {
-                Spacer(Modifier.weight(1f))
-                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        CircularProgressIndicator(color = Accent)
-                        Spacer(Modifier.height(16.dp))
-                        Text("Fetching offer details...", color = TextSecondary, fontSize = 14.sp)
-                    }
-                }
-                Spacer(Modifier.weight(1f))
-            }
+            is CredentialOfferUiState.Loading -> LoadingContent("Processing offer...")
 
-            is CredentialOfferState.OfferLoaded -> {
-                OfferDetailsContent(
-                    offer = currentState.offer,
-                    identities = identities,
-                    selectedIdentity = selectedIdentity,
-                    onSelectIdentity = viewModel::selectIdentity,
-                    onAccept = viewModel::accept,
-                    onReject = onBack
-                )
-            }
+            is CredentialOfferUiState.ReviewingOffer -> ReviewingOfferContent(
+                issuerName = currentState.issuerName,
+                credentialTypes = currentState.credentialTypes,
+                identities = currentState.identities,
+                selectedIdentity = currentState.selectedIdentity,
+                onSelectIdentity = viewModel::selectIdentity,
+                onAccept = viewModel::acceptOffer,
+                onDecline = { viewModel.decline(); onBack() }
+            )
 
-            is CredentialOfferState.Accepting -> {
-                Spacer(Modifier.weight(1f))
-                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        CircularProgressIndicator(color = Accent)
-                        Spacer(Modifier.height(16.dp))
-                        Text("Accepting credential...", color = TextSecondary, fontSize = 14.sp)
-                    }
-                }
-                Spacer(Modifier.weight(1f))
-            }
+            is CredentialOfferUiState.PinEntry -> PinEntryContent(
+                description = currentState.description,
+                length = currentState.length,
+                inputMode = currentState.inputMode,
+                onSubmit = viewModel::submitPin,
+                onCancel = { viewModel.decline(); onBack() }
+            )
 
-            is CredentialOfferState.Success -> {
-                Spacer(Modifier.weight(1f))
-                Column(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 32.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Box(
-                        Modifier
-                            .size(72.dp)
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(SuccessDim),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(Icons.Default.Check, contentDescription = "Success", modifier = Modifier.size(32.dp), tint = Success)
-                    }
-                    Spacer(Modifier.height(20.dp))
-                    Text("Credential Accepted", style = MaterialTheme.typography.headlineSmall, color = TextPrimary)
-                    Spacer(Modifier.height(8.dp))
-                    Text("The credential has been stored in your wallet.", color = TextSecondary, fontSize = 14.sp)
-                }
-                Spacer(Modifier.weight(1f))
-                Button(
-                    onClick = onComplete,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Success)
-                ) {
-                    Text("Done", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
-                }
-            }
+            is CredentialOfferUiState.Processing -> LoadingContent("Requesting credential...")
 
-            is CredentialOfferState.Error -> {
-                Spacer(Modifier.weight(1f))
-                Column(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 32.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Box(
-                        Modifier
-                            .size(72.dp)
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(DangerDim),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(Icons.Default.Close, contentDescription = "Error", modifier = Modifier.size(32.dp), tint = Danger)
-                    }
-                    Spacer(Modifier.height(20.dp))
-                    Text("Offer Failed", style = MaterialTheme.typography.headlineSmall, color = TextPrimary)
-                    Spacer(Modifier.height(8.dp))
-                    Text(currentState.message, color = TextSecondary, fontSize = 14.sp)
-                }
-                Spacer(Modifier.weight(1f))
-                Button(
-                    onClick = onBack,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Danger)
-                ) {
-                    Text("Go Back", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
-                }
-            }
+            is CredentialOfferUiState.Success -> SuccessContent(onComplete = onComplete)
+
+            is CredentialOfferUiState.Deferred -> DeferredContent(
+                transactionId = currentState.transactionId,
+                onDone = onComplete
+            )
+
+            is CredentialOfferUiState.Error -> ErrorContent(
+                message = currentState.message,
+                onBack = onBack
+            )
         }
     }
 }
 
 @Composable
-private fun ColumnScope.OfferDetailsContent(
-    offer: CredentialOfferResponse,
+private fun ColumnScope.LoadingContent(message: String) {
+    Spacer(Modifier.weight(1f))
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            CircularProgressIndicator(color = Accent)
+            Spacer(Modifier.height(16.dp))
+            Text(message, color = TextSecondary, fontSize = 14.sp)
+        }
+    }
+    Spacer(Modifier.weight(1f))
+}
+
+@Composable
+private fun ColumnScope.ReviewingOfferContent(
+    issuerName: String,
+    credentialTypes: List<String>,
     identities: List<Identity>,
     selectedIdentity: Identity?,
     onSelectIdentity: (Identity) -> Unit,
     onAccept: () -> Unit,
-    onReject: () -> Unit
+    onDecline: () -> Unit
 ) {
-    // Offer info card
+    // Issuer info card
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -251,44 +129,27 @@ private fun ColumnScope.OfferDetailsContent(
         colors = CardDefaults.cardColors(containerColor = BgCard)
     ) {
         Column(Modifier.padding(14.dp)) {
-            Text("OFFER DETAILS", style = MaterialTheme.typography.labelMedium)
+            Text("ISSUER", style = MaterialTheme.typography.labelMedium)
             Spacer(Modifier.height(8.dp))
-            Text("Issuer", fontSize = 11.sp, color = TextTertiary)
-            Text(offer.issuer_did, fontSize = 13.sp, color = TextPrimary, fontFamily = FontFamily.Monospace, maxLines = 1)
-            Spacer(Modifier.height(6.dp))
-            Text("Credential Type", fontSize = 11.sp, color = TextTertiary)
-            Text(offer.credential_type, fontSize = 13.sp, color = Accent)
-            if (offer.expires_at != null) {
-                Spacer(Modifier.height(6.dp))
-                Text("Expires", fontSize = 11.sp, color = TextTertiary)
-                Text(offer.expires_at, fontSize = 13.sp, color = Warning)
-            }
+            Text(issuerName, fontSize = 13.sp, color = TextPrimary, fontFamily = FontFamily.Monospace, maxLines = 2)
         }
     }
 
-    // Claims preview
-    if (offer.claims.isNotEmpty()) {
-        Spacer(Modifier.height(12.dp))
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = BgCard)
-        ) {
-            Column(Modifier.padding(14.dp)) {
-                Text("CLAIMS", style = MaterialTheme.typography.labelMedium)
-                Spacer(Modifier.height(8.dp))
-                offer.claims.forEach { (key, value) ->
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 2.dp)
-                    ) {
-                        Text(key, fontSize = 12.sp, color = TextTertiary, modifier = Modifier.weight(1f))
-                        Text(value, fontSize = 12.sp, color = TextPrimary, modifier = Modifier.weight(2f))
-                    }
-                }
+    Spacer(Modifier.height(12.dp))
+
+    // Credential types
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = BgCard)
+    ) {
+        Column(Modifier.padding(14.dp)) {
+            Text("CREDENTIALS OFFERED", style = MaterialTheme.typography.labelMedium)
+            Spacer(Modifier.height(8.dp))
+            credentialTypes.forEach { type ->
+                Text(type, fontSize = 13.sp, color = Accent, modifier = Modifier.padding(vertical = 2.dp))
             }
         }
     }
@@ -357,7 +218,7 @@ private fun ColumnScope.OfferDetailsContent(
         }
     }
 
-    // Accept/Reject buttons
+    // Accept/Decline buttons
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -365,12 +226,12 @@ private fun ColumnScope.OfferDetailsContent(
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         OutlinedButton(
-            onClick = onReject,
+            onClick = onDecline,
             modifier = Modifier.weight(1f),
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.outlinedButtonColors(contentColor = Danger)
         ) {
-            Text("Reject", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+            Text("Decline", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
         }
         Button(
             onClick = onAccept,
@@ -381,5 +242,196 @@ private fun ColumnScope.OfferDetailsContent(
         ) {
             Text("Accept", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
         }
+    }
+}
+
+@Composable
+private fun ColumnScope.PinEntryContent(
+    description: String?,
+    length: Int,
+    inputMode: String,
+    onSubmit: (String) -> Unit,
+    onCancel: () -> Unit
+) {
+    var pinValue by remember { mutableStateOf("") }
+
+    Spacer(Modifier.weight(1f))
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Transaction Code Required", style = MaterialTheme.typography.headlineSmall, color = TextPrimary)
+        Spacer(Modifier.height(8.dp))
+        Text(
+            description ?: "Please enter the transaction code provided by the issuer.",
+            color = TextSecondary,
+            fontSize = 14.sp
+        )
+        Spacer(Modifier.height(24.dp))
+        OutlinedTextField(
+            value = pinValue,
+            onValueChange = { newValue ->
+                if (length <= 0 || newValue.length <= length) {
+                    pinValue = newValue
+                }
+            },
+            label = { Text("Transaction Code") },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = if (inputMode == "numeric") KeyboardType.Number else KeyboardType.Text
+            ),
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        if (length > 0) {
+            Spacer(Modifier.height(4.dp))
+            Text("${pinValue.length}/$length characters", fontSize = 12.sp, color = TextTertiary)
+        }
+    }
+    Spacer(Modifier.weight(1f))
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(20.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        OutlinedButton(
+            onClick = onCancel,
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = Danger)
+        ) {
+            Text("Cancel", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+        }
+        Button(
+            onClick = { onSubmit(pinValue) },
+            modifier = Modifier.weight(1f),
+            enabled = pinValue.isNotEmpty() && (length <= 0 || pinValue.length == length),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Accent)
+        ) {
+            Text("Submit", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+        }
+    }
+}
+
+@Composable
+private fun ColumnScope.SuccessContent(onComplete: () -> Unit) {
+    Spacer(Modifier.weight(1f))
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            Modifier
+                .size(72.dp)
+                .clip(RoundedCornerShape(20.dp))
+                .background(SuccessDim),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(Icons.Default.Check, contentDescription = "Success", modifier = Modifier.size(32.dp), tint = Success)
+        }
+        Spacer(Modifier.height(20.dp))
+        Text("Credential Received", style = MaterialTheme.typography.headlineSmall, color = TextPrimary)
+        Spacer(Modifier.height(8.dp))
+        Text("The credential has been stored in your wallet.", color = TextSecondary, fontSize = 14.sp)
+    }
+    Spacer(Modifier.weight(1f))
+    Button(
+        onClick = onComplete,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(20.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = Success)
+    ) {
+        Text("Done", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+@Composable
+private fun ColumnScope.DeferredContent(transactionId: String, onDone: () -> Unit) {
+    Spacer(Modifier.weight(1f))
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            Modifier
+                .size(72.dp)
+                .clip(RoundedCornerShape(20.dp))
+                .background(WarningDim),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(Icons.Default.Schedule, contentDescription = "Pending", modifier = Modifier.size(32.dp), tint = Warning)
+        }
+        Spacer(Modifier.height(20.dp))
+        Text("Credential Pending", style = MaterialTheme.typography.headlineSmall, color = TextPrimary)
+        Spacer(Modifier.height(8.dp))
+        Text(
+            "Your credential is being processed and will be available later.",
+            color = TextSecondary,
+            fontSize = 14.sp
+        )
+        Spacer(Modifier.height(12.dp))
+        Text(
+            "Transaction ID: $transactionId",
+            fontSize = 11.sp,
+            color = TextTertiary,
+            fontFamily = FontFamily.Monospace
+        )
+    }
+    Spacer(Modifier.weight(1f))
+    Button(
+        onClick = onDone,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(20.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = Warning)
+    ) {
+        Text("Done", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+@Composable
+private fun ColumnScope.ErrorContent(message: String, onBack: () -> Unit) {
+    Spacer(Modifier.weight(1f))
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            Modifier
+                .size(72.dp)
+                .clip(RoundedCornerShape(20.dp))
+                .background(DangerDim),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(Icons.Default.Close, contentDescription = "Error", modifier = Modifier.size(32.dp), tint = Danger)
+        }
+        Spacer(Modifier.height(20.dp))
+        Text("Offer Failed", style = MaterialTheme.typography.headlineSmall, color = TextPrimary)
+        Spacer(Modifier.height(8.dp))
+        Text(message, color = TextSecondary, fontSize = 14.sp)
+    }
+    Spacer(Modifier.weight(1f))
+    Button(
+        onClick = onBack,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(20.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = Danger)
+    ) {
+        Text("Go Back", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
     }
 }

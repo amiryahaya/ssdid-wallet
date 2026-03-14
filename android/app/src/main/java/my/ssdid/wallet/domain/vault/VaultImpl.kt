@@ -3,6 +3,7 @@ package my.ssdid.wallet.domain.vault
 import my.ssdid.wallet.domain.crypto.CryptoProvider
 import my.ssdid.wallet.domain.crypto.Multibase
 import my.ssdid.wallet.domain.model.*
+import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -205,4 +206,10 @@ class VaultImpl(
 
     override suspend fun saveIdentity(identity: Identity, encryptedPrivateKey: ByteArray) =
         storage.saveIdentity(identity, encryptedPrivateKey)
+
+    override suspend fun listStoredSdJwtVcs(): List<StoredSdJwtVc> = storage.listSdJwtVcs()
+
+    override suspend fun storeStoredSdJwtVc(sdJwtVc: StoredSdJwtVc): Result<Unit> = runCatching {
+        storage.saveSdJwtVc(sdJwtVc)
+    }
 }

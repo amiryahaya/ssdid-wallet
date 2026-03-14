@@ -131,6 +131,12 @@ enum class Algorithm(
     val isMlDsa: Boolean get() = name.startsWith("ML_DSA")
     val isSlhDsa: Boolean get() = name.startsWith("SLH_DSA")
 
+    /**
+     * Returns the JWA algorithm name for this Algorithm (e.g., "EdDSA", "ES256").
+     */
+    fun toJwaName(): String = Companion.reverseJwaMap[this]
+        ?: throw IllegalStateException("No JWA name for $name")
+
     companion object {
         /**
          * JWA algorithm name to Algorithm mapping.
@@ -159,6 +165,9 @@ enum class Algorithm(
             "SLH-DSA-SHAKE-256s" to SLH_DSA_SHAKE_256S,
             "SLH-DSA-SHAKE-256f" to SLH_DSA_SHAKE_256F
         )
+
+        private val reverseJwaMap: Map<Algorithm, String> =
+            jwaMap.entries.associate { (k, v) -> v to k }
 
         /**
          * Reverse lookup from JWA algorithm name (e.g., "EdDSA", "ES256").

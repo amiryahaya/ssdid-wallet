@@ -45,7 +45,7 @@ enum Route: Hashable {
     case deviceManagement(keyId: String)
     case deviceEnroll(keyId: String, mode: String)
     case inviteAccept(serverUrl: String, token: String, callbackUrl: String)
-    case presentationRequest(uri: String)
+    case presentationRequest(rawUri: String)
 }
 
 // MARK: - AppRouter

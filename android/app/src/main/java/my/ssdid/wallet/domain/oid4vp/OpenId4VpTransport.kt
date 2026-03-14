@@ -6,63 +6,31 @@ import okhttp3.Request
 
 class OpenId4VpTransport(private val client: OkHttpClient) {
 
-    fun fetchRequestObject(requestUri: String): Result<AuthorizationRequest> = runCatching {
+    fun fetchRequestObject(requestUri: String): String {
         val request = Request.Builder().url(requestUri).get().build()
-        val body = client.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) {
-                throw RuntimeException("Failed to fetch request object: HTTP ${response.code}")
-            }
-            response.body?.string()
-                ?: throw RuntimeException("Empty response from request_uri")
+        return client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) throw RuntimeException("HTTP ${response.code}")
+            response.body?.string() ?: throw RuntimeException("Empty response body")
         }
-        AuthorizationRequest.parseJson(body).getOrThrow()
     }
 
-    fun postVpResponse(
-        responseUri: String,
-        vpToken: String,
-        presentationSubmission: PresentationSubmission?,
-        state: String?
-    ): Result<Unit> = runCatching {
-        // Note: HTTPS is enforced by AuthorizationRequest parser — not re-validated here
-        // to keep transport testable with MockWebServer (http://localhost).
+    fun postVpResponse(responseUri: String, vpToken: String, presentationSubmission: String, state: String?) {
         val formBuilder = FormBody.Builder()
             .add("vp_token", vpToken)
-        presentationSubmission?.let {
-            formBuilder.add("presentation_submission", it.toJson())
-        }
-        state?.let { formBuilder.add("state", it) }
-
-        val request = Request.Builder()
-            .url(responseUri)
-            .post(formBuilder.build())
-            .build()
+            .add("presentation_submission", presentationSubmission)
+        if (state != null) formBuilder.add("state", state)
+        val request = Request.Builder().url(responseUri).post(formBuilder.build()).build()
         client.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) {
-                throw RuntimeException("Failed to post VP response: HTTP ${response.code}")
-            }
+            if (!response.isSuccessful) throw RuntimeException("HTTP ${response.code}")
         }
     }
 
-    fun postError(
-        responseUri: String,
-        error: String,
-        state: String?
-    ): Result<Unit> = runCatching {
-        // Note: HTTPS is enforced by AuthorizationRequest parser — not re-validated here
-        // to keep transport testable with MockWebServer (http://localhost).
-        val formBuilder = FormBody.Builder()
-            .add("error", error)
-        state?.let { formBuilder.add("state", it) }
-
-        val request = Request.Builder()
-            .url(responseUri)
-            .post(formBuilder.build())
-            .build()
+    fun postError(responseUri: String, error: String, state: String?) {
+        val formBuilder = FormBody.Builder().add("error", error)
+        if (state != null) formBuilder.add("state", state)
+        val request = Request.Builder().url(responseUri).post(formBuilder.build()).build()
         client.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) {
-                throw RuntimeException("Failed to post error: HTTP ${response.code}")
-            }
+            if (!response.isSuccessful) throw RuntimeException("HTTP ${response.code}")
         }
     }
 }

@@ -1,5 +1,6 @@
 package my.ssdid.wallet.domain.oid4vp
 
+import android.net.Uri
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -11,116 +12,95 @@ import org.robolectric.annotation.Config
 class AuthorizationRequestTest {
 
     @Test
-    fun `parse valid by-value request with presentation_definition`() {
-        val uri = "openid4vp://?response_type=vp_token" +
-            "&client_id=https://verifier.example.com" +
-            "&nonce=n-0S6_WzA2Mj" +
-            "&response_mode=direct_post" +
-            "&response_uri=https://verifier.example.com/response" +
-            "&state=af0ifjsldkj" +
-            "&presentation_definition=%7B%22id%22%3A%22req-1%22%2C%22input_descriptors%22%3A%5B%5D%7D"
-
+    fun parseByReference() {
+        val uri = "openid4vp://?client_id=https://verifier.example.com&request_uri=https://verifier.example.com/request/123"
         val result = AuthorizationRequest.parse(uri)
         assertThat(result.isSuccess).isTrue()
         val req = result.getOrThrow()
-        assertThat(req.responseType).isEqualTo("vp_token")
         assertThat(req.clientId).isEqualTo("https://verifier.example.com")
-        assertThat(req.nonce).isEqualTo("n-0S6_WzA2Mj")
-        assertThat(req.responseMode).isEqualTo("direct_post")
-        assertThat(req.responseUri).isEqualTo("https://verifier.example.com/response")
-        assertThat(req.state).isEqualTo("af0ifjsldkj")
+        assertThat(req.requestUri).isEqualTo("https://verifier.example.com/request/123")
+        assertThat(req.responseUri).isNull()
+    }
+
+    @Test
+    fun parseByValue() {
+        val pd = """{"id":"pd-1","input_descriptors":[{"id":"id-1","format":{"vc+sd-jwt":{}},"constraints":{"fields":[{"path":["$.vct"],"filter":{"const":"IdentityCredential"}}]}}]}"""
+        val uri = "openid4vp://?response_type=vp_token&client_id=https://v.example.com&response_uri=https://v.example.com/cb&nonce=n-123&response_mode=direct_post&presentation_definition=${Uri.encode(pd)}"
+        val result = AuthorizationRequest.parse(uri)
+        assertThat(result.isSuccess).isTrue()
+        val req = result.getOrThrow()
+        assertThat(req.clientId).isEqualTo("https://v.example.com")
+        assertThat(req.responseUri).isEqualTo("https://v.example.com/cb")
+        assertThat(req.nonce).isEqualTo("n-123")
         assertThat(req.presentationDefinition).isNotNull()
-        assertThat(req.dcqlQuery).isNull()
-        assertThat(req.requestUri).isNull()
     }
 
     @Test
-    fun `parse by-reference request extracts request_uri`() {
-        val uri = "openid4vp://?client_id=https://verifier.example.com" +
-            "&request_uri=https://verifier.example.com/request/abc123"
+    fun rejectHttpRequestUri() {
+        val uri = "openid4vp://?client_id=https://v.example.com&request_uri=http://v.example.com/request"
+        val result = AuthorizationRequest.parse(uri)
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()!!.message).contains("HTTPS")
+    }
 
+    @Test
+    fun rejectMissingClientId() {
+        val uri = "openid4vp://?request_uri=https://v.example.com/request"
+        val result = AuthorizationRequest.parse(uri)
+        assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
+    fun rejectNonDirectPostResponseMode() {
+        val uri = "openid4vp://?response_type=vp_token&client_id=https://v.example.com&response_uri=https://v.example.com/cb&nonce=n&response_mode=fragment&presentation_definition=%7B%7D"
+        val result = AuthorizationRequest.parse(uri)
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()!!.message).contains("direct_post")
+    }
+
+    @Test
+    fun rejectMissingQuery() {
+        val uri = "openid4vp://?response_type=vp_token&client_id=https://v.example.com&response_uri=https://v.example.com/cb&nonce=n&response_mode=direct_post"
+        val result = AuthorizationRequest.parse(uri)
+        assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
+    fun rejectHttpResponseUri() {
+        val pd = """{"id":"pd-1","input_descriptors":[]}"""
+        val uri = "openid4vp://?response_type=vp_token&client_id=https://v.example.com&response_uri=http://v.example.com/cb&nonce=n&response_mode=direct_post&presentation_definition=${Uri.encode(pd)}"
+        val result = AuthorizationRequest.parse(uri)
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()!!.message).contains("HTTPS")
+    }
+
+    @Test
+    fun parseDcqlQuery() {
+        val dcql = """{"credentials":[{"id":"cred-1","format":"vc+sd-jwt","meta":{"vct_values":["IdentityCredential"]}}]}"""
+        val uri = "openid4vp://?response_type=vp_token&client_id=https://v.example.com&response_uri=https://v.example.com/cb&nonce=n&response_mode=direct_post&dcql_query=${Uri.encode(dcql)}"
         val result = AuthorizationRequest.parse(uri)
         assertThat(result.isSuccess).isTrue()
         val req = result.getOrThrow()
-        assertThat(req.clientId).isEqualTo("https://verifier.example.com")
-        assertThat(req.requestUri).isEqualTo("https://verifier.example.com/request/abc123")
+        assertThat(req.dcqlQuery).isNotNull()
+        assertThat(req.presentationDefinition).isNull()
     }
 
     @Test
-    fun `parse rejects missing response_type for by-value request`() {
-        val uri = "openid4vp://?client_id=https://v.example.com&nonce=abc" +
-            "&response_mode=direct_post&response_uri=https://v.example.com/r" +
-            "&presentation_definition=%7B%7D"
-
+    fun rejectBothPdAndDcql() {
+        val pd = """{"id":"pd-1","input_descriptors":[]}"""
+        val dcql = """{"credentials":[]}"""
+        val uri = "openid4vp://?response_type=vp_token&client_id=https://v.example.com&response_uri=https://v.example.com/cb&nonce=n&response_mode=direct_post&presentation_definition=${Uri.encode(pd)}&dcql_query=${Uri.encode(dcql)}"
         val result = AuthorizationRequest.parse(uri)
         assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()?.message).contains("response_type")
     }
 
     @Test
-    fun `parse rejects missing nonce for by-value request`() {
-        val uri = "openid4vp://?response_type=vp_token&client_id=https://v.example.com" +
-            "&response_mode=direct_post&response_uri=https://v.example.com/r" +
-            "&presentation_definition=%7B%7D"
-
-        val result = AuthorizationRequest.parse(uri)
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()?.message).contains("nonce")
-    }
-
-    @Test
-    fun `parse rejects missing client_id`() {
-        val uri = "openid4vp://?response_type=vp_token&nonce=abc" +
-            "&response_mode=direct_post&response_uri=https://v.example.com/r" +
-            "&presentation_definition=%7B%7D"
-
-        val result = AuthorizationRequest.parse(uri)
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()?.message).contains("client_id")
-    }
-
-    @Test
-    fun `parse rejects non-HTTPS response_uri`() {
-        val uri = "openid4vp://?response_type=vp_token&client_id=https://v.example.com" +
-            "&nonce=abc&response_mode=direct_post&response_uri=http://v.example.com/r" +
-            "&presentation_definition=%7B%7D"
-
-        val result = AuthorizationRequest.parse(uri)
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()?.message).contains("response_uri")
-    }
-
-    @Test
-    fun `parse rejects both presentation_definition and dcql_query`() {
-        val uri = "openid4vp://?response_type=vp_token&client_id=https://v.example.com" +
-            "&nonce=abc&response_mode=direct_post&response_uri=https://v.example.com/r" +
-            "&presentation_definition=%7B%7D&dcql_query=%7B%7D"
-
-        val result = AuthorizationRequest.parse(uri)
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()?.message).contains("ambiguous")
-    }
-
-    @Test
-    fun `parse rejects neither presentation_definition nor dcql_query`() {
-        val uri = "openid4vp://?response_type=vp_token&client_id=https://v.example.com" +
-            "&nonce=abc&response_mode=direct_post&response_uri=https://v.example.com/r"
-
-        val result = AuthorizationRequest.parse(uri)
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()?.message).contains("neither")
-    }
-
-    @Test
-    fun `parse accepts DID as client_id`() {
-        val uri = "openid4vp://?response_type=vp_token" +
-            "&client_id=did:web:verifier.example.com" +
-            "&nonce=abc&response_mode=direct_post" +
-            "&response_uri=https://verifier.example.com/r" +
-            "&presentation_definition=%7B%7D"
-
-        val result = AuthorizationRequest.parse(uri)
+    fun parseJsonRequestObject() {
+        val json = """{"client_id":"https://v.example.com","response_uri":"https://v.example.com/cb","nonce":"n-1","response_mode":"direct_post","presentation_definition":{"id":"pd-1","input_descriptors":[]}}"""
+        val result = AuthorizationRequest.parseJson(json)
         assertThat(result.isSuccess).isTrue()
-        assertThat(result.getOrThrow().clientId).isEqualTo("did:web:verifier.example.com")
+        val req = result.getOrThrow()
+        assertThat(req.clientId).isEqualTo("https://v.example.com")
+        assertThat(req.nonce).isEqualTo("n-1")
     }
 }

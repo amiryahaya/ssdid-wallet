@@ -53,6 +53,11 @@ import my.ssdid.wallet.domain.notify.LocalNotificationStorage
 import my.ssdid.wallet.domain.notify.NotifyLifecycleObserver
 import my.ssdid.wallet.domain.notify.NotifyManager
 import my.ssdid.wallet.domain.notify.NotifyStorage
+import my.ssdid.wallet.domain.oid4vci.IssuerMetadataResolver
+import my.ssdid.wallet.domain.oid4vci.NonceManager
+import my.ssdid.wallet.domain.oid4vci.OpenId4VciHandler
+import my.ssdid.wallet.domain.oid4vci.OpenId4VciTransport
+import my.ssdid.wallet.domain.oid4vci.TokenClient
 import my.ssdid.wallet.domain.transport.EmailVerifyApi
 import my.ssdid.wallet.domain.transport.NotifyApi
 import okhttp3.CertificatePinner
@@ -282,18 +287,42 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun providePresentationDefinitionMatcher(): PresentationDefinitionMatcher =
-        PresentationDefinitionMatcher()
-
-    @Provides
-    @Singleton
-    fun provideDcqlMatcher(): DcqlMatcher = DcqlMatcher()
-
-    @Provides
-    @Singleton
     fun provideOpenId4VpHandler(
         transport: OpenId4VpTransport,
-        peMatcher: PresentationDefinitionMatcher,
-        dcqlMatcher: DcqlMatcher
-    ): OpenId4VpHandler = OpenId4VpHandler(transport, peMatcher, dcqlMatcher)
+        vault: Vault
+    ): OpenId4VpHandler = OpenId4VpHandler(
+        transport = transport,
+        peMatcher = PresentationDefinitionMatcher(),
+        dcqlMatcher = DcqlMatcher(),
+        vault = vault
+    )
+
+    @Provides
+    @Singleton
+    fun provideIssuerMetadataResolver(okHttpClient: OkHttpClient): IssuerMetadataResolver =
+        IssuerMetadataResolver(okHttpClient)
+
+    @Provides
+    @Singleton
+    fun provideTokenClient(okHttpClient: OkHttpClient): TokenClient =
+        TokenClient(okHttpClient)
+
+    @Provides
+    @Singleton
+    fun provideNonceManager(): NonceManager = NonceManager()
+
+    @Provides
+    @Singleton
+    fun provideOpenId4VciTransport(okHttpClient: OkHttpClient): OpenId4VciTransport =
+        OpenId4VciTransport(okHttpClient)
+
+    @Provides
+    @Singleton
+    fun provideOpenId4VciHandler(
+        metadataResolver: IssuerMetadataResolver,
+        tokenClient: TokenClient,
+        nonceManager: NonceManager,
+        transport: OpenId4VciTransport,
+        vault: Vault
+    ): OpenId4VciHandler = OpenId4VciHandler(metadataResolver, tokenClient, nonceManager, transport, vault)
 }

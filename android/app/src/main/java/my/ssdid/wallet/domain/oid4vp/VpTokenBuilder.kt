@@ -1,54 +1,67 @@
 package my.ssdid.wallet.domain.oid4vp
 
 import my.ssdid.wallet.domain.sdjwt.KeyBindingJwt
-import my.ssdid.wallet.domain.sdjwt.SdJwtVc
+import my.ssdid.wallet.domain.sdjwt.SdJwtParser
+import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
 
 /**
- * Builds a VP Token from an SD-JWT VC for OpenID4VP presentation.
+ * Assembles SD-JWT VP tokens with selective disclosure and Key Binding JWT.
  *
- * Steps:
- * 1. Filter disclosures to only user-approved claims
- * 2. Build SD-JWT without KB-JWT (for sd_hash computation)
- * 3. Create KB-JWT with aud=client_id, nonce, and sd_hash
- * 4. Assemble the final presentation string
+ * Given a stored SD-JWT VC, selected claims, and verifier parameters,
+ * builds a presentation token: issuerJwt~disclosure1~...~disclosureN~kbJwt
  */
 object VpTokenBuilder {
 
     /**
-     * Builds a VP Token string from the given SD-JWT VC credential.
+     * Builds a VP token from a stored SD-JWT VC with selective disclosure.
      *
-     * @param credential The SD-JWT VC to present
-     * @param selectedClaimNames Set of claim names the holder approves to disclose
-     * @param audience The verifier's client_id (KB-JWT aud claim)
-     * @param nonce Verifier-provided nonce for freshness
+     * @param storedSdJwtVc The stored credential
+     * @param selectedClaims Claim names the holder consents to disclose
+     * @param audience The verifier's identifier (aud claim in KB-JWT)
+     * @param nonce Verifier-provided nonce
      * @param algorithm JWA algorithm name (e.g., "EdDSA", "ES256")
      * @param signer Function that signs data with the holder's private key
-     * @return The assembled VP Token string: issuerJwt~disclosure1~...~disclosureN~kbJwt
+     * @param issuedAt Unix timestamp for the KB-JWT (defaults to current time)
+     * @return The assembled VP token string
      */
     fun build(
-        credential: SdJwtVc,
-        selectedClaimNames: Set<String>,
+        storedSdJwtVc: StoredSdJwtVc,
+        selectedClaims: List<String>,
         audience: String,
         nonce: String,
         algorithm: String,
-        signer: (ByteArray) -> ByteArray
+        signer: (ByteArray) -> ByteArray,
+        issuedAt: Long = System.currentTimeMillis() / 1000
     ): String {
-        // Step 1: Filter disclosures to user-approved claims
-        val selectedDisclosures = credential.disclosures.filter { it.claimName in selectedClaimNames }
+        val parsed = SdJwtParser.parse(storedSdJwtVc.compact)
 
-        // Step 2: Build SD-JWT without KB-JWT (ending with ~) for sd_hash
-        val sdJwtWithoutKb = credential.present(selectedDisclosures, kbJwt = null)
+        val selectedDisclosures = parsed.disclosures.filter { it.claimName in selectedClaims }
 
-        // Step 3: Create KB-JWT
+        val resolvedNames = selectedDisclosures.map { it.claimName }.toSet()
+        val missing = selectedClaims.toSet() - resolvedNames
+        require(missing.isEmpty()) {
+            "Requested claims not found in credential disclosures: $missing"
+        }
+
+        // Build the SD-JWT with selected disclosures (without KB-JWT)
+        val sdJwtWithDisclosures = buildString {
+            append(parsed.issuerJwt)
+            append("~")
+            for (disc in selectedDisclosures) {
+                append(disc.encoded)
+                append("~")
+            }
+        }
+
         val kbJwt = KeyBindingJwt.create(
-            sdJwtWithDisclosures = sdJwtWithoutKb,
+            sdJwtWithDisclosures = sdJwtWithDisclosures,
             audience = audience,
             nonce = nonce,
             algorithm = algorithm,
-            signer = signer
+            signer = signer,
+            issuedAt = issuedAt
         )
 
-        // Step 4: Assemble final presentation with KB-JWT
-        return credential.present(selectedDisclosures, kbJwt = kbJwt)
+        return "$sdJwtWithDisclosures$kbJwt"
     }
 }
