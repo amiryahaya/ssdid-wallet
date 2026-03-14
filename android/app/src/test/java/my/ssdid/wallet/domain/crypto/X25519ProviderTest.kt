@@ -10,7 +10,7 @@ class X25519ProviderTest {
 
     @Before
     fun setUp() {
-        BouncyCastleInstaller.install()
+        BouncyCastleInstaller.ensureInstalled()
         provider = X25519Provider()
     }
 
