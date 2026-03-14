@@ -49,6 +49,18 @@
                 <data android:mimeType="application/octet-stream" />
             </intent-filter>
         </activity>
+        <service
+            android:name=".platform.credentials.SsdidCredentialProviderService"
+            android:exported="true"
+            android:permission="android.permission.BIND_CREDENTIAL_PROVIDER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.credentials.CredentialProviderService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.credentials.CredentialProviderService"
+                android:resource="@xml/credential_provider_config" />
+        </service>
+
         <meta-data android:name="io.sentry.auto-init" android:value="false" />
 
         <provider
