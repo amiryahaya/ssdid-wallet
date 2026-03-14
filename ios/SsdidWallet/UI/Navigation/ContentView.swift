@@ -151,8 +151,7 @@ struct RootView: View {
         case .inviteAccept(let serverUrl, let token, let callbackUrl):
             InviteAcceptScreen(serverUrl: serverUrl, token: token, callbackUrl: callbackUrl)
         case .presentationRequest(let rawUri):
-            // Placeholder — PresentationRequestScreen will be created in Task 13
-            Text("Presentation Request: \(rawUri)")
+            PresentationRequestScreen(rawUri: rawUri)
         }
     }
 }
