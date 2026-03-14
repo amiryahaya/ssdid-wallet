@@ -4,7 +4,7 @@ import kotlinx.serialization.json.*
 import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
 
 data class MatchResult(
-    val credential: StoredSdJwtVc,
+    val credentialRef: CredentialRef,
     val descriptorId: String,
     val requiredClaims: List<String>,
     val optionalClaims: List<String>
@@ -26,7 +26,7 @@ class PresentationDefinitionMatcher {
             for (cred in credentials) {
                 if (matchesConstraints(cred, fields)) {
                     val (required, optional) = extractClaims(fields, cred)
-                    results.add(MatchResult(cred, descriptorId, required, optional))
+                    results.add(MatchResult(CredentialRef.SdJwt(cred), descriptorId, required, optional))
                 }
             }
         }

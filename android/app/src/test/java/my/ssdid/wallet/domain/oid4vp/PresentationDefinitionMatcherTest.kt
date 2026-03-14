@@ -24,7 +24,7 @@ class PresentationDefinitionMatcherTest {
         val pd = json.parseToJsonElement("""{"id":"pd-1","input_descriptors":[{"id":"id-1","format":{"vc+sd-jwt":{}},"constraints":{"fields":[{"path":["$.vct"],"filter":{"const":"IdentityCredential"}}]}}]}""") as JsonObject
         val results = matcher.match(pd, listOf(credential))
         assertThat(results).hasSize(1)
-        assertThat(results[0].credential.id).isEqualTo("vc-1")
+        assertThat((results[0].credentialRef as CredentialRef.SdJwt).credential.id).isEqualTo("vc-1")
         assertThat(results[0].descriptorId).isEqualTo("id-1")
     }
 
@@ -64,6 +64,6 @@ class PresentationDefinitionMatcherTest {
         val pd = json.parseToJsonElement("""{"id":"pd-1","input_descriptors":[{"id":"id-1","format":{"vc+sd-jwt":{}},"constraints":{"fields":[{"path":["$.vct"],"filter":{"const":"DriverLicense"}}]}}]}""") as JsonObject
         val results = matcher.match(pd, listOf(credential, cred2))
         assertThat(results).hasSize(1)
-        assertThat(results[0].credential.id).isEqualTo("vc-2")
+        assertThat((results[0].credentialRef as CredentialRef.SdJwt).credential.id).isEqualTo("vc-2")
     }
 }

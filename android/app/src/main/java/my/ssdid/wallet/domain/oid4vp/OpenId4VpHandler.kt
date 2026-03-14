@@ -60,8 +60,9 @@ class OpenId4VpHandler(
         val nonce = authRequest.nonce
             ?: throw IllegalStateException("No nonce in authorization request")
 
+        val storedVc = (matchResult.credentialRef as CredentialRef.SdJwt).credential
         val vpToken = VpTokenBuilder.build(
-            storedSdJwtVc = matchResult.credential,
+            storedSdJwtVc = storedVc,
             selectedClaims = selectedClaims,
             audience = authRequest.clientId,
             nonce = nonce,

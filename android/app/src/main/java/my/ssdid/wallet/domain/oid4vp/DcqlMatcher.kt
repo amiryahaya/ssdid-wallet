@@ -30,7 +30,7 @@ class DcqlMatcher {
                     cred.disclosableClaims to emptyList<String>()
                 }
 
-                results.add(MatchResult(cred, id, required, optional))
+                results.add(MatchResult(CredentialRef.SdJwt(cred), id, required, optional))
             }
         }
         return results

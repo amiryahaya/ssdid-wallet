@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import my.ssdid.wallet.domain.oid4vp.AuthorizationRequest
+import my.ssdid.wallet.domain.oid4vp.CredentialRef
 import my.ssdid.wallet.domain.oid4vp.MatchResult
 import my.ssdid.wallet.domain.oid4vp.OpenId4VpHandler
 import my.ssdid.wallet.domain.oid4vp.PresentationReviewResult
@@ -56,10 +57,14 @@ class PresentationRequestViewModel @Inject constructor(
 
     fun setReviewResult(review: PresentationReviewResult) {
         val match = review.matches.first()
+        val claimsMap = when (val ref = match.credentialRef) {
+            is CredentialRef.SdJwt -> ref.credential.claims
+            is CredentialRef.MDoc -> emptyMap()
+        }
         val claims = match.requiredClaims.map { name ->
-            ClaimItem(name, match.credential.claims[name] ?: "", required = true, selected = true)
+            ClaimItem(name, claimsMap[name] ?: "", required = true, selected = true)
         } + match.optionalClaims.map { name ->
-            ClaimItem(name, match.credential.claims[name] ?: "", required = false, selected = false)
+            ClaimItem(name, claimsMap[name] ?: "", required = false, selected = false)
         }
         _state.value = UiState.CredentialMatch(
             verifierName = review.authRequest.clientId,

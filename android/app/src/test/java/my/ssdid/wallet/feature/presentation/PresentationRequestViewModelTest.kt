@@ -13,6 +13,7 @@ import kotlinx.coroutines.test.setMain
 import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.oid4vp.AuthorizationRequest
+import my.ssdid.wallet.domain.oid4vp.CredentialRef
 import my.ssdid.wallet.domain.oid4vp.MatchResult
 import my.ssdid.wallet.domain.oid4vp.OpenId4VpHandler
 import my.ssdid.wallet.domain.oid4vp.PresentationReviewResult
@@ -64,7 +65,7 @@ class PresentationRequestViewModelTest {
     @Test
     fun setReviewResultTransitionsToCredentialMatch() {
         viewModel = PresentationRequestViewModel(handler, vault)
-        val match = MatchResult(testCred, "id-1", listOf("name"), listOf("email"))
+        val match = MatchResult(CredentialRef.SdJwt(testCred), "id-1", listOf("name"), listOf("email"))
         val authReq = AuthorizationRequest(clientId = "https://v.example.com", nonce = "n")
 
         viewModel.setReviewResult(PresentationReviewResult(authReq, listOf(match)))
@@ -79,7 +80,7 @@ class PresentationRequestViewModelTest {
     @Test
     fun requiredClaimsAreMarkedRequired() {
         viewModel = PresentationRequestViewModel(handler, vault)
-        val match = MatchResult(testCred, "id-1", listOf("name"), listOf("email"))
+        val match = MatchResult(CredentialRef.SdJwt(testCred), "id-1", listOf("name"), listOf("email"))
         val authReq = AuthorizationRequest(clientId = "https://v.example.com", nonce = "n")
 
         viewModel.setReviewResult(PresentationReviewResult(authReq, listOf(match)))
@@ -93,7 +94,7 @@ class PresentationRequestViewModelTest {
     @Test
     fun optionalClaimsDefaultToUnselected() {
         viewModel = PresentationRequestViewModel(handler, vault)
-        val match = MatchResult(testCred, "id-1", listOf("name"), listOf("email"))
+        val match = MatchResult(CredentialRef.SdJwt(testCred), "id-1", listOf("name"), listOf("email"))
         val authReq = AuthorizationRequest(clientId = "https://v.example.com", nonce = "n")
 
         viewModel.setReviewResult(PresentationReviewResult(authReq, listOf(match)))
@@ -107,7 +108,7 @@ class PresentationRequestViewModelTest {
     @Test
     fun toggleClaimFlipsOptionalSelection() {
         viewModel = PresentationRequestViewModel(handler, vault)
-        val match = MatchResult(testCred, "id-1", listOf("name"), listOf("email"))
+        val match = MatchResult(CredentialRef.SdJwt(testCred), "id-1", listOf("name"), listOf("email"))
         val authReq = AuthorizationRequest(clientId = "https://v.example.com", nonce = "n")
 
         viewModel.setReviewResult(PresentationReviewResult(authReq, listOf(match)))
@@ -121,7 +122,7 @@ class PresentationRequestViewModelTest {
     @Test
     fun toggleClaimDoesNotFlipRequired() {
         viewModel = PresentationRequestViewModel(handler, vault)
-        val match = MatchResult(testCred, "id-1", listOf("name"), listOf("email"))
+        val match = MatchResult(CredentialRef.SdJwt(testCred), "id-1", listOf("name"), listOf("email"))
         val authReq = AuthorizationRequest(clientId = "https://v.example.com", nonce = "n")
 
         viewModel.setReviewResult(PresentationReviewResult(authReq, listOf(match)))
@@ -146,7 +147,7 @@ class PresentationRequestViewModelTest {
     @Test
     fun approveWithNoIdentitySetsError() = runTest(testDispatcher) {
         viewModel = PresentationRequestViewModel(handler, vault)
-        val match = MatchResult(testCred, "id-1", listOf("name"), emptyList())
+        val match = MatchResult(CredentialRef.SdJwt(testCred), "id-1", listOf("name"), emptyList())
         val authReq = AuthorizationRequest(clientId = "https://v.example.com", nonce = "n")
 
         viewModel.setReviewResult(PresentationReviewResult(authReq, listOf(match)))
@@ -165,7 +166,7 @@ class PresentationRequestViewModelTest {
     @Test
     fun approveSuccessTransitionsToSuccess() = runTest(testDispatcher) {
         viewModel = PresentationRequestViewModel(handler, vault)
-        val match = MatchResult(testCred, "id-1", listOf("name"), emptyList())
+        val match = MatchResult(CredentialRef.SdJwt(testCred), "id-1", listOf("name"), emptyList())
         val authReq = AuthorizationRequest(
             clientId = "https://v.example.com",
             nonce = "n",
