@@ -3,6 +3,7 @@ package my.ssdid.wallet.domain.vault
 import my.ssdid.wallet.domain.crypto.CryptoProvider
 import my.ssdid.wallet.domain.crypto.Multibase
 import my.ssdid.wallet.domain.model.*
+import my.ssdid.wallet.domain.mdoc.StoredMDoc
 import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -212,4 +213,14 @@ class VaultImpl(
     override suspend fun storeStoredSdJwtVc(sdJwtVc: StoredSdJwtVc): Result<Unit> = runCatching {
         storage.saveSdJwtVc(sdJwtVc)
     }
+
+    override suspend fun storeMDoc(mdoc: StoredMDoc) {
+        storage.saveMDoc(mdoc)
+    }
+
+    override suspend fun listMDocs(): List<StoredMDoc> = storage.listMDocs()
+
+    override suspend fun getMDoc(id: String): StoredMDoc? = storage.getMDoc(id)
+
+    override suspend fun deleteMDoc(id: String) = storage.deleteMDoc(id)
 }

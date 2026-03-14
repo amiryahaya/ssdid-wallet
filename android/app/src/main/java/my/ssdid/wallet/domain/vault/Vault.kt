@@ -2,6 +2,7 @@ package my.ssdid.wallet.domain.vault
 
 import kotlinx.serialization.json.JsonObject
 import my.ssdid.wallet.domain.model.*
+import my.ssdid.wallet.domain.mdoc.StoredMDoc
 import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
 
 interface Vault {
@@ -20,4 +21,8 @@ interface Vault {
     suspend fun saveIdentity(identity: Identity, encryptedPrivateKey: ByteArray)
     suspend fun listStoredSdJwtVcs(): List<StoredSdJwtVc>
     suspend fun storeStoredSdJwtVc(sdJwtVc: StoredSdJwtVc): Result<Unit>
+    suspend fun storeMDoc(mdoc: StoredMDoc)
+    suspend fun listMDocs(): List<StoredMDoc>
+    suspend fun getMDoc(id: String): StoredMDoc?
+    suspend fun deleteMDoc(id: String)
 }

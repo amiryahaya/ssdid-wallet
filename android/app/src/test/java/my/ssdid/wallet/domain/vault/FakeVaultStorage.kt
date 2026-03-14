@@ -3,6 +3,7 @@ package my.ssdid.wallet.domain.vault
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.rotation.RotationEntry
+import my.ssdid.wallet.domain.mdoc.StoredMDoc
 import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
 
 class FakeVaultStorage : VaultStorage {
@@ -28,6 +29,11 @@ class FakeVaultStorage : VaultStorage {
     override suspend fun saveSdJwtVc(sdJwtVc: StoredSdJwtVc) { sdJwtVcs[sdJwtVc.id] = sdJwtVc }
     override suspend fun listSdJwtVcs() = sdJwtVcs.values.toList()
     override suspend fun deleteSdJwtVc(id: String) { sdJwtVcs.remove(id) }
+    private val mdocs = mutableMapOf<String, StoredMDoc>()
+    override suspend fun saveMDoc(mdoc: StoredMDoc) { mdocs[mdoc.id] = mdoc }
+    override suspend fun listMDocs() = mdocs.values.toList()
+    override suspend fun getMDoc(id: String) = mdocs[id]
+    override suspend fun deleteMDoc(id: String) { mdocs.remove(id) }
     override suspend fun saveRecoveryPublicKey(keyId: String, encryptedPublicKey: ByteArray) { recoveryKeys[keyId] = encryptedPublicKey }
     override suspend fun getRecoveryPublicKey(keyId: String) = recoveryKeys[keyId]
     override suspend fun savePreRotatedKey(keyId: String, encryptedPrivateKey: ByteArray, publicKey: ByteArray) {
