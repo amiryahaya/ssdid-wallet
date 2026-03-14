@@ -208,4 +208,8 @@ class VaultImpl(
         storage.saveIdentity(identity, encryptedPrivateKey)
 
     override suspend fun listStoredSdJwtVcs(): List<StoredSdJwtVc> = storage.listSdJwtVcs()
+
+    override suspend fun storeStoredSdJwtVc(sdJwtVc: StoredSdJwtVc): Result<Unit> = runCatching {
+        storage.saveSdJwtVc(sdJwtVc)
+    }
 }

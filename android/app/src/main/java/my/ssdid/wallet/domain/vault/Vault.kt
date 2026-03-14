@@ -19,4 +19,5 @@ interface Vault {
     suspend fun getEncryptedPrivateKey(keyId: String): ByteArray?
     suspend fun saveIdentity(identity: Identity, encryptedPrivateKey: ByteArray)
     suspend fun listStoredSdJwtVcs(): List<StoredSdJwtVc>
+    suspend fun storeStoredSdJwtVc(sdJwtVc: StoredSdJwtVc): Result<Unit>
 }
