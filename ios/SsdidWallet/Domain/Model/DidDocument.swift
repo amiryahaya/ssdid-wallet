@@ -8,12 +8,15 @@ struct DidDocument: Codable {
     var authentication: [String] = []
     var assertionMethod: [String] = []
     var capabilityInvocation: [String] = []
+    var keyAgreement: [String] = []
+    var service: [Service] = []
     var nextKeyHash: String? = nil
 
     enum CodingKeys: String, CodingKey {
         case context = "@context"
         case id, controller, verificationMethod
-        case authentication, assertionMethod, capabilityInvocation, nextKeyHash
+        case authentication, assertionMethod, capabilityInvocation
+        case keyAgreement, service, nextKeyHash
     }
 
     init(
@@ -24,6 +27,8 @@ struct DidDocument: Codable {
         authentication: [String] = [],
         assertionMethod: [String] = [],
         capabilityInvocation: [String] = [],
+        keyAgreement: [String] = [],
+        service: [Service] = [],
         nextKeyHash: String? = nil
     ) {
         self.context = context
@@ -33,6 +38,8 @@ struct DidDocument: Codable {
         self.authentication = authentication
         self.assertionMethod = assertionMethod
         self.capabilityInvocation = capabilityInvocation
+        self.keyAgreement = keyAgreement
+        self.service = service
         self.nextKeyHash = nextKeyHash
     }
 
@@ -58,4 +65,10 @@ struct DidDocument: Codable {
             capabilityInvocation: [keyId]
         )
     }
+}
+
+struct Service: Codable {
+    let id: String
+    let type: String
+    let serviceEndpoint: String
 }
