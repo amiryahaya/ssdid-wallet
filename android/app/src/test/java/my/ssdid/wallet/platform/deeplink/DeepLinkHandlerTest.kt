@@ -596,7 +596,7 @@ class DeepLinkHandlerTest {
         assertThat(result!!.action).isEqualTo("authorize")
         assertThat(result.callbackUrl).contains("openid4vp")
         assertThat(result.callbackUrl).contains("dcql_query")
-        assertThat(result.sessionId).isEqualTo("myapp://ssdid/callback")
+        assertThat(result.callbackScheme).isEqualTo("myapp://ssdid/callback")
     }
 
     @Test
@@ -648,7 +648,7 @@ class DeepLinkHandlerTest {
             action = "authorize",
             serverUrl = "",
             callbackUrl = "openid4vp://?dcql_query=...",
-            sessionId = "myapp://ssdid/callback"
+            callbackScheme = "myapp://ssdid/callback"
         )
         val route = deepLink.toNavRoute()
         assertThat(route).isNotNull()
@@ -665,5 +665,35 @@ class DeepLinkHandlerTest {
         val route = deepLink.toNavRoute()
         assertThat(route).isNotNull()
         assertThat(route).contains("credential_offer")
+    }
+
+    @Test
+    fun `parse authorize rejects javascript callback_scheme`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "authorize",
+            queryParams = mapOf(
+                "dcql_query" to """{"credentials":[]}""",
+                "response_url" to "https://myapp.com/api/response",
+                "callback_scheme" to "javascript:alert(1)",
+                "nonce" to "n-1"
+            )
+        )
+        assertThat(DeepLinkHandler.parse(uri)).isNull()
+    }
+
+    @Test
+    fun `parse authenticate handles CSV accepted_algorithms`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "authenticate",
+            queryParams = mapOf(
+                "server_url" to "https://demo.ssdid.my",
+                "accepted_algorithms" to "Ed25519,EcdsaP256"
+            )
+        )
+        val result = DeepLinkHandler.parse(uri)
+        assertThat(result).isNotNull()
+        assertThat(result!!.acceptedAlgorithms).containsExactly("Ed25519", "EcdsaP256")
     }
 }

@@ -18,7 +18,8 @@ data class DeepLinkAction(
     val sessionId: String = "",
     val token: String = "",
     val requestedClaims: List<ClaimRequest> = emptyList(),
-    val acceptedAlgorithms: List<String> = emptyList()
+    val acceptedAlgorithms: List<String> = emptyList(),
+    val callbackScheme: String = ""
 ) {
     /**
      * Returns the navigation route for this deep link action,
@@ -52,6 +53,7 @@ object DeepLinkHandler {
      * Parses a deep link URI with scheme `ssdid://`.
      * Returns null if the URI is not a valid SSDID deep link.
      */
+    // "authorize" is included here for the gate check but is handled by an early-return branch in parseSsdid()
     private val VALID_ACTIONS = setOf("register", "authenticate", "sign", "credential-offer", "invite", "authorize")
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -103,7 +105,7 @@ object DeepLinkHandler {
                 action = "authorize",
                 serverUrl = "",
                 callbackUrl = oid4vpUri.toString(),
-                sessionId = callbackScheme  // store callback_scheme in sessionId field
+                callbackScheme = callbackScheme  // use dedicated field instead of sessionId
             )
         }
 
@@ -141,7 +143,9 @@ object DeepLinkHandler {
             val raw = uri.getQueryParameter("accepted_algorithms") ?: ""
             if (raw.isNotEmpty()) json.decodeFromString<List<String>>(raw) else emptyList()
         } catch (_: Exception) {
-            emptyList()
+            // Fallback: try CSV format for backwards compatibility
+            val raw = uri.getQueryParameter("accepted_algorithms") ?: ""
+            if (raw.isNotEmpty()) raw.split(",").map { it.trim() }.filter { it.isNotEmpty() } else emptyList()
         }
 
         return DeepLinkAction(
