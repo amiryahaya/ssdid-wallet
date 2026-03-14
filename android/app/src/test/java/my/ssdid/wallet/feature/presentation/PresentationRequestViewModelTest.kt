@@ -185,7 +185,7 @@ class PresentationRequestViewModelTest {
         )
         coEvery { vault.listIdentities() } returns listOf(testIdentity)
         coEvery { vault.sign(any(), any()) } returns Result.success(ByteArray(64))
-        io.mockk.every {
+        coEvery {
             handler.submitPresentation(
                 authRequest = any(),
                 matchResult = any(),

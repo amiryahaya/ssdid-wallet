@@ -14,7 +14,9 @@ data class TokenResponse(
     val tokenType: String,
     val cNonce: String?,
     val cNonceExpiresIn: Int?
-)
+) {
+    override fun toString() = "TokenResponse(accessToken=<redacted>, tokenType=$tokenType, cNonce=$cNonce, cNonceExpiresIn=$cNonceExpiresIn)"
+}
 
 class TokenClient(private val client: OkHttpClient) {
 

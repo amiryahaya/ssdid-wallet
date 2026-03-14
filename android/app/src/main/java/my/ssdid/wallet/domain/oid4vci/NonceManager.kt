@@ -7,8 +7,9 @@ package my.ssdid.wallet.domain.oid4vci
  * that the wallet must include in subsequent proof-of-possession JWTs.
  */
 class NonceManager {
-    @Volatile private var nonce: String? = null
-    @Volatile private var expiresAt: Long = 0L
+    private data class NonceState(val value: String, val expiresAt: Long)
+
+    @Volatile private var state: NonceState? = null
 
     /**
      * Updates the stored nonce and its expiry.
@@ -17,22 +18,20 @@ class NonceManager {
      * @param expiresIn Nonce lifetime in seconds
      */
     fun update(nonce: String, expiresIn: Int) {
-        this.nonce = nonce
-        this.expiresAt = System.currentTimeMillis() / 1000 + expiresIn
+        state = NonceState(nonce, System.currentTimeMillis() / 1000 + expiresIn)
     }
 
     /** Returns the current nonce, or null if none has been set. */
-    fun current(): String? = nonce
+    fun current(): String? = state?.value
 
     /** Returns true if the nonce is missing or has expired. */
     fun isExpired(): Boolean {
-        if (nonce == null) return true
-        return System.currentTimeMillis() / 1000 >= expiresAt
+        val s = state ?: return true
+        return System.currentTimeMillis() / 1000 >= s.expiresAt
     }
 
     /** Clears the stored nonce. */
     fun clear() {
-        nonce = null
-        expiresAt = 0L
+        state = null
     }
 }

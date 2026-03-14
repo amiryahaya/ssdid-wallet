@@ -131,7 +131,7 @@ class CredentialOfferViewModelTest {
             disclosableClaims = emptyList(),
             issuedAt = 1700000000L
         )
-        every {
+        coEvery {
             handler.acceptOffer(
                 offer = any(),
                 metadata = any(),
@@ -159,7 +159,7 @@ class CredentialOfferViewModelTest {
     fun acceptOfferDeferredTransitionsToDeferredState() = runTest(testDispatcher) {
         coEvery { vault.listIdentities() } returns listOf(testIdentity)
         every { handler.processOffer(any()) } returns Result.success(testReview)
-        every {
+        coEvery {
             handler.acceptOffer(
                 offer = any(),
                 metadata = any(),

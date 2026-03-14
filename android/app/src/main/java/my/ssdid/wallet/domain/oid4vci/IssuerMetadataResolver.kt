@@ -14,42 +14,56 @@ class IssuerMetadataResolver(private val client: OkHttpClient) {
     private val cache = ConcurrentHashMap<String, IssuerMetadata>()
 
     fun resolve(issuerUrl: String): Result<IssuerMetadata> = runCatching {
-        cache[issuerUrl]?.let { return@runCatching it }
+        cache.computeIfAbsent(issuerUrl) { key ->
+            // Fetch credential issuer metadata
+            val issuerMetaUrl = "${key.trimEnd('/')}/.well-known/openid-credential-issuer"
+            val issuerMetaJson = fetchJson(issuerMetaUrl)
 
-        // Fetch credential issuer metadata
-        val issuerMetaUrl = "${issuerUrl.trimEnd('/')}/.well-known/openid-credential-issuer"
-        val issuerMetaJson = fetchJson(issuerMetaUrl)
+            val credentialEndpoint = issuerMetaJson["credential_endpoint"]?.jsonPrimitive?.content
+                ?: throw IllegalStateException("Missing credential_endpoint")
 
-        val credentialEndpoint = issuerMetaJson["credential_endpoint"]?.jsonPrimitive?.content
-            ?: throw IllegalStateException("Missing credential_endpoint")
+            val configs = issuerMetaJson["credential_configurations_supported"]?.jsonObject
+                ?.mapValues { it.value.jsonObject }
+                ?: emptyMap()
 
-        val configs = issuerMetaJson["credential_configurations_supported"]?.jsonObject
-            ?.mapValues { it.value.jsonObject }
-            ?: emptyMap()
+            // Determine authorization server
+            val explicitAuthServer = issuerMetaJson["authorization_server"]?.jsonPrimitive?.contentOrNull
 
-        // Determine authorization server
-        val authServer = issuerMetaJson["authorization_server"]?.jsonPrimitive?.contentOrNull
-            ?: issuerUrl
+            // Validate explicit authorization server URL to prevent SSRF
+            if (explicitAuthServer != null) {
+                validateUrl(explicitAuthServer)
+            }
 
-        // Fetch OAuth authorization server metadata
-        val authMetaUrl = "${authServer.trimEnd('/')}/.well-known/oauth-authorization-server"
-        val authMetaJson = fetchJson(authMetaUrl)
+            val authServer = explicitAuthServer ?: key
 
-        val tokenEndpoint = authMetaJson["token_endpoint"]?.jsonPrimitive?.content
-            ?: throw IllegalStateException("Missing token_endpoint")
+            // Fetch OAuth authorization server metadata
+            val authMetaUrl = "${authServer.trimEnd('/')}/.well-known/oauth-authorization-server"
+            val authMetaJson = fetchJson(authMetaUrl)
 
-        val authorizationEndpoint = authMetaJson["authorization_endpoint"]?.jsonPrimitive?.contentOrNull
+            val tokenEndpoint = authMetaJson["token_endpoint"]?.jsonPrimitive?.content
+                ?: throw IllegalStateException("Missing token_endpoint")
 
-        val metadata = IssuerMetadata(
-            credentialIssuer = issuerUrl,
-            credentialEndpoint = credentialEndpoint,
-            credentialConfigurationsSupported = configs,
-            tokenEndpoint = tokenEndpoint,
-            authorizationEndpoint = authorizationEndpoint
-        )
+            val authorizationEndpoint = authMetaJson["authorization_endpoint"]?.jsonPrimitive?.contentOrNull
 
-        cache[issuerUrl] = metadata
-        metadata
+            IssuerMetadata(
+                credentialIssuer = key,
+                credentialEndpoint = credentialEndpoint,
+                credentialConfigurationsSupported = configs,
+                tokenEndpoint = tokenEndpoint,
+                authorizationEndpoint = authorizationEndpoint
+            )
+        }
+    }
+
+    private fun validateUrl(url: String) {
+        require(url.startsWith("https://")) {
+            "Authorization server URL must use HTTPS: $url"
+        }
+        val host = java.net.URI(url).host?.lowercase()
+            ?: throw IllegalArgumentException("Invalid authorization server URL: $url")
+        require(host != "localhost" && host != "127.0.0.1" && host != "::1") {
+            "Authorization server URL must not point to a loopback address: $url"
+        }
     }
 
     fun clearCache() {
