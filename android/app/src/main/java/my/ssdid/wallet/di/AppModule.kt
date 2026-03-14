@@ -44,6 +44,10 @@ import my.ssdid.wallet.platform.device.AndroidDeviceInfoProvider
 import my.ssdid.wallet.domain.vault.KeystoreManager
 import my.ssdid.wallet.domain.settings.SettingsRepository
 import my.ssdid.wallet.platform.storage.DataStoreSettingsRepository
+import my.ssdid.wallet.domain.oid4vp.DcqlMatcher
+import my.ssdid.wallet.domain.oid4vp.OpenId4VpHandler
+import my.ssdid.wallet.domain.oid4vp.OpenId4VpTransport
+import my.ssdid.wallet.domain.oid4vp.PresentationDefinitionMatcher
 import my.ssdid.wallet.domain.notify.AndroidNotifyDispatcher
 import my.ssdid.wallet.domain.notify.LocalNotificationStorage
 import my.ssdid.wallet.domain.notify.NotifyLifecycleObserver
@@ -270,4 +274,26 @@ object AppModule {
         notifyManager: NotifyManager,
         vault: Vault
     ): NotifyLifecycleObserver = NotifyLifecycleObserver(context.applicationContext as android.app.Application, notifyManager, vault)
+
+    @Provides
+    @Singleton
+    fun provideOpenId4VpTransport(okHttpClient: OkHttpClient): OpenId4VpTransport =
+        OpenId4VpTransport(okHttpClient)
+
+    @Provides
+    @Singleton
+    fun providePresentationDefinitionMatcher(): PresentationDefinitionMatcher =
+        PresentationDefinitionMatcher()
+
+    @Provides
+    @Singleton
+    fun provideDcqlMatcher(): DcqlMatcher = DcqlMatcher()
+
+    @Provides
+    @Singleton
+    fun provideOpenId4VpHandler(
+        transport: OpenId4VpTransport,
+        peMatcher: PresentationDefinitionMatcher,
+        dcqlMatcher: DcqlMatcher
+    ): OpenId4VpHandler = OpenId4VpHandler(transport, peMatcher, dcqlMatcher)
 }

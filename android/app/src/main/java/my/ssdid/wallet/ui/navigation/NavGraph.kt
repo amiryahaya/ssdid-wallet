@@ -36,6 +36,7 @@ import my.ssdid.wallet.feature.invite.InviteAcceptScreen
 import my.ssdid.wallet.feature.scan.ScanQrScreen
 import my.ssdid.wallet.feature.settings.SettingsScreen
 import my.ssdid.wallet.feature.notifications.NotificationsScreen
+import my.ssdid.wallet.feature.presentation.PresentationRequestScreen
 import my.ssdid.wallet.feature.transaction.TxSigningScreen
 
 @Composable
@@ -389,8 +390,12 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
                 navArgument("uri") { type = NavType.StringType; defaultValue = "" }
             )
         ) {
-            // Placeholder — real PresentationRequestScreen will be added in Task 17
-            androidx.compose.material3.Text("Presentation Request")
+            PresentationRequestScreen(
+                onBack = { navController.popBackStack() },
+                onComplete = {
+                    navController.popBackStack(Screen.WalletHome.route, inclusive = false)
+                }
+            )
         }
         composable(Screen.SocialRecoveryRestore.route) {
             SocialRecoveryRestoreScreen(
