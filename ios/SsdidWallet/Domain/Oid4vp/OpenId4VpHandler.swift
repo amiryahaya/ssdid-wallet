@@ -34,8 +34,8 @@ class OpenId4VpHandler {
         switch parseResult {
         case .success(let parsed):
             // If by-reference, fetch the request object
-            if parsed.requestUri != nil {
-                authRequest = try transport.fetchRequestObject(requestUri: parsed.requestUri!)
+            if let requestUri = parsed.requestUri {
+                authRequest = try transport.fetchRequestObject(requestUri: requestUri)
             } else {
                 authRequest = parsed
             }

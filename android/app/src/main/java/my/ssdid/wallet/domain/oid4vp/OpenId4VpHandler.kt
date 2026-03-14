@@ -22,26 +22,28 @@ class OpenId4VpHandler(
         var authRequest = AuthorizationRequest.parse(uri).getOrThrow()
 
         // Fetch request object if by-reference
-        if (authRequest.requestUri != null) {
-            authRequest = transport.fetchRequestObject(authRequest.requestUri!!).getOrThrow()
+        authRequest.requestUri?.let { uri ->
+            authRequest = transport.fetchRequestObject(uri).getOrThrow()
         }
 
         // Match using appropriate query language
         val (matchResults, query) = when {
             authRequest.presentationDefinition != null -> {
-                val q = peMatcher.toCredentialQuery(authRequest.presentationDefinition!!)
-                peMatcher.match(authRequest.presentationDefinition!!, storedVcs) to q
+                val pd = authRequest.presentationDefinition
+                val q = peMatcher.toCredentialQuery(pd)
+                peMatcher.match(pd, storedVcs) to q
             }
             authRequest.dcqlQuery != null -> {
-                val q = dcqlMatcher.toCredentialQuery(authRequest.dcqlQuery!!)
-                dcqlMatcher.match(authRequest.dcqlQuery!!, storedVcs) to q
+                val dq = authRequest.dcqlQuery
+                val q = dcqlMatcher.toCredentialQuery(dq)
+                dcqlMatcher.match(dq, storedVcs) to q
             }
             else -> throw IllegalStateException("No query in authorization request")
         }
 
         if (matchResults.isEmpty()) {
             authRequest.responseUri?.let { responseUri ->
-                transport.postError(responseUri, "no_credentials_available", authRequest.state)
+                transport.postError(responseUri, "access_denied", authRequest.state)
             }
             throw NoMatchingCredentialsException("No stored credentials match the request")
         }

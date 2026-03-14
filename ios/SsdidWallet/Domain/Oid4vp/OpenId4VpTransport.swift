@@ -95,45 +95,91 @@ class OpenId4VpTransport {
     }
 
     static func parseJsonRequest(_ json: String) -> Result<AuthorizationRequest, Error> {
-        guard let data = json.data(using: .utf8),
-              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            return .failure(OpenId4VpError.invalidRequestObject)
-        }
-
-        guard let clientId = obj["client_id"] as? String else {
-            return .failure(OpenId4VpError.missingClientId)
-        }
-
-        var pdString: String? = nil
-        if let pd = obj["presentation_definition"] {
-            if let pdData = try? JSONSerialization.data(withJSONObject: pd) {
-                pdString = String(data: pdData, encoding: .utf8)
+        do {
+            guard let data = json.data(using: .utf8),
+                  let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                throw OpenId4VpError.invalidRequestObject
             }
-        }
 
-        var dcqlString: String? = nil
-        if let dcql = obj["dcql_query"] {
-            if let dcqlData = try? JSONSerialization.data(withJSONObject: dcql) {
-                dcqlString = String(data: dcqlData, encoding: .utf8)
+            guard let clientId = obj["client_id"] as? String else {
+                throw OpenId4VpError.missingClientId
             }
-        }
 
-        return .success(AuthorizationRequest(
-            clientId: clientId,
-            responseType: obj["response_type"] as? String,
-            responseMode: obj["response_mode"] as? String,
-            responseUri: obj["response_uri"] as? String,
-            nonce: obj["nonce"] as? String,
-            state: obj["state"] as? String,
-            presentationDefinition: pdString,
-            dcqlQuery: dcqlString,
-            requestUri: nil
-        ))
+            // Validate client_id format
+            let isHttps = clientId.hasPrefix("https://")
+            let isDid = clientId.hasPrefix("did:")
+            guard isHttps || isDid else {
+                throw OpenId4VpError.invalidClientId(clientId)
+            }
+
+            // Validate response_type
+            guard let responseType = obj["response_type"] as? String else {
+                throw OpenId4VpError.missingResponseType
+            }
+            guard responseType == "vp_token" else {
+                throw OpenId4VpError.unsupportedResponseType(responseType)
+            }
+
+            // Validate nonce
+            guard let nonce = obj["nonce"] as? String else {
+                throw OpenId4VpError.missingNonce
+            }
+
+            // Validate response_mode
+            let responseMode = (obj["response_mode"] as? String) ?? "direct_post"
+            guard responseMode == "direct_post" else {
+                throw OpenId4VpError.unsupportedResponseMode(responseMode)
+            }
+
+            // Validate response_uri
+            guard let responseUri = obj["response_uri"] as? String else {
+                throw OpenId4VpError.missingResponseUri
+            }
+            guard responseUri.hasPrefix("https://") else {
+                throw OpenId4VpError.nonHttpsResponseUri(responseUri)
+            }
+
+            var pdString: String? = nil
+            if let pd = obj["presentation_definition"] {
+                if let pdData = try? JSONSerialization.data(withJSONObject: pd) {
+                    pdString = String(data: pdData, encoding: .utf8)
+                }
+            }
+
+            var dcqlString: String? = nil
+            if let dcql = obj["dcql_query"] {
+                if let dcqlData = try? JSONSerialization.data(withJSONObject: dcql) {
+                    dcqlString = String(data: dcqlData, encoding: .utf8)
+                }
+            }
+
+            if pdString != nil && dcqlString != nil {
+                throw OpenId4VpError.ambiguousQuery
+            }
+
+            if pdString == nil && dcqlString == nil {
+                throw OpenId4VpError.noQuery
+            }
+
+            return .success(AuthorizationRequest(
+                clientId: clientId,
+                responseType: responseType,
+                responseMode: responseMode,
+                responseUri: responseUri,
+                nonce: nonce,
+                state: obj["state"] as? String,
+                presentationDefinition: pdString,
+                dcqlQuery: dcqlString,
+                requestUri: nil
+            ))
+        } catch {
+            return .failure(error)
+        }
     }
 }
 
 private extension String {
     var urlEncoded: String {
-        addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? self
+        addingPercentEncoding(withAllowedCharacters: .alphanumerics.union(.init(charactersIn: "-._~"))) ?? self
     }
 }

@@ -341,8 +341,8 @@ class OpenId4VpIntegrationTest {
         assertThat(result.isFailure).isTrue()
         assertThat(result.exceptionOrNull()).isInstanceOf(NoMatchingCredentialsException::class.java)
 
-        // Verify the no_credentials_available error was posted
-        assertThat(errorSlot.captured).isEqualTo("no_credentials_available")
+        // Verify the access_denied error was posted (per OpenID4VP §7.5)
+        assertThat(errorSlot.captured).isEqualTo("access_denied")
         assertThat(errorStateSlot.captured).isEqualTo("test-state-456")
     }
 }

@@ -27,6 +27,7 @@ data class AuthorizationRequest(
 
             // By-reference: only client_id and request_uri needed
             if (requestUri != null) {
+                validateClientId(clientId)
                 return@runCatching AuthorizationRequest(
                     clientId = clientId,
                     requestUri = requestUri

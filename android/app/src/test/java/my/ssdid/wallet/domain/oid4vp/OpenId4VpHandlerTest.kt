@@ -136,7 +136,7 @@ class OpenId4VpHandlerTest {
         assertThat(result.isFailure).isTrue()
         assertThat(result.exceptionOrNull()).isInstanceOf(NoMatchingCredentialsException::class.java)
 
-        verify { transport.postError("https://verifier.example.com/response", "no_credentials_available", "state-3") }
+        verify { transport.postError("https://verifier.example.com/response", "access_denied", "state-3") }
     }
 
     @Test

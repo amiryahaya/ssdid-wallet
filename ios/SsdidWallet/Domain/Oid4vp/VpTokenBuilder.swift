@@ -34,7 +34,7 @@ class VpTokenBuilder {
         descriptorId: String
     ) -> PresentationSubmission {
         PresentationSubmission(
-            id: "submission-\(Int(Date().timeIntervalSince1970))",
+            id: UUID().uuidString,
             definitionId: definitionId,
             descriptorMap: [
                 DescriptorMapEntry(id: descriptorId, format: "vc+sd-jwt", path: "$")

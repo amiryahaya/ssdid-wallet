@@ -82,7 +82,7 @@ class PresentationRequestViewModel @Inject constructor(
                                 name = info.name,
                                 required = info.required,
                                 available = info.available,
-                                selected = info.required || info.available
+                                selected = info.required
                             )
                         }
 

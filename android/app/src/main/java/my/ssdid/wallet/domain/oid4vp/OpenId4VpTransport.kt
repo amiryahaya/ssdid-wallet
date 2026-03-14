@@ -8,14 +8,13 @@ class OpenId4VpTransport(private val client: OkHttpClient) {
 
     fun fetchRequestObject(requestUri: String): Result<AuthorizationRequest> = runCatching {
         val request = Request.Builder().url(requestUri).get().build()
-        val response = client.newCall(request).execute()
-        if (!response.isSuccessful) {
-            throw RuntimeException("Failed to fetch request object: HTTP ${response.code}")
+        val body = client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                throw RuntimeException("Failed to fetch request object: HTTP ${response.code}")
+            }
+            response.body?.string()
+                ?: throw RuntimeException("Empty response from request_uri")
         }
-        val body = response.body?.string()
-            ?: throw RuntimeException("Empty response from request_uri")
-        // The response is a JWT or JSON. For now, parse as authorization request params.
-        // In a full implementation, this would decode a signed JWT.
         AuthorizationRequest.parseJson(body).getOrThrow()
     }
 
@@ -36,9 +35,10 @@ class OpenId4VpTransport(private val client: OkHttpClient) {
             .url(responseUri)
             .post(formBuilder.build())
             .build()
-        val response = client.newCall(request).execute()
-        if (!response.isSuccessful) {
-            throw RuntimeException("Failed to post VP response: HTTP ${response.code}")
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                throw RuntimeException("Failed to post VP response: HTTP ${response.code}")
+            }
         }
     }
 
@@ -55,9 +55,10 @@ class OpenId4VpTransport(private val client: OkHttpClient) {
             .url(responseUri)
             .post(formBuilder.build())
             .build()
-        val response = client.newCall(request).execute()
-        if (!response.isSuccessful) {
-            throw RuntimeException("Failed to post error: HTTP ${response.code}")
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                throw RuntimeException("Failed to post error: HTTP ${response.code}")
+            }
         }
     }
 }

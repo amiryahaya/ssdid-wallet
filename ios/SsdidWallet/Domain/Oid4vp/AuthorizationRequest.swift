@@ -31,6 +31,7 @@ struct AuthorizationRequest {
 
             // By-reference: only client_id and request_uri needed
             if let requestUri = requestUri {
+                try validateClientId(clientId)
                 return AuthorizationRequest(
                     clientId: clientId,
                     responseType: nil,
