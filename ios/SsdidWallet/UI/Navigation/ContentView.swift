@@ -80,6 +80,10 @@ struct RootView: View {
             router.push(.credentialOffer(issuerUrl: issuerUrl, offerId: offerId))
         case .invite(let serverUrl, let token, let callbackUrl):
             router.push(.inviteAccept(serverUrl: serverUrl, token: token, callbackUrl: callbackUrl))
+        case .openid4vp(let rawUri):
+            router.push(.presentationRequest(rawUri: rawUri))
+        case .openidCredentialOffer(let offerData):
+            router.push(.credentialOffer(issuerUrl: "", offerId: offerData))
         }
     }
 
@@ -146,6 +150,9 @@ struct RootView: View {
             DeviceEnrollScreen(keyId: keyId, mode: mode)
         case .inviteAccept(let serverUrl, let token, let callbackUrl):
             InviteAcceptScreen(serverUrl: serverUrl, token: token, callbackUrl: callbackUrl)
+        case .presentationRequest(let rawUri):
+            // Placeholder — PresentationRequestScreen will be created in Task 13
+            Text("Presentation Request: \(rawUri)")
         }
     }
 }
