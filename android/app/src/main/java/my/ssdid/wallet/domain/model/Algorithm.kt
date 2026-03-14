@@ -7,7 +7,8 @@ enum class Algorithm(
     val w3cType: String,
     val proofType: String,
     val isPostQuantum: Boolean,
-    val kazSignLevel: Int? = null
+    val kazSignLevel: Int? = null,
+    val isKeyAgreement: Boolean = false
 ) {
     // --- Classical ---
     ED25519(
@@ -125,6 +126,14 @@ enum class Algorithm(
         w3cType = "SlhDsaShake256fVerificationKey2024",
         proofType = "SlhDsaShake256fSignature2024",
         isPostQuantum = true
+    ),
+
+    // --- Key Agreement ---
+    X25519(
+        w3cType = "X25519KeyAgreementKey2020",
+        proofType = "",
+        isPostQuantum = false,
+        isKeyAgreement = true
     );
 
     val isKazSign: Boolean get() = kazSignLevel != null
@@ -163,7 +172,8 @@ enum class Algorithm(
             "SLH-DSA-SHAKE-192s" to SLH_DSA_SHAKE_192S,
             "SLH-DSA-SHAKE-192f" to SLH_DSA_SHAKE_192F,
             "SLH-DSA-SHAKE-256s" to SLH_DSA_SHAKE_256S,
-            "SLH-DSA-SHAKE-256f" to SLH_DSA_SHAKE_256F
+            "SLH-DSA-SHAKE-256f" to SLH_DSA_SHAKE_256F,
+            "X25519" to X25519
         )
 
         private val reverseJwaMap: Map<Algorithm, String> =
