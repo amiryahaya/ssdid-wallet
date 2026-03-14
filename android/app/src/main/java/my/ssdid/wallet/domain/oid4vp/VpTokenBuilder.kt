@@ -37,6 +37,12 @@ object VpTokenBuilder {
 
         val selectedDisclosures = parsed.disclosures.filter { it.claimName in selectedClaims }
 
+        val resolvedNames = selectedDisclosures.map { it.claimName }.toSet()
+        val missing = selectedClaims.toSet() - resolvedNames
+        require(missing.isEmpty()) {
+            "Requested claims not found in credential disclosures: $missing"
+        }
+
         // Build the SD-JWT with selected disclosures (without KB-JWT)
         val sdJwtWithDisclosures = buildString {
             append(parsed.issuerJwt)
