@@ -94,6 +94,63 @@ class MDocVpTokenBuilderTest {
         assertThat(doc["deviceSigned"]).isNotNull()
     }
 
+    // --- G12: signer output verification in COSE structure ---
+
+    @Test
+    fun buildIncludesSignerOutputInDeviceSignature() {
+        val mdoc = buildTestStoredMDoc()
+        val requested = mapOf("org.iso.18013.5.1" to listOf("family_name"))
+        val expectedSignature = byteArrayOf(0x01, 0x02, 0x03, 0x04, 0x05)
+
+        val vpToken = MDocVpTokenBuilder.build(
+            storedMDoc = mdoc,
+            requestedElements = requested,
+            clientId = "verifier.example",
+            responseUri = "https://verifier.example/response",
+            nonce = "nonce123",
+            signer = { _ -> expectedSignature }
+        )
+
+        val bytes = android.util.Base64.decode(vpToken, android.util.Base64.URL_SAFE)
+        val response = CBORObject.DecodeFromBytes(bytes)
+        val doc = response["documents"][0]
+        val deviceAuth = doc["deviceSigned"]["deviceAuth"]
+
+        // deviceSignature is a COSE_Sign1 tagged with 18
+        val coseSign1 = deviceAuth["deviceSignature"]
+        assertThat(coseSign1).isNotNull()
+        // The 4th element of COSE_Sign1 is the signature
+        val sig = coseSign1[3].GetByteString()
+        assertThat(sig).isEqualTo(expectedSignature)
+    }
+
+    @Test
+    fun buildSignsCorrectSigStructure() {
+        val mdoc = buildTestStoredMDoc()
+        val requested = mapOf("org.iso.18013.5.1" to listOf("family_name"))
+        var capturedSignInput: ByteArray? = null
+
+        MDocVpTokenBuilder.build(
+            storedMDoc = mdoc,
+            requestedElements = requested,
+            clientId = "verifier.example",
+            responseUri = "https://verifier.example/response",
+            nonce = "nonce123",
+            signer = { data ->
+                capturedSignInput = data
+                byteArrayOf(0xAA.toByte())
+            }
+        )
+
+        // Verify the signer received a valid CBOR Sig_structure
+        assertThat(capturedSignInput).isNotNull()
+        val sigStructure = CBORObject.DecodeFromBytes(capturedSignInput!!)
+        assertThat(sigStructure.size()).isEqualTo(4)
+        assertThat(sigStructure[0].AsString()).isEqualTo("Signature1")
+        // external_aad should be empty
+        assertThat(sigStructure[2].GetByteString()).isEmpty()
+    }
+
     @Test
     fun buildAppliesSelectiveDisclosure() {
         val mdoc = buildTestStoredMDoc()

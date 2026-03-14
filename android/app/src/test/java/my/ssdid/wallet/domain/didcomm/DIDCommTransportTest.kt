@@ -42,6 +42,19 @@ class DIDCommTransportTest {
         assertThat(request.body.readUtf8()).isEqualTo("""{"ciphertext":"test-data"}""")
     }
 
+    // --- G6: 4xx client error ---
+
+    @Test
+    fun sendReturnsFailureOn4xxError() {
+        server.enqueue(MockResponse().setResponseCode(403).setBody("Forbidden"))
+        val packed = "data".toByteArray()
+        val result = transport.send(packed, server.url("/didcomm").toString())
+        assertThat(result.isFailure).isTrue()
+        val exception = result.exceptionOrNull()
+        assertThat(exception).isInstanceOf(DIDCommTransportException::class.java)
+        assertThat(exception!!.message).contains("403")
+    }
+
     @Test
     fun sendReturnsFailureOnHttpError() {
         server.enqueue(MockResponse().setResponseCode(500).setBody("Internal Server Error"))

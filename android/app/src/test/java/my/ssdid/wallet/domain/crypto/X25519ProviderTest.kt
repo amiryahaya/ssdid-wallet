@@ -41,6 +41,32 @@ class X25519ProviderTest {
         assertThat(sharedSecretAlice).isEqualTo(sharedSecretBob)
     }
 
+    // --- G15: wrong-length key inputs ---
+
+    @Test(expected = Exception::class)
+    fun `deriveSharedSecret rejects short private key`() {
+        val bob = provider.generateKeyPair()
+        provider.deriveSharedSecret(ByteArray(16), bob.publicKey)
+    }
+
+    @Test(expected = Exception::class)
+    fun `deriveSharedSecret rejects short public key`() {
+        val alice = provider.generateKeyPair()
+        provider.deriveSharedSecret(alice.privateKey, ByteArray(16))
+    }
+
+    @Test
+    fun `deriveSharedSecret with oversized key uses first 32 bytes`() {
+        // BouncyCastle X25519 takes 32 bytes from offset 0, so oversized keys
+        // silently use only the first 32 bytes rather than throwing
+        val alice = provider.generateKeyPair()
+        val bob = provider.generateKeyPair()
+        val oversized = alice.privateKey + ByteArray(32)
+        val secretNormal = provider.deriveSharedSecret(alice.privateKey, bob.publicKey)
+        val secretOversized = provider.deriveSharedSecret(oversized, bob.publicKey)
+        assertThat(secretOversized).isEqualTo(secretNormal)
+    }
+
     @Test
     fun `different key pairs produce different shared secrets`() {
         val alice = provider.generateKeyPair()

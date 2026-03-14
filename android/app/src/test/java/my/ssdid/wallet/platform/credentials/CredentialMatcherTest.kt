@@ -217,4 +217,31 @@ class CredentialMatcherTest {
         val results = matcher.matchMDocCredentials(emptyList())
         assertThat(results).isEmpty()
     }
+
+    // --- G16: matchAll with protocol/requestJson params ---
+
+    @Test
+    fun `matchAll ignores protocol param and returns all credentials`() {
+        val results = matcher.matchAll(
+            sdJwtVcs = listOf(sdJwtVc1),
+            mdocs = listOf(mdoc1),
+            protocol = "openid4vp",
+            requestJson = """{"presentation_definition":{"id":"pd-1"}}"""
+        )
+
+        // Currently returns all credentials regardless of protocol/requestJson
+        assertThat(results).hasSize(2)
+    }
+
+    @Test
+    fun `matchAll with null protocol and requestJson returns all`() {
+        val results = matcher.matchAll(
+            sdJwtVcs = listOf(sdJwtVc1, sdJwtVc2),
+            mdocs = listOf(mdoc1),
+            protocol = null,
+            requestJson = null
+        )
+
+        assertThat(results).hasSize(3)
+    }
 }

@@ -98,6 +98,22 @@ class DIDCommUnpackerTest {
         unpacker.unpack(packed, eve.privateKey, alice.publicKey)
     }
 
+    // --- G5: short input require guard ---
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `unpack rejects input shorter than 29 bytes`() {
+        val alice = x25519.generateKeyPair()
+        val bob = x25519.generateKeyPair()
+        unpacker.unpack(ByteArray(28), bob.privateKey, alice.publicKey)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `unpack rejects empty input`() {
+        val alice = x25519.generateKeyPair()
+        val bob = x25519.generateKeyPair()
+        unpacker.unpack(ByteArray(0), bob.privateKey, alice.publicKey)
+    }
+
     @Test
     fun `multiple round-trips with different key pairs all succeed`() {
         val pairs = (1..3).map { x25519.generateKeyPair() }

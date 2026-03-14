@@ -183,6 +183,54 @@ class VaultTest {
         assertThat(proof.challenge).isEqualTo("test-challenge-123")
     }
 
+    // --- G1: mdoc CRUD through VaultImpl ---
+
+    @Test
+    fun `storeMDoc and listMDocs round trip`() = runTest {
+        val mdoc = my.ssdid.wallet.domain.mdoc.StoredMDoc(
+            id = "mdoc-1",
+            docType = "org.iso.18013.5.1.mDL",
+            issuerSignedCbor = byteArrayOf(1, 2, 3),
+            deviceKeyId = "key-1",
+            issuedAt = 1700000000L,
+            nameSpaces = mapOf("org.iso.18013.5.1" to listOf("family_name"))
+        )
+        vault.storeMDoc(mdoc)
+        val list = vault.listMDocs()
+        assertThat(list).hasSize(1)
+        assertThat(list[0].docType).isEqualTo("org.iso.18013.5.1.mDL")
+    }
+
+    @Test
+    fun `getMDoc returns stored mdoc by id`() = runTest {
+        val mdoc = my.ssdid.wallet.domain.mdoc.StoredMDoc(
+            id = "mdoc-2",
+            docType = "org.iso.18013.5.1.mDL",
+            issuerSignedCbor = byteArrayOf(4, 5, 6),
+            deviceKeyId = "key-2",
+            issuedAt = 1700000000L,
+            nameSpaces = emptyMap()
+        )
+        vault.storeMDoc(mdoc)
+        assertThat(vault.getMDoc("mdoc-2")).isNotNull()
+        assertThat(vault.getMDoc("nonexistent")).isNull()
+    }
+
+    @Test
+    fun `deleteMDoc removes from storage`() = runTest {
+        val mdoc = my.ssdid.wallet.domain.mdoc.StoredMDoc(
+            id = "mdoc-3",
+            docType = "org.iso.18013.5.1.mDL",
+            issuerSignedCbor = byteArrayOf(7, 8),
+            deviceKeyId = "key-3",
+            issuedAt = 1700000000L,
+            nameSpaces = emptyMap()
+        )
+        vault.storeMDoc(mdoc)
+        vault.deleteMDoc("mdoc-3")
+        assertThat(vault.listMDocs()).isEmpty()
+    }
+
     @Test
     fun `createProof signature verifies with public key`() = runTest {
         val classical = ClassicalProvider()

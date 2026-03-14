@@ -69,6 +69,80 @@ class OpenId4VpHandlerTest {
         assertThat(result.isSuccess).isTrue()
     }
 
+    // --- G8: DCQL path for SD-JWT ---
+
+    @Test
+    fun processRequestWithDcqlQuery() = runTest {
+        val dcql = """{"credentials":[{"id":"cred-1","format":"vc+sd-jwt","meta":{"vct_values":["IdentityCredential"]}}]}"""
+        val uri = "openid4vp://?response_type=vp_token&client_id=https://v.example.com&response_uri=https://v.example.com/cb&nonce=n-1&response_mode=direct_post&dcql_query=${java.net.URLEncoder.encode(dcql, "UTF-8")}"
+
+        coEvery { vault.listStoredSdJwtVcs() } returns listOf(testCredential)
+        coEvery { vault.listMDocs() } returns emptyList()
+
+        val result = handler.processRequest(uri)
+        assertThat(result.isSuccess).isTrue()
+        val review = result.getOrThrow()
+        assertThat(review.matches).hasSize(1)
+        assertThat(review.authRequest.dcqlQuery).isNotNull()
+        assertThat(review.authRequest.presentationDefinition).isNull()
+    }
+
+    // --- G7: submitPresentation error paths ---
+
+    @Test
+    fun submitPresentationFailsWhenNoResponseUri() = runTest {
+        val authReq = AuthorizationRequest(
+            clientId = "https://v.example.com",
+            responseUri = null,
+            nonce = "n-1"
+        )
+        val matchResult = MatchResult(
+            credentialRef = CredentialRef.SdJwt(testCredential),
+            descriptorId = "id-1",
+            requiredClaims = listOf("name"),
+            optionalClaims = emptyList()
+        )
+
+        val result = handler.submitPresentation(
+            authRequest = authReq,
+            matchResult = matchResult,
+            selectedClaims = listOf("name"),
+            algorithm = "EdDSA",
+            signer = { ByteArray(64) }
+        )
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+        assertThat(result.exceptionOrNull()?.message).contains("response_uri")
+    }
+
+    @Test
+    fun submitPresentationFailsWhenNoNonce() = runTest {
+        val authReq = AuthorizationRequest(
+            clientId = "https://v.example.com",
+            responseUri = "https://v.example.com/cb",
+            nonce = null
+        )
+        val matchResult = MatchResult(
+            credentialRef = CredentialRef.SdJwt(testCredential),
+            descriptorId = "id-1",
+            requiredClaims = listOf("name"),
+            optionalClaims = emptyList()
+        )
+
+        val result = handler.submitPresentation(
+            authRequest = authReq,
+            matchResult = matchResult,
+            selectedClaims = listOf("name"),
+            algorithm = "EdDSA",
+            signer = { ByteArray(64) }
+        )
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+        assertThat(result.exceptionOrNull()?.message).contains("nonce")
+    }
+
     @Test
     fun processRequestNoMatchPostsError() = runTest {
         val pd = """{"id":"pd-1","input_descriptors":[{"id":"id-1","format":{"vc+sd-jwt":{}},"constraints":{"fields":[{"path":["$.vct"],"filter":{"const":"DriverLicense"}}]}}]}"""

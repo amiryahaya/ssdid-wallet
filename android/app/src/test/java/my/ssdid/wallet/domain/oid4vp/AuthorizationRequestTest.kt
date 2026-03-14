@@ -94,6 +94,64 @@ class AuthorizationRequestTest {
         assertThat(result.isFailure).isTrue()
     }
 
+    // --- G13: parseJson error paths ---
+
+    @Test
+    fun parseJsonRejectsMissingClientId() {
+        val json = """{"response_uri":"https://v.example.com/cb","nonce":"n","response_mode":"direct_post","presentation_definition":{"id":"pd-1"}}"""
+        val result = AuthorizationRequest.parseJson(json)
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()?.message).contains("client_id")
+    }
+
+    @Test
+    fun parseJsonRejectsNonDirectPostMode() {
+        val json = """{"client_id":"c","response_uri":"https://v.example.com/cb","nonce":"n","response_mode":"fragment","presentation_definition":{"id":"pd-1"}}"""
+        val result = AuthorizationRequest.parseJson(json)
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()?.message).contains("direct_post")
+    }
+
+    @Test
+    fun parseJsonRejectsMissingResponseUri() {
+        val json = """{"client_id":"c","nonce":"n","response_mode":"direct_post","presentation_definition":{"id":"pd-1"}}"""
+        val result = AuthorizationRequest.parseJson(json)
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()?.message).contains("response_uri")
+    }
+
+    @Test
+    fun parseJsonRejectsHttpResponseUri() {
+        val json = """{"client_id":"c","response_uri":"http://insecure.com/cb","nonce":"n","response_mode":"direct_post","presentation_definition":{"id":"pd-1"}}"""
+        val result = AuthorizationRequest.parseJson(json)
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()?.message).contains("HTTPS")
+    }
+
+    @Test
+    fun parseJsonRejectsMissingNonce() {
+        val json = """{"client_id":"c","response_uri":"https://v.example.com/cb","response_mode":"direct_post","presentation_definition":{"id":"pd-1"}}"""
+        val result = AuthorizationRequest.parseJson(json)
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()?.message).contains("nonce")
+    }
+
+    @Test
+    fun parseJsonRejectsMissingQueryType() {
+        val json = """{"client_id":"c","response_uri":"https://v.example.com/cb","nonce":"n","response_mode":"direct_post"}"""
+        val result = AuthorizationRequest.parseJson(json)
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()?.message).contains("presentation_definition")
+    }
+
+    @Test
+    fun parseJsonAcceptsDcqlQuery() {
+        val json = """{"client_id":"c","response_uri":"https://v.example.com/cb","nonce":"n","response_mode":"direct_post","dcql_query":{"credentials":[]}}"""
+        val result = AuthorizationRequest.parseJson(json)
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrThrow().dcqlQuery).isNotNull()
+    }
+
     @Test
     fun parseJsonRequestObject() {
         val json = """{"client_id":"https://v.example.com","response_uri":"https://v.example.com/cb","nonce":"n-1","response_mode":"direct_post","presentation_definition":{"id":"pd-1","input_descriptors":[]}}"""

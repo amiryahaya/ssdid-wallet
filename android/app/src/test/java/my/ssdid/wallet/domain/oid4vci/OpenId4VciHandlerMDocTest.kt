@@ -1,6 +1,5 @@
 package my.ssdid.wallet.domain.oid4vci
 
-import android.util.Base64
 import com.google.common.truth.Truth.assertThat
 import com.upokecenter.cbor.CBORObject
 import io.mockk.*
@@ -11,12 +10,7 @@ import my.ssdid.wallet.domain.mdoc.StoredMDoc
 import my.ssdid.wallet.domain.vault.Vault
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 
-@RunWith(RobolectricTestRunner::class)
-@Config(sdk = [34])
 class OpenId4VciHandlerMDocTest {
 
     private lateinit var metadataResolver: IssuerMetadataResolver
@@ -53,22 +47,36 @@ class OpenId4VciHandlerMDocTest {
         preAuthorizedCode = "pre-code-mdoc"
     )
 
-    /** Build a minimal CBOR map to simulate an issuer-signed mdoc credential. */
+    /** Build a minimal IssuerSigned CBOR to simulate an issuer-signed mdoc credential. */
     private fun buildTestMDocCbor(): String {
-        val nameSpaces = CBORObject.NewMap()
-        val items = CBORObject.NewArray()
+        // Build IssuerSignedItem wrapped in tag 24 (as required by ISO 18013-5)
         val item = CBORObject.NewMap()
+        item["digestID"] = CBORObject.FromObject(0)
+        item["random"] = CBORObject.FromObject(byteArrayOf(0x01, 0x02))
         item["elementIdentifier"] = CBORObject.FromObject("family_name")
         item["elementValue"] = CBORObject.FromObject("Doe")
-        items.Add(item)
+        val taggedItem = CBORObject.FromObjectAndTag(item.EncodeToBytes(), 24)
+
+        val items = CBORObject.NewArray()
+        items.Add(taggedItem)
+
+        val nameSpaces = CBORObject.NewMap()
         nameSpaces["org.iso.18013.5.1"] = items
+
+        // Build minimal COSE_Sign1 issuerAuth: [protected, unprotected, payload, signature]
+        val issuerAuth = CBORObject.NewArray()
+        issuerAuth.Add(CBORObject.FromObject(byteArrayOf())) // protected
+        issuerAuth.Add(CBORObject.NewMap()) // unprotected
+        issuerAuth.Add(CBORObject.FromObject(byteArrayOf())) // payload (empty for test)
+        issuerAuth.Add(CBORObject.FromObject(byteArrayOf(0))) // signature
 
         val root = CBORObject.NewMap()
         root["docType"] = CBORObject.FromObject(mdocDoctype)
         root["nameSpaces"] = nameSpaces
+        root["issuerAuth"] = issuerAuth
 
         val bytes = root.EncodeToBytes()
-        return Base64.encodeToString(bytes, Base64.URL_SAFE or Base64.NO_WRAP)
+        return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
     }
 
     @Before

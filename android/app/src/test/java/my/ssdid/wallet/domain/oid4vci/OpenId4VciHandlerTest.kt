@@ -187,6 +187,41 @@ class OpenId4VciHandlerTest {
             .contains("No c_nonce available")
     }
 
+    // --- G9: token exchange failure ---
+
+    @Test
+    fun acceptOfferFailsWhenTokenExchangeFails() = runTest {
+        val offer = CredentialOffer(
+            credentialIssuer = "https://issuer.example.com",
+            credentialConfigurationIds = listOf("Test"),
+            preAuthorizedCode = "bad-code"
+        )
+        val metadata = IssuerMetadata(
+            credentialIssuer = "https://issuer.example.com",
+            credentialEndpoint = "https://issuer.example.com/credential",
+            credentialConfigurationsSupported = emptyMap(),
+            tokenEndpoint = "https://issuer.example.com/token",
+            authorizationEndpoint = null
+        )
+
+        every {
+            tokenClient.exchangePreAuthorizedCode(any(), any(), any())
+        } returns Result.failure(RuntimeException("Token exchange failed: invalid_grant"))
+
+        val result = handler.acceptOffer(
+            offer = offer,
+            metadata = metadata,
+            selectedConfigId = "Test",
+            walletDid = "did:ssdid:h",
+            keyId = "did:ssdid:h#k-1",
+            algorithm = "EdDSA",
+            signer = signer
+        )
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()?.message).contains("invalid_grant")
+    }
+
     @Test
     fun acceptOfferUnexpectedResponseReturnsFailed() = runTest {
         val offer = CredentialOffer(

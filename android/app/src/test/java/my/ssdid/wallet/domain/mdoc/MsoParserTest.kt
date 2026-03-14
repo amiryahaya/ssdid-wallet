@@ -94,4 +94,117 @@ class MsoParserTest {
         assertThat(mso.validityInfo.validFrom).isEqualTo("2024-01-01T00:00:00Z")
         assertThat(mso.validityInfo.validUntil).isEqualTo("2025-01-01T00:00:00Z")
     }
+
+    // --- Error path tests for null-safety guards ---
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `parseIssuerSigned throws on missing nameSpaces`() {
+        val cbor = CBORObject.NewMap()
+        cbor["issuerAuth"] = CBORObject.FromObject(byteArrayOf())
+        MsoParser.parseIssuerSigned(cbor.EncodeToBytes())
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `parseIssuerSigned throws on missing issuerAuth`() {
+        val cbor = CBORObject.NewMap()
+        cbor["nameSpaces"] = CBORObject.NewMap()
+        MsoParser.parseIssuerSigned(cbor.EncodeToBytes())
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `parseMso throws on missing version`() {
+        val mso = CBORObject.NewMap()
+        mso["digestAlgorithm"] = CBORObject.FromObject("SHA-256")
+        mso["valueDigests"] = CBORObject.NewMap()
+        val deviceKeyInfo = CBORObject.NewMap()
+        deviceKeyInfo["deviceKey"] = CBORObject.FromObject(byteArrayOf())
+        mso["deviceKeyInfo"] = deviceKeyInfo
+        val validityInfo = CBORObject.NewMap()
+        validityInfo["signed"] = CBORObject.FromObject("2024-01-01T00:00:00Z")
+        validityInfo["validFrom"] = CBORObject.FromObject("2024-01-01T00:00:00Z")
+        validityInfo["validUntil"] = CBORObject.FromObject("2025-01-01T00:00:00Z")
+        mso["validityInfo"] = validityInfo
+
+        val coseSign1 = CBORObject.NewArray()
+        coseSign1.Add(CBORObject.FromObject(byteArrayOf()))
+        coseSign1.Add(CBORObject.NewMap())
+        coseSign1.Add(CBORObject.FromObject(mso.EncodeToBytes()))
+        coseSign1.Add(CBORObject.FromObject(byteArrayOf()))
+
+        MsoParser.parseMso(coseSign1.EncodeToBytes())
+    }
+
+    // --- G4: validityInfo sub-fields, valueDigests throws ---
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `parseMso throws on missing validityInfo`() {
+        val mso = CBORObject.NewMap()
+        mso["version"] = CBORObject.FromObject("1.0")
+        mso["digestAlgorithm"] = CBORObject.FromObject("SHA-256")
+        mso["valueDigests"] = CBORObject.NewMap()
+        val deviceKeyInfo = CBORObject.NewMap()
+        deviceKeyInfo["deviceKey"] = CBORObject.FromObject(byteArrayOf())
+        mso["deviceKeyInfo"] = deviceKeyInfo
+        // validityInfo intentionally omitted
+
+        val coseSign1 = CBORObject.NewArray()
+        coseSign1.Add(CBORObject.FromObject(byteArrayOf()))
+        coseSign1.Add(CBORObject.NewMap())
+        coseSign1.Add(CBORObject.FromObject(mso.EncodeToBytes()))
+        coseSign1.Add(CBORObject.FromObject(byteArrayOf()))
+
+        MsoParser.parseMso(coseSign1.EncodeToBytes())
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `parseMso throws on missing digestAlgorithm`() {
+        val mso = CBORObject.NewMap()
+        mso["version"] = CBORObject.FromObject("1.0")
+        // digestAlgorithm intentionally omitted
+        mso["valueDigests"] = CBORObject.NewMap()
+        val deviceKeyInfo = CBORObject.NewMap()
+        deviceKeyInfo["deviceKey"] = CBORObject.FromObject(byteArrayOf())
+        mso["deviceKeyInfo"] = deviceKeyInfo
+        val validityInfo = CBORObject.NewMap()
+        validityInfo["signed"] = CBORObject.FromObject("2024-01-01T00:00:00Z")
+        validityInfo["validFrom"] = CBORObject.FromObject("2024-01-01T00:00:00Z")
+        validityInfo["validUntil"] = CBORObject.FromObject("2025-01-01T00:00:00Z")
+        mso["validityInfo"] = validityInfo
+
+        val coseSign1 = CBORObject.NewArray()
+        coseSign1.Add(CBORObject.FromObject(byteArrayOf()))
+        coseSign1.Add(CBORObject.NewMap())
+        coseSign1.Add(CBORObject.FromObject(mso.EncodeToBytes()))
+        coseSign1.Add(CBORObject.FromObject(byteArrayOf()))
+
+        MsoParser.parseMso(coseSign1.EncodeToBytes())
+    }
+
+    @Test
+    fun parseIssuerSignedExtractsIssuerAuth() {
+        val cbor = buildTestIssuerSigned()
+        val parsed = MsoParser.parseIssuerSigned(cbor)
+        assertThat(parsed.issuerAuth).isNotEmpty()
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `parseMso throws on missing deviceKeyInfo`() {
+        val mso = CBORObject.NewMap()
+        mso["version"] = CBORObject.FromObject("1.0")
+        mso["digestAlgorithm"] = CBORObject.FromObject("SHA-256")
+        mso["valueDigests"] = CBORObject.NewMap()
+        val validityInfo = CBORObject.NewMap()
+        validityInfo["signed"] = CBORObject.FromObject("2024-01-01T00:00:00Z")
+        validityInfo["validFrom"] = CBORObject.FromObject("2024-01-01T00:00:00Z")
+        validityInfo["validUntil"] = CBORObject.FromObject("2025-01-01T00:00:00Z")
+        mso["validityInfo"] = validityInfo
+
+        val coseSign1 = CBORObject.NewArray()
+        coseSign1.Add(CBORObject.FromObject(byteArrayOf()))
+        coseSign1.Add(CBORObject.NewMap())
+        coseSign1.Add(CBORObject.FromObject(mso.EncodeToBytes()))
+        coseSign1.Add(CBORObject.FromObject(byteArrayOf()))
+
+        MsoParser.parseMso(coseSign1.EncodeToBytes())
+    }
 }
