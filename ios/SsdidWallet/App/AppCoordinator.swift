@@ -27,7 +27,7 @@ final class AppCoordinator: ObservableObject {
     }
 
     func handleDeepLink(_ url: URL) {
-        guard url.scheme == "ssdid" else { return }
+        guard url.scheme == "ssdid" || url.scheme == "openid4vp" else { return }
         pendingDeepLink = url
     }
 

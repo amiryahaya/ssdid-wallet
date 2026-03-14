@@ -43,6 +43,7 @@ targets:
           - CFBundleURLName: my.ssdid.wallet
             CFBundleURLSchemes:
               - ssdid
+              - openid4vp
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: my.ssdid.wallet

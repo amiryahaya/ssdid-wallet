@@ -8,6 +8,7 @@ enum DeepLinkAction: Equatable {
     case credentialOffer(issuerUrl: String, offerId: String)
     case login(serverUrl: String, serviceName: String?, challengeId: String?, callbackUrl: String, requestedClaims: String?)
     case invite(serverUrl: String, token: String, callbackUrl: String)
+    case presentationRequest(uri: String)
 }
 
 /// Errors specific to deep link parsing.
@@ -21,7 +22,7 @@ enum DeepLinkError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidScheme(let scheme):
-            return "Invalid URL scheme: \(scheme). Expected 'ssdid'"
+            return "Invalid URL scheme: \(scheme). Expected 'ssdid' or 'openid4vp'"
         case .invalidHost(let host):
             return "Unknown deep link action: \(host)"
         case .missingRequiredParameter(let param):
@@ -45,8 +46,15 @@ final class DeepLinkHandler {
 
     /// Parses a URL into a DeepLinkAction.
     func parse(url: URL) throws -> DeepLinkAction {
-        guard url.scheme == "ssdid" else {
-            throw DeepLinkError.invalidScheme(url.scheme ?? "nil")
+        let scheme = url.scheme ?? "nil"
+
+        // Handle openid4vp:// URIs — the entire URL is the presentation request URI.
+        if scheme == "openid4vp" {
+            return .presentationRequest(uri: url.absoluteString)
+        }
+
+        guard scheme == "ssdid" else {
+            throw DeepLinkError.invalidScheme(scheme)
         }
 
         guard let host = url.host else {
