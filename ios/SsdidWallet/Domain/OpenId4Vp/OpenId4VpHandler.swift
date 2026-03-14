@@ -29,6 +29,11 @@ protocol SdJwtVcStore {
     func listSdJwtVcs() async -> [StoredSdJwtVc]
 }
 
+/// Protocol for listing stored mdoc credentials, implemented by VaultStorage.
+protocol MDocStore {
+    func listMDocs() async -> [StoredMDoc]
+}
+
 /// Orchestrates the OpenID4VP presentation flow.
 final class OpenId4VpHandler {
 
@@ -36,17 +41,20 @@ final class OpenId4VpHandler {
     private let peMatcher: PresentationDefinitionMatcher
     private let dcqlMatcher: DcqlMatcher
     private let vcStore: SdJwtVcStore
+    private let mdocStore: MDocStore?
 
     init(
         transport: OpenId4VpTransport,
         peMatcher: PresentationDefinitionMatcher = PresentationDefinitionMatcher(),
         dcqlMatcher: DcqlMatcher = DcqlMatcher(),
-        vcStore: SdJwtVcStore
+        vcStore: SdJwtVcStore,
+        mdocStore: MDocStore? = nil
     ) {
         self.transport = transport
         self.peMatcher = peMatcher
         self.dcqlMatcher = dcqlMatcher
         self.vcStore = vcStore
+        self.mdocStore = mdocStore
     }
 
     /// Processes an authorization request URI: parses, resolves request_uri if present,
@@ -63,12 +71,13 @@ final class OpenId4VpHandler {
         }
 
         let storedVcs = await vcStore.listSdJwtVcs()
+        let storedMDocs = await mdocStore?.listMDocs() ?? []
 
         let matches: [VpMatchResult]
         if let pd = authRequest.presentationDefinition {
-            matches = peMatcher.match(pd: pd, credentials: storedVcs)
+            matches = peMatcher.matchAll(pd: pd, sdJwtVcs: storedVcs, mdocs: storedMDocs)
         } else if let dcql = authRequest.dcqlQuery {
-            matches = dcqlMatcher.match(dcql: dcql, credentials: storedVcs)
+            matches = dcqlMatcher.matchAll(dcql: dcql, sdJwtVcs: storedVcs, mdocs: storedMDocs)
         } else {
             matches = []
         }
@@ -102,14 +111,47 @@ final class OpenId4VpHandler {
             throw OpenId4VpError.invalidRequest("No nonce in authorization request")
         }
 
-        let vpToken = try VpTokenBuilder.build(
-            storedSdJwtVc: matchResult.credential,
-            selectedClaims: selectedClaims,
-            audience: authRequest.clientId,
-            nonce: nonce,
-            algorithm: algorithm,
-            signer: signer
-        )
+        let vpToken: String
+        switch matchResult.credentialRef {
+        case .sdJwt(let credential):
+            vpToken = try VpTokenBuilder.build(
+                storedSdJwtVc: credential,
+                selectedClaims: selectedClaims,
+                audience: authRequest.clientId,
+                nonce: nonce,
+                algorithm: algorithm,
+                signer: signer
+            )
+
+        case .mdoc(let storedMDoc):
+            // Convert selectedClaims to namespace->elements map
+            // Claims should be in "namespace/element" format
+            var requestedElements = [String: [String]]()
+            for claim in selectedClaims {
+                let parts = claim.split(separator: "/", maxSplits: 1)
+                if parts.count == 2 {
+                    let ns = String(parts[0])
+                    let elem = String(parts[1])
+                    requestedElements[ns, default: []].append(elem)
+                }
+            }
+            // Fallback: treat claims as elements in the first namespace
+            if requestedElements.isEmpty, let firstNs = storedMDoc.nameSpaces.keys.first {
+                requestedElements[firstNs] = selectedClaims
+            }
+
+            guard let token = MDocVpTokenBuilder.build(
+                storedMDoc: storedMDoc,
+                requestedElements: requestedElements,
+                clientId: authRequest.clientId,
+                responseUri: responseUri,
+                nonce: nonce,
+                signer: signer
+            ) else {
+                throw OpenId4VpError.invalidRequest("Failed to build mdoc VP token")
+            }
+            vpToken = token
+        }
 
         // Determine definition ID from PE or DCQL query
         let definitionId: String

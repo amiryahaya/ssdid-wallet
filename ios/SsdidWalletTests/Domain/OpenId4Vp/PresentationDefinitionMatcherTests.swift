@@ -20,7 +20,11 @@ final class PresentationDefinitionMatcherTests: XCTestCase {
         let pd = try parseJson(#"{"id":"pd-1","input_descriptors":[{"id":"id-1","format":{"vc+sd-jwt":{}},"constraints":{"fields":[{"path":["$.vct"],"filter":{"const":"IdentityCredential"}}]}}]}"#)
         let results = matcher.match(pd: pd, credentials: [credential])
         XCTAssertEqual(results.count, 1)
-        XCTAssertEqual(results[0].credential.id, "vc-1")
+        if case .sdJwt(let cred) = results[0].credentialRef {
+            XCTAssertEqual(cred.id, "vc-1")
+        } else {
+            XCTFail("Expected sdJwt credential ref")
+        }
         XCTAssertEqual(results[0].descriptorId, "id-1")
     }
 
@@ -64,7 +68,11 @@ final class PresentationDefinitionMatcherTests: XCTestCase {
         let pd = try parseJson(#"{"id":"pd-1","input_descriptors":[{"id":"id-1","format":{"vc+sd-jwt":{}},"constraints":{"fields":[{"path":["$.vct"],"filter":{"const":"DriverLicense"}}]}}]}"#)
         let results = matcher.match(pd: pd, credentials: [credential, cred2])
         XCTAssertEqual(results.count, 1)
-        XCTAssertEqual(results[0].credential.id, "vc-2")
+        if case .sdJwt(let cred) = results[0].credentialRef {
+            XCTAssertEqual(cred.id, "vc-2")
+        } else {
+            XCTFail("Expected sdJwt credential ref")
+        }
     }
 
     // MARK: - Helpers

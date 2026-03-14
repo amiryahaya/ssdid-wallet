@@ -67,10 +67,19 @@ final class PresentationRequestViewModel {
             return
         }
 
+        // Extract claim values based on credential type
+        let claimValues: [String: String]
+        switch match.credentialRef {
+        case .sdJwt(let credential):
+            claimValues = credential.claims
+        case .mdoc:
+            claimValues = [:]
+        }
+
         let claims = match.requiredClaims.map { name in
-            ClaimItem(name: name, value: match.credential.claims[name] ?? "", required: true, selected: true)
+            ClaimItem(name: name, value: claimValues[name] ?? "", required: true, selected: true)
         } + match.optionalClaims.map { name in
-            ClaimItem(name: name, value: match.credential.claims[name] ?? "", required: false, selected: false)
+            ClaimItem(name: name, value: claimValues[name] ?? "", required: false, selected: false)
         }
 
         state = .credentialMatch(
