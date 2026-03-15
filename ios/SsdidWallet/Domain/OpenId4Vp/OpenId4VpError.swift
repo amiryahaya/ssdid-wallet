@@ -16,6 +16,9 @@ enum OpenId4VpError: Error, LocalizedError {
     case invalidRequestObject
     case httpError(Int)
     case emptyResponse
+    case invalidRequest(String)
+    case transportError(String)
+    case noMatchingCredentials(String)
 
     var errorDescription: String? {
         switch self {
@@ -49,6 +52,12 @@ enum OpenId4VpError: Error, LocalizedError {
             return "HTTP error: \(code)"
         case .emptyResponse:
             return "Empty response from server"
+        case .invalidRequest(let reason):
+            return "Invalid VP request: \(reason)"
+        case .transportError(let reason):
+            return "VP transport error: \(reason)"
+        case .noMatchingCredentials(let reason):
+            return "No matching credentials: \(reason)"
         }
     }
 }

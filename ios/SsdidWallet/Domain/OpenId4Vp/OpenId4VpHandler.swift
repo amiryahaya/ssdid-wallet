@@ -1,23 +1,5 @@
 import Foundation
 
-/// Error types for OpenID4VP operations.
-enum OpenId4VpError: Error, LocalizedError {
-    case invalidRequest(String)
-    case transportError(String)
-    case noMatchingCredentials(String)
-
-    var errorDescription: String? {
-        switch self {
-        case .invalidRequest(let reason):
-            return "Invalid VP request: \(reason)"
-        case .transportError(let reason):
-            return "VP transport error: \(reason)"
-        case .noMatchingCredentials(let reason):
-            return "No matching credentials: \(reason)"
-        }
-    }
-}
-
 /// Result of processing an authorization request before user consent.
 struct PresentationReviewResult {
     let authRequest: AuthorizationRequest
@@ -30,7 +12,7 @@ protocol SdJwtVcStore {
 }
 
 /// Orchestrates the OpenID4VP presentation flow.
-final class OpenId4VpHandler {
+final class OpenId4VpHandler: @unchecked Sendable {
 
     private let transport: OpenId4VpTransport
     private let peMatcher: PresentationDefinitionMatcher
@@ -93,7 +75,7 @@ final class OpenId4VpHandler {
         matchResult: VpMatchResult,
         selectedClaims: [String],
         algorithm: String,
-        signer: (Data) -> Data
+        signer: @Sendable (Data) -> Data
     ) async throws {
         guard let responseUri = authRequest.responseUri else {
             throw OpenId4VpError.invalidRequest("No response_uri in authorization request")

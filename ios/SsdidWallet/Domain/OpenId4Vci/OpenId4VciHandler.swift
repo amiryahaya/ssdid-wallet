@@ -50,7 +50,7 @@ protocol SdJwtVcStorage {
 }
 
 /// Orchestrates the OpenID4VCI credential issuance flow.
-final class OpenId4VciHandler {
+final class OpenId4VciHandler: @unchecked Sendable {
 
     private let metadataResolver: IssuerMetadataResolver
     private let tokenClient: TokenClient
@@ -84,6 +84,18 @@ final class OpenId4VciHandler {
         )
     }
 
+    /// Processes a credential offer from a raw JSON string: parses, resolves metadata, and returns review data.
+    func processOfferJson(json: String) async throws -> CredentialOfferReview {
+        let offer = try CredentialOffer.parse(json)
+        let metadata = try await metadataResolver.resolve(issuerUrl: offer.credentialIssuer)
+
+        return CredentialOfferReview(
+            offer: offer,
+            metadata: metadata,
+            credentialConfigNames: offer.credentialConfigurationIds
+        )
+    }
+
     /// Accepts a credential offer and performs the issuance flow.
     func acceptOffer(
         offer: CredentialOffer,
@@ -93,7 +105,7 @@ final class OpenId4VciHandler {
         walletDid: String,
         keyId: String,
         algorithm: String,
-        signer: @escaping (Data) -> Data
+        signer: @escaping @Sendable (Data) -> Data
     ) async throws -> IssuanceResult {
         // Step 1: Token exchange
         guard let preAuthCode = offer.preAuthorizedCode else {
@@ -137,7 +149,7 @@ final class OpenId4VciHandler {
         walletDid: String,
         keyId: String,
         algorithm: String,
-        signer: (Data) -> Data
+        signer: @Sendable (Data) -> Data
     ) async throws -> IssuanceResult {
         guard let currentNonce = await nonceManager.current() else {
             throw OpenId4VciError.credentialError("No c_nonce available")

@@ -206,8 +206,10 @@ struct ScanQrScreen: View {
                 token: token,
                 callbackUrl: callbackUrl
             ))
-        case .presentationRequest(let uri):
-            router.push(.presentationRequest(uri: uri))
+        case .openid4vp(let rawUri):
+            router.push(.presentationRequest(rawUri: rawUri))
+        case .openidCredentialOffer:
+            break // Handled via credentialOffer case above
         }
     }
 }

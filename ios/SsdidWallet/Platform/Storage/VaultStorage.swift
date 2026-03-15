@@ -7,7 +7,7 @@ struct PreRotatedKeyData {
 }
 
 /// Protocol for persistent vault storage operations.
-protocol VaultStorage {
+protocol VaultStorage: SdJwtVcStorage {
     func saveIdentity(_ identity: Identity, encryptedPrivateKey: Data) async throws
     func getIdentity(keyId: String) async -> Identity?
     func listIdentities() async -> [Identity]
