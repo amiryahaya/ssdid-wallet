@@ -33,8 +33,15 @@ import my.ssdid.wallet.domain.notify.LocalNotificationStorage
 import my.ssdid.wallet.domain.vault.Vault
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
+import androidx.compose.ui.graphics.vector.ImageVector
+import my.ssdid.wallet.ui.components.AlgorithmBadge
 import my.ssdid.wallet.ui.components.truncatedDid
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
@@ -47,13 +54,20 @@ class WalletHomeViewModel @Inject constructor(
     private val _identities = MutableStateFlow<List<Identity>>(emptyList())
     val identities = _identities.asStateFlow()
 
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading = _isLoading.asStateFlow()
+
     val unreadNotificationCount = localNotificationStorage.unreadCount
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     init { refresh() }
 
     fun refresh() {
-        viewModelScope.launch { _identities.value = vault.listIdentities() }
+        viewModelScope.launch {
+            _isLoading.value = true
+            _identities.value = vault.listIdentities()
+            _isLoading.value = false
+        }
     }
 }
 
@@ -69,6 +83,7 @@ fun WalletHomeScreen(
     viewModel: WalletHomeViewModel = hiltViewModel()
 ) {
     val identities by viewModel.identities.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         viewModel.refresh()
@@ -123,7 +138,7 @@ fun WalletHomeScreen(
                 onClick = onSettings,
                 modifier = Modifier.semantics { contentDescription = "Settings" }
             ) {
-                Text("\u2699", fontSize = 22.sp, color = TextSecondary)
+                Icon(Icons.Default.Settings, contentDescription = "Settings", tint = TextSecondary)
             }
         }
 
@@ -142,18 +157,31 @@ fun WalletHomeScreen(
                     Text("MY IDENTITIES", style = MaterialTheme.typography.labelMedium)
                     TextButton(
                         onClick = onCreateIdentity,
-                        modifier = Modifier.semantics { contentDescription = "Create new identity" }
+                        modifier = Modifier
+                            .defaultMinSize(minHeight = 48.dp)
+                            .semantics { contentDescription = "Create new identity" }
                     ) {
                         Text("+ New", color = Accent, fontSize = 13.sp)
                     }
                 }
             }
 
-            items(identities) { identity ->
+            items(identities, key = { it.keyId }) { identity ->
                 IdentityCard(identity = identity, onClick = { onIdentityClick(identity.keyId) })
             }
 
-            if (identities.isEmpty()) {
+            if (isLoading && identities.isEmpty()) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = Accent)
+                    }
+                }
+            } else if (identities.isEmpty()) {
                 item {
                     Column(
                         modifier = Modifier
@@ -172,7 +200,7 @@ fun WalletHomeScreen(
                                 .background(AccentDim),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("\uD83D\uDC64", fontSize = 28.sp)
+                            Icon(Icons.Default.PersonAdd, contentDescription = null, modifier = Modifier.size(28.dp), tint = Accent)
                         }
                         Spacer(Modifier.height(16.dp))
                         Text(
@@ -195,9 +223,9 @@ fun WalletHomeScreen(
             item { Text("QUICK ACTIONS", style = MaterialTheme.typography.labelMedium) }
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    QuickActionCard("Scan QR", Modifier.weight(1f), onScanQr)
-                    QuickActionCard("Credentials", Modifier.weight(1f), onCredentials)
-                    QuickActionCard("History", Modifier.weight(1f), onHistory)
+                    QuickActionCard("Scan QR", Icons.Default.QrCodeScanner, Modifier.weight(1f), onScanQr)
+                    QuickActionCard("Credentials", Icons.Default.Description, Modifier.weight(1f), onCredentials)
+                    QuickActionCard("History", Icons.Default.History, Modifier.weight(1f), onHistory)
                 }
             }
         }
@@ -207,7 +235,6 @@ fun WalletHomeScreen(
 @Composable
 fun IdentityCard(identity: Identity, onClick: () -> Unit) {
     val algColor = if (identity.algorithm.isPostQuantum) Pqc else Classical
-    val algBgColor = if (identity.algorithm.isPostQuantum) PqcDim else ClassicalDim
 
     Card(
         modifier = Modifier
@@ -227,18 +254,10 @@ fun IdentityCard(identity: Identity, onClick: () -> Unit) {
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Box(
-                    Modifier.clip(RoundedCornerShape(4.dp))
-                        .background(algBgColor)
-                        .padding(horizontal = 8.dp, vertical = 3.dp)
-                ) {
-                    Text(
-                        identity.algorithm.name.replace("_", "-"),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = algColor
-                    )
-                }
+                AlgorithmBadge(
+                    algorithmName = identity.algorithm.name,
+                    isPostQuantum = identity.algorithm.isPostQuantum
+                )
                 Box(
                     Modifier.clip(RoundedCornerShape(4.dp))
                         .background(SuccessDim)
@@ -266,7 +285,7 @@ fun IdentityCard(identity: Identity, onClick: () -> Unit) {
 }
 
 @Composable
-fun QuickActionCard(label: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
+fun QuickActionCard(label: String, icon: ImageVector, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Card(
         modifier = modifier.clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
@@ -282,7 +301,7 @@ fun QuickActionCard(label: String, modifier: Modifier = Modifier, onClick: () ->
                     .background(AccentDim),
                 contentAlignment = Alignment.Center
             ) {
-                Text("\u2B21", color = Accent, fontSize = 18.sp)
+                Icon(icon, contentDescription = label, modifier = Modifier.size(20.dp), tint = Accent)
             }
             Spacer(Modifier.height(8.dp))
             Text(label, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = TextPrimary, maxLines = 1)

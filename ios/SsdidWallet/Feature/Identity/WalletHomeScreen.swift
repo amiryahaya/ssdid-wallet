@@ -5,6 +5,7 @@ struct WalletHomeScreen: View {
     @EnvironmentObject private var services: ServiceContainer
 
     @State private var identities: [Identity] = []
+    @State private var isLoading = true
 
     var body: some View {
         VStack(spacing: 0) {
@@ -14,7 +15,7 @@ struct WalletHomeScreen: View {
                     Text("IDENTITY WALLET")
                         .font(.ssdidCaption)
                         .foregroundStyle(Color.textSecondary)
-                    Text("SSDID")
+                    Text("Self-Sovereign Digital ID")
                         .font(.ssdidTitle)
                         .foregroundStyle(Color.textPrimary)
                 }
@@ -49,6 +50,12 @@ struct WalletHomeScreen: View {
             }
             .padding(20)
 
+            if isLoading {
+                Spacer()
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: Color.ssdidAccent))
+                Spacer()
+            } else {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 10) {
                     // Section: My Identities
@@ -88,7 +95,7 @@ struct WalletHomeScreen: View {
                             .frame(maxWidth: .infinity)
                             .padding(32)
                             .background(Color.bgCard)
-                            .cornerRadius(16)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
                         }
                     } else {
                         ForEach(identities) { identity in
@@ -121,11 +128,16 @@ struct WalletHomeScreen: View {
                 }
                 .padding(.horizontal, 20)
             }
+            .refreshable {
+                identities = await services.vault.listIdentities()
+            }
+            } // end else (not loading)
         }
         .background(Color.bgPrimary)
         .onAppear {
             Task {
                 identities = await services.vault.listIdentities()
+                isLoading = false
             }
         }
     }
@@ -149,7 +161,7 @@ struct WalletHomeScreen: View {
                         .padding(.horizontal, 8)
                         .padding(.vertical, 3)
                         .background(algBgColor)
-                        .cornerRadius(4)
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
 
                     Spacer()
 
@@ -159,7 +171,7 @@ struct WalletHomeScreen: View {
                         .padding(.horizontal, 8)
                         .padding(.vertical, 3)
                         .background(Color.successDim)
-                        .cornerRadius(4)
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
                 }
 
                 Spacer().frame(height: 10)
@@ -189,7 +201,7 @@ struct WalletHomeScreen: View {
             .padding(16)
         }
         .background(Color.bgCard)
-        .cornerRadius(16)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
     @ViewBuilder
@@ -212,7 +224,7 @@ struct WalletHomeScreen: View {
             .frame(maxWidth: .infinity)
             .padding(18)
             .background(Color.bgCard)
-            .cornerRadius(12)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
         }
     }
 }

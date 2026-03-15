@@ -1,7 +1,10 @@
 import SwiftUI
+import Combine
 
 struct TxSigningScreen: View {
     @Environment(AppRouter.self) private var router
+    @EnvironmentObject private var services: ServiceContainer
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     let serverUrl: String
     let sessionToken: String
@@ -16,7 +19,7 @@ struct TxSigningScreen: View {
     @State private var state: TxState = .idle
     @State private var timerSeconds = 120
     @State private var txDetails: [(key: String, value: String)] = []
-    @State private var timer: Timer?
+    @State private var timerActive = true
 
     private var timerColor: Color {
         if timerSeconds > 30 { return .success }
@@ -45,6 +48,7 @@ struct TxSigningScreen: View {
                         .foregroundStyle(Color.textPrimary)
                         .font(.system(size: 20))
                 }
+                .accessibilityLabel("Go back")
                 .padding(.leading, 8)
 
                 Text("Sign Transaction")
@@ -116,7 +120,7 @@ struct TxSigningScreen: View {
                                     .padding(.horizontal, 10)
                                     .padding(.vertical, 4)
                                     .background(timerBgColor)
-                                    .cornerRadius(6)
+                                    .clipShape(RoundedRectangle(cornerRadius: 6))
                             }
 
                             Spacer().frame(height: 10)
@@ -172,8 +176,9 @@ struct TxSigningScreen: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
                 .background(!isLoading && timerSeconds > 0 ? Color.warning : Color.bgElevated)
-                .cornerRadius(12)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
                 .disabled(isLoading || timerSeconds <= 0)
+                .accessibilityLabel(isLoading ? "Signing transaction" : "Sign transaction")
                 .padding(20)
 
             case .confirmed:
@@ -204,10 +209,23 @@ struct TxSigningScreen: View {
         .background(Color.bgPrimary)
         .onAppear {
             loadTransactionDetails()
-            startTimer()
         }
-        .onDisappear {
-            timer?.invalidate()
+        .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
+            guard timerActive else { return }
+            if timerSeconds > 0 {
+                timerSeconds -= 1
+                if timerSeconds == 10 {
+                    HapticManager.notification(.warning)
+                }
+            } else {
+                timerActive = false
+                if case .idle = state {
+                    HapticManager.notification(.error)
+                    withAnimation(reduceMotion ? nil : .default) {
+                        state = .failed("Challenge expired. Please scan QR again.")
+                    }
+                }
+            }
         }
     }
 
@@ -262,7 +280,8 @@ struct TxSigningScreen: View {
     }
 
     private func loadTransactionDetails() {
-        // Mock transaction details
+        // TODO: Replace mock data with real service call via services.ssdidClient
+        // e.g. try await services.ssdidClient.fetchTransactionDetails(sessionToken:serverUrl:)
         txDetails = [
             (key: "type", value: "Transfer"),
             (key: "amount", value: "1,000.00 MYR"),
@@ -271,29 +290,20 @@ struct TxSigningScreen: View {
         ]
     }
 
-    private func startTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            if timerSeconds > 0 {
-                timerSeconds -= 1
-                if timerSeconds == 10 {
-                    HapticManager.notification(.warning)
-                }
-            } else {
-                timer?.invalidate()
-                if case .idle = state {
-                    HapticManager.notification(.error)
-                    state = .failed("Challenge expired. Please scan QR again.")
-                }
-            }
-        }
-    }
-
     private func signTransaction() {
-        state = .loading
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            HapticManager.notification(.success)
-            state = .confirmed
-            timer?.invalidate()
+        withAnimation(reduceMotion ? nil : .default) {
+            state = .loading
+        }
+        Task {
+            // TODO: Replace with real server call via services.ssdidClient
+            try? await Task.sleep(for: .seconds(1.5))
+            await MainActor.run {
+                HapticManager.notification(.success)
+                withAnimation(reduceMotion ? nil : .default) {
+                    state = .confirmed
+                }
+                timerActive = false
+            }
         }
     }
 }
