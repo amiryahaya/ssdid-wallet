@@ -116,7 +116,7 @@ fun RecoveryRestoreScreen(
             .fillMaxSize()
             .imePadding()
             .background(BgPrimary)
-            .statusBarsPadding()
+            .statusBarsPadding().navigationBarsPadding()
     ) {
         // Header
         Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {

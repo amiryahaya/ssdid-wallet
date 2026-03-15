@@ -92,7 +92,7 @@ fun IdentityDetailScreen(
     val isDeactivating by viewModel.isDeactivating.collectAsState()
     val view = LocalView.current
 
-    Column(Modifier.fillMaxSize().background(BgPrimary).statusBarsPadding()) {
+    Column(Modifier.fillMaxSize().background(BgPrimary).statusBarsPadding().navigationBarsPadding()) {
         Row(
             Modifier.padding(start = 8.dp, end = 20.dp, top = 12.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically

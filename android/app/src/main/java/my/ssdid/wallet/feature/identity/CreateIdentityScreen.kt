@@ -93,7 +93,7 @@ fun CreateIdentityScreen(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize().background(BgPrimary).statusBarsPadding()
+        modifier = Modifier.fillMaxSize().background(BgPrimary).statusBarsPadding().navigationBarsPadding()
     ) {
         // Header
         Row(

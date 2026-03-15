@@ -80,39 +80,47 @@ class SsdidClient(
         }
     }
 
-    /** Flow 1: Create identity and publish DID to Registry */
-    suspend fun initIdentity(name: String, algorithm: Algorithm): Result<Identity> = runCatching {
+    /** Flow 1: Create identity and publish DID to Registry.
+     *  If registry registration fails, the locally created identity is deleted
+     *  so that retrying does not create orphaned duplicates. */
+    suspend fun initIdentity(name: String, algorithm: Algorithm): Result<Identity> {
         Sentry.addBreadcrumb(Breadcrumb().apply {
             category = "identity"; message = "Creating identity"; level = SentryLevel.INFO
             data["algorithm"] = algorithm.name
         })
-        val identity = vault.createIdentity(name, algorithm).getOrThrow()
+        val identity = vault.createIdentity(name, algorithm).getOrElse { return Result.failure(it) }
 
-        Sentry.addBreadcrumb(Breadcrumb().apply {
-            category = "identity"; message = "Building DID document"; level = SentryLevel.INFO
-            data["keyId"] = identity.keyId
-        })
-        val didDoc = vault.buildDidDocument(identity.keyId).getOrThrow()
-        val didDocJsonObject = didDoc.toJsonObject()
+        return try {
+            Sentry.addBreadcrumb(Breadcrumb().apply {
+                category = "identity"; message = "Building DID document"; level = SentryLevel.INFO
+                data["keyId"] = identity.keyId
+            })
+            val didDoc = vault.buildDidDocument(identity.keyId).getOrThrow()
+            val didDocJsonObject = didDoc.toJsonObject()
 
-        Sentry.addBreadcrumb(Breadcrumb().apply {
-            category = "identity"; message = "Creating proof"; level = SentryLevel.INFO
-            data["proofPurpose"] = "assertionMethod"
-        })
-        val proof = vault.createProof(
-            identity.keyId,
-            didDocJsonObject,
-            "assertionMethod"
-        ).getOrThrow()
+            Sentry.addBreadcrumb(Breadcrumb().apply {
+                category = "identity"; message = "Creating proof"; level = SentryLevel.INFO
+                data["proofPurpose"] = "assertionMethod"
+            })
+            val proof = vault.createProof(
+                identity.keyId,
+                didDocJsonObject,
+                "assertionMethod"
+            ).getOrThrow()
 
-        Sentry.addBreadcrumb(Breadcrumb().apply {
-            category = "identity"; message = "Registering DID with registry"; level = SentryLevel.INFO
-        })
-        httpClient.registry.registerDid(RegisterDidRequest(didDoc, proof))
-        logActivity(ActivityType.IDENTITY_CREATED, identity.did, details = mapOf("algorithm" to algorithm.name))
-        notifyManager.createMailbox(identity)
-        notifyManager.updateKnownIdentities(vault.listIdentities())
-        identity
+            Sentry.addBreadcrumb(Breadcrumb().apply {
+                category = "identity"; message = "Registering DID with registry"; level = SentryLevel.INFO
+            })
+            httpClient.registry.registerDid(RegisterDidRequest(didDoc, proof))
+            logActivity(ActivityType.IDENTITY_CREATED, identity.did, details = mapOf("algorithm" to algorithm.name))
+            notifyManager.createMailbox(identity)
+            notifyManager.updateKnownIdentities(vault.listIdentities())
+            Result.success(identity)
+        } catch (e: Exception) {
+            // Clean up the locally saved identity so retries don't create orphans
+            try { vault.deleteIdentity(identity.keyId) } catch (_: Exception) {}
+            Result.failure(e)
+        }
     }
 
     /** Update DID Document on Registry (used by rotation and recovery) */

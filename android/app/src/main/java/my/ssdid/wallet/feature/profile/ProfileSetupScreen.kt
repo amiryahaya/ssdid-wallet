@@ -1,6 +1,8 @@
 package my.ssdid.wallet.feature.profile
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -57,6 +59,7 @@ fun ProfileSetupScreen(
             .imePadding()
             .background(BgPrimary)
             .statusBarsPadding()
+            .navigationBarsPadding()
     ) {
         // Header
         Row(
@@ -90,6 +93,7 @@ fun ProfileSetupScreen(
             Column(
                 Modifier
                     .weight(1f)
+                    .verticalScroll(rememberScrollState())
                     .padding(horizontal = 20.dp)
             ) {
                 Text(

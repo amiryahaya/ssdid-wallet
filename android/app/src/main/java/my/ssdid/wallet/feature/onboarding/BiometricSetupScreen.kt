@@ -25,7 +25,7 @@ fun BiometricSetupScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(BgPrimary)
-            .statusBarsPadding(),
+            .statusBarsPadding().navigationBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(Modifier.weight(1f))

@@ -17,7 +17,9 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import my.ssdid.wallet.domain.vault.VaultStorage
@@ -62,7 +64,13 @@ class MainActivity : FragmentActivity() {
 
                 if (!showSplash && startDestination != null) {
                     val navController = rememberNavController()
-                    SsdidNavGraph(navController = navController, startDestination = startDestination!!)
+                    SsdidNavGraph(
+                        navController = navController,
+                        startDestination = startDestination!!,
+                        onOnboardingCompleted = {
+                            lifecycleScope.launch { vaultStorage.setOnboardingCompleted() }
+                        }
+                    )
 
                     LaunchedEffect(Unit) {
                         // Handle cold start deep link or share intent

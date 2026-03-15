@@ -62,7 +62,7 @@ fun OnboardingScreen(onComplete: () -> Unit, onRestore: () -> Unit = {}) {
         modifier = Modifier
             .fillMaxSize()
             .background(BgPrimary)
-            .statusBarsPadding()
+            .statusBarsPadding().navigationBarsPadding()
     ) {
         // Skip button
         Box(
