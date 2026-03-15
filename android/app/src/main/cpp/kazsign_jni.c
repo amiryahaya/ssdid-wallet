@@ -1,6 +1,6 @@
 /*
  * KAZ-SIGN JNI Bridge
- * Version 2.0.0
+ * Version 3.0.0
  *
  * JNI native interface for Android applications.
  * Provides runtime security level selection (128, 192, 256).
