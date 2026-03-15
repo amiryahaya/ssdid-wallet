@@ -48,7 +48,7 @@ struct CredentialOfferScreen: View {
                     tokenClient: tokenClient,
                     nonceManager: nonceManager,
                     transport: transport,
-                    vault: services.vault
+                    vcStorage: services.storage
                 )
                 let vm = CredentialOfferViewModel(handler: handler, vault: services.vault)
                 viewModel = vm

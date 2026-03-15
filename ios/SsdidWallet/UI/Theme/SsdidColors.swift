@@ -14,7 +14,7 @@ extension Color {
 
     static let textPrimary = Color(hex: 0xE8EAF0)
     static let textSecondary = Color(hex: 0x8A8F9E)
-    static let textTertiary = Color(hex: 0x5A5F6E)
+    static let textTertiary = Color(hex: 0x7A7F8E)
 
     // MARK: - Accent
 
@@ -42,7 +42,7 @@ extension Color {
 
     // MARK: - Border
 
-    static let ssdidBorder = Color.white.opacity(0.06)
+    static let ssdidBorder = Color.white.opacity(0.20)
     static let borderStrong = Color.white.opacity(0.10)
 
     // MARK: - Hex Initializer

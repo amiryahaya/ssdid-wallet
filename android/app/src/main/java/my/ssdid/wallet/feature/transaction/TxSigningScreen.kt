@@ -37,6 +37,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.ui.platform.LocalView
 import my.ssdid.wallet.ui.components.HapticManager
 import my.ssdid.wallet.ui.theme.*
@@ -134,6 +135,13 @@ fun TxSigningScreen(
     var signing by remember { mutableStateOf(false) }
     val view = LocalView.current
 
+    // Haptic feedback at 10-second warning
+    LaunchedEffect(timerSeconds) {
+        if (timerSeconds == 10) {
+            HapticManager.selection(view)
+        }
+    }
+
     // Haptic feedback on transaction result
     LaunchedEffect(state) {
         when (state) {
@@ -147,7 +155,7 @@ fun TxSigningScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(BgPrimary)
-            .statusBarsPadding()
+            .statusBarsPadding().navigationBarsPadding()
     ) {
         // Header
         Row(
@@ -285,7 +293,7 @@ fun TxSigningScreen(
                                         .background(WarningDim),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text("\uD83D\uDD13", fontSize = 18.sp)
+                                    Icon(Icons.Default.Fingerprint, contentDescription = null, modifier = Modifier.size(18.dp), tint = Warning)
                                 }
                                 Spacer(Modifier.width(12.dp))
                                 Column {
@@ -419,7 +427,7 @@ private fun TxDetailRow(label: String, value: String, highlight: Boolean = false
             color = if (highlight) Warning else TextPrimary,
             fontWeight = if (highlight) FontWeight.Bold else FontWeight.Normal,
             fontFamily = if (mono) FontFamily.Monospace else FontFamily.Default,
-            maxLines = 1
+            maxLines = if (mono) Int.MAX_VALUE else 1
         )
     }
 }

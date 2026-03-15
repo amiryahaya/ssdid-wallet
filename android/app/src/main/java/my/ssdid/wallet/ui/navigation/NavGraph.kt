@@ -41,7 +41,7 @@ import my.ssdid.wallet.feature.presentation.PresentationRequestScreen
 import my.ssdid.wallet.feature.transaction.TxSigningScreen
 
 @Composable
-fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
+fun SsdidNavGraph(navController: NavHostController, startDestination: String, onOnboardingCompleted: () -> Unit = {}) {
     NavHost(navController = navController, startDestination = startDestination) {
         composable(Screen.Onboarding.route) {
             OnboardingScreen(
@@ -75,6 +75,7 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String) {
                     if (source == "edit") {
                         navController.popBackStack(Screen.Settings.route, inclusive = false)
                     } else {
+                        onOnboardingCompleted()
                         navController.navigate(Screen.CreateIdentity.createRoute()) {
                             popUpTo(Screen.ProfileSetup.route) { inclusive = true }
                         }

@@ -10,7 +10,7 @@ val BgElevated = Color(0xFF1E2230)
 
 val TextPrimary = Color(0xFFE8EAF0)
 val TextSecondary = Color(0xFF8A8F9E)
-val TextTertiary = Color(0xFF5A5F6E)
+val TextTertiary = Color(0xFF7A7F8E)
 
 val Accent = Color(0xFF4A9EFF)
 val AccentDim = Color(0x1F4A9EFF)
@@ -25,5 +25,5 @@ val PqcDim = Color(0x1FA78BFA)
 val Classical = Color(0xFF38BDF8)
 val ClassicalDim = Color(0x1F38BDF8)
 
-val Border = Color(0x0FFFFFFF)
-val BorderStrong = Color(0x1AFFFFFF)
+val Border = Color(0x33FFFFFF)
+val BorderStrong = Color(0x4DFFFFFF)

@@ -45,7 +45,7 @@ fun EmailVerificationScreen(
             .fillMaxSize()
             .imePadding()
             .background(BgPrimary)
-            .statusBarsPadding()
+            .statusBarsPadding().navigationBarsPadding()
     ) {
         // Header
         Row(

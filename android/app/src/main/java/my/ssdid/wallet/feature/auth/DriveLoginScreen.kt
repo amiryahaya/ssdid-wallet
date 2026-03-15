@@ -55,7 +55,7 @@ fun DriveLoginScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(BgPrimary)
-            .statusBarsPadding()
+            .statusBarsPadding().navigationBarsPadding()
     ) {
         // Header
         Row(

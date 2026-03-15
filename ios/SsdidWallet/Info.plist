@@ -27,22 +27,6 @@
 				<string>openid4vp</string>
 			</array>
 		</dict>
-		<dict>
-			<key>CFBundleURLName</key>
-			<string>my.ssdid.wallet.openid4vp</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>openid4vp</string>
-			</array>
-		</dict>
-		<dict>
-			<key>CFBundleURLName</key>
-			<string>my.ssdid.wallet.openid-credential-offer</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>openid-credential-offer</string>
-			</array>
-		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>1</string>

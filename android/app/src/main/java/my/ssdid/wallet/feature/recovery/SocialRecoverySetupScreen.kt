@@ -213,7 +213,7 @@ fun SocialRecoverySetupScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(BgPrimary)
-            .statusBarsPadding()
+            .statusBarsPadding().navigationBarsPadding()
     ) {
         Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
             TextButton(

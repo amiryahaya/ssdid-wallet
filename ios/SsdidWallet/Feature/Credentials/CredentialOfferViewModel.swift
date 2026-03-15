@@ -1,23 +1,5 @@
 import Foundation
 
-/// Error types for OpenID4VCI operations.
-enum OpenId4VciError: Error, LocalizedError {
-    case invalidOffer(String)
-    case issuanceFailed(String)
-    case transportError(String)
-
-    var errorDescription: String? {
-        switch self {
-        case .invalidOffer(let reason):
-            return "Invalid credential offer: \(reason)"
-        case .issuanceFailed(let reason):
-            return "Credential issuance failed: \(reason)"
-        case .transportError(let reason):
-            return "VCI transport error: \(reason)"
-        }
-    }
-}
-
 /// ViewModel for the OpenID4VCI credential offer flow.
 ///
 /// State machine:
@@ -229,19 +211,20 @@ final class CredentialOfferViewModel {
                 let vaultRef = vault
 
                 // Bridge async vault.sign to synchronous signer closure.
-                let signer: (Data) -> Data = { data in
+                nonisolated(unsafe) var signerResult = Data()
+                let signer: @Sendable (Data) -> Data = { data in
                     let semaphore = DispatchSemaphore(value: 0)
-                    var result = Data()
-                    Task {
+                    signerResult = Data()
+                    Task.detached { @Sendable in
                         do {
-                            result = try await vaultRef.sign(keyId: keyId, data: data)
+                            signerResult = try await vaultRef.sign(keyId: keyId, data: data)
                         } catch {
                             // Signing failure will produce empty signature
                         }
                         semaphore.signal()
                     }
                     semaphore.wait()
-                    return result
+                    return signerResult
                 }
 
                 let issuanceResult = try await handler.acceptOffer(
@@ -258,7 +241,7 @@ final class CredentialOfferViewModel {
                 switch issuanceResult {
                 case .success:
                     state = .success
-                case .deferred(let transactionId):
+                case .deferred(let transactionId, _, _):
                     state = .deferred(transactionId: transactionId)
                 case .failed(let error):
                     state = .error(error)

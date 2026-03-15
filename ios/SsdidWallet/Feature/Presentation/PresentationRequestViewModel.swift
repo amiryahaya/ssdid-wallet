@@ -108,12 +108,13 @@ final class PresentationRequestViewModel {
                 // The signer closure is synchronous (required by VpTokenBuilder).
                 // We bridge async vault.sign using a semaphore, similar to
                 // Android's runBlocking pattern.
-                let signer: (Data) -> Data = { data in
+                nonisolated(unsafe) var signerResult: Data = Data()
+                let signer: @Sendable (Data) -> Data = { data in
                     let semaphore = DispatchSemaphore(value: 0)
-                    var result: Data = Data()
-                    Task {
+                    signerResult = Data()
+                    Task.detached { @Sendable in
                         do {
-                            result = try await vaultRef.sign(keyId: keyId, data: data)
+                            signerResult = try await vaultRef.sign(keyId: keyId, data: data)
                         } catch {
                             // Signing failure will produce an empty signature,
                             // which the verifier will reject.
@@ -121,7 +122,7 @@ final class PresentationRequestViewModel {
                         semaphore.signal()
                     }
                     semaphore.wait()
-                    return result
+                    return signerResult
                 }
 
                 try await handler.submitPresentation(

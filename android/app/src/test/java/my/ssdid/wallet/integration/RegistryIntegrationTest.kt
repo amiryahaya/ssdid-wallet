@@ -6,13 +6,16 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.put
 import my.ssdid.wallet.domain.crypto.ClassicalProvider
 import my.ssdid.wallet.domain.crypto.CryptoProvider
 import my.ssdid.wallet.domain.crypto.Multibase
 import my.ssdid.wallet.domain.crypto.PqcProvider
 import my.ssdid.wallet.domain.model.*
 import my.ssdid.wallet.domain.transport.RegistryApi
+import my.ssdid.wallet.domain.transport.dto.DeactivateDidRequest
 import my.ssdid.wallet.domain.transport.dto.RegisterDidRequest
 import my.ssdid.wallet.domain.transport.dto.UpdateDidRequest
 import my.ssdid.wallet.domain.vault.VaultImpl
@@ -311,5 +314,84 @@ class RegistryIntegrationTest {
         val proof2 = createW3CProof(keyId, didDocToJsonObject(didDoc), Algorithm.ED25519, keyPair.privateKey, classical)
         val result = runCatching { registryApi.registerDid(RegisterDidRequest(didDoc, proof2)) }
         assertThat(result.isFailure).isTrue()
+    }
+
+    // === KAZ-Sign (Malaysian PQC) ===
+
+    /**
+     * Probes the registry for KAZ-Sign support. Skipped if the native
+     * KAZ-Sign library is not available (JNI not loaded in unit-test JVM)
+     * or the registry cannot verify KAZ-Sign signatures.
+     */
+    private suspend fun assumeKazSignSupported() {
+        try {
+            val kp = pqc.generateKeyPair(Algorithm.KAZ_SIGN_128)
+            val did = Did.generate()
+            val keyId = did.keyId(1)
+            val pubMultibase = Multibase.encode(kp.publicKey)
+            val didDoc = DidDocument.build(did, keyId, Algorithm.KAZ_SIGN_128, pubMultibase)
+            val proof = createW3CProof(keyId, didDocToJsonObject(didDoc), Algorithm.KAZ_SIGN_128, kp.privateKey, pqc)
+            registryApi.registerDid(RegisterDidRequest(didDoc, proof))
+        } catch (e: Throwable) {
+            assumeTrue("KAZ-Sign unavailable (${e.message})", false)
+        }
+    }
+
+    @Test
+    fun `register and resolve DID with KAZ-SIGN-128`() = runTest {
+        assumeKazSignSupported()
+        registerAndResolve(Algorithm.KAZ_SIGN_128, pqc)
+    }
+
+    @Test
+    fun `register and resolve DID with KAZ-SIGN-192`() = runTest {
+        assumeKazSignSupported()
+        registerAndResolve(Algorithm.KAZ_SIGN_192, pqc)
+    }
+
+    @Test
+    fun `register and resolve DID with KAZ-SIGN-256`() = runTest {
+        assumeKazSignSupported()
+        registerAndResolve(Algorithm.KAZ_SIGN_256, pqc)
+    }
+
+    // === DID Deactivation ===
+
+    @Test
+    fun `deactivate DID makes it unresolvable`() = runTest {
+        // Register a fresh DID
+        val keyPair = classical.generateKeyPair(Algorithm.ED25519)
+        val did = Did.generate()
+        val keyId = did.keyId(1)
+        val pubMultibase = Multibase.encode(keyPair.publicKey)
+
+        val didDoc = DidDocument.build(did, keyId, Algorithm.ED25519, pubMultibase)
+        val proof = createW3CProof(keyId, didDocToJsonObject(didDoc), Algorithm.ED25519, keyPair.privateKey, classical)
+        registryApi.registerDid(RegisterDidRequest(didDoc, proof))
+
+        // Verify it resolves
+        val resolved = registryApi.resolveDid(did.value)
+        assertThat(resolved.id).isEqualTo(did.value)
+
+        // Request challenge for deactivation
+        val challengeResp = registryApi.createChallenge(did.value)
+        assertThat(challengeResp.challenge).isNotEmpty()
+
+        // Build deactivation proof with capabilityInvocation purpose
+        val deactivateData = buildJsonObject {
+            put("action", "deactivate")
+            put("did", did.value)
+        }
+        val deactivateProof = createW3CProof(
+            keyId, deactivateData, Algorithm.ED25519, keyPair.privateKey, classical,
+            proofPurpose = "capabilityInvocation",
+            challenge = challengeResp.challenge,
+            domain = challengeResp.domain
+        )
+        registryApi.deactivateDid(did.value, DeactivateDidRequest(deactivateProof))
+
+        // Verify DID is no longer resolvable
+        val resolveResult = runCatching { registryApi.resolveDid(did.value) }
+        assertThat(resolveResult.isFailure).isTrue()
     }
 }

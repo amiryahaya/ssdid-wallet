@@ -19,10 +19,15 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import my.ssdid.wallet.R
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.PhoneAndroid
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.ui.graphics.vector.ImageVector
 import my.ssdid.wallet.ui.theme.*
 
 private data class OnboardingSlide(
-    val icon: String,
+    val icon: ImageVector,
     val title: String,
     val description: String,
     val accentColor: androidx.compose.ui.graphics.Color
@@ -32,19 +37,19 @@ private data class OnboardingSlide(
 fun OnboardingScreen(onComplete: () -> Unit, onRestore: () -> Unit = {}) {
     val slides = listOf(
         OnboardingSlide(
-            icon = "\uD83D\uDD10",
+            icon = Icons.Default.Lock,
             title = stringResource(R.string.onboarding_title_1),
             description = stringResource(R.string.onboarding_desc_1),
             accentColor = Accent
         ),
         OnboardingSlide(
-            icon = "\uD83D\uDEE1\uFE0F",
+            icon = Icons.Default.Shield,
             title = stringResource(R.string.onboarding_title_2),
             description = stringResource(R.string.onboarding_desc_2),
             accentColor = Pqc
         ),
         OnboardingSlide(
-            icon = "\uD83D\uDCF1",
+            icon = Icons.Default.PhoneAndroid,
             title = stringResource(R.string.onboarding_title_3),
             description = stringResource(R.string.onboarding_desc_3),
             accentColor = Success
@@ -57,8 +62,20 @@ fun OnboardingScreen(onComplete: () -> Unit, onRestore: () -> Unit = {}) {
         modifier = Modifier
             .fillMaxSize()
             .background(BgPrimary)
-            .statusBarsPadding()
+            .statusBarsPadding().navigationBarsPadding()
     ) {
+        // Skip button
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            contentAlignment = Alignment.CenterEnd
+        ) {
+            TextButton(onClick = onComplete) {
+                Text("Skip", color = TextSecondary, fontSize = 14.sp)
+            }
+        }
+
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.weight(1f)
@@ -78,7 +95,12 @@ fun OnboardingScreen(onComplete: () -> Unit, onRestore: () -> Unit = {}) {
                         .background(slide.accentColor.copy(alpha = 0.12f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(slide.icon, fontSize = 42.sp)
+                    Icon(
+                        slide.icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(42.dp),
+                        tint = slide.accentColor
+                    )
                 }
                 Spacer(Modifier.height(40.dp))
                 Text(
