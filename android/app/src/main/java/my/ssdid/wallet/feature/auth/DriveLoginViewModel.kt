@@ -17,7 +17,6 @@ import my.ssdid.wallet.domain.transport.SsdidHttpClient
 import my.ssdid.wallet.domain.transport.dto.ClaimRequest
 import my.ssdid.wallet.domain.transport.dto.RegisterStartRequest
 import my.ssdid.wallet.domain.transport.dto.RegisterVerifyRequest
-import my.ssdid.wallet.domain.profile.ProfileManager
 import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.domain.verifier.Verifier
 import my.ssdid.wallet.platform.biometric.BiometricAuthenticator
@@ -39,7 +38,6 @@ class DriveLoginViewModel @Inject constructor(
     private val httpClient: SsdidHttpClient,
     private val verifier: Verifier,
     private val biometricAuth: BiometricAuthenticator,
-    private val profileManager: ProfileManager,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -175,8 +173,11 @@ class DriveLoginViewModel @Inject constructor(
         val signedChallenge = Multibase.encode(signatureBytes)
 
         // Step 4: Complete registration — receive VC
+        // Build shared claims from identity profile
+        val sharedClaims = identity.claimsMap().ifEmpty { null }
+
         val verifyResp = driveApi.registerVerify(
-            RegisterVerifyRequest(identity.did, identity.keyId, signedChallenge)
+            RegisterVerifyRequest(identity.did, identity.keyId, signedChallenge, shared_claims = sharedClaims)
         )
 
         // Step 5: Store the credential
