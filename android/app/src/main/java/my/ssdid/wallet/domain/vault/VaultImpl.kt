@@ -70,6 +70,23 @@ class VaultImpl(
         storage.deleteIdentity(keyId)
     }
 
+    override suspend fun updateIdentityProfile(
+        keyId: String,
+        profileName: String?,
+        email: String?,
+        emailVerified: Boolean?
+    ): Result<Unit> = runCatching {
+        val identity = storage.getIdentity(keyId) ?: throw IllegalArgumentException("Identity not found: $keyId")
+        val encryptedKey = storage.getEncryptedPrivateKey(keyId)
+            ?: throw IllegalStateException("Private key not found for: $keyId")
+        val updated = identity.copy(
+            profileName = profileName ?: identity.profileName,
+            email = email ?: identity.email,
+            emailVerified = emailVerified ?: identity.emailVerified
+        )
+        storage.saveIdentity(updated, encryptedKey)
+    }
+
     override suspend fun sign(keyId: String, data: ByteArray): Result<ByteArray> = runCatching {
         val identity = storage.getIdentity(keyId) ?: throw IllegalArgumentException("Identity not found: $keyId")
         val did = Did(identity.did)
