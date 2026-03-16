@@ -6,7 +6,7 @@ enum DeepLinkAction: Equatable {
     case authenticate(serverUrl: String, callbackUrl: String, sessionId: String?, requestedClaims: String?, acceptedAlgorithms: String?)
     case sign(serverUrl: String, sessionToken: String)
     case credentialOffer(issuerUrl: String, offerId: String)
-    case login(serverUrl: String, serviceName: String?, challengeId: String?, callbackUrl: String, requestedClaims: String?)
+    case login(serverUrl: String, serviceName: String?, challengeId: String?, callbackUrl: String, requestedClaims: String?, inviteCode: String?)
     case invite(serverUrl: String, token: String, callbackUrl: String)
     case openid4vp(rawUri: String)
     case openidCredentialOffer(offerData: String)
@@ -132,7 +132,8 @@ final class DeepLinkHandler {
                 serviceName: params["service_name"],
                 challengeId: params["challenge_id"],
                 callbackUrl: callbackUrl,
-                requestedClaims: params["requested_claims"]
+                requestedClaims: params["requested_claims"],
+                inviteCode: params["invite_code"]
             )
 
         case "invite":

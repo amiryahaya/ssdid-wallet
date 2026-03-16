@@ -37,6 +37,13 @@ final class UrlValidator {
             throw UrlValidationError.invalidURL(urlString)
         }
 
+        #if DEBUG
+        // Allow localhost HTTP in debug builds for local development
+        if let host = components.host, (host == "localhost" || host == "127.0.0.1") {
+            return
+        }
+        #endif
+
         // HTTPS only
         guard components.scheme?.lowercased() == "https" else {
             throw UrlValidationError.httpNotAllowed

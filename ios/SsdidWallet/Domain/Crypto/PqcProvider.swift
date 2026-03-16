@@ -19,9 +19,8 @@ final class PqcProvider: CryptoProvider {
             let signer = try KazSigner(level: level)
             let keyPair = try signer.generateKeyPair()
             // Store DER-encoded keys to match Android and registry expectations
-            // Patch the public key OID from KEM arc (62395.2.x) to SIGN arc (62395.1.x)
-            let rawDerPublicKey = try signer.publicKeyToDer(keyPair.publicKey)
-            let derPublicKey = patchPublicKeyOid(rawDerPublicKey)
+            // C library v2.0.2+ uses correct SIGN arc OID (62395.1.x) natively
+            let derPublicKey = try signer.publicKeyToDer(keyPair.publicKey)
             let derPrivateKey = try signer.privateKeyToDer(keyPair.secretKey)
             return KeyPairResult(publicKey: derPublicKey, privateKey: derPrivateKey)
         }
@@ -75,9 +74,8 @@ final class PqcProvider: CryptoProvider {
             let level = securityLevel(for: algorithm)
             let signer = try KazSigner(level: level)
 
-            // Reverse-patch OID back to what the C library expects before decoding
-            let cLibDerKey = unpatchPublicKeyOid(publicKey)
-            let rawPublicKey = try signer.publicKeyFromDer(cLibDerKey)
+            // C library v2.0.2+ uses correct SIGN arc OID natively — no patching needed
+            let rawPublicKey = try signer.publicKeyFromDer(publicKey)
 
             // Strip KazWire header if present
             let rawSignature = stripWireHeader(signature)

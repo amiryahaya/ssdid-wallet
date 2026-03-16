@@ -30,11 +30,15 @@ struct RegisterVerifyRequest: Codable {
     let did: String
     let keyId: String
     let signedChallenge: String
+    let inviteToken: String?
+    let sharedClaims: [String: String]?
 
     enum CodingKeys: String, CodingKey {
         case did
         case keyId = "key_id"
         case signedChallenge = "signed_challenge"
+        case inviteToken = "invite_token"
+        case sharedClaims = "shared_claims"
     }
 }
 
