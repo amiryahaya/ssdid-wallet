@@ -143,6 +143,8 @@ class CreateIdentityViewModel @Inject constructor(
         }
     }
 
+    fun resetEmailVerified() { _emailVerified.value = false }
+
     fun clearError() {
         _error.value = null
     }
@@ -158,26 +160,29 @@ class CreateIdentityViewModel @Inject constructor(
         viewModelScope.launch {
             _isCreating.value = true
             _error.value = null
-            client.initIdentity(name, algorithm)
-                .onSuccess { identity ->
-                    if (!profileName.isNullOrBlank() || !email.isNullOrBlank()) {
-                        vault.updateIdentityProfile(
-                            identity.keyId,
-                            profileName = profileName?.takeIf { it.isNotBlank() },
-                            email = email?.takeIf { it.isNotBlank() },
-                            emailVerified = if (emailVerified) true else null
-                        ).onFailure { e ->
-                            io.sentry.Sentry.captureException(e)
+            try {
+                client.initIdentity(name, algorithm)
+                    .onSuccess { identity ->
+                        if (!profileName.isNullOrBlank() || !email.isNullOrBlank()) {
+                            vault.updateIdentityProfile(
+                                identity.keyId,
+                                profileName = profileName?.takeIf { it.isNotBlank() },
+                                email = email?.takeIf { it.isNotBlank() },
+                                emailVerified = if (emailVerified) true else null
+                            ).onFailure { e ->
+                                io.sentry.Sentry.captureException(e)
+                            }
                         }
+                        storage.setOnboardingCompleted()
+                        onSuccess()
                     }
-                    storage.setOnboardingCompleted()
-                    onSuccess()
-                }
-                .onFailure {
-                    io.sentry.Sentry.captureException(it)
-                    _error.value = it.message ?: "Failed to create identity"
-                }
-            _isCreating.value = false
+                    .onFailure {
+                        io.sentry.Sentry.captureException(it)
+                        _error.value = it.message ?: "Failed to create identity"
+                    }
+            } finally {
+                _isCreating.value = false
+            }
         }
     }
 
@@ -229,8 +234,13 @@ fun CreateIdentityScreen(
     val cooldown by viewModel.cooldown.collectAsState()
     val error by viewModel.error.collectAsState()
 
-    val isStep1Valid = displayName.isNotBlank() &&
-            email.contains("@") && email.substringAfter("@").contains(".")
+    val isStep1Valid = run {
+        val trimmed = email.trim()
+        val parts = trimmed.split("@")
+        val domainOk = parts.size == 2 && parts[0].isNotEmpty() &&
+            parts[1].contains(".") && !parts[1].endsWith(".")
+        displayName.isNotBlank() && domainOk
+    }
 
     // Haptic feedback on error
     LaunchedEffect(error) {
@@ -299,7 +309,11 @@ fun CreateIdentityScreen(
                 displayName = displayName,
                 onDisplayNameChange = { displayName = it },
                 email = email,
-                onEmailChange = { email = it },
+                onEmailChange = {
+                    email = it
+                    viewModel.resetEmailVerified()
+                    viewModel.clearError()
+                },
                 isValid = isStep1Valid,
                 isSendingCode = isSendingCode,
                 onNext = {

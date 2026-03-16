@@ -424,9 +424,9 @@ struct DriveLoginScreen: View {
             return
         }
 
-        // Only allow ssdid:// or https:// callback schemes to prevent open redirect
-        guard let scheme = components.scheme,
-              scheme == "ssdid" || scheme == "https" else {
+        // Allow custom app schemes and https:// — block dangerous schemes (javascript, data, file)
+        guard let scheme = components.scheme?.lowercased(),
+              !["javascript", "data", "file", "blob", "vbscript"].contains(scheme) else {
             router.pop()
             return
         }

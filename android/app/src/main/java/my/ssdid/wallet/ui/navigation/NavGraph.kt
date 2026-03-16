@@ -36,7 +36,6 @@ import my.ssdid.wallet.feature.presentation.PresentationRequestScreen
 import my.ssdid.wallet.feature.scan.ScanQrScreen
 import my.ssdid.wallet.feature.settings.SettingsScreen
 import my.ssdid.wallet.feature.notifications.NotificationsScreen
-import my.ssdid.wallet.feature.presentation.PresentationRequestScreen
 import my.ssdid.wallet.feature.transaction.TxSigningScreen
 
 @Composable
@@ -57,22 +56,11 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String, on
 composable(
             Screen.EmailVerification.route,
             arguments = listOf(
-                navArgument("email") { type = NavType.StringType; defaultValue = "" },
-                navArgument("source") { type = NavType.StringType; defaultValue = "setup" }
+                navArgument("email") { type = NavType.StringType; defaultValue = "" }
             )
-        ) { backStackEntry ->
-            val source = backStackEntry.arguments?.getString("source") ?: "setup"
+        ) {
             EmailVerificationScreen(
-                onVerified = {
-                    if (source == "edit") {
-                        navController.popBackStack(Screen.Settings.route, inclusive = false)
-                    } else {
-                        onOnboardingCompleted()
-                        navController.navigate(Screen.CreateIdentity.createRoute()) {
-                            popUpTo(Screen.Onboarding.route) { inclusive = true }
-                        }
-                    }
-                },
+                onVerified = { navController.popBackStack() },
                 onBack = { navController.popBackStack() }
             )
         }
@@ -362,19 +350,6 @@ composable(Screen.TxHistory.route) {
             )
         ) {
             InviteAcceptScreen()
-        }
-        composable(
-            route = Screen.PresentationRequest.route,
-            arguments = listOf(
-                navArgument("uri") { type = NavType.StringType; defaultValue = "" }
-            )
-        ) {
-            PresentationRequestScreen(
-                onBack = { navController.popBackStack() },
-                onComplete = {
-                    navController.popBackStack(Screen.WalletHome.route, inclusive = false)
-                }
-            )
         }
         composable(Screen.SocialRecoveryRestore.route) {
             SocialRecoveryRestoreScreen(

@@ -26,6 +26,8 @@ struct CreateIdentityScreen: View {
     @State private var selectedAlgorithm: Algorithm = .KAZ_SIGN_192
     @State private var isCreating = false
 
+    @State private var resendCount = 0
+
     @State private var errorMessage: String?
 
     private nonisolated(unsafe) let emailApi = EmailApi(client: SsdidHttpClient())
@@ -202,6 +204,9 @@ struct CreateIdentityScreen: View {
                         .background(Color.bgCard)
                         .cornerRadius(12)
                         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.ssdidBorder, lineWidth: 1))
+                        .onChange(of: email) { _, _ in
+                            emailVerified = false
+                        }
                 }
                 .padding(.horizontal, 20)
             }
@@ -406,7 +411,14 @@ struct CreateIdentityScreen: View {
                     if currentStep == 1 {
                         withAnimation { currentStep = 2 }
                     }
-                    startCooldown()
+                    resendCount += 1
+                    let seconds: Int
+                    switch resendCount {
+                    case 1: seconds = 60
+                    case 2: seconds = 120
+                    default: seconds = 300
+                    }
+                    startCooldown(seconds)
                 }
             } catch let error as HttpError {
                 await MainActor.run {
@@ -516,13 +528,12 @@ struct CreateIdentityScreen: View {
         }
     }
 
-    private func startCooldown() {
-        cooldown = 60
-        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
-            if cooldown > 0 {
+    private func startCooldown(_ seconds: Int) {
+        cooldown = seconds
+        Task { @MainActor in
+            while cooldown > 0 {
+                try? await Task.sleep(for: .seconds(1))
                 cooldown -= 1
-            } else {
-                timer.invalidate()
             }
         }
     }
