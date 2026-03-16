@@ -238,7 +238,7 @@ class ConsentViewModelTest {
     fun `buildCallbackUri includes session_token and did`() = runTest {
         coEvery { vault.listIdentities() } returns listOf(testIdentity)
         stubInitChallenge()
-        val vm = createViewModel(callbackUrl = "myapp://cb")
+        val vm = createViewModel(callbackUrl = "ssdid://cb")
         advanceUntilIdle()
         val uri = vm.buildCallbackUri("tok-123")
         assertThat(uri).isNotNull()
@@ -250,7 +250,7 @@ class ConsentViewModelTest {
     fun `buildDeclineCallbackUri includes error param`() = runTest {
         coEvery { vault.listIdentities() } returns listOf(testIdentity)
         stubInitChallenge()
-        val vm = createViewModel(callbackUrl = "myapp://cb")
+        val vm = createViewModel(callbackUrl = "ssdid://cb")
         advanceUntilIdle()
         val uri = vm.buildDeclineCallbackUri()
         assertThat(uri).isNotNull()
