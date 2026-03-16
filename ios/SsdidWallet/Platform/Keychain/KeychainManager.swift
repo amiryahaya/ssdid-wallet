@@ -73,6 +73,7 @@ final class KeychainManager: KeychainManagerProtocol {
     let requireBiometric: Bool
 
     /// Cached SE master key to avoid repeated Keychain lookups.
+    private let masterKeyLock = NSLock()
     private var _seMasterKey: SecureEnclave.P256.KeyAgreement.PrivateKey?
 
     init(servicePrefix: String = "my.ssdid.wallet", requireBiometric: Bool = false) {
@@ -87,8 +88,11 @@ final class KeychainManager: KeychainManagerProtocol {
     // MARK: - SE Master Key Lifecycle
 
     private func ensureSEMasterKey() throws -> SecureEnclave.P256.KeyAgreement.PrivateKey {
+        masterKeyLock.lock()
+        defer { masterKeyLock.unlock() }
+
         if let cached = _seMasterKey { return cached }
-        if let existing = try? loadSEMasterKey() {
+        if let existing = try loadSEMasterKey() {
             _seMasterKey = existing
             return existing
         }
@@ -112,20 +116,35 @@ final class KeychainManager: KeychainManagerProtocol {
         let key = try SecureEnclave.P256.KeyAgreement.PrivateKey(accessControl: accessControl)
 
         // Persist dataRepresentation for reload
-        let query: [String: Any] = [
+        var persistQuery: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: Self.seMasterTag,
             kSecAttrAccount as String: "se_master",
-            kSecValueData as String: key.dataRepresentation,
-            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+            kSecValueData as String: key.dataRepresentation
         ]
+
+        if requireBiometric {
+            // Apply same biometric protection to the stored token
+            var acPersistError: Unmanaged<CFError>?
+            if let ac = SecAccessControlCreateWithFlags(
+                kCFAllocatorDefault,
+                kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+                .biometryCurrentSet,
+                &acPersistError
+            ) {
+                persistQuery[kSecAttrAccessControl as String] = ac
+            }
+        } else {
+            persistQuery[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+        }
+
         let deleteQ: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: Self.seMasterTag,
             kSecAttrAccount as String: "se_master"
         ]
         SecItemDelete(deleteQ as CFDictionary)
-        let status = SecItemAdd(query as CFDictionary, nil)
+        let status = SecItemAdd(persistQuery as CFDictionary, nil)
         guard status == errSecSuccess else {
             throw KeychainError.keyGenerationFailed(status)
         }
@@ -143,8 +162,19 @@ final class KeychainManager: KeychainManagerProtocol {
         ]
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
-        guard status == errSecSuccess, let data = result as? Data else { return nil }
-        return try SecureEnclave.P256.KeyAgreement.PrivateKey(dataRepresentation: data)
+
+        switch status {
+        case errSecSuccess:
+            guard let data = result as? Data else { return nil }
+            return try SecureEnclave.P256.KeyAgreement.PrivateKey(dataRepresentation: data)
+        case errSecItemNotFound:
+            return nil  // First-run: no key yet
+        case errSecAuthFailed, errSecUserCanceled:
+            // Biometrics re-enrolled or auth failed — existing wrapped keys are inaccessible
+            throw KeychainError.biometricAuthFailed("SE master key invalidated — restore from backup required")
+        default:
+            throw KeychainError.unexpectedError("SE master key load failed with status \(status)")
+        }
     }
 
     // MARK: - ECDH Key Derivation
@@ -239,6 +269,12 @@ final class KeychainManager: KeychainManagerProtocol {
             let ephemeralPrivate = P256.KeyAgreement.PrivateKey()
             try saveEphemeralPublicKey(alias: alias, publicKey: ephemeralPrivate.publicKey)
         } else {
+            // SECURITY: SE not available — keys are software-backed (simulator or unsupported device)
+            #if DEBUG
+            print("⚠️ [KeychainManager] Secure Enclave unavailable for alias '\(alias)' — using software fallback")
+            #else
+            assertionFailure("Secure Enclave unavailable in production build")
+            #endif
             try generateLegacyWrappingKey(alias: alias)
         }
     }
