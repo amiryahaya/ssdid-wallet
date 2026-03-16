@@ -25,8 +25,8 @@ struct RootView: View {
             .ssdidTheme()
             .onChange(of: coordinator.pendingDeepLink) { _, newURL in
                 guard let url = newURL else { return }
-                _ = coordinator.consumeDeepLink()
                 routeDeepLink(url)
+                _ = coordinator.consumeDeepLink()
             }
 
             if showSplash {
@@ -52,13 +52,14 @@ struct RootView: View {
         guard let action = try? handler.parse(url: url) else { return }
 
         switch action {
-        case .login(let serverUrl, let serviceName, let challengeId, let callbackUrl, let requestedClaims):
+        case .login(let serverUrl, let serviceName, let challengeId, let callbackUrl, let requestedClaims, let inviteCode):
             router.push(.driveLogin(
                 serviceUrl: serverUrl,
                 serviceName: serviceName ?? "SSDID Drive",
                 challengeId: challengeId ?? "",
                 callbackUrl: callbackUrl,
-                requestedClaims: requestedClaims ?? ""
+                requestedClaims: requestedClaims ?? "",
+                inviteCode: inviteCode
             ))
         case .authenticate(let serverUrl, let callbackUrl, let sessionId, let requestedClaims, let acceptedAlgorithms):
             if sessionId != nil || requestedClaims != nil {
@@ -96,10 +97,6 @@ struct RootView: View {
             CreateIdentityScreen(acceptedAlgorithms: acceptedAlgorithms)
         case .biometricSetup:
             BiometricSetupScreen()
-        case .profileSetup:
-            ProfileSetupScreen(isEditing: false)
-        case .profileEdit:
-            ProfileSetupScreen(isEditing: true)
         case .emailVerification(let email, let isEditing):
             EmailVerificationScreen(email: email, isEditing: isEditing)
         case .walletHome:
@@ -114,8 +111,8 @@ struct RootView: View {
             AuthFlowScreen(serverUrl: serverUrl, callbackUrl: callbackUrl)
         case .consent(let serverUrl, let callbackUrl, let sessionId, let requestedClaims, let acceptedAlgorithms):
             ConsentScreen(serverUrl: serverUrl, callbackUrl: callbackUrl, sessionId: sessionId, requestedClaims: requestedClaims, acceptedAlgorithms: acceptedAlgorithms)
-        case .driveLogin(let serviceUrl, let serviceName, let challengeId, let callbackUrl, let requestedClaims):
-            DriveLoginScreen(serviceUrl: serviceUrl, serviceName: serviceName, challengeId: challengeId, callbackUrl: callbackUrl, requestedClaims: requestedClaims)
+        case .driveLogin(let serviceUrl, let serviceName, let challengeId, let callbackUrl, let requestedClaims, let inviteCode):
+            DriveLoginScreen(serviceUrl: serviceUrl, serviceName: serviceName, challengeId: challengeId, callbackUrl: callbackUrl, requestedClaims: requestedClaims, inviteCode: inviteCode)
         case .txSigning(let serverUrl, let sessionToken):
             TxSigningScreen(serverUrl: serverUrl, sessionToken: sessionToken)
         case .credentials:

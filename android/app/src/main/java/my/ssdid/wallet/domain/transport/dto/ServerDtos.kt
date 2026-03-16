@@ -21,7 +21,9 @@ data class RegisterStartResponse(
 data class RegisterVerifyRequest(
     val did: String,
     val key_id: String,
-    val signed_challenge: String
+    val signed_challenge: String,
+    val invite_token: String? = null,
+    val shared_claims: Map<String, String>? = null
 )
 
 @Serializable

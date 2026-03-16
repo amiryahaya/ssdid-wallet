@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -31,8 +32,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.model.Identity
+import my.ssdid.wallet.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.ui.theme.*
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 @HiltViewModel
@@ -45,6 +49,9 @@ class IdentityDetailViewModel @Inject constructor(
     private val _identity = MutableStateFlow<Identity?>(null)
     val identity = _identity.asStateFlow()
 
+    private val _credentials = MutableStateFlow<List<VerifiableCredential>>(emptyList())
+    val credentials = _credentials.asStateFlow()
+
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
 
@@ -52,7 +59,13 @@ class IdentityDetailViewModel @Inject constructor(
     val isDeactivating = _isDeactivating.asStateFlow()
 
     init {
-        viewModelScope.launch { _identity.value = vault.getIdentity(keyId) }
+        viewModelScope.launch {
+            val id = vault.getIdentity(keyId)
+            _identity.value = id
+            if (id != null) {
+                _credentials.value = vault.getCredentialsForDid(id.did)
+            }
+        }
     }
 
     fun deactivateIdentity(onComplete: () -> Unit) {
@@ -88,6 +101,7 @@ fun IdentityDetailScreen(
     viewModel: IdentityDetailViewModel = hiltViewModel()
 ) {
     val identity by viewModel.identity.collectAsState()
+    val credentials by viewModel.credentials.collectAsState()
     val error by viewModel.error.collectAsState()
     val isDeactivating by viewModel.isDeactivating.collectAsState()
     val view = LocalView.current
@@ -198,6 +212,101 @@ fun IdentityDetailScreen(
                     }
                 }
 
+                // Profile
+                if (id.profileName != null || id.email != null) {
+                    item {
+                        Spacer(Modifier.height(4.dp))
+                        Text("PROFILE", style = MaterialTheme.typography.labelMedium)
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = BgCard)
+                        ) {
+                            Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                id.profileName?.let { name ->
+                                    Row {
+                                        Text("Name", fontSize = 14.sp, color = TextSecondary)
+                                        Spacer(Modifier.weight(1f))
+                                        Text(name, fontSize = 14.sp, color = TextPrimary)
+                                    }
+                                }
+                                id.email?.let { email ->
+                                    Row {
+                                        Text("Email", fontSize = 14.sp, color = TextSecondary)
+                                        Spacer(Modifier.weight(1f))
+                                        Text(email, fontSize = 14.sp, color = TextPrimary)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Connected Services
+                item {
+                    Spacer(Modifier.height(8.dp))
+                    Text("CONNECTED SERVICES", style = MaterialTheme.typography.labelMedium)
+                    Spacer(Modifier.height(8.dp))
+                }
+
+                if (credentials.isEmpty()) {
+                    item {
+                        Card(
+                            Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = BgCard)
+                        ) {
+                            Column(
+                                Modifier.padding(24.dp).fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text("\uD83D\uDD17", fontSize = 32.sp)
+                                Spacer(Modifier.height(8.dp))
+                                Text("No services connected", fontSize = 14.sp, color = TextSecondary)
+                                Text("Scan a QR code to register with a service", fontSize = 12.sp, color = TextTertiary)
+                            }
+                        }
+                    }
+                } else {
+                    items(credentials.size) { index ->
+                        val vc = credentials[index]
+                        val status = vcDisplayStatus(vc)
+                        val name = serviceName(vc)
+                        val url = serviceUrl(vc)
+                        val statusColor = when (status) {
+                            VcDisplayStatus.ACTIVE -> Success
+                            VcDisplayStatus.EXPIRING -> Warning
+                            VcDisplayStatus.EXPIRED -> Danger
+                        }
+                        val statusLabel = when (status) {
+                            VcDisplayStatus.ACTIVE -> "Active"
+                            VcDisplayStatus.EXPIRING -> "Expiring soon"
+                            VcDisplayStatus.EXPIRED -> "Expired"
+                        }
+
+                        Card(
+                            Modifier.fillMaxWidth().clickable { onCredentialClick(vc.id) },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = BgCard)
+                        ) {
+                            Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Box(
+                                    Modifier.size(10.dp).clip(CircleShape).background(statusColor)
+                                )
+                                Spacer(Modifier.width(12.dp))
+                                Column(Modifier.weight(1f)) {
+                                    Text(name, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
+                                    if (url != null) {
+                                        Text(url, fontSize = 11.sp, color = TextTertiary, maxLines = 1)
+                                    }
+                                    Text("Issued: ${vc.issuanceDate.take(10)}", fontSize = 11.sp, color = TextTertiary)
+                                }
+                                Text(statusLabel, fontSize = 11.sp, color = statusColor)
+                            }
+                        }
+                    }
+                }
+
                 // Action buttons
                 item {
                     Spacer(Modifier.height(8.dp))
@@ -300,6 +409,34 @@ fun ActionCard(icon: String, label: String, modifier: Modifier = Modifier, onCli
             Text(label, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
         }
     }
+}
+
+enum class VcDisplayStatus { ACTIVE, EXPIRING, EXPIRED }
+
+fun vcDisplayStatus(vc: VerifiableCredential): VcDisplayStatus {
+    val exp = vc.expirationDate ?: return VcDisplayStatus.ACTIVE
+    return try {
+        val expInstant = Instant.parse(exp)
+        val now = Instant.now()
+        when {
+            expInstant.isBefore(now) -> VcDisplayStatus.EXPIRED
+            expInstant.isBefore(now.plus(30, ChronoUnit.DAYS)) -> VcDisplayStatus.EXPIRING
+            else -> VcDisplayStatus.ACTIVE
+        }
+    } catch (_: Exception) {
+        VcDisplayStatus.ACTIVE
+    }
+}
+
+fun serviceName(vc: VerifiableCredential): String {
+    val fromProps = vc.credentialSubject.additionalProperties["service"]
+    if (fromProps != null) return fromProps.toString().trim('"')
+    val issuer = vc.issuer
+    return if (issuer.length > 30) issuer.take(20) + "..." + issuer.takeLast(8) else issuer
+}
+
+fun serviceUrl(vc: VerifiableCredential): String? {
+    return vc.credentialSubject.additionalProperties["serviceUrl"]?.toString()?.trim('"')
 }
 
 @Composable

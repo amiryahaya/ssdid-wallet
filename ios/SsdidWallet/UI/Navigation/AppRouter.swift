@@ -6,8 +6,6 @@ enum Route: Hashable {
     case onboarding
     case createIdentity(acceptedAlgorithms: String? = nil)
     case biometricSetup
-    case profileSetup
-    case profileEdit
     case emailVerification(email: String, isEditing: Bool = false)
     case walletHome
     case identityDetail(keyId: String)
@@ -26,7 +24,8 @@ enum Route: Hashable {
         serviceName: String,
         challengeId: String,
         callbackUrl: String,
-        requestedClaims: String
+        requestedClaims: String,
+        inviteCode: String? = nil
     )
     case txSigning(serverUrl: String, sessionToken: String)
     case credentials

@@ -15,6 +15,7 @@ import androidx.lifecycle.SavedStateHandle
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.model.Algorithm
 import my.ssdid.wallet.domain.model.Identity
+import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.domain.vault.VaultStorage
 import org.junit.After
 import org.junit.Before
@@ -24,6 +25,8 @@ import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@org.robolectric.annotation.Config(sdk = [34])
+@org.junit.runner.RunWith(org.robolectric.RobolectricTestRunner::class)
 class CreateIdentityViewModelTest {
 
     @get:Rule
@@ -31,7 +34,9 @@ class CreateIdentityViewModelTest {
 
     private lateinit var viewModel: CreateIdentityViewModel
     private lateinit var client: SsdidClient
+    private lateinit var vault: Vault
     private lateinit var storage: VaultStorage
+    private lateinit var emailApi: my.ssdid.wallet.domain.transport.EmailVerifyApi
 
     private val testIdentity = Identity(
         name = "Test",
@@ -45,8 +50,11 @@ class CreateIdentityViewModelTest {
     @Before
     fun setup() {
         client = mockk(relaxed = true)
+        vault = mockk(relaxed = true)
         storage = mockk(relaxed = true)
-        viewModel = CreateIdentityViewModel(client, storage, SavedStateHandle())
+        emailApi = mockk(relaxed = true)
+        val context = androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>()
+        viewModel = CreateIdentityViewModel(client, vault, storage, emailApi, context, SavedStateHandle())
     }
 
     @Test
@@ -61,7 +69,7 @@ class CreateIdentityViewModelTest {
         coEvery { storage.setOnboardingCompleted() } returns Unit
 
         var successCalled = false
-        viewModel.createIdentity("Test", Algorithm.ED25519) { successCalled = true }
+        viewModel.createIdentity("Test", Algorithm.ED25519, null, null, false) { successCalled = true }
 
         assertThat(successCalled).isTrue()
         assertThat(viewModel.isCreating.value).isFalse()
@@ -76,7 +84,7 @@ class CreateIdentityViewModelTest {
         )
 
         var successCalled = false
-        viewModel.createIdentity("Test", Algorithm.ED25519) { successCalled = true }
+        viewModel.createIdentity("Test", Algorithm.ED25519, null, null, false) { successCalled = true }
 
         assertThat(successCalled).isFalse()
         assertThat(viewModel.error.value).isEqualTo("Network error")
@@ -89,7 +97,7 @@ class CreateIdentityViewModelTest {
             RuntimeException()
         )
 
-        viewModel.createIdentity("Test", Algorithm.KAZ_SIGN_128) { }
+        viewModel.createIdentity("Test", Algorithm.KAZ_SIGN_128, null, null, false) { }
 
         assertThat(viewModel.error.value).isEqualTo("Failed to create identity")
     }
@@ -98,7 +106,7 @@ class CreateIdentityViewModelTest {
     fun `createIdentity sets isCreating to false after completion`() = runTest {
         coEvery { client.initIdentity(any(), any()) } returns Result.success(testIdentity)
 
-        viewModel.createIdentity("Test", Algorithm.ED25519) { }
+        viewModel.createIdentity("Test", Algorithm.ED25519, null, null, false) { }
 
         assertThat(viewModel.isCreating.value).isFalse()
     }

@@ -12,6 +12,8 @@ final class VaultImpl: Vault, @unchecked Sendable {
     private let pqcProvider: CryptoProvider
     private let keychainManager: KeychainManager
     private let storage: VaultStorage
+    private let migrationLock = NSLock()
+    private var migratingAliases = Set<String>()
 
     init(
         classicalProvider: CryptoProvider,
@@ -31,6 +33,9 @@ final class VaultImpl: Vault, @unchecked Sendable {
 
     // MARK: - Identity Management
 
+    // NOTE: Name uniqueness check has a TOCTOU window when called concurrently.
+    // Root cause: VaultImpl is @unchecked Sendable rather than an actor.
+    // Migrate to actor to eliminate this. See: identity-scoped-profiles code review D3/D7.
     func createIdentity(name: String, algorithm: Algorithm) async throws -> Identity {
         let existing = await storage.listIdentities()
         if existing.contains(where: { $0.name.lowercased() == name.lowercased() }) {
@@ -79,6 +84,24 @@ final class VaultImpl: Vault, @unchecked Sendable {
         try await storage.deleteIdentity(keyId: keyId)
     }
 
+    func updateIdentityProfile(keyId: String, profileName: String?, email: String?, emailVerified: Bool?) async throws {
+        guard var identity = await storage.getIdentity(keyId: keyId) else {
+            throw VaultError.identityNotFound(keyId)
+        }
+        guard let encryptedKey = await storage.getEncryptedPrivateKey(keyId: keyId) else {
+            throw VaultError.privateKeyNotFound(keyId)
+        }
+        if let profileName = profileName { identity.profileName = profileName }
+        if let email = email {
+            if email != identity.email {
+                identity.email = email
+                identity.emailVerified = false  // Reset verification when email changes
+            }
+        }
+        if let emailVerified = emailVerified { identity.emailVerified = emailVerified }
+        try await storage.saveIdentity(identity, encryptedPrivateKey: encryptedKey)
+    }
+
     // MARK: - Signing
 
     func sign(keyId: String, data: Data) async throws -> Data {
@@ -92,15 +115,96 @@ final class VaultImpl: Vault, @unchecked Sendable {
             throw VaultError.privateKeyNotFound(keyId)
         }
 
-        let privateKey = try keychainManager.decrypt(alias: wrappingAlias, data: encryptedPrivateKey)
-        defer {
-            // Zero private key from memory
-            var mutableKey = privateKey
-            mutableKey.resetBytes(in: 0..<mutableKey.count)
+        // Try SE-path first (new format or already migrated)
+        if keychainManager.hasEphemeralKey(alias: wrappingAlias) {
+            do {
+                var privateKey = try keychainManager.decrypt(alias: wrappingAlias, data: encryptedPrivateKey)
+                defer {
+                    privateKey.withUnsafeMutableBytes { ptr in
+                        if let baseAddress = ptr.baseAddress { memset(baseAddress, 0, ptr.count) }
+                    }
+                }
+                let cryptoProvider = provider(for: identity.algorithm)
+                return try cryptoProvider.sign(algorithm: identity.algorithm, privateKey: privateKey, data: data)
+            } catch let error as KeychainError {
+                // SE decrypt failed — may be stale ephemeral key from interrupted migration
+                if !keychainManager.hasLegacyKey(alias: wrappingAlias) {
+                    throw error // No fallback available
+                }
+                // Fall through to legacy migration path
+            } catch {
+                // Non-keychain error (signing failed, etc.) — do not silently downgrade
+                throw error
+            }
         }
 
-        let cryptoProvider = provider(for: identity.algorithm)
-        return try cryptoProvider.sign(algorithm: identity.algorithm, privateKey: privateKey, data: data)
+        // Legacy path — migrate to SE
+        if keychainManager.hasLegacyKey(alias: wrappingAlias) {
+            return try await migrateAndSign(
+                identity: identity,
+                wrappingAlias: wrappingAlias,
+                encryptedPrivateKey: encryptedPrivateKey,
+                data: data
+            )
+        }
+
+        throw VaultError.privateKeyNotFound(keyId)
+    }
+
+    /// Migrates a legacy software-wrapped key to SE-derived wrapping, then signs.
+    /// Uses per-alias tracking to prevent concurrent migration of the same identity.
+    private func migrateAndSign(
+        identity: Identity,
+        wrappingAlias: String,
+        encryptedPrivateKey: Data,
+        data: Data
+    ) async throws -> Data {
+        // Check / mark alias under lock to prevent concurrent migration of same alias
+        try migrationLock.withLock {
+            guard !migratingAliases.contains(wrappingAlias) else {
+                // Another call is already migrating this alias — retry via SE path
+                throw VaultError.storageFailed("Migration in progress for this identity, please retry")
+            }
+            migratingAliases.insert(wrappingAlias)
+        }
+        defer {
+            migrationLock.withLock { _ = migratingAliases.remove(wrappingAlias) }
+        }
+
+        // Check if already migrated by a previous concurrent call
+        if keychainManager.hasEphemeralKey(alias: wrappingAlias),
+           !keychainManager.hasLegacyKey(alias: wrappingAlias) {
+            var pk = try keychainManager.decrypt(alias: wrappingAlias, data: encryptedPrivateKey)
+            defer {
+                pk.withUnsafeMutableBytes { ptr in
+                    if let baseAddress = ptr.baseAddress { memset(baseAddress, 0, ptr.count) }
+                }
+            }
+            return try provider(for: identity.algorithm).sign(algorithm: identity.algorithm, privateKey: pk, data: data)
+        }
+
+        // Decrypt with legacy key
+        var pk = try keychainManager.decryptLegacy(alias: wrappingAlias, data: encryptedPrivateKey)
+
+        // Generate new SE-derived wrapping key
+        try keychainManager.generateWrappingKey(alias: wrappingAlias)
+
+        // Re-encrypt with SE-derived key
+        let reEncrypted = try keychainManager.encrypt(alias: wrappingAlias, data: pk)
+
+        // Sign while we have the raw key
+        let signature = try provider(for: identity.algorithm).sign(algorithm: identity.algorithm, privateKey: pk, data: data)
+
+        // Zero raw key
+        pk.withUnsafeMutableBytes { ptr in
+            if let baseAddress = ptr.baseAddress { memset(baseAddress, 0, ptr.count) }
+        }
+
+        // Persist new ciphertext asynchronously (outside migration tracking)
+        try await storage.saveIdentity(identity, encryptedPrivateKey: reEncrypted)
+        keychainManager.deleteLegacyKey(alias: wrappingAlias)
+
+        return signature
     }
 
     // MARK: - DID Document
@@ -189,6 +293,11 @@ final class VaultImpl: Vault, @unchecked Sendable {
     func getCredentialForDid(_ did: String) async -> VerifiableCredential? {
         let credentials = await storage.listCredentials()
         return credentials.first { $0.credentialSubject.id == did }
+    }
+
+    func getCredentialsForDid(_ did: String) async -> [VerifiableCredential] {
+        let credentials = await storage.listCredentials()
+        return credentials.filter { $0.credentialSubject.id == did }
     }
 
     func deleteCredential(credentialId: String) async throws {

@@ -38,6 +38,9 @@ protocol Vault: Sendable {
     /// Deletes an identity by its key ID.
     func deleteIdentity(keyId: String) async throws
 
+    /// Updates profile fields (profileName, email, emailVerified) on an existing identity.
+    func updateIdentityProfile(keyId: String, profileName: String?, email: String?, emailVerified: Bool?) async throws
+
     /// Signs data using the private key associated with the given key ID.
     func sign(keyId: String, data: Data) async throws -> Data
 
@@ -61,6 +64,9 @@ protocol Vault: Sendable {
 
     /// Retrieves a credential whose subject ID matches the given DID.
     func getCredentialForDid(_ did: String) async -> VerifiableCredential?
+
+    /// Returns all credentials whose subject ID matches the given DID.
+    func getCredentialsForDid(_ did: String) async -> [VerifiableCredential]
 
     /// Deletes a credential by its ID.
     func deleteCredential(credentialId: String) async throws

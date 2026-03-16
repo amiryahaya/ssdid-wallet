@@ -79,7 +79,6 @@
 		6482F67031A3DCA21C78C45B /* TokenClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E112899F8FC3028EFA3BF69 /* TokenClientTests.swift */; };
 		68177A6E7440027E05D58CEF /* AlgorithmBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEB759342B72885647D00887 /* AlgorithmBadge.swift */; };
 		696069B0BC4144A98BF1F394 /* ServiceContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7FB896692C4E9DBDE438C69 /* ServiceContainer.swift */; };
-		6A4D667049E9CF9F59E830C1 /* ProfileSetupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A7FAD32A652C96C229BEFE1 /* ProfileSetupScreen.swift */; };
 		6E4F0C04AA9DDCFFBF840240 /* DidResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393D8CCFA06421676FDADA68 /* DidResolver.swift */; };
 		6F61D2F6E4C754230227282F /* SdJwtError.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA4165B8A767B090FE84BFBE /* SdJwtError.swift */; };
 		6FACB0490B9E42D268EF9DE2 /* StoredSdJwtVc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89802BF51BE5465177F64AF0 /* StoredSdJwtVc.swift */; };
@@ -104,7 +103,7 @@
 		85C123D6EF7CCC85354D2234 /* TxSigningScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F90BB3DA04FB9FC371DDDCB /* TxSigningScreen.swift */; };
 		88FC83F184C469B1EF13FCC3 /* CredentialDtos.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55C2A11CCEE2B911A05B6536 /* CredentialDtos.swift */; };
 		8B2F29C50E72D6920E51A3DC /* RegistrationScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9190E3BB5E3D6CE7CFEE29A7 /* RegistrationScreen.swift */; };
-		8BCE5638A689C511FAA8DDBD /* ProfileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18327CF1CBB3FD635354927D /* ProfileManager.swift */; };
+		8BCE5638A689C511FAA8DDBD /* ProfileMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18327CF1CBB3FD635354927D /* ProfileMigration.swift */; };
 		8C207CA6E26F6AF38A23E578 /* NotifyDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F6420157E4C4CD642A1B590 /* NotifyDto.swift */; };
 		8D151338E1C4FA65EB07E31E /* VpTokenBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C483CB05352CB7593DBDCE4 /* VpTokenBuilder.swift */; };
 		8E5A377CDAF31EC2FEF0332B /* DriveApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1094A1213DE08F5A317DBCD6 /* DriveApi.swift */; };
@@ -212,7 +211,7 @@
 		1094A1213DE08F5A317DBCD6 /* DriveApi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveApi.swift; sourceTree = "<group>"; };
 		12D666A531A1CFAE8BDDCB22 /* RevocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RevocationManager.swift; sourceTree = "<group>"; };
 		156E117108E875BDE2A2D9E2 /* KeyBindingJwtTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyBindingJwtTests.swift; sourceTree = "<group>"; };
-		18327CF1CBB3FD635354927D /* ProfileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileManager.swift; sourceTree = "<group>"; };
+		18327CF1CBB3FD635354927D /* ProfileMigration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileMigration.swift; sourceTree = "<group>"; };
 		1A479DBE4CE46DD2D9315F4C /* PresentationSubmissionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationSubmissionTests.swift; sourceTree = "<group>"; };
 		1AED8BAD4F7407C4A0DC9FC3 /* StoredSdJwtVcTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredSdJwtVcTests.swift; sourceTree = "<group>"; };
 		1C2C982E606F4F5D11B8589F /* SsdidWalletTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = SsdidWalletTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -250,7 +249,6 @@
 		468C6C6FF4716060B7EA0F53 /* ErrorBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorBanner.swift; sourceTree = "<group>"; };
 		469C289290048CAF9CD26E06 /* RegistryApi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistryApi.swift; sourceTree = "<group>"; };
 		482C83E7EA796971BB0509FA /* DidJwkResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DidJwkResolver.swift; sourceTree = "<group>"; };
-		4A7FAD32A652C96C229BEFE1 /* ProfileSetupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileSetupScreen.swift; sourceTree = "<group>"; };
 		4BF66249D50D04D694C36825 /* VerifiablePresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifiablePresentation.swift; sourceTree = "<group>"; };
 		4C2057980C3D89E456B7B639 /* TxHistoryScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TxHistoryScreen.swift; sourceTree = "<group>"; };
 		4C25A893DCDF6F5201781254 /* ActivityType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityType.swift; sourceTree = "<group>"; };
@@ -529,7 +527,6 @@
 			isa = PBXGroup;
 			children = (
 				D3914B30D5EEA93BFD177E6D /* EmailVerificationScreen.swift */,
-				4A7FAD32A652C96C229BEFE1 /* ProfileSetupScreen.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -913,7 +910,7 @@
 		B80F52F06C4DE698C3F443A8 /* Profile */ = {
 			isa = PBXGroup;
 			children = (
-				18327CF1CBB3FD635354927D /* ProfileManager.swift */,
+				18327CF1CBB3FD635354927D /* ProfileMigration.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -1290,8 +1287,7 @@
 				ECA242BC83212911F7E2A6AD /* PresentationRequestScreen.swift in Sources */,
 				1DD5B8BE29BDCEDC168394E6 /* PresentationRequestViewModel.swift in Sources */,
 				7CA22A51F6D16D111A148D44 /* PresentationSubmission.swift in Sources */,
-				8BCE5638A689C511FAA8DDBD /* ProfileManager.swift in Sources */,
-				6A4D667049E9CF9F59E830C1 /* ProfileSetupScreen.swift in Sources */,
+				8BCE5638A689C511FAA8DDBD /* ProfileMigration.swift in Sources */,
 				A2A99E822D065F3A8F1D272A /* Proof.swift in Sources */,
 				493C67083661300A19985EB5 /* ProofJwtBuilder.swift in Sources */,
 				360E608B1F5EC4B8F1E4BA6F /* RecoveryManager.swift in Sources */,

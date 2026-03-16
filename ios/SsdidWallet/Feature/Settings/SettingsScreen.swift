@@ -40,14 +40,6 @@ struct SettingsScreen: View {
 
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 4) {
-                    // Account
-                    sectionHeader("ACCOUNT")
-                    settingsItem("Profile", subtitle: "Name, email") {
-                        router.push(.profileEdit)
-                    }
-
-                    Spacer().frame(height: 16)
-
                     // Security
                     sectionHeader("SECURITY")
                     settingsToggle("Biometric Authentication", subtitle: "Face ID / Fingerprint", isOn: $biometricEnabled)

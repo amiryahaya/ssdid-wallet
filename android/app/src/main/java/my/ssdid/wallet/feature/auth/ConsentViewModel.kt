@@ -22,9 +22,9 @@ import my.ssdid.wallet.domain.transport.dto.AuthVerifyRequest
 import my.ssdid.wallet.domain.transport.dto.ClaimRequest
 import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.domain.verifier.Verifier
-import my.ssdid.wallet.domain.profile.ProfileManager
 import my.ssdid.wallet.platform.biometric.BiometricAuthenticator
 import my.ssdid.wallet.platform.biometric.BiometricResult
+import my.ssdid.wallet.platform.security.UrlValidator
 import javax.inject.Inject
 
 sealed class ConsentState {
@@ -41,7 +41,6 @@ class ConsentViewModel @Inject constructor(
     private val httpClient: SsdidHttpClient,
     private val verifier: Verifier,
     private val biometricAuth: BiometricAuthenticator,
-    private val profileManager: ProfileManager,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -90,6 +89,7 @@ class ConsentViewModel @Inject constructor(
     val serverName = _serverName.asStateFlow()
 
     private var cachedChallenge: String? = null
+    private var challengeFetchedAt: Long = 0L
 
     @Suppress("OPT_IN_USAGE")
     val hasAllRequiredClaims: StateFlow<Boolean> = _selectedIdentity
@@ -100,12 +100,8 @@ class ConsentViewModel @Inject constructor(
                 if (requiredKeys.isEmpty()) {
                     emit(true)
                 } else {
-                    try {
-                        val claims = profileManager.getProfileClaims()
-                        emit(requiredKeys.all { !claims[it].isNullOrBlank() })
-                    } catch (_: Exception) {
-                        emit(false)
-                    }
+                    val claims = identity.claimsMap()
+                    emit(requiredKeys.all { !claims[it].isNullOrBlank() })
                 }
             }
         }
@@ -116,6 +112,11 @@ class ConsentViewModel @Inject constructor(
         _credentialFormat.value = savedStateHandle.get<String>("credentialFormat") ?: "vc"
 
         viewModelScope.launch {
+            if (serverUrl.isNotEmpty() && !UrlValidator.isValidServerUrl(serverUrl)) {
+                _state.value = ConsentState.Error("Invalid server URL")
+                return@launch
+            }
+
             val allIdentities = vault.listIdentities()
             val filtered = if (acceptedAlgorithmNames.isEmpty()) allIdentities
                 else allIdentities.filter { it.algorithm.name in acceptedAlgorithmNames }
@@ -132,6 +133,7 @@ class ConsentViewModel @Inject constructor(
                     val challengeResp = serverApi.getAuthChallenge()
                     _serverName.value = challengeResp.serverName
                     cachedChallenge = challengeResp.challenge
+                    challengeFetchedAt = System.currentTimeMillis()
                 } catch (_: Exception) {
                     // Challenge fetch failed — will retry on approve
                 }
@@ -164,20 +166,28 @@ class ConsentViewModel @Inject constructor(
             try {
                 val serverApi = httpClient.serverApi(serverUrl)
 
-                // Consume cached challenge (single-use nonce) or fetch fresh
-                val challenge = cachedChallenge?.also { cachedChallenge = null } ?: run {
-                    val resp = serverApi.getAuthChallenge()
-                    _serverName.value = resp.serverName
-                    resp.challenge
+                // Consume cached challenge if fresh (< 60s), otherwise fetch new
+                val challenge = run {
+                    val cached = cachedChallenge?.takeIf {
+                        System.currentTimeMillis() - challengeFetchedAt < 60_000L
+                    }
+                    if (cached != null) {
+                        cachedChallenge = null
+                        cached
+                    } else {
+                        val resp = serverApi.getAuthChallenge()
+                        _serverName.value = resp.serverName
+                        resp.challenge
+                    }
                 }
 
                 // Sign the challenge
                 val signatureBytes = vault.sign(identity.keyId, challenge.toByteArray()).getOrThrow()
                 val signedChallenge = Multibase.encode(signatureBytes)
 
-                // Build shared claims from global profile
+                // Build shared claims from identity profile
                 val sharedClaims = mutableMapOf<String, String>()
-                val claims = profileManager.getProfileClaims()
+                val claims = identity.claimsMap()
 
                 val missingRequired = requestedClaims
                     .filter { it.required }
@@ -233,7 +243,9 @@ class ConsentViewModel @Inject constructor(
 
     fun buildCallbackUri(sessionToken: String): Uri? {
         if (callbackUrl.isEmpty()) return null
-        return Uri.parse(callbackUrl).buildUpon()
+        val uri = Uri.parse(callbackUrl)
+        if (uri.scheme != "ssdid" && uri.scheme != "https") return null
+        return uri.buildUpon()
             .appendQueryParameter("session_token", sessionToken)
             .appendQueryParameter("did", _selectedIdentity.value?.did ?: "")
             .build()
@@ -241,7 +253,9 @@ class ConsentViewModel @Inject constructor(
 
     fun buildDeclineCallbackUri(): Uri? {
         if (callbackUrl.isEmpty()) return null
-        return Uri.parse(callbackUrl).buildUpon()
+        val uri = Uri.parse(callbackUrl)
+        if (uri.scheme != "ssdid" && uri.scheme != "https") return null
+        return uri.buildUpon()
             .appendQueryParameter("error", "user_declined")
             .build()
     }

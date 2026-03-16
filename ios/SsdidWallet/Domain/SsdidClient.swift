@@ -176,7 +176,9 @@ final class SsdidClient: @unchecked Sendable {
         let verifyResp = try await serverApi.registerVerify(request: RegisterVerifyRequest(
             did: identity.did,
             keyId: identity.keyId,
-            signedChallenge: signedChallenge
+            signedChallenge: signedChallenge,
+            inviteToken: nil,
+            sharedClaims: nil
         ))
 
         // Step 5: Store the credential

@@ -70,6 +70,23 @@ class VaultImpl(
         storage.deleteIdentity(keyId)
     }
 
+    override suspend fun updateIdentityProfile(
+        keyId: String,
+        profileName: String?,
+        email: String?,
+        emailVerified: Boolean?
+    ): Result<Unit> = runCatching {
+        val identity = storage.getIdentity(keyId) ?: throw IllegalArgumentException("Identity not found: $keyId")
+        val encryptedKey = storage.getEncryptedPrivateKey(keyId)
+            ?: throw IllegalStateException("Private key not found for: $keyId")
+        val updated = identity.copy(
+            profileName = profileName ?: identity.profileName,
+            email = email ?: identity.email,
+            emailVerified = emailVerified ?: identity.emailVerified
+        )
+        storage.saveIdentity(updated, encryptedKey)
+    }
+
     override suspend fun sign(keyId: String, data: ByteArray): Result<ByteArray> = runCatching {
         val identity = storage.getIdentity(keyId) ?: throw IllegalArgumentException("Identity not found: $keyId")
         val did = Did(identity.did)
@@ -90,7 +107,7 @@ class VaultImpl(
 
         // Check for pre-rotated key hash
         val nextKeyHash = if (identity.preRotatedKeyId != null) {
-            val preRotated = storage.getPreRotatedKey(identity.preRotatedKeyId!!)
+            val preRotated = storage.getPreRotatedKey(identity.preRotatedKeyId)
             if (preRotated != null) {
                 val sha3 = MessageDigest.getInstance("SHA3-256")
                 val hash = sha3.digest(preRotated.publicKey)
@@ -195,6 +212,10 @@ class VaultImpl(
 
     override suspend fun getCredentialForDid(did: String): VerifiableCredential? {
         return storage.listCredentials().firstOrNull { it.credentialSubject.id == did }
+    }
+
+    override suspend fun getCredentialsForDid(did: String): List<VerifiableCredential> {
+        return storage.listCredentials().filter { it.credentialSubject.id == did }
     }
 
     override suspend fun deleteCredential(credentialId: String): Result<Unit> = runCatching {

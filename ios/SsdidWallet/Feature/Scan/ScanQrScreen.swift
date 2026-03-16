@@ -162,13 +162,14 @@ struct ScanQrScreen: View {
         guard let action = try? handler.parse(urlString: content) else { return }
 
         switch action {
-        case .login(let serverUrl, let serviceName, let challengeId, let callbackUrl, let requestedClaims):
+        case .login(let serverUrl, let serviceName, let challengeId, let callbackUrl, let requestedClaims, let inviteCode):
             router.push(.driveLogin(
                 serviceUrl: serverUrl,
                 serviceName: serviceName ?? "SSDID Drive",
                 challengeId: challengeId ?? "",
                 callbackUrl: callbackUrl,
-                requestedClaims: requestedClaims ?? ""
+                requestedClaims: requestedClaims ?? "",
+                inviteCode: inviteCode
             ))
         case .register(let serverUrl, let serverDid):
             router.push(.registration(

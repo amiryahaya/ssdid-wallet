@@ -10,16 +10,20 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import my.ssdid.wallet.domain.notify.NotifyLifecycleObserver
 import my.ssdid.wallet.domain.notify.NotifyManager
+import my.ssdid.wallet.domain.profile.ProfileMigration
 import org.unifiedpush.android.connector.UnifiedPush
 import javax.inject.Inject
 
 @HiltAndroidApp
 class SsdidApp : Application() {
 
+    // Process-scoped coroutine context — not cancelled explicitly; OS reclaims on process death.
+    // Tests should not instantiate SsdidApp directly.
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     @Inject lateinit var notifyManager: NotifyManager
     @Inject lateinit var notifyLifecycleObserver: NotifyLifecycleObserver
+    @Inject lateinit var profileMigration: ProfileMigration
 
     override fun onCreate() {
         super.onCreate()
@@ -27,6 +31,10 @@ class SsdidApp : Application() {
 
         // Fetch pending notifications whenever the app enters the foreground.
         ProcessLifecycleOwner.get().lifecycle.addObserver(notifyLifecycleObserver)
+
+        appScope.launch {
+            profileMigration.migrateIfNeeded()
+        }
 
         appScope.launch {
             notifyManager.ensureInboxRegistered()
