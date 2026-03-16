@@ -12,6 +12,7 @@ final class VaultImpl: Vault, @unchecked Sendable {
     private let pqcProvider: CryptoProvider
     private let keychainManager: KeychainManager
     private let storage: VaultStorage
+    private let migrationLock = NSLock()
 
     init(
         classicalProvider: CryptoProvider,
@@ -113,17 +114,83 @@ final class VaultImpl: Vault, @unchecked Sendable {
             throw VaultError.privateKeyNotFound(keyId)
         }
 
-        var privateKey = try keychainManager.decrypt(alias: wrappingAlias, data: encryptedPrivateKey)
-        defer {
-            privateKey.withUnsafeMutableBytes { ptr in
-                if let baseAddress = ptr.baseAddress {
-                    memset(baseAddress, 0, ptr.count)
+        // Try SE-path first (new format or already migrated)
+        if keychainManager.hasEphemeralKey(alias: wrappingAlias) {
+            do {
+                var privateKey = try keychainManager.decrypt(alias: wrappingAlias, data: encryptedPrivateKey)
+                defer {
+                    privateKey.withUnsafeMutableBytes { ptr in
+                        if let baseAddress = ptr.baseAddress { memset(baseAddress, 0, ptr.count) }
+                    }
                 }
+                let cryptoProvider = provider(for: identity.algorithm)
+                return try cryptoProvider.sign(algorithm: identity.algorithm, privateKey: privateKey, data: data)
+            } catch {
+                // SE decrypt failed — may be stale ephemeral key from interrupted migration
+                if !keychainManager.hasLegacyKey(alias: wrappingAlias) {
+                    throw error // No fallback available
+                }
+                // Fall through to legacy migration path
             }
         }
 
-        let cryptoProvider = provider(for: identity.algorithm)
-        return try cryptoProvider.sign(algorithm: identity.algorithm, privateKey: privateKey, data: data)
+        // Legacy path — migrate to SE
+        if keychainManager.hasLegacyKey(alias: wrappingAlias) {
+            return try await migrateAndSign(
+                identity: identity,
+                wrappingAlias: wrappingAlias,
+                encryptedPrivateKey: encryptedPrivateKey,
+                data: data
+            )
+        }
+
+        throw VaultError.privateKeyNotFound(keyId)
+    }
+
+    /// Migrates a legacy software-wrapped key to SE-derived wrapping, then signs.
+    private func migrateAndSign(
+        identity: Identity,
+        wrappingAlias: String,
+        encryptedPrivateKey: Data,
+        data: Data
+    ) async throws -> Data {
+        migrationLock.lock()
+        defer { migrationLock.unlock() }
+
+        // Double-check after lock — another thread may have migrated
+        if keychainManager.hasEphemeralKey(alias: wrappingAlias),
+           !keychainManager.hasLegacyKey(alias: wrappingAlias) {
+            var privateKey = try keychainManager.decrypt(alias: wrappingAlias, data: encryptedPrivateKey)
+            defer {
+                privateKey.withUnsafeMutableBytes { ptr in
+                    if let baseAddress = ptr.baseAddress { memset(baseAddress, 0, ptr.count) }
+                }
+            }
+            return try provider(for: identity.algorithm).sign(algorithm: identity.algorithm, privateKey: privateKey, data: data)
+        }
+
+        // Decrypt with legacy key
+        var privateKey = try keychainManager.decryptLegacy(alias: wrappingAlias, data: encryptedPrivateKey)
+        defer {
+            privateKey.withUnsafeMutableBytes { ptr in
+                if let baseAddress = ptr.baseAddress { memset(baseAddress, 0, ptr.count) }
+            }
+        }
+
+        // Generate new SE-derived wrapping key
+        try keychainManager.generateWrappingKey(alias: wrappingAlias)
+
+        // Re-encrypt with SE-derived key
+        let newEncrypted = try keychainManager.encrypt(alias: wrappingAlias, data: privateKey)
+
+        // Persist (FileVaultStorage uses .atomic — crash-safe)
+        try await storage.saveIdentity(identity, encryptedPrivateKey: newEncrypted)
+
+        // Delete old software key (safe — new ciphertext persisted)
+        keychainManager.deleteLegacyKey(alias: wrappingAlias)
+
+        // Sign
+        return try provider(for: identity.algorithm).sign(algorithm: identity.algorithm, privateKey: privateKey, data: data)
     }
 
     // MARK: - DID Document
