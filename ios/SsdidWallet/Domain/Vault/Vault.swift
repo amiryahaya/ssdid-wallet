@@ -38,6 +38,9 @@ protocol Vault: Sendable {
     /// Deletes an identity by its key ID.
     func deleteIdentity(keyId: String) async throws
 
+    /// Updates profile fields (profileName, email, emailVerified) on an existing identity.
+    func updateIdentityProfile(keyId: String, profileName: String?, email: String?, emailVerified: Bool?) async throws
+
     /// Signs data using the private key associated with the given key ID.
     func sign(keyId: String, data: Data) async throws -> Data
 

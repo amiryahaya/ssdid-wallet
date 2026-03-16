@@ -79,6 +79,19 @@ final class VaultImpl: Vault, @unchecked Sendable {
         try await storage.deleteIdentity(keyId: keyId)
     }
 
+    func updateIdentityProfile(keyId: String, profileName: String?, email: String?, emailVerified: Bool?) async throws {
+        guard var identity = await storage.getIdentity(keyId: keyId) else {
+            throw VaultError.identityNotFound(keyId)
+        }
+        guard let encryptedKey = await storage.getEncryptedPrivateKey(keyId: keyId) else {
+            throw VaultError.privateKeyNotFound(keyId)
+        }
+        if let profileName = profileName { identity.profileName = profileName }
+        if let email = email { identity.email = email }
+        if let emailVerified = emailVerified { identity.emailVerified = emailVerified }
+        try await storage.saveIdentity(identity, encryptedPrivateKey: encryptedKey)
+    }
+
     // MARK: - Signing
 
     func sign(keyId: String, data: Data) async throws -> Data {
