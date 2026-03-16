@@ -83,5 +83,11 @@ final class ServiceContainer: ObservableObject {
             revocationManager: revocationMgr,
             notifyManager: notifyMgr
         )
+
+        // One-time migration: copy legacy global profile VC to first identity
+        let migrationVault: Vault = vaultImpl
+        Task {
+            await ProfileMigration.migrateIfNeeded(vault: migrationVault)
+        }
     }
 }
