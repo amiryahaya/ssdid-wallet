@@ -13,5 +13,13 @@ data class Identity(
     val isActive: Boolean = true,
     val recoveryKeyId: String? = null,
     val hasRecoveryKey: Boolean = false,
-    val preRotatedKeyId: String? = null
-)
+    val preRotatedKeyId: String? = null,
+    val profileName: String? = null,
+    val email: String? = null,
+    val emailVerified: Boolean = false
+) {
+    fun claimsMap(): Map<String, String> = buildMap {
+        profileName?.let { put("name", it) }
+        email?.let { put("email", it) }
+    }
+}
