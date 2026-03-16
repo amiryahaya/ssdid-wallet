@@ -4,11 +4,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -22,6 +24,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.model.Algorithm
+import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.domain.vault.VaultStorage
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -33,6 +36,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CreateIdentityViewModel @Inject constructor(
     private val client: SsdidClient,
+    private val vault: Vault,
     private val storage: VaultStorage,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -54,12 +58,19 @@ class CreateIdentityViewModel @Inject constructor(
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
 
-    fun createIdentity(name: String, algorithm: Algorithm, onSuccess: () -> Unit) {
+    fun createIdentity(name: String, algorithm: Algorithm, profileName: String?, email: String?, onSuccess: () -> Unit) {
         viewModelScope.launch {
             _isCreating.value = true
             _error.value = null
             client.initIdentity(name, algorithm)
-                .onSuccess {
+                .onSuccess { identity ->
+                    if (!profileName.isNullOrBlank() || !email.isNullOrBlank()) {
+                        vault.updateIdentityProfile(
+                            identity.keyId,
+                            profileName = profileName?.takeIf { it.isNotBlank() },
+                            email = email?.takeIf { it.isNotBlank() }
+                        )
+                    }
                     storage.setOnboardingCompleted()
                     onSuccess()
                 }
@@ -80,6 +91,8 @@ fun CreateIdentityScreen(
 ) {
     val view = LocalView.current
     var name by remember { mutableStateOf("") }
+    var profileName by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     var selectedAlgo by remember {
         val preferred = viewModel.acceptedAlgorithms.find { it == Algorithm.KAZ_SIGN_192 }
         mutableStateOf(preferred ?: viewModel.acceptedAlgorithms.first())
@@ -125,6 +138,43 @@ fun CreateIdentityScreen(
                         unfocusedTextColor = TextPrimary
                     ),
                     singleLine = true
+                )
+            }
+
+            item {
+                Text("YOUR NAME", style = MaterialTheme.typography.labelMedium)
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = profileName,
+                    onValueChange = { profileName = it },
+                    placeholder = { Text("Your full name", color = TextTertiary) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Accent,
+                        unfocusedBorderColor = Border,
+                        cursorColor = Accent,
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary
+                    ),
+                    singleLine = true
+                )
+                Spacer(Modifier.height(12.dp))
+                Text("EMAIL", style = MaterialTheme.typography.labelMedium)
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    placeholder = { Text("your@email.com", color = TextTertiary) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Accent,
+                        unfocusedBorderColor = Border,
+                        cursorColor = Accent,
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary
+                    ),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
                 )
             }
 
@@ -177,7 +227,11 @@ fun CreateIdentityScreen(
         // Footer
         Button(
             onClick = {
-                if (name.isNotBlank()) viewModel.createIdentity(name, selectedAlgo) {
+                if (name.isNotBlank()) viewModel.createIdentity(
+                    name, selectedAlgo,
+                    profileName.ifBlank { null },
+                    email.ifBlank { null }
+                ) {
                     HapticManager.success(view)
                     onCreated()
                 }

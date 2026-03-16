@@ -2,7 +2,9 @@ import SwiftUI
 
 struct SettingsScreen: View {
     @Environment(AppRouter.self) private var router
+    @EnvironmentObject private var services: ServiceContainer
 
+    @State private var primaryKeyId: String?
     @State private var biometricEnabled = true
     @State private var autoLockMinutes = 5
     @State private var language = "en"
@@ -43,7 +45,9 @@ struct SettingsScreen: View {
                     // Account
                     sectionHeader("ACCOUNT")
                     settingsItem("Profile", subtitle: "Name, email") {
-                        router.push(.profileEdit)
+                        if let keyId = primaryKeyId {
+                            router.push(.profileEdit(keyId: keyId))
+                        }
                     }
 
                     Spacer().frame(height: 16)
@@ -84,6 +88,11 @@ struct SettingsScreen: View {
             }
         }
         .background(Color.bgPrimary)
+        .task {
+            if let first = await services.vault.listIdentities().first {
+                primaryKeyId = first.keyId
+            }
+        }
         .sheet(isPresented: $showLanguageDialog) {
             languagePicker
         }

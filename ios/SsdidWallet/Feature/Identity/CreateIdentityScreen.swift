@@ -7,6 +7,8 @@ struct CreateIdentityScreen: View {
     let acceptedAlgorithms: String?
 
     @State private var name = ""
+    @State private var profileName = ""
+    @State private var email = ""
     @State private var selectedAlgorithm: Algorithm = .KAZ_SIGN_192
     @State private var isCreating = false
     @State private var errorMessage: String?
@@ -92,6 +94,45 @@ struct CreateIdentityScreen: View {
                         .textFieldStyle(.plain)
                         .font(.ssdidBody)
                         .foregroundStyle(Color.textPrimary)
+                        .padding(14)
+                        .background(Color.bgCard)
+                        .cornerRadius(12)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.ssdidBorder, lineWidth: 1)
+                        )
+
+                    Spacer().frame(height: 12)
+
+                    Text("YOUR NAME")
+                        .font(.ssdidCaption)
+                        .foregroundStyle(Color.textTertiary)
+
+                    TextField("", text: $profileName, prompt: Text("Your full name").foregroundStyle(Color.textTertiary))
+                        .textFieldStyle(.plain)
+                        .font(.ssdidBody)
+                        .foregroundStyle(Color.textPrimary)
+                        .padding(14)
+                        .background(Color.bgCard)
+                        .cornerRadius(12)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.ssdidBorder, lineWidth: 1)
+                        )
+
+                    Spacer().frame(height: 12)
+
+                    Text("EMAIL")
+                        .font(.ssdidCaption)
+                        .foregroundStyle(Color.textTertiary)
+
+                    TextField("", text: $email, prompt: Text("your@email.com").foregroundStyle(Color.textTertiary))
+                        .textFieldStyle(.plain)
+                        .font(.ssdidBody)
+                        .foregroundStyle(Color.textPrimary)
+                        .keyboardType(.emailAddress)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
                         .padding(14)
                         .background(Color.bgCard)
                         .cornerRadius(12)
@@ -192,10 +233,21 @@ struct CreateIdentityScreen: View {
 
         Task {
             do {
-                _ = try await services.ssdidClient.initIdentity(
+                let identity = try await services.ssdidClient.initIdentity(
                     name: trimmedName,
                     algorithm: selectedAlgorithm
                 )
+                // Set profile on the newly created identity
+                let trimmedProfileName = profileName.trimmingCharacters(in: .whitespaces)
+                let trimmedEmail = email.trimmingCharacters(in: .whitespaces)
+                if !trimmedProfileName.isEmpty || !trimmedEmail.isEmpty {
+                    try? await services.vault.updateIdentityProfile(
+                        keyId: identity.keyId,
+                        profileName: trimmedProfileName.isEmpty ? nil : trimmedProfileName,
+                        email: trimmedEmail.isEmpty ? nil : trimmedEmail,
+                        emailVerified: nil
+                    )
+                }
                 await MainActor.run {
                     isCreating = false
                     HapticManager.notification(.success)

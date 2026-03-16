@@ -5,7 +5,9 @@ struct ProfileSetupScreen: View {
     @EnvironmentObject private var services: ServiceContainer
 
     let isEditing: Bool
+    let keyId: String?
 
+    @State private var identityKeyId = ""
     @State private var name = ""
     @State private var email = ""
     @State private var originalEmail = ""
@@ -14,8 +16,9 @@ struct ProfileSetupScreen: View {
     @State private var saving = false
     @State private var loaded = false
 
-    init(isEditing: Bool = false) {
+    init(isEditing: Bool = false, keyId: String? = nil) {
         self.isEditing = isEditing
+        self.keyId = keyId
     }
 
     private var isValid: Bool {
@@ -161,24 +164,37 @@ struct ProfileSetupScreen: View {
         }
         .background(Color.bgPrimary)
         .task {
-            guard isEditing, !loaded else { return }
+            guard !loaded else { return }
             loaded = true
-            let profileManager = ProfileManager(vault: services.vault)
-            let claims = await profileManager.getProfileClaims()
-            name = claims["name"] ?? ""
-            email = claims["email"] ?? ""
-            originalEmail = claims["email"] ?? ""
+            let targetKeyId: String
+            if let keyId = keyId {
+                targetKeyId = keyId
+            } else {
+                guard let first = await services.vault.listIdentities().first else { return }
+                targetKeyId = first.keyId
+            }
+            identityKeyId = targetKeyId
+            if let identity = await services.vault.getIdentity(keyId: targetKeyId) {
+                name = identity.profileName ?? ""
+                email = identity.email ?? ""
+                originalEmail = identity.email ?? ""
+            }
         }
     }
 
     private func saveAndContinue() {
         saving = true
+        let trimmedName = name.trimmingCharacters(in: .whitespaces)
         let trimmedEmail = email.trimmingCharacters(in: .whitespaces)
         let emailChanged = trimmedEmail.lowercased() != originalEmail.trimmingCharacters(in: .whitespaces).lowercased()
 
         Task {
-            let profileManager = ProfileManager(vault: services.vault)
-            try? await profileManager.saveProfile(name: name.trimmingCharacters(in: .whitespaces), email: trimmedEmail)
+            try? await services.vault.updateIdentityProfile(
+                keyId: identityKeyId,
+                profileName: trimmedName,
+                email: trimmedEmail,
+                emailVerified: nil
+            )
             saving = false
 
             if emailChanged {

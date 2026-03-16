@@ -50,7 +50,7 @@ struct OnboardingScreen: View {
             // Get Started / Next button
             Button {
                 if currentPage == slides.count - 1 {
-                    router.push(.profileSetup)
+                    router.push(.profileSetup())
                 } else {
                     withAnimation {
                         currentPage += 1
