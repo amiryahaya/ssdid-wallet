@@ -1,5 +1,6 @@
 package my.ssdid.wallet.feature.profile
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -7,13 +8,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import my.ssdid.wallet.domain.auth.ClaimValidator
-import my.ssdid.wallet.domain.profile.ProfileManager
+import my.ssdid.wallet.domain.vault.Vault
 import javax.inject.Inject
 
 @HiltViewModel
 class ProfileSetupViewModel @Inject constructor(
-    private val profileManager: ProfileManager
+    private val vault: Vault,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+
+    private val keyId: String = savedStateHandle["keyId"] ?: ""
 
     private val _name = MutableStateFlow("")
     val name = _name.asStateFlow()
@@ -50,12 +54,11 @@ class ProfileSetupViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             try {
-                val existing = profileManager.getProfile()
-                if (existing != null) {
-                    val claims = existing.credentialSubject.claims
-                    _name.value = claims["name"] ?: ""
-                    _email.value = claims["email"] ?: ""
-                    originalEmail = _email.value
+                val identity = vault.getIdentity(keyId)
+                if (identity != null) {
+                    _name.value = identity.profileName ?: ""
+                    _email.value = identity.email ?: ""
+                    originalEmail = identity.email ?: ""
                 }
             } catch (e: Exception) {
                 _error.value = "Failed to load profile"
@@ -87,7 +90,11 @@ class ProfileSetupViewModel @Inject constructor(
         _saving.value = true
         viewModelScope.launch {
             _error.value = null
-            val result = profileManager.saveProfile(_name.value, _email.value)
+            val result = vault.updateIdentityProfile(
+                keyId,
+                profileName = _name.value,
+                email = _email.value
+            )
             if (result.isSuccess) {
                 _emailChanged.value = _email.value.trim().lowercase() != originalEmail.trim().lowercase()
                 _saved.value = true

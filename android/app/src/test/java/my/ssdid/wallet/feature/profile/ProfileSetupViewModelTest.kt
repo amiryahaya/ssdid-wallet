@@ -1,14 +1,14 @@
 package my.ssdid.wallet.feature.profile
 
+import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import io.mockk.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
-import my.ssdid.wallet.domain.model.CredentialSubject
-import my.ssdid.wallet.domain.model.Proof
-import my.ssdid.wallet.domain.model.VerifiableCredential
-import my.ssdid.wallet.domain.profile.ProfileManager
+import my.ssdid.wallet.domain.model.Algorithm
+import my.ssdid.wallet.domain.model.Identity
+import my.ssdid.wallet.domain.vault.Vault
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -19,13 +19,15 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class ProfileSetupViewModelTest {
 
-    private lateinit var profileManager: ProfileManager
+    private lateinit var vault: Vault
     private lateinit var vm: ProfileSetupViewModel
+
+    private val testKeyId = "did:ssdid:abc#key-1"
 
     @Before
     fun setup() {
         Dispatchers.setMain(StandardTestDispatcher())
-        profileManager = mockk()
+        vault = mockk()
     }
 
     @After
@@ -34,12 +36,12 @@ class ProfileSetupViewModelTest {
     }
 
     private fun createViewModel(): ProfileSetupViewModel {
-        return ProfileSetupViewModel(profileManager)
+        return ProfileSetupViewModel(vault, SavedStateHandle(mapOf("keyId" to testKeyId)))
     }
 
     @Test
     fun `initial state has empty fields and no errors`() = runTest {
-        coEvery { profileManager.getProfile() } returns null
+        coEvery { vault.getIdentity(testKeyId) } returns null
         vm = createViewModel()
         advanceUntilIdle()
         assertThat(vm.name.value).isEmpty()
@@ -49,20 +51,18 @@ class ProfileSetupViewModelTest {
     }
 
     @Test
-    fun `loads existing profile in edit mode`() = runTest {
-        val profile = VerifiableCredential(
-            id = "urn:ssdid:profile",
-            type = listOf("VerifiableCredential", "ProfileCredential"),
-            issuer = "did:ssdid:self",
-            issuanceDate = "2026-03-11T00:00:00Z",
-            credentialSubject = CredentialSubject(
-                id = "did:ssdid:self",
-                claims = mapOf("name" to "Alice", "email" to "alice@example.com")
-            ),
-            proof = Proof(type = "SelfIssued2024", created = "2026-03-11T00:00:00Z",
-                verificationMethod = "did:ssdid:self", proofPurpose = "selfAssertion", proofValue = "")
+    fun `loads existing identity profile in edit mode`() = runTest {
+        val identity = Identity(
+            name = "Alice",
+            keyId = testKeyId,
+            did = "did:ssdid:abc",
+            algorithm = Algorithm.ED25519,
+            publicKeyMultibase = "z6Mk...",
+            createdAt = "2026-03-11T00:00:00Z",
+            profileName = "Alice",
+            email = "alice@example.com"
         )
-        coEvery { profileManager.getProfile() } returns profile
+        coEvery { vault.getIdentity(testKeyId) } returns identity
         vm = createViewModel()
         advanceUntilIdle()
         assertThat(vm.name.value).isEqualTo("Alice")
@@ -71,7 +71,7 @@ class ProfileSetupViewModelTest {
 
     @Test
     fun `isValid is false when name empty`() = runTest {
-        coEvery { profileManager.getProfile() } returns null
+        coEvery { vault.getIdentity(testKeyId) } returns null
         vm = createViewModel()
         advanceUntilIdle()
         vm.updateEmail("alice@example.com")
@@ -80,7 +80,7 @@ class ProfileSetupViewModelTest {
 
     @Test
     fun `isValid is false when email invalid`() = runTest {
-        coEvery { profileManager.getProfile() } returns null
+        coEvery { vault.getIdentity(testKeyId) } returns null
         vm = createViewModel()
         advanceUntilIdle()
         vm.updateName("Alice")
@@ -90,7 +90,7 @@ class ProfileSetupViewModelTest {
 
     @Test
     fun `isValid is true when name and email valid`() = runTest {
-        coEvery { profileManager.getProfile() } returns null
+        coEvery { vault.getIdentity(testKeyId) } returns null
         vm = createViewModel()
         advanceUntilIdle()
         vm.updateName("Alice")
@@ -99,9 +99,9 @@ class ProfileSetupViewModelTest {
     }
 
     @Test
-    fun `save calls profileManager and sets saved state`() = runTest {
-        coEvery { profileManager.getProfile() } returns null
-        coEvery { profileManager.saveProfile(any(), any()) } returns Result.success(Unit)
+    fun `save calls vault updateIdentityProfile and sets saved state`() = runTest {
+        coEvery { vault.getIdentity(testKeyId) } returns null
+        coEvery { vault.updateIdentityProfile(any(), any(), any(), any()) } returns Result.success(Unit)
         vm = createViewModel()
         advanceUntilIdle()
         vm.updateName("Alice")
@@ -109,13 +109,13 @@ class ProfileSetupViewModelTest {
         vm.save()
         advanceUntilIdle()
         assertThat(vm.saved.value).isTrue()
-        coVerify { profileManager.saveProfile("Alice", "alice@example.com") }
+        coVerify { vault.updateIdentityProfile(testKeyId, profileName = "Alice", email = "alice@example.com") }
     }
 
     @Test
     fun `save sets error on failure`() = runTest {
-        coEvery { profileManager.getProfile() } returns null
-        coEvery { profileManager.saveProfile(any(), any()) } returns Result.failure(RuntimeException("Storage error"))
+        coEvery { vault.getIdentity(testKeyId) } returns null
+        coEvery { vault.updateIdentityProfile(any(), any(), any(), any()) } returns Result.failure(RuntimeException("Storage error"))
         vm = createViewModel()
         advanceUntilIdle()
         vm.updateName("Alice")
