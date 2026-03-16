@@ -69,7 +69,9 @@ class CreateIdentityViewModel @Inject constructor(
                             identity.keyId,
                             profileName = profileName?.takeIf { it.isNotBlank() },
                             email = email?.takeIf { it.isNotBlank() }
-                        )
+                        ).onFailure { e ->
+                            io.sentry.Sentry.captureException(e)
+                        }
                     }
                     storage.setOnboardingCompleted()
                     onSuccess()

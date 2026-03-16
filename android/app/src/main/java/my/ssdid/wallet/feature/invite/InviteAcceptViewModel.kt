@@ -110,16 +110,20 @@ class InviteAcceptViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isAccepting = true, error = null) }
             try {
-                val credentials = vault.listCredentials()
-                if (credentials.isEmpty()) {
-                    _state.update { it.copy(
-                        isAccepting = false,
-                        error = "No credentials found in wallet. Please register with a service first."
-                    ) }
-                    return@launch
-                }
+                val selectedDid = _selectedIdentity.value?.did
+                    ?: run {
+                        _state.update { it.copy(isAccepting = false, error = "No identity selected") }
+                        return@launch
+                    }
 
-                val credential = credentials.first()
+                val credential = vault.getCredentialForDid(selectedDid)
+                    ?: run {
+                        _state.update { it.copy(
+                            isAccepting = false,
+                            error = "No credential found for selected identity. Please register with a service first."
+                        ) }
+                        return@launch
+                    }
                 val credentialJson = json.encodeToJsonElement(
                     my.ssdid.wallet.domain.model.VerifiableCredential.serializer(),
                     credential
