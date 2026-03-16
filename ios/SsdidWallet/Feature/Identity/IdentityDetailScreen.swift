@@ -7,6 +7,7 @@ struct IdentityDetailScreen: View {
     let keyId: String
 
     @State private var identity: Identity?
+    @State private var credentials: [VerifiableCredential] = []
     @State private var showDeactivateDialog = false
     @State private var isDeactivating = false
     @State private var didCopied = false
@@ -136,6 +137,62 @@ struct IdentityDetailScreen: View {
                             .ssdidCard()
                         }
 
+                        // Connected Services
+                        Spacer().frame(height: 8)
+                        Text("CONNECTED SERVICES")
+                            .font(.ssdidCaption)
+                            .foregroundStyle(Color.textSecondary)
+
+                        if credentials.isEmpty {
+                            VStack(spacing: 8) {
+                                Text("🔗")
+                                    .font(.system(size: 32))
+                                Text("No services connected")
+                                    .font(.system(size: 14))
+                                    .foregroundStyle(Color.textSecondary)
+                                Text("Scan a QR code to register with a service")
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(Color.textTertiary)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(24)
+                            .background(Color.bgCard)
+                            .cornerRadius(12)
+                        } else {
+                            ForEach(credentials, id: \.id) { vc in
+                                let status = serviceConnectionStatus(vc)
+                                let name = serviceName(vc)
+                                let url = serviceUrl(vc)
+
+                                HStack(spacing: 12) {
+                                    Circle()
+                                        .fill(status.color)
+                                        .frame(width: 10, height: 10)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(name)
+                                            .font(.system(size: 14, weight: .medium))
+                                            .foregroundStyle(Color.textPrimary)
+                                        if let url = url {
+                                            Text(url)
+                                                .font(.system(size: 11))
+                                                .foregroundStyle(Color.textTertiary)
+                                                .lineLimit(1)
+                                        }
+                                        Text("Issued: \(String(vc.issuanceDate.prefix(10)))")
+                                            .font(.system(size: 11))
+                                            .foregroundStyle(Color.textTertiary)
+                                    }
+                                    Spacer()
+                                    Text(status.label)
+                                        .font(.system(size: 11))
+                                        .foregroundStyle(status.color)
+                                }
+                                .padding(14)
+                                .background(Color.bgCard)
+                                .cornerRadius(12)
+                            }
+                        }
+
                         // Actions
                         Spacer().frame(height: 8)
                         Text("ACTIONS")
@@ -202,6 +259,9 @@ struct IdentityDetailScreen: View {
         }
         .task {
             await loadIdentity()
+            if let id = identity {
+                credentials = await services.vault.getCredentialsForDid(id.did)
+            }
         }
     }
 
@@ -250,6 +310,52 @@ struct IdentityDetailScreen: View {
         if identity == nil {
             errorMessage = "Identity not found for key: \(keyId)"
         }
+    }
+
+    private enum ServiceConnectionStatus {
+        case active, expiring, expired
+
+        var color: Color {
+            switch self {
+            case .active: return .success
+            case .expiring: return .warning
+            case .expired: return .danger
+            }
+        }
+
+        var label: String {
+            switch self {
+            case .active: return "Active"
+            case .expiring: return "Expiring soon"
+            case .expired: return "Expired"
+            }
+        }
+    }
+
+    private func serviceConnectionStatus(_ vc: VerifiableCredential) -> ServiceConnectionStatus {
+        guard let exp = vc.expirationDate else { return .active }
+        let formatter = ISO8601DateFormatter()
+        guard let expDate = formatter.date(from: exp) else { return .active }
+        let now = Date()
+        if expDate < now { return .expired }
+        if expDate < Calendar.current.date(byAdding: .day, value: 30, to: now) ?? now { return .expiring }
+        return .active
+    }
+
+    private func serviceName(_ vc: VerifiableCredential) -> String {
+        if let name = vc.credentialSubject.additionalProperties["service"] {
+            return "\(name)".trimmingCharacters(in: CharacterSet(charactersIn: "\""))
+        }
+        let issuer = vc.issuer
+        if issuer.count > 30 {
+            return String(issuer.prefix(20)) + "..." + String(issuer.suffix(8))
+        }
+        return issuer
+    }
+
+    private func serviceUrl(_ vc: VerifiableCredential) -> String? {
+        guard let url = vc.credentialSubject.additionalProperties["serviceUrl"] else { return nil }
+        return "\(url)".trimmingCharacters(in: CharacterSet(charactersIn: "\""))
     }
 
     private func deactivateIdentity() {
