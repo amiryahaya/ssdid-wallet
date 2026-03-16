@@ -24,6 +24,7 @@ struct DriveLoginScreen: View {
     @State private var isSuccess = false
     @State private var sessionToken: String?
     @State private var errorMessage: String?
+    @State private var approveTask: Task<Void, Never>?
 
     private var parsedClaims: [ClaimItem] {
         guard let data = requestedClaims.data(using: .utf8),
@@ -282,6 +283,7 @@ struct DriveLoginScreen: View {
             }
         }
         .background(Color.bgPrimary)
+        .onDisappear { approveTask?.cancel() }
         .task {
             await loadIdentities()
             for claim in parsedClaims where claim.required {
@@ -309,7 +311,8 @@ struct DriveLoginScreen: View {
         isSubmitting = true
         errorMessage = nil
 
-        Task {
+        approveTask?.cancel()
+        approveTask = Task {
             do {
                 let driveApi = services.httpClient.driveApi(baseURL: serviceUrl)
 
@@ -347,9 +350,21 @@ struct DriveLoginScreen: View {
             } catch {
                 isSubmitting = false
 
-                // Handle specific HTTP errors
                 let message: String
-                if let urlError = error as? URLError {
+                if let httpError = error as? HttpError,
+                   case .requestFailed(let statusCode, _) = httpError {
+                    switch statusCode {
+                    case 401:
+                        if let vc = await services.vault.getCredentialForDid(identity.did) {
+                            try? await services.vault.deleteCredential(credentialId: vc.id)
+                        }
+                        message = "Credential expired. Please try again."
+                    case 404:
+                        message = "No account found. Please register first."
+                    default:
+                        message = "Request failed with status \(statusCode)"
+                    }
+                } else if let urlError = error as? URLError {
                     switch urlError.code {
                     case .notConnectedToInternet:
                         message = "No internet connection"
@@ -359,18 +374,7 @@ struct DriveLoginScreen: View {
                         message = "Network error: \(urlError.localizedDescription)"
                     }
                 } else {
-                    let errorStr = error.localizedDescription
-                    if errorStr.contains("401") {
-                        // Credential expired — delete and retry
-                        if let vc = await services.vault.getCredentialForDid(identity.did) {
-                            try? await services.vault.deleteCredential(credentialId: vc.id)
-                        }
-                        message = "Credential expired. Please try again."
-                    } else if errorStr.contains("404") {
-                        message = "No account found. Please register first."
-                    } else {
-                        message = errorStr
-                    }
+                    message = error.localizedDescription
                 }
                 errorMessage = message
             }
@@ -416,6 +420,13 @@ struct DriveLoginScreen: View {
         }
 
         guard var components = URLComponents(string: callbackUrl) else {
+            router.pop()
+            return
+        }
+
+        // Only allow ssdid:// or https:// callback schemes to prevent open redirect
+        guard let scheme = components.scheme,
+              scheme == "ssdid" || scheme == "https" else {
             router.pop()
             return
         }
