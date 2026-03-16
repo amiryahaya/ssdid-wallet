@@ -31,6 +31,9 @@ final class VaultImpl: Vault, @unchecked Sendable {
 
     // MARK: - Identity Management
 
+    // NOTE: Name uniqueness check has a TOCTOU window when called concurrently.
+    // Root cause: VaultImpl is @unchecked Sendable rather than an actor.
+    // Migrate to actor to eliminate this. See: identity-scoped-profiles code review D3/D7.
     func createIdentity(name: String, algorithm: Algorithm) async throws -> Identity {
         let existing = await storage.listIdentities()
         if existing.contains(where: { $0.name.lowercased() == name.lowercased() }) {
@@ -87,7 +90,12 @@ final class VaultImpl: Vault, @unchecked Sendable {
             throw VaultError.privateKeyNotFound(keyId)
         }
         if let profileName = profileName { identity.profileName = profileName }
-        if let email = email { identity.email = email }
+        if let email = email {
+            if email != identity.email {
+                identity.email = email
+                identity.emailVerified = false  // Reset verification when email changes
+            }
+        }
         if let emailVerified = emailVerified { identity.emailVerified = emailVerified }
         try await storage.saveIdentity(identity, encryptedPrivateKey: encryptedKey)
     }
@@ -105,11 +113,13 @@ final class VaultImpl: Vault, @unchecked Sendable {
             throw VaultError.privateKeyNotFound(keyId)
         }
 
-        let privateKey = try keychainManager.decrypt(alias: wrappingAlias, data: encryptedPrivateKey)
+        var privateKey = try keychainManager.decrypt(alias: wrappingAlias, data: encryptedPrivateKey)
         defer {
-            // Zero private key from memory
-            var mutableKey = privateKey
-            mutableKey.resetBytes(in: 0..<mutableKey.count)
+            privateKey.withUnsafeMutableBytes { ptr in
+                if let baseAddress = ptr.baseAddress {
+                    memset(baseAddress, 0, ptr.count)
+                }
+            }
         }
 
         let cryptoProvider = provider(for: identity.algorithm)
