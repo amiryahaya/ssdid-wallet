@@ -24,13 +24,15 @@ SECURE ENCLAVE (hardware, device-bound, non-extractable)
                      │
 ┌────────────────────▼──────────────────────┐
 │  Per-Identity Ephemeral P-256 Public Key  │
-│  Stored in Keychain as kSecClassKey       │
+│  Stored as kSecClassGenericPassword       │
+│  (x963Representation bytes)              │
 │  Tag: "my.ssdid.wallet.eph_{alias}"      │
 │  Created per generateWrappingKey() call   │
 └────────────────────┬──────────────────────┘
                      │
           SharedSecret → HKDF-SHA256
-          info = "ssdid-wrap-{alias}"
+          info = Data("ssdid-wrap-{alias}".utf8)
+          salt = Data() (empty, per RFC 5869)
                      │
 ┌────────────────────▼──────────────────────┐
 │  Derived AES-256 Symmetric Key            │
@@ -39,6 +41,7 @@ SECURE ENCLAVE (hardware, device-bound, non-extractable)
 └────────────────────┬──────────────────────┘
                      │
           AES-256-GCM encrypt/decrypt
+          (random nonce per operation, via CryptoKit default)
                      │
 ┌────────────────────▼──────────────────────┐
 │  Encrypted Private Key File               │
@@ -51,56 +54,81 @@ SECURE ENCLAVE (hardware, device-bound, non-extractable)
 
 ### generateWrappingKey(alias)
 
-1. Ensure SE master key exists (create if first call)
-2. Generate a new ephemeral P-256 key pair (in software, via CryptoKit)
-3. Store the ephemeral **public key** in Keychain under tag `eph_{alias}`
-4. Discard the ephemeral private key — it's only used once to create the pair
-5. The wrapping key will be derived on-demand in encrypt/decrypt
+1. Ensure SE master key exists (create if first call — may trigger biometric prompt)
+2. Generate a new ephemeral P-256 key pair in software via `P256.KeyAgreement.PrivateKey()`
+3. Store the ephemeral **public key** in Keychain as `kSecClassGenericPassword` using `.x963Representation` serialization, under tag `eph_{alias}`
+4. Discard the ephemeral private key — not needed after this step
 
-Wait — correction. ECDH requires both a private key and the other party's public key. The SE has the private key. We need the ephemeral public key for the other side. But ECDH is `SE_private × ephemeral_public`. To make this work:
+The ECDH shared secret is computed on-demand in encrypt/decrypt. Since the SE master key (fixed) and the stored ephemeral public key (fixed per alias) are both deterministic inputs, the derived AES-256 key is the same on every access.
 
-**Revised approach:**
-1. Generate ephemeral P-256 key pair in software
-2. Perform ECDH: `sharedSecret = SE_private_key.sharedSecret(with: ephemeral_public_key)`
-3. Derive AES key: `HKDF<SHA256>.deriveKey(sharedSecret, salt: [], info: "ssdid-wrap-{alias}", outputByteCount: 32)`
-4. Store `ephemeral_public_key` in Keychain (needed for re-derivation)
-5. The ephemeral private key is **not needed** after step 2 — discard it
+### deriveKey(alias) — internal helper
 
-Wait — that's wrong too. ECDH needs `our_private × their_public`. If the SE holds the private key, we do `SE.sharedSecret(with: ephemeral_public)`. But to re-derive later, we need to reproduce the same shared secret, which requires the same `ephemeral_public`. Since the SE private key is fixed, and the ephemeral public key is stored, the shared secret is deterministic. ✅
-
-But actually, for the initial `sharedSecret` call, CryptoKit's `SecureEnclave.P256.KeyAgreement.PrivateKey` does `privateKey.sharedSecretFromKeyAgreement(with: ephemeralPublicKey)`. This works. On subsequent calls, we reload the ephemeral public key from Keychain and call the SE private key again. Same inputs → same shared secret → same derived AES key. ✅
+```swift
+func deriveKey(alias: String) throws -> SymmetricKey {
+    let ephPubData = try loadEphemeralPublicKey(alias: alias)
+    let ephPub = try P256.KeyAgreement.PublicKey(x963Representation: ephPubData)
+    let seMasterKey = try loadSEMasterKey()
+    let sharedSecret = try seMasterKey.sharedSecretFromKeyAgreement(with: ephPub)
+    return sharedSecret.hkdfDerivedSymmetricKey(
+        using: SHA256.self,
+        salt: Data(),
+        sharedInfo: Data("ssdid-wrap-\(alias)".utf8),
+        outputByteCount: 32
+    )
+}
+```
 
 ### encrypt(alias, data)
 
-1. Load ephemeral public key for `alias` from Keychain
-2. Load SE master private key reference
-3. `sharedSecret = seMasterKey.sharedSecretFromKeyAgreement(with: ephemeralPublicKey)`
-4. `aesKey = HKDF<SHA256>.deriveKey(sharedSecret, info: "ssdid-wrap-{alias}".data, outputByteCount: 32)`
-5. `sealedBox = AES.GCM.seal(data, using: aesKey)`
-6. Return `sealedBox.combined`
+1. `aesKey = deriveKey(alias)`
+2. `sealedBox = AES.GCM.seal(data, using: aesKey)` — CryptoKit generates a random 12-byte nonce
+3. Return `sealedBox.combined` (nonce + ciphertext + 16-byte tag)
 
 ### decrypt(alias, data)
 
-Same as encrypt steps 1-4, then:
-5. `sealedBox = AES.GCM.SealedBox(combined: data)`
-6. `return AES.GCM.open(sealedBox, using: aesKey)`
+1. `aesKey = deriveKey(alias)`
+2. `sealedBox = AES.GCM.SealedBox(combined: data)`
+3. Return `AES.GCM.open(sealedBox, using: aesKey)`
+
+**Nonce safety:** The same derived key is reused across encrypt calls for the same alias. AES-GCM requires unique nonces per key. CryptoKit's `AES.GCM.seal` generates a cryptographically random 12-byte nonce by default, making nonce collision negligible (birthday bound at 2^48 operations).
 
 ## SE Master Key Management
 
 - **Tag:** `my.ssdid.wallet.se_master`
-- **Created:** Once, on first identity creation (or first app launch after upgrade)
+- **Created:** Once, on first identity creation or first app launch after upgrade
 - **Type:** `SecureEnclave.P256.KeyAgreement.PrivateKey`
 - **Access control:** `kSecAttrAccessibleWhenUnlockedThisDeviceOnly` + `.biometryCurrentSet`
 - **Non-extractable:** Key material never leaves the Secure Enclave
 - **Device-bound:** Does not sync via iCloud Keychain
-- **Survives app updates:** Yes (Keychain persists across updates)
-- **Lost on device wipe:** Yes — user needs backup file + passphrase to restore
+- **Survives app updates:** Yes (Keychain persists)
+- **Lost on device wipe:** Yes — user needs backup file + passphrase
+
+### Biometric Prompt Frequency
+
+Every `sharedSecretFromKeyAgreement()` call triggers biometric authentication (because the SE key has `.biometryCurrentSet`). To avoid repeated prompts within a single user action (e.g., backup exports all identities sequentially):
+
+- Create a single `LAContext` per user-initiated operation
+- Pass it to all SE key access calls within that operation via `kSecUseAuthenticationContext`
+- The `LAContext` remains valid for its configured evaluation interval (default: ~10 seconds after successful auth)
+- Do NOT cache the derived `SymmetricKey` beyond the operation scope
+
+### Biometric Re-Enrollment Invalidation
+
+`.biometryCurrentSet` means the SE master key is **invalidated if the user re-enrolls Face ID / Touch ID** (e.g., adds a new face, resets biometrics). When this happens:
+
+1. All `decrypt()` calls will fail with `errSecAuthFailed`
+2. Detect this in `loadSEMasterKey()` — if key load fails, check if it was invalidated
+3. Show user: "Your biometrics have changed. Please restore your wallet from backup."
+4. User restores from backup file + passphrase → new SE master key generated → all keys re-wrapped
+
+This is the same UX as a device wipe. The backup file is the recovery mechanism.
 
 ### Fallback for Devices Without Secure Enclave
 
-All modern iPhones (iPhone 5s+, 2013+) and iPads have Secure Enclave. The iOS simulator does NOT. For simulator builds:
+All modern iPhones (A7+, 2013+) and iPads have Secure Enclave. The iOS simulator does NOT.
+
 - Detect SE availability via `SecureEnclave.isAvailable`
-- Fall back to software P-256 key stored in Keychain (same ECDH flow, just not hardware-backed)
+- Fall back to software `P256.KeyAgreement.PrivateKey` stored in Keychain (same ECDH flow, just not hardware-backed)
 - Log a warning: "Secure Enclave not available, using software key agreement"
 
 ## Migration: Lazy Re-Wrap on First Access
@@ -111,112 +139,168 @@ Existing users have wrapping keys stored as `kSecClassGenericPassword` (raw AES-
 
 When `decrypt(alias, data)` is called:
 1. Check if ephemeral public key exists for `alias` → **new format**, use SE-derived key
-2. If not, check if `kSecClassGenericPassword` exists for `alias` → **old format**, migrate
+2. If not, check if legacy `kSecClassGenericPassword` exists for `alias` → **old format**, migrate
+3. If neither → key not found error
 
-### Migration Steps
+### Migration Steps (executed in VaultImpl, not KeychainManager)
 
-```
-decrypt(alias, encryptedPrivateKey):
-  1. ephemeralKey = loadEphemeralPublicKey(alias)
-  2. if ephemeralKey != nil:
-       → SE path: derive AES key via ECDH, decrypt, return
-  3. else:
-       → Legacy path:
-       a. oldAesKey = loadLegacyKey(alias)          // old kSecClassGenericPassword
-       b. rawPrivateKey = AES.GCM.open(data, oldAesKey)
-       c. generateWrappingKey(alias)                  // creates new SE-derived key
-       d. newEncrypted = encrypt(alias, rawPrivateKey) // re-encrypt with SE key
-       e. save newEncrypted to disk (overwrite pk_*.enc file)
-       f. deleteLegacyKey(alias)                      // remove old software key
-       g. zero(rawPrivateKey)                          // scrub memory
-       h. return rawPrivateKey
-```
-
-### Safety
-
-- If migration fails at any step, the old key is still intact (deletion is last)
-- If the app crashes between steps (e) and (f), next launch will detect old key still exists and re-migrate (idempotent — re-encrypting an already-migrated key is a no-op since the old key is gone)
-- Private key raw bytes exist in memory only during the migration window
-
-## Interface Changes
-
-`KeychainManagerProtocol` — **no changes**. The interface stays:
-```swift
-func generateWrappingKey(alias: String) throws
-func encrypt(alias: String, data: Data) throws -> Data
-func decrypt(alias: String, data: Data) throws -> Data
-func deleteKey(alias: String)
-func hasKey(alias: String) -> Bool
-```
-
-All changes are internal to `KeychainManager`. No other files need modification except for the migration integration (VaultImpl needs to pass the encrypted file path for re-save during migration, or KeychainManager needs a callback/delegate for the re-save).
-
-### Migration Integration Option
-
-Since migration needs to re-save the encrypted file, and `KeychainManager` doesn't know about file storage, the cleanest approach is:
-
-**Option: Migrate in VaultImpl.decrypt path**
-
-`VaultImpl.sign()` already calls `keychainManager.decrypt()` and has access to `storage`. Add a post-decrypt migration check:
+Migration runs in `VaultImpl.sign()` which has access to both `keychainManager` and `storage`:
 
 ```swift
 func sign(keyId: String, data: Data) async throws -> Data {
-    // ... existing code to get identity, wrappingAlias, encryptedPrivateKey ...
+    let identity = ...
+    let wrappingAlias = "ssdid_wrap_\(did.methodSpecificId())"
+    let encryptedPrivateKey = ...
 
-    var privateKey = try keychainManager.decrypt(alias: wrappingAlias, data: encryptedPrivateKey)
-
-    // Migrate if this key was decrypted with legacy software key
-    if keychainManager.needsMigration(alias: wrappingAlias) {
-        let newEncrypted = try keychainManager.encrypt(alias: wrappingAlias, data: privateKey)
-        try await storage.saveIdentity(identity, encryptedPrivateKey: newEncrypted) // overwrite
-        keychainManager.deleteLegacyKey(alias: wrappingAlias)
+    // Attempt SE-path decrypt
+    if keychainManager.hasEphemeralKey(alias: wrappingAlias) {
+        // New format — SE-derived key
+        var privateKey = try keychainManager.decrypt(alias: wrappingAlias, data: encryptedPrivateKey)
+        defer { privateKey.withUnsafeMutableBytes { memset($0.baseAddress!, 0, $0.count) } }
+        return try provider(for: identity.algorithm).sign(...)
     }
 
-    // ... sign and return ...
+    // Legacy format — migrate
+    migrationLock.lock()
+    defer { migrationLock.unlock() }
+
+    // Double-check after acquiring lock (another thread may have migrated)
+    if keychainManager.hasEphemeralKey(alias: wrappingAlias) {
+        var privateKey = try keychainManager.decrypt(alias: wrappingAlias, data: encryptedPrivateKey)
+        defer { privateKey.withUnsafeMutableBytes { memset($0.baseAddress!, 0, $0.count) } }
+        return try provider(for: identity.algorithm).sign(...)
+    }
+
+    // Decrypt with legacy key
+    var privateKey = try keychainManager.decryptLegacy(alias: wrappingAlias, data: encryptedPrivateKey)
+    defer { privateKey.withUnsafeMutableBytes { memset($0.baseAddress!, 0, $0.count) } }
+
+    // Generate new SE-derived wrapping key
+    try keychainManager.generateWrappingKey(alias: wrappingAlias)
+
+    // Re-encrypt with new key
+    let newEncrypted = try keychainManager.encrypt(alias: wrappingAlias, data: privateKey)
+
+    // Atomic file write: write to temp, rename to final
+    try await storage.saveIdentity(identity, encryptedPrivateKey: newEncrypted)
+
+    // Delete old software key (safe — new ciphertext is persisted)
+    keychainManager.deleteLegacyKey(alias: wrappingAlias)
+
+    // Sign with the decrypted key
+    return try provider(for: identity.algorithm).sign(...)
 }
 ```
 
-This keeps the migration logic in the domain layer where it has access to both keychain and storage.
+### Concurrency Safety
 
-## Backup/Restore Compatibility
+Add an `NSLock` to `VaultImpl` for migration serialization:
 
-**No changes needed.**
+```swift
+private let migrationLock = NSLock()
+```
 
-- **Backup:** `BackupManager.createBackup()` calls `keychainManager.decrypt()` → gets raw private key → encrypts with passphrase. The ECDH derivation is transparent.
-- **Restore:** `BackupManager.restoreBackup()` calls `keychainManager.generateWrappingKey()` (creates new SE-derived key on target device) → `keychainManager.encrypt()` (wraps with new key). Portable across devices.
-- **Cross-device:** Each device has its own SE master key. Backup file + passphrase is the bridge.
+The lock is only held during migration (legacy path). SE-path decrypt does not acquire the lock.
+
+### Crash Safety
+
+If the app crashes between `saveIdentity` (new ciphertext written) and `deleteLegacyKey`:
+- On next launch, `hasEphemeralKey(alias)` returns `true` (new key exists)
+- Takes the SE path, decrypts with new key → works correctly
+- Old legacy key is orphaned in Keychain but harmless (can be cleaned up lazily)
+
+If the app crashes before `saveIdentity`:
+- On next launch, `hasEphemeralKey(alias)` returns `false` (generateWrappingKey may have created it, but the file still has old ciphertext)
+- Need to handle: if ephemeral key exists but decrypt fails, fall back to legacy key and retry migration
+- Add a try/catch in the SE path that falls back to legacy on `AES.GCM` decrypt failure
+
+### File writes
+
+`FileVaultStorage.saveIdentity` already uses `.atomic` write option, which writes to a temp file and renames — safe against crash-during-write.
+
+## Interface Changes
+
+`KeychainManagerProtocol` — add migration helpers:
+
+```swift
+protocol KeychainManagerProtocol {
+    // Existing
+    func generateWrappingKey(alias: String) throws
+    func encrypt(alias: String, data: Data) throws -> Data
+    func decrypt(alias: String, data: Data) throws -> Data
+    func deleteKey(alias: String)
+    func hasKey(alias: String) -> Bool
+
+    // New for migration
+    func hasEphemeralKey(alias: String) -> Bool
+    func decryptLegacy(alias: String, data: Data) throws -> Data
+    func deleteLegacyKey(alias: String)
+}
+```
+
+- `hasKey(alias:)` updated to return `true` if EITHER ephemeral key (new) or legacy key (old) exists
+- `hasEphemeralKey(alias:)` checks only for the new-format ephemeral public key
+- `decryptLegacy(alias:)` decrypts using the old `kSecClassGenericPassword` key
+- `deleteLegacyKey(alias:)` deletes only the old-format key
 
 ## Security Properties
 
 | Property | Before (Software) | After (Secure Enclave) |
 |----------|-------------------|----------------------|
 | Wrapping key extractable | Yes (Keychain read) | No (SE hardware) |
-| Wrapping key in memory | Yes (loaded on decrypt) | No (derived in SE, only shared secret exposed) |
+| Wrapping key in memory | Yes (full AES key loaded) | Derived SymmetricKey only (transient) |
+| ECDH computation | N/A | Runs inside SE hardware |
+| AES-GCM computation | In-process (CryptoKit) | In-process (CryptoKit) — same as before |
 | Biometric protection | Optional flag | Built into SE access control |
-| Device binding | `ThisDeviceOnly` flag | Hardware-enforced |
+| Device binding | `ThisDeviceOnly` flag | Hardware-enforced non-extractable |
 | Survives jailbreak | Possibly extractable | SE remains isolated |
-| Side-channel resistance | None | SE has dedicated crypto processor |
+
+Note: Only the ECDH scalar multiplication runs on the SE's dedicated crypto processor. The HKDF derivation and AES-GCM encrypt/decrypt run in the application processor via CryptoKit. The key security gain is that the SE private key (the root secret) is non-extractable.
+
+## Backup/Restore Compatibility
+
+**No changes needed.**
+
+- **Backup:** `BackupManager.createBackup()` calls `keychainManager.decrypt()` → gets raw private key → encrypts with user's passphrase. The SE derivation is transparent.
+- **Restore:** `BackupManager.restoreBackup()` calls `keychainManager.generateWrappingKey()` (creates new SE-derived key on target device) → `keychainManager.encrypt()` (wraps with new key). Portable across devices.
+- **Cross-device:** Each device has its own SE master key. Backup file + passphrase is the bridge.
+
+## Error Handling
+
+| Error | Cause | Recovery |
+|-------|-------|----------|
+| SE key creation fails | Device has no SE (simulator) | Fall back to software P-256 |
+| Biometric cancelled | User dismissed Face ID prompt | Show "Authentication required" |
+| Biometric invalidated | User re-enrolled Face ID | Show "Restore from backup" flow |
+| SE key not found | App reinstalled (Keychain cleared) | Show "Restore from backup" flow |
+| ECDH fails | Corrupted ephemeral key | Fall back to legacy key if available, else backup restore |
+| AES-GCM decrypt fails on SE path | Crash during migration left stale ephemeral key | Fall back to legacy key, retry migration |
 
 ## Files to Change
 
 | File | Change |
 |------|--------|
-| `KeychainManager.swift` | Add SE master key management, ECDH derivation, ephemeral key storage, legacy detection, migration helpers |
-| `VaultImpl.swift` | Add post-decrypt migration check in `sign()` and `updateIdentityProfile()` |
-| `KeychainManagerProtocol` | Add `needsMigration(alias:)` and `deleteLegacyKey(alias:)` methods |
+| `KeychainManager.swift` | SE master key lifecycle, ECDH derivation, ephemeral key storage/load, legacy helpers |
+| `VaultImpl.swift` | Migration logic in `sign()`, migration lock, fallback handling |
+| `KeychainManagerProtocol` (in KeychainManager.swift) | Add `hasEphemeralKey`, `decryptLegacy`, `deleteLegacyKey` |
 
 ## Testing
 
 - Unit test: ECDH derivation produces deterministic AES key from same SE key + ephemeral public key
 - Unit test: encrypt/decrypt round-trip with SE-derived key
+- Unit test: encrypt with different aliases produces different keys (domain separation)
 - Unit test: migration detects old format and re-wraps
 - Unit test: migration is idempotent (running twice doesn't break)
-- Unit test: simulator fallback works when SE unavailable
-- Integration test: backup → restore across migration boundary (backup with old key, restore creates new SE key)
+- Unit test: crash recovery — ephemeral key exists but ciphertext is old format → falls back to legacy
+- Unit test: simulator fallback works when `SecureEnclave.isAvailable` is false
+- Unit test: `hasKey` returns true for both legacy and new format
+- Integration test: backup with old key → upgrade → restore creates new SE key
 
 ## Out of Scope
 
 - Android changes (already uses hardware-backed Keystore)
-- Changing the encrypted file format (stays AES-256-GCM)
+- Changing the encrypted file format (stays AES-256-GCM nonce+ciphertext+tag)
 - Changing the Vault/VaultStorage interface
 - Changing BackupManager
+- SE master key rotation (future consideration — would require re-wrapping all identities)
+- Migrating UserDefaults metadata to encrypted file storage (separate concern)
