@@ -13,6 +13,7 @@ final class VaultImpl: Vault, @unchecked Sendable {
     private let keychainManager: KeychainManager
     private let storage: VaultStorage
     private let migrationLock = NSLock()
+    private var migratingAliases = Set<String>()
 
     init(
         classicalProvider: CryptoProvider,
@@ -125,12 +126,15 @@ final class VaultImpl: Vault, @unchecked Sendable {
                 }
                 let cryptoProvider = provider(for: identity.algorithm)
                 return try cryptoProvider.sign(algorithm: identity.algorithm, privateKey: privateKey, data: data)
-            } catch {
+            } catch let error as KeychainError {
                 // SE decrypt failed — may be stale ephemeral key from interrupted migration
                 if !keychainManager.hasLegacyKey(alias: wrappingAlias) {
                     throw error // No fallback available
                 }
                 // Fall through to legacy migration path
+            } catch {
+                // Non-keychain error (signing failed, etc.) — do not silently downgrade
+                throw error
             }
         }
 
@@ -148,51 +152,57 @@ final class VaultImpl: Vault, @unchecked Sendable {
     }
 
     /// Migrates a legacy software-wrapped key to SE-derived wrapping, then signs.
-    /// Splits into sync crypto work (under lock) and async persistence.
+    /// Uses per-alias tracking to prevent concurrent migration of the same identity.
     private func migrateAndSign(
         identity: Identity,
         wrappingAlias: String,
         encryptedPrivateKey: Data,
         data: Data
     ) async throws -> Data {
-        // Perform all crypto work synchronously under lock (no await points)
-        let (privateKey, newEncrypted, signature) = try migrationLock.withLock {
-            // Double-check after lock — another thread may have migrated
-            if keychainManager.hasEphemeralKey(alias: wrappingAlias),
-               !keychainManager.hasLegacyKey(alias: wrappingAlias) {
-                var pk = try keychainManager.decrypt(alias: wrappingAlias, data: encryptedPrivateKey)
-                let sig = try provider(for: identity.algorithm).sign(algorithm: identity.algorithm, privateKey: pk, data: data)
+        // Check / mark alias under lock to prevent concurrent migration of same alias
+        try migrationLock.withLock {
+            guard !migratingAliases.contains(wrappingAlias) else {
+                // Another call is already migrating this alias — retry via SE path
+                throw VaultError.storageFailed("Migration in progress for this identity, please retry")
+            }
+            migratingAliases.insert(wrappingAlias)
+        }
+        defer {
+            migrationLock.withLock { _ = migratingAliases.remove(wrappingAlias) }
+        }
+
+        // Check if already migrated by a previous concurrent call
+        if keychainManager.hasEphemeralKey(alias: wrappingAlias),
+           !keychainManager.hasLegacyKey(alias: wrappingAlias) {
+            var pk = try keychainManager.decrypt(alias: wrappingAlias, data: encryptedPrivateKey)
+            defer {
                 pk.withUnsafeMutableBytes { ptr in
                     if let baseAddress = ptr.baseAddress { memset(baseAddress, 0, ptr.count) }
                 }
-                return (Data(), Data(), sig) // Empty data signals "already migrated"
             }
-
-            // Decrypt with legacy key
-            var pk = try keychainManager.decryptLegacy(alias: wrappingAlias, data: encryptedPrivateKey)
-
-            // Generate new SE-derived wrapping key
-            try keychainManager.generateWrappingKey(alias: wrappingAlias)
-
-            // Re-encrypt with SE-derived key
-            let reEncrypted = try keychainManager.encrypt(alias: wrappingAlias, data: pk)
-
-            // Sign while we have the raw key
-            let sig = try provider(for: identity.algorithm).sign(algorithm: identity.algorithm, privateKey: pk, data: data)
-
-            // Zero raw key
-            pk.withUnsafeMutableBytes { ptr in
-                if let baseAddress = ptr.baseAddress { memset(baseAddress, 0, ptr.count) }
-            }
-
-            return (pk, reEncrypted, sig)
+            return try provider(for: identity.algorithm).sign(algorithm: identity.algorithm, privateKey: pk, data: data)
         }
 
-        // Persist new ciphertext asynchronously (outside lock)
-        if !newEncrypted.isEmpty {
-            try await storage.saveIdentity(identity, encryptedPrivateKey: newEncrypted)
-            keychainManager.deleteLegacyKey(alias: wrappingAlias)
+        // Decrypt with legacy key
+        var pk = try keychainManager.decryptLegacy(alias: wrappingAlias, data: encryptedPrivateKey)
+
+        // Generate new SE-derived wrapping key
+        try keychainManager.generateWrappingKey(alias: wrappingAlias)
+
+        // Re-encrypt with SE-derived key
+        let reEncrypted = try keychainManager.encrypt(alias: wrappingAlias, data: pk)
+
+        // Sign while we have the raw key
+        let signature = try provider(for: identity.algorithm).sign(algorithm: identity.algorithm, privateKey: pk, data: data)
+
+        // Zero raw key
+        pk.withUnsafeMutableBytes { ptr in
+            if let baseAddress = ptr.baseAddress { memset(baseAddress, 0, ptr.count) }
         }
+
+        // Persist new ciphertext asynchronously (outside migration tracking)
+        try await storage.saveIdentity(identity, encryptedPrivateKey: reEncrypted)
+        keychainManager.deleteLegacyKey(alias: wrappingAlias)
 
         return signature
     }
