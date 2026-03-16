@@ -65,7 +65,7 @@ final class InviteAcceptViewModel {
             emailMatch = !walletEmail.isEmpty && normalizeEmail(walletEmail) == normalizeEmail(inv.email)
 
             if !emailMatch && !walletEmail.isEmpty {
-                errorMessage = "Email mismatch: invitation is for \(inv.email) but your wallet email is \(walletEmail)"
+                errorMessage = "Email mismatch: the invitation email does not match this identity's email"
             } else if walletEmail.isEmpty {
                 errorMessage = "No email configured in wallet profile"
             }

@@ -76,7 +76,8 @@ struct IdentityDetailScreen: View {
                                     UIPasteboard.general.string = id.did
                                     HapticManager.notification(.success)
                                     didCopied = true
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                    Task {
+                                        try? await Task.sleep(for: .seconds(2))
                                         didCopied = false
                                     }
                                 } label: {

@@ -248,17 +248,13 @@ struct CreateIdentityScreen: View {
                         emailVerified: nil
                     )
                 }
-                await MainActor.run {
-                    isCreating = false
-                    HapticManager.notification(.success)
-                    router.push(.biometricSetup)
-                }
+                isCreating = false
+                HapticManager.notification(.success)
+                router.push(.biometricSetup)
             } catch {
-                await MainActor.run {
-                    isCreating = false
-                    HapticManager.notification(.error)
-                    errorMessage = error.localizedDescription
-                }
+                isCreating = false
+                HapticManager.notification(.error)
+                errorMessage = error.localizedDescription
             }
         }
     }

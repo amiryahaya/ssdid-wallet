@@ -22,9 +22,11 @@ struct ProfileSetupScreen: View {
     }
 
     private var isValid: Bool {
-        !name.trimmingCharacters(in: .whitespaces).isEmpty &&
-        !email.trimmingCharacters(in: .whitespaces).isEmpty &&
-        email.contains("@") && email.contains(".")
+        let trimmedName = name.trimmingCharacters(in: .whitespaces)
+        let trimmedEmail = email.trimmingCharacters(in: .whitespaces)
+        let emailParts = trimmedEmail.split(separator: "@")
+        let emailOk = emailParts.count == 2 && !emailParts[0].isEmpty && emailParts[1].contains(".") && emailParts[1].last != "."
+        return !trimmedName.isEmpty && !trimmedEmail.isEmpty && emailOk
     }
 
     var body: some View {
@@ -113,10 +115,13 @@ struct ProfileSetupScreen: View {
                     .onChange(of: email) { _, newValue in
                         if newValue.trimmingCharacters(in: .whitespaces).isEmpty {
                             emailError = "Email is required"
-                        } else if !newValue.contains("@") || !newValue.contains(".") {
-                            emailError = "Invalid email format"
                         } else {
-                            emailError = nil
+                            let parts = newValue.split(separator: "@")
+                            if parts.count != 2 || parts[0].isEmpty || !parts[1].contains(".") || parts[1].last == "." {
+                                emailError = "Invalid email format"
+                            } else {
+                                emailError = nil
+                            }
                         }
                     }
 

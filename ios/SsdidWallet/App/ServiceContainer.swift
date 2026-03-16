@@ -86,7 +86,7 @@ final class ServiceContainer: ObservableObject {
 
         // One-time migration: copy legacy global profile VC to first identity
         let migrationVault: Vault = vaultImpl
-        Task {
+        Task.detached(priority: .utility) {
             await ProfileMigration.migrateIfNeeded(vault: migrationVault)
         }
     }
