@@ -97,10 +97,6 @@ struct RootView: View {
             CreateIdentityScreen(acceptedAlgorithms: acceptedAlgorithms)
         case .biometricSetup:
             BiometricSetupScreen()
-        case .profileSetup(let keyId):
-            ProfileSetupScreen(isEditing: false, keyId: keyId)
-        case .profileEdit(let keyId):
-            ProfileSetupScreen(isEditing: true, keyId: keyId)
         case .emailVerification(let email, let isEditing):
             EmailVerificationScreen(email: email, isEditing: isEditing)
         case .walletHome:

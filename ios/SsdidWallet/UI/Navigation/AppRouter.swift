@@ -6,8 +6,6 @@ enum Route: Hashable {
     case onboarding
     case createIdentity(acceptedAlgorithms: String? = nil)
     case biometricSetup
-    case profileSetup(keyId: String? = nil)
-    case profileEdit(keyId: String)
     case emailVerification(email: String, isEditing: Bool = false)
     case walletHome
     case identityDetail(keyId: String)
