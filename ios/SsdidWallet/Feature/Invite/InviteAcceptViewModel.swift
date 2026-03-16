@@ -56,10 +56,8 @@ final class InviteAcceptViewModel {
                 selectedIdentity = identities.first
             }
 
-            // Check email match from profile claims
-            let profileManager = ProfileManager(vault: services.vault)
-            let claims = await profileManager.getProfileClaims()
-            walletEmail = claims["email"] ?? ""
+            // Use selected identity's email
+            walletEmail = selectedIdentity?.email ?? ""
 
             let normalizeEmail: (String) -> String = {
                 $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
@@ -198,10 +196,13 @@ final class InviteAcceptViewModel {
         ))
         let signatureBytes = try await services.vault.sign(keyId: identity.keyId, data: Data(startResp.challenge.utf8))
         let signedChallenge = Multibase.encode(signatureBytes)
+        let profileClaims = identity.claimsMap()
         let verifyResp = try await driveApi.registerVerify(request: RegisterVerifyRequest(
             did: identity.did,
             keyId: identity.keyId,
-            signedChallenge: signedChallenge
+            signedChallenge: signedChallenge,
+            inviteToken: token,
+            sharedClaims: profileClaims.isEmpty ? nil : profileClaims
         ))
         let vc = verifyResp.credential
         try await services.vault.storeCredential(vc)
