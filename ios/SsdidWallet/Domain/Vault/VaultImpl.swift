@@ -204,6 +204,11 @@ final class VaultImpl: Vault, @unchecked Sendable {
         return credentials.first { $0.credentialSubject.id == did }
     }
 
+    func getCredentialsForDid(_ did: String) async -> [VerifiableCredential] {
+        let credentials = await storage.listCredentials()
+        return credentials.filter { $0.credentialSubject.id == did }
+    }
+
     func deleteCredential(credentialId: String) async throws {
         try await storage.deleteCredential(credentialId: credentialId)
     }

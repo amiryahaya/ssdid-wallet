@@ -65,6 +65,9 @@ protocol Vault: Sendable {
     /// Retrieves a credential whose subject ID matches the given DID.
     func getCredentialForDid(_ did: String) async -> VerifiableCredential?
 
+    /// Returns all credentials whose subject ID matches the given DID.
+    func getCredentialsForDid(_ did: String) async -> [VerifiableCredential]
+
     /// Deletes a credential by its ID.
     func deleteCredential(credentialId: String) async throws
 }
