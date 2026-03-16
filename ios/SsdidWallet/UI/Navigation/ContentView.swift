@@ -25,8 +25,8 @@ struct RootView: View {
             .ssdidTheme()
             .onChange(of: coordinator.pendingDeepLink) { _, newURL in
                 guard let url = newURL else { return }
-                _ = coordinator.consumeDeepLink()
                 routeDeepLink(url)
+                _ = coordinator.consumeDeepLink()
             }
 
             if showSplash {

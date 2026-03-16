@@ -141,17 +141,14 @@ struct WalletHomeScreen: View {
             } // end else (not loading)
         }
         .background(Color.bgPrimary)
-        .onAppear {
-            Task {
-                identities = await services.vault.listIdentities()
-                var counts: [String: Int] = [:]
-                for identity in identities {
-                    let creds = await services.vault.getCredentialsForDid(identity.did)
-                    counts[identity.did] = creds.count
-                }
-                credentialCounts = counts
-                isLoading = false
+        .task {
+            identities = await services.vault.listIdentities().filter { $0.isActive }
+            var counts: [String: Int] = [:]
+            for identity in identities {
+                counts[identity.did] = await services.vault.getCredentialsForDid(identity.did).count
             }
+            credentialCounts = counts
+            isLoading = false
         }
     }
 
