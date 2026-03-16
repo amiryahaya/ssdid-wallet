@@ -214,6 +214,10 @@ class VaultImpl(
         return storage.listCredentials().firstOrNull { it.credentialSubject.id == did }
     }
 
+    override suspend fun getCredentialsForDid(did: String): List<VerifiableCredential> {
+        return storage.listCredentials().filter { it.credentialSubject.id == did }
+    }
+
     override suspend fun deleteCredential(credentialId: String): Result<Unit> = runCatching {
         storage.deleteCredential(credentialId)
     }
