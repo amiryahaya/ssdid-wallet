@@ -57,6 +57,9 @@ class WalletHomeViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(true)
     val isLoading = _isLoading.asStateFlow()
 
+    private val _credentialCounts = MutableStateFlow<Map<String, Int>>(emptyMap())
+    val credentialCounts = _credentialCounts.asStateFlow()
+
     val unreadNotificationCount = localNotificationStorage.unreadCount
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
@@ -65,7 +68,13 @@ class WalletHomeViewModel @Inject constructor(
     fun refresh() {
         viewModelScope.launch {
             _isLoading.value = true
-            _identities.value = vault.listIdentities()
+            val identitiesList = vault.listIdentities()
+            _identities.value = identitiesList
+            val counts = mutableMapOf<String, Int>()
+            for (id in identitiesList) {
+                counts[id.did] = vault.getCredentialsForDid(id.did).size
+            }
+            _credentialCounts.value = counts
             _isLoading.value = false
         }
     }
@@ -84,6 +93,7 @@ fun WalletHomeScreen(
 ) {
     val identities by viewModel.identities.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val credentialCounts by viewModel.credentialCounts.collectAsState()
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         viewModel.refresh()
@@ -167,7 +177,11 @@ fun WalletHomeScreen(
             }
 
             items(identities, key = { it.keyId }) { identity ->
-                IdentityCard(identity = identity, onClick = { onIdentityClick(identity.keyId) })
+                IdentityCard(
+                    identity = identity,
+                    credentialCount = credentialCounts[identity.did] ?: 0,
+                    onClick = { onIdentityClick(identity.keyId) }
+                )
             }
 
             if (isLoading && identities.isEmpty()) {
@@ -233,7 +247,7 @@ fun WalletHomeScreen(
 }
 
 @Composable
-fun IdentityCard(identity: Identity, onClick: () -> Unit) {
+fun IdentityCard(identity: Identity, credentialCount: Int = 0, onClick: () -> Unit) {
     val algColor = if (identity.algorithm.isPostQuantum) Pqc else Classical
 
     Card(
@@ -278,6 +292,13 @@ fun IdentityCard(identity: Identity, onClick: () -> Unit) {
             )
             identity.email?.let { email ->
                 Text(email, fontSize = 12.sp, color = TextTertiary)
+            }
+            if (credentialCount > 0) {
+                Text(
+                    "$credentialCount service${if (credentialCount != 1) "s" else ""} connected",
+                    fontSize = 11.sp,
+                    color = TextTertiary
+                )
             }
             Spacer(Modifier.height(12.dp))
             HorizontalDivider(color = Border)
