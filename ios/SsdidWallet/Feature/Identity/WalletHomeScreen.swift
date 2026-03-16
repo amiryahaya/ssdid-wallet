@@ -6,6 +6,7 @@ struct WalletHomeScreen: View {
 
     @State private var identities: [Identity] = []
     @State private var isLoading = true
+    @State private var credentialCounts: [String: Int] = [:]
 
     var body: some View {
         VStack(spacing: 0) {
@@ -130,6 +131,12 @@ struct WalletHomeScreen: View {
             }
             .refreshable {
                 identities = await services.vault.listIdentities()
+                var counts: [String: Int] = [:]
+                for identity in identities {
+                    let creds = await services.vault.getCredentialsForDid(identity.did)
+                    counts[identity.did] = creds.count
+                }
+                credentialCounts = counts
             }
             } // end else (not loading)
         }
@@ -137,6 +144,12 @@ struct WalletHomeScreen: View {
         .onAppear {
             Task {
                 identities = await services.vault.listIdentities()
+                var counts: [String: Int] = [:]
+                for identity in identities {
+                    let creds = await services.vault.getCredentialsForDid(identity.did)
+                    counts[identity.did] = creds.count
+                }
+                credentialCounts = counts
                 isLoading = false
             }
         }
@@ -190,6 +203,12 @@ struct WalletHomeScreen: View {
                 if let email = identity.email {
                     Text(email)
                         .font(.system(size: 12))
+                        .foregroundStyle(Color.textTertiary)
+                }
+
+                if let count = credentialCounts[identity.did], count > 0 {
+                    Text("\(count) service\(count == 1 ? "" : "s") connected")
+                        .font(.system(size: 11))
                         .foregroundStyle(Color.textTertiary)
                 }
 
