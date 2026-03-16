@@ -9,6 +9,7 @@ struct DriveLoginScreen: View {
     let challengeId: String
     let callbackUrl: String
     let requestedClaims: String
+    let inviteCode: String?
 
     struct ClaimItem: Identifiable {
         let id: String
@@ -161,6 +162,29 @@ struct DriveLoginScreen: View {
                                 }
                                 .disabled(isSubmitting)
                             }
+                        }
+
+                        // Invitation info (debug: shows invite code if present)
+                        if let code = inviteCode, !code.isEmpty {
+                            Spacer().frame(height: 4)
+                            Text("INVITATION")
+                                .font(.ssdidCaption)
+                                .foregroundStyle(Color.textTertiary)
+
+                            HStack(spacing: 8) {
+                                Image(systemName: "envelope.badge.shield.half.filled")
+                                    .foregroundStyle(Color.ssdidAccent)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Invite Code")
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundStyle(Color.textPrimary)
+                                    Text(code)
+                                        .font(.system(size: 13, design: .monospaced))
+                                        .foregroundStyle(Color.textTertiary)
+                                }
+                                Spacer()
+                            }
+                            .ssdidCard()
                         }
 
                         // Requested information
@@ -366,10 +390,16 @@ struct DriveLoginScreen: View {
         let signedChallenge = Multibase.encode(signatureBytes)
 
         // Step 3: Complete registration — receive VC
+        // Include invite code and shared claims (name/email) for invite-only registration
+        let identityClaims = identity.claimsMap()
+        let claims: [String: String]? = identityClaims.isEmpty ? nil : identityClaims
+
         let verifyResp = try await driveApi.registerVerify(request: RegisterVerifyRequest(
             did: identity.did,
             keyId: identity.keyId,
-            signedChallenge: signedChallenge
+            signedChallenge: signedChallenge,
+            inviteToken: inviteCode,
+            sharedClaims: claims
         ))
 
         // Step 4: Store the credential in vault
