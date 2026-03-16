@@ -198,6 +198,36 @@ fun IdentityDetailScreen(
                     }
                 }
 
+                // Profile
+                if (id.profileName != null || id.email != null) {
+                    item {
+                        Spacer(Modifier.height(4.dp))
+                        Text("PROFILE", style = MaterialTheme.typography.labelMedium)
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = BgCard)
+                        ) {
+                            Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                id.profileName?.let { name ->
+                                    Row {
+                                        Text("Name", fontSize = 14.sp, color = TextSecondary)
+                                        Spacer(Modifier.weight(1f))
+                                        Text(name, fontSize = 14.sp, color = TextPrimary)
+                                    }
+                                }
+                                id.email?.let { email ->
+                                    Row {
+                                        Text("Email", fontSize = 14.sp, color = TextSecondary)
+                                        Spacer(Modifier.weight(1f))
+                                        Text(email, fontSize = 14.sp, color = TextPrimary)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 // Action buttons
                 item {
                     Spacer(Modifier.height(8.dp))

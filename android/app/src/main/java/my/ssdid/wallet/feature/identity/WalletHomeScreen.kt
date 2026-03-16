@@ -276,6 +276,9 @@ fun IdentityCard(identity: Identity, onClick: () -> Unit) {
                 color = TextSecondary,
                 maxLines = 1
             )
+            identity.email?.let { email ->
+                Text(email, fontSize = 12.sp, color = TextTertiary)
+            }
             Spacer(Modifier.height(12.dp))
             HorizontalDivider(color = Border)
             Spacer(Modifier.height(8.dp))

@@ -187,6 +187,12 @@ struct WalletHomeScreen: View {
                     .foregroundStyle(Color.textSecondary)
                     .lineLimit(1)
 
+                if let email = identity.email {
+                    Text(email)
+                        .font(.system(size: 12))
+                        .foregroundStyle(Color.textTertiary)
+                }
+
                 Spacer().frame(height: 12)
 
                 Divider()

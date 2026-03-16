@@ -102,6 +102,40 @@ struct IdentityDetailScreen: View {
                         }
                         .ssdidCard()
 
+                        // Profile
+                        if id.profileName != nil || id.email != nil {
+                            Spacer().frame(height: 4)
+                            Text("PROFILE")
+                                .font(.ssdidCaption)
+                                .foregroundStyle(Color.textTertiary)
+
+                            VStack(alignment: .leading, spacing: 8) {
+                                if let profileName = id.profileName {
+                                    HStack {
+                                        Text("Name")
+                                            .font(.system(size: 14))
+                                            .foregroundStyle(Color.textSecondary)
+                                        Spacer()
+                                        Text(profileName)
+                                            .font(.system(size: 14))
+                                            .foregroundStyle(Color.textPrimary)
+                                    }
+                                }
+                                if let email = id.email {
+                                    HStack {
+                                        Text("Email")
+                                            .font(.system(size: 14))
+                                            .foregroundStyle(Color.textSecondary)
+                                        Spacer()
+                                        Text(email)
+                                            .font(.system(size: 14))
+                                            .foregroundStyle(Color.textPrimary)
+                                    }
+                                }
+                            }
+                            .ssdidCard()
+                        }
+
                         // Actions
                         Spacer().frame(height: 8)
                         Text("ACTIONS")
