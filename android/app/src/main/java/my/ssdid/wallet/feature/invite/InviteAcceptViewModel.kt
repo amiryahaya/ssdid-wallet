@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
-import my.ssdid.wallet.domain.profile.ProfileManager
+import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.transport.SsdidHttpClient
 import my.ssdid.wallet.domain.transport.dto.AcceptWithWalletRequest
 import my.ssdid.wallet.domain.transport.dto.InvitationDetailsResponse
@@ -37,7 +37,6 @@ class InviteAcceptViewModel @Inject constructor(
     private val vault: Vault,
     private val httpClient: SsdidHttpClient,
     private val verifier: Verifier,
-    private val profileManager: ProfileManager,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -49,6 +48,9 @@ class InviteAcceptViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(InviteAcceptUiState())
     val state = _state.asStateFlow()
+
+    private val _selectedIdentity = MutableStateFlow<Identity?>(null)
+    val selectedIdentity = _selectedIdentity.asStateFlow()
 
     init {
         loadInvitation()
@@ -68,8 +70,10 @@ class InviteAcceptViewModel @Inject constructor(
                 val api = httpClient.serverApi(serverUrl)
                 val invitation = api.getInvitationByToken(token)
 
-                val claims = profileManager.getProfileClaims()
-                val walletEmail = claims["email"] ?: ""
+                val identities = vault.listIdentities()
+                val firstIdentity = identities.firstOrNull()
+                _selectedIdentity.value = firstIdentity
+                val walletEmail = firstIdentity?.email ?: ""
 
                 val emailMatch = walletEmail.isNotBlank() &&
                     walletEmail.equals(invitation.email, ignoreCase = true)
@@ -126,7 +130,7 @@ class InviteAcceptViewModel @Inject constructor(
                     token,
                     AcceptWithWalletRequest(
                         credential = credentialJson,
-                        email = _state.value.walletEmail
+                        email = _selectedIdentity.value?.email ?: _state.value.walletEmail
                     )
                 )
 
@@ -172,6 +176,21 @@ class InviteAcceptViewModel @Inject constructor(
                 ) }
             }
         }
+    }
+
+    fun selectIdentity(identity: Identity) {
+        _selectedIdentity.value = identity
+        _state.update { it.copy(
+            walletEmail = identity.email ?: "",
+            emailMatch = !identity.email.isNullOrBlank() &&
+                identity.email.equals(_state.value.invitation?.email, ignoreCase = true),
+            error = if (!identity.email.isNullOrBlank() &&
+                !identity.email.equals(_state.value.invitation?.email, ignoreCase = true))
+                "Email mismatch: invitation is for ${_state.value.invitation?.email} but identity email is ${identity.email}"
+            else if (identity.email.isNullOrBlank())
+                "No email configured for this identity"
+            else null
+        ) }
     }
 
     fun decline() {
