@@ -9,6 +9,11 @@ interface Vault {
     suspend fun getIdentity(keyId: String): Identity?
     suspend fun listIdentities(): List<Identity>
     suspend fun deleteIdentity(keyId: String): Result<Unit>
+    /**
+     * Updates profile fields on an existing identity.
+     * Pass null to leave a field unchanged (not to clear it).
+     * Pass empty string ("") to clear a string field.
+     */
     suspend fun updateIdentityProfile(
         keyId: String,
         profileName: String? = null,

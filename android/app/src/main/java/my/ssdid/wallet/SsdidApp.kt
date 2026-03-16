@@ -17,6 +17,8 @@ import javax.inject.Inject
 @HiltAndroidApp
 class SsdidApp : Application() {
 
+    // Process-scoped coroutine context — not cancelled explicitly; OS reclaims on process death.
+    // Tests should not instantiate SsdidApp directly.
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     @Inject lateinit var notifyManager: NotifyManager

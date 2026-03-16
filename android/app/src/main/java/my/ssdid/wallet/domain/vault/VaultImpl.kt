@@ -107,7 +107,7 @@ class VaultImpl(
 
         // Check for pre-rotated key hash
         val nextKeyHash = if (identity.preRotatedKeyId != null) {
-            val preRotated = storage.getPreRotatedKey(identity.preRotatedKeyId!!)
+            val preRotated = storage.getPreRotatedKey(identity.preRotatedKeyId)
             if (preRotated != null) {
                 val sha3 = MessageDigest.getInstance("SHA3-256")
                 val hash = sha3.digest(preRotated.publicKey)
