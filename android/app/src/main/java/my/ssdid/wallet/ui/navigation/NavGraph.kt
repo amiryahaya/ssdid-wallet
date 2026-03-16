@@ -21,7 +21,6 @@ import my.ssdid.wallet.feature.identity.WalletHomeScreen
 import my.ssdid.wallet.feature.onboarding.BiometricSetupScreen
 import my.ssdid.wallet.feature.onboarding.OnboardingScreen
 import my.ssdid.wallet.feature.profile.EmailVerificationScreen
-import my.ssdid.wallet.feature.profile.ProfileSetupScreen
 import my.ssdid.wallet.feature.recovery.InstitutionalSetupScreen
 import my.ssdid.wallet.feature.recovery.RecoveryRestoreScreen
 import my.ssdid.wallet.feature.recovery.RecoverySetupScreen
@@ -46,7 +45,7 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String, on
         composable(Screen.Onboarding.route) {
             OnboardingScreen(
                 onComplete = {
-                    navController.navigate(Screen.ProfileSetup.route) {
+                    navController.navigate(Screen.CreateIdentity.createRoute()) {
                         popUpTo(Screen.Onboarding.route) { inclusive = true }
                     }
                 },
@@ -55,14 +54,7 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String, on
                 }
             )
         }
-        composable(Screen.ProfileSetup.route) {
-            ProfileSetupScreen(
-                onComplete = { email ->
-                    navController.navigate(Screen.EmailVerification.createRoute(email))
-                }
-            )
-        }
-        composable(
+composable(
             Screen.EmailVerification.route,
             arguments = listOf(
                 navArgument("email") { type = NavType.StringType; defaultValue = "" },
@@ -77,7 +69,7 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String, on
                     } else {
                         onOnboardingCompleted()
                         navController.navigate(Screen.CreateIdentity.createRoute()) {
-                            popUpTo(Screen.ProfileSetup.route) { inclusive = true }
+                            popUpTo(Screen.Onboarding.route) { inclusive = true }
                         }
                     }
                 },
@@ -288,25 +280,10 @@ fun SsdidNavGraph(navController: NavHostController, startDestination: String, on
         composable(Screen.Settings.route) {
             SettingsScreen(
                 onBack = { navController.popBackStack() },
-                onBackupExport = { navController.navigate(Screen.BackupExport.route) },
-                onProfile = { navController.navigate(Screen.ProfileEdit.route) }
+                onBackupExport = { navController.navigate(Screen.BackupExport.route) }
             )
         }
-        composable(Screen.ProfileEdit.route) {
-            ProfileSetupScreen(
-                onComplete = { email ->
-                    navController.popBackStack()
-                },
-                onEmailChanged = { email ->
-                    navController.navigate(Screen.EmailVerification.createRoute(email, source = "edit")) {
-                        popUpTo(Screen.ProfileEdit.route) { inclusive = true }
-                    }
-                },
-                onBack = { navController.popBackStack() },
-                buttonText = "Save"
-            )
-        }
-        composable(Screen.TxHistory.route) {
+composable(Screen.TxHistory.route) {
             TxHistoryScreen(onBack = { navController.popBackStack() })
         }
         composable(Screen.Notifications.route) {
