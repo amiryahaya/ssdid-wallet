@@ -350,9 +350,16 @@ struct IdentityDetailScreen: View {
     }
 
     private func serviceName(_ vc: VerifiableCredential) -> String {
-        if let name = vc.credentialSubject.additionalProperties["service"] {
-            return "\(name)".trimmingCharacters(in: CharacterSet(charactersIn: "\""))
+        // additionalProperties values are AnyCodable — extract the underlying String
+        if let anyCodable = vc.credentialSubject.additionalProperties["service"],
+           let name = anyCodable.value as? String, !name.isEmpty {
+            // Capitalize known service names for display
+            switch name.lowercased() {
+            case "drive": return "SSDID Drive"
+            default: return name.capitalized
+            }
         }
+        // Fallback: truncate issuer DID
         let issuer = vc.issuer
         if issuer.count > 30 {
             return String(issuer.prefix(20)) + "..." + String(issuer.suffix(8))
@@ -361,8 +368,9 @@ struct IdentityDetailScreen: View {
     }
 
     private func serviceUrl(_ vc: VerifiableCredential) -> String? {
-        guard let url = vc.credentialSubject.additionalProperties["serviceUrl"] else { return nil }
-        return "\(url)".trimmingCharacters(in: CharacterSet(charactersIn: "\""))
+        guard let anyCodable = vc.credentialSubject.additionalProperties["serviceUrl"],
+              let url = anyCodable.value as? String, !url.isEmpty else { return nil }
+        return url
     }
 
     private func deactivateIdentity() {
