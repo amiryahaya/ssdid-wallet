@@ -445,7 +445,7 @@
 			isa = PBXGroup;
 			children = (
 				93D7F0CB5E9158132DAB040F /* Domain */,
-				39C93072EE6DD2A070202689 /* AuthorizationRequestParsingTests.swift */,
+				BB36A1F17A7E34D45AE2CF60 /* AuthorizationRequestTests.swift */,
 				69A3BC89A6C2482C86EE38D0 /* BackupCryptoTests.swift */,
 				E1869678D7810D9602D67163 /* CanonicalJsonTests.swift */,
 				620815538E471B53257CD2D9 /* ClassicalProviderTests.swift */,
@@ -598,7 +598,7 @@
 		436A08A10A7FA318C6DD7D2C /* OpenId4Vp */ = {
 			isa = PBXGroup;
 			children = (
-				BB36A1F17A7E34D45AE2CF60 /* AuthorizationRequestTests.swift */,
+				39C93072EE6DD2A070202689 /* AuthorizationRequestParsingTests.swift */,
 				CF62BF5A8C70F04EC400DCE4 /* DcqlMatcherTests.swift */,
 				9F0287F0DB334A2A6359D684 /* PresentationDefinitionMatcherTests.swift */,
 				1A479DBE4CE46DD2D9315F4C /* PresentationSubmissionTests.swift */,
