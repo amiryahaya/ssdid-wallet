@@ -60,4 +60,37 @@ class DidValidationTest {
         assertThat(Did.validate("null").isFailure).isTrue()
         assertThat(Did.validate("undefined").isFailure).isTrue()
     }
+
+    // D1: Minimum length should be 22 for 128-bit entropy
+    @Test
+    fun `validate rejects 21-char ID (insufficient entropy)`() {
+        assertThat(Did.validate("did:ssdid:abcdefghijklmnopqrstu").isFailure).isTrue()
+    }
+
+    @Test
+    fun `validate accepts exactly 22-char ID`() {
+        assertThat(Did.validate("did:ssdid:abcdefghijklmnopqrstuv").isSuccess).isTrue()
+    }
+
+    // D5: Max length to prevent DoS
+    @Test
+    fun `validate rejects excessively long ID`() {
+        assertThat(Did.validate("did:ssdid:" + "a".repeat(200)).isFailure).isTrue()
+    }
+
+    // D6: Additional attack vectors
+    @Test
+    fun `validate rejects null byte in ID`() {
+        assertThat(Did.validate("did:ssdid:abcdefghijklmnopqrst\u0000v").isFailure).isTrue()
+    }
+
+    @Test
+    fun `validate rejects colon in method-specific ID`() {
+        assertThat(Did.validate("did:ssdid:abc:defghijklmnopqrstuv").isFailure).isTrue()
+    }
+
+    @Test
+    fun `validate rejects padding character in ID`() {
+        assertThat(Did.validate("did:ssdid:dGVzdDEyMzQ1Njc4OTAx=").isFailure).isTrue()
+    }
 }

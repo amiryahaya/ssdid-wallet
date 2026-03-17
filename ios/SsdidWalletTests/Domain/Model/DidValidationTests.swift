@@ -47,4 +47,38 @@ final class DidValidationTests: XCTestCase {
         XCTAssertThrowsError(try Did.validate("null"))
         XCTAssertThrowsError(try Did.validate("undefined"))
     }
+
+    // D1: Minimum length should be 22 for 128-bit entropy
+    func testValidateRejects21CharId() {
+        XCTAssertThrowsError(try Did.validate("did:ssdid:abcdefghijklmnopqrstu"))
+    }
+
+    func testValidateAcceptsExactly22CharId() throws {
+        let did = try Did.validate("did:ssdid:abcdefghijklmnopqrstuv")
+        XCTAssertEqual(did.value, "did:ssdid:abcdefghijklmnopqrstuv")
+    }
+
+    // D2: Unicode alphanumerics must be rejected
+    func testValidateRejectsUnicodeAlphanumerics() {
+        // Full-width Unicode 'A' and 'a' — pass CharacterSet.alphanumerics but should fail
+        XCTAssertThrowsError(try Did.validate("did:ssdid:\u{FF21}\u{FF41}bcdefghijklmnopqrstuv"))
+    }
+
+    // D5: Max length to prevent DoS
+    func testValidateRejectsExcessivelyLongId() {
+        XCTAssertThrowsError(try Did.validate("did:ssdid:" + String(repeating: "a", count: 200)))
+    }
+
+    // D6: Additional attack vectors
+    func testValidateRejectsNullByteInId() {
+        XCTAssertThrowsError(try Did.validate("did:ssdid:abcdefghijklmnopqrst\u{0000}v"))
+    }
+
+    func testValidateRejectsColonInId() {
+        XCTAssertThrowsError(try Did.validate("did:ssdid:abc:defghijklmnopqrstuv"))
+    }
+
+    func testValidateRejectsPaddingCharInId() {
+        XCTAssertThrowsError(try Did.validate("did:ssdid:dGVzdDEyMzQ1Njc4OTAx="))
+    }
 }
