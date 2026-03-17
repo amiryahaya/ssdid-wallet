@@ -361,10 +361,10 @@ struct IdentityDetailScreen: View {
 
     private func deactivateIdentity() {
         isDeactivating = true
-        let vault = services.vault
         Task {
             do {
-                try await vault.deleteIdentity(keyId: keyId)
+                // Deactivate on registry + delete locally + log activity
+                try await services.ssdidClient.deactivateDid(keyId: keyId)
                 isDeactivating = false
                 router.pop()
             } catch {
