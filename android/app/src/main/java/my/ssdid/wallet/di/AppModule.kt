@@ -77,7 +77,12 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideKeystoreManager(): KeystoreManager = AndroidKeystoreManager()
+    fun provideKeystoreManager(): KeystoreManager {
+        // KeystoreManager's requireBiometric affects key GENERATION, not key USE.
+        // Once a key is generated without biometric, it can't be retroactively changed.
+        // Biometric gating is enforced at the app level via auto-lock in MainActivity.
+        return AndroidKeystoreManager()
+    }
 
     @Provides
     @Singleton

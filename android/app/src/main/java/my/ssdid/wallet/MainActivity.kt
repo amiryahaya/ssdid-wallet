@@ -19,12 +19,15 @@ import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
+import my.ssdid.wallet.domain.settings.SettingsRepository
 import my.ssdid.wallet.domain.vault.VaultStorage
 import my.ssdid.wallet.feature.splash.SplashScreen
 import my.ssdid.wallet.platform.deeplink.DeepLinkHandler
+import my.ssdid.wallet.ui.components.LockScreen
 import my.ssdid.wallet.ui.navigation.Screen
 import my.ssdid.wallet.ui.navigation.SsdidNavGraph
 import my.ssdid.wallet.ui.theme.SsdidTheme
@@ -34,54 +37,83 @@ import javax.inject.Inject
 class MainActivity : FragmentActivity() {
 
     @Inject lateinit var vaultStorage: VaultStorage
+    @Inject lateinit var settingsRepository: SettingsRepository
 
     private val pendingDeepLinks = MutableSharedFlow<Intent>(extraBufferCapacity = 1)
+
+    private val isLocked = mutableStateOf(false)
+    private var backgroundTimestamp = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             SsdidTheme {
-                var startDestination by remember { mutableStateOf<String?>(null) }
-                var showSplash by remember { mutableStateOf(true) }
+                val locked by remember { isLocked }
 
-                LaunchedEffect(Unit) {
-                    startDestination = if (vaultStorage.isOnboardingCompleted()) {
-                        Screen.WalletHome.route
-                    } else {
-                        Screen.Onboarding.route
-                    }
-                    delay(1500)
-                    showSplash = false
-                }
-
-                AnimatedVisibility(
-                    visible = showSplash,
-                    exit = fadeOut(animationSpec = tween(400))
-                ) {
-                    SplashScreen()
-                }
-
-                if (!showSplash && startDestination != null) {
-                    val navController = rememberNavController()
-                    SsdidNavGraph(
-                        navController = navController,
-                        startDestination = startDestination!!,
-                        onOnboardingCompleted = {
-                            lifecycleScope.launch { vaultStorage.setOnboardingCompleted() }
-                        }
-                    )
+                if (locked) {
+                    LockScreen(onUnlock = { isLocked.value = false })
+                } else {
+                    var startDestination by remember { mutableStateOf<String?>(null) }
+                    var showSplash by remember { mutableStateOf(true) }
 
                     LaunchedEffect(Unit) {
-                        // Handle cold start deep link or share intent
-                        if (savedInstanceState == null) {
-                            handleIntent(intent, navController)
+                        startDestination = if (vaultStorage.isOnboardingCompleted()) {
+                            Screen.WalletHome.route
+                        } else {
+                            Screen.Onboarding.route
                         }
-                        // Handle warm start deep links via flow
-                        pendingDeepLinks.collectLatest { newIntent ->
-                            handleIntent(newIntent, navController)
+                        delay(1500)
+                        showSplash = false
+                    }
+
+                    AnimatedVisibility(
+                        visible = showSplash,
+                        exit = fadeOut(animationSpec = tween(400))
+                    ) {
+                        SplashScreen()
+                    }
+
+                    if (!showSplash && startDestination != null) {
+                        val navController = rememberNavController()
+                        SsdidNavGraph(
+                            navController = navController,
+                            startDestination = startDestination!!,
+                            onOnboardingCompleted = {
+                                lifecycleScope.launch { vaultStorage.setOnboardingCompleted() }
+                            }
+                        )
+
+                        LaunchedEffect(Unit) {
+                            // Handle cold start deep link or share intent
+                            if (savedInstanceState == null) {
+                                handleIntent(intent, navController)
+                            }
+                            // Handle warm start deep links via flow
+                            pendingDeepLinks.collectLatest { newIntent ->
+                                handleIntent(newIntent, navController)
+                            }
                         }
                     }
+                }
+            }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        backgroundTimestamp = System.currentTimeMillis()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (backgroundTimestamp > 0) {
+            lifecycleScope.launch {
+                val biometricEnabled = settingsRepository.biometricEnabled().first()
+                val autoLockMinutes = settingsRepository.autoLockMinutes().first()
+                val elapsed = System.currentTimeMillis() - backgroundTimestamp
+                if (biometricEnabled && elapsed > autoLockMinutes * 60_000L) {
+                    isLocked.value = true
                 }
             }
         }
