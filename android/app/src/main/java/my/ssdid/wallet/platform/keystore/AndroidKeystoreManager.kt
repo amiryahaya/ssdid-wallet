@@ -1,5 +1,6 @@
 package my.ssdid.wallet.platform.keystore
 
+import android.os.Build
 import my.ssdid.wallet.domain.vault.KeystoreManager
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
@@ -29,7 +30,12 @@ class AndroidKeystoreManager(
 
         if (requireBiometric) {
             builder.setUserAuthenticationRequired(true)
-            builder.setUserAuthenticationParameters(30, KeyProperties.AUTH_BIOMETRIC_STRONG)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                builder.setUserAuthenticationParameters(30, KeyProperties.AUTH_BIOMETRIC_STRONG)
+            } else {
+                @Suppress("DEPRECATION")
+                builder.setUserAuthenticationValidityDurationSeconds(30)
+            }
         }
 
         val spec = builder.build()
