@@ -19,10 +19,8 @@ struct Did {
     }
 
     func methodSpecificId() -> String {
-        if value.hasPrefix("did:ssdid:") {
-            return String(value.dropFirst("did:ssdid:".count))
-        }
-        return value
+        precondition(value.hasPrefix("did:ssdid:"), "methodSpecificId() called on malformed DID: \(value)")
+        return String(value.dropFirst("did:ssdid:".count))
     }
 
     static func generate() -> Did {
@@ -40,10 +38,14 @@ struct Did {
         guard !id.isEmpty else {
             throw DidError.invalidFormat("method-specific ID must not be empty")
         }
-        guard id.count >= 16 else {
-            throw DidError.invalidFormat("method-specific ID too short (minimum 16 characters)")
+        guard id.count >= 22 else {
+            throw DidError.invalidFormat("method-specific ID too short (minimum 22 characters for 128-bit entropy)")
         }
-        let allowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_"))
+        guard id.count <= 128 else {
+            throw DidError.invalidFormat("method-specific ID too long")
+        }
+        // ASCII-only base64url characters (not Unicode alphanumerics)
+        let allowed = CharacterSet(charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_")
         guard id.unicodeScalars.allSatisfy({ allowed.contains($0) }) else {
             throw DidError.invalidFormat("method-specific ID contains invalid characters")
         }

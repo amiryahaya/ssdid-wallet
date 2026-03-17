@@ -7,9 +7,9 @@ class DidValidationTest {
 
     @Test
     fun `validate accepts valid DID`() {
-        val result = Did.validate("did:ssdid:dGVzdDEyMzQ1Njc4OTAx")
+        val result = Did.validate("did:ssdid:dGVzdDEyMzQ1Njc4OTAxMjM")
         assertThat(result.isSuccess).isTrue()
-        assertThat(result.getOrThrow().value).isEqualTo("did:ssdid:dGVzdDEyMzQ1Njc4OTAx")
+        assertThat(result.getOrThrow().value).isEqualTo("did:ssdid:dGVzdDEyMzQ1Njc4OTAxMjM")
     }
 
     @Test
@@ -35,7 +35,7 @@ class DidValidationTest {
     }
 
     @Test
-    fun `validate rejects short ID (less than 16 chars)`() {
+    fun `validate rejects short ID (less than 22 chars)`() {
         assertThat(Did.validate("did:ssdid:abc").isFailure).isTrue()
     }
 
@@ -51,7 +51,7 @@ class DidValidationTest {
 
     @Test
     fun `validate accepts base64url with hyphens and underscores`() {
-        val result = Did.validate("did:ssdid:abc-def_ghi-jkl_mno")
+        val result = Did.validate("did:ssdid:abc-def_ghi-jkl_mno_pqr")
         assertThat(result.isSuccess).isTrue()
     }
 
@@ -91,6 +91,6 @@ class DidValidationTest {
 
     @Test
     fun `validate rejects padding character in ID`() {
-        assertThat(Did.validate("did:ssdid:dGVzdDEyMzQ1Njc4OTAx=").isFailure).isTrue()
+        assertThat(Did.validate("did:ssdid:dGVzdDEyMzQ1Njc4OTAxMjM=").isFailure).isTrue()
     }
 }

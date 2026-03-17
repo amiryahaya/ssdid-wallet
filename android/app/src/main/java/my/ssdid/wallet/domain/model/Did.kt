@@ -29,8 +29,11 @@ value class Did(val value: String) {
             if (id.isEmpty()) {
                 return Result.failure(IllegalArgumentException("DID method-specific ID must not be empty"))
             }
-            if (id.length < 16) {
-                return Result.failure(IllegalArgumentException("DID method-specific ID too short (minimum 16 characters)"))
+            if (id.length < 22) {
+                return Result.failure(IllegalArgumentException("DID method-specific ID too short (minimum 22 characters for 128-bit entropy)"))
+            }
+            if (id.length > 128) {
+                return Result.failure(IllegalArgumentException("DID method-specific ID too long"))
             }
             val base64urlPattern = Regex("^[A-Za-z0-9_-]+$")
             if (!base64urlPattern.matches(id)) {

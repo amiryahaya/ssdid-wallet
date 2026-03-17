@@ -4,8 +4,8 @@ import XCTest
 final class DidValidationTests: XCTestCase {
 
     func testValidateAcceptsValidDid() throws {
-        let did = try Did.validate("did:ssdid:dGVzdDEyMzQ1Njc4OTAx")
-        XCTAssertEqual(did.value, "did:ssdid:dGVzdDEyMzQ1Njc4OTAx")
+        let did = try Did.validate("did:ssdid:dGVzdDEyMzQ1Njc4OTAxMjM")
+        XCTAssertEqual(did.value, "did:ssdid:dGVzdDEyMzQ1Njc4OTAxMjM")
     }
 
     func testValidateAcceptsGeneratedDid() throws {
@@ -39,8 +39,8 @@ final class DidValidationTests: XCTestCase {
     }
 
     func testValidateAcceptsBase64urlWithHyphensAndUnderscores() throws {
-        let did = try Did.validate("did:ssdid:abc-def_ghi-jkl_mno")
-        XCTAssertEqual(did.value, "did:ssdid:abc-def_ghi-jkl_mno")
+        let did = try Did.validate("did:ssdid:abc-def_ghi-jkl_mno_pqr")
+        XCTAssertEqual(did.value, "did:ssdid:abc-def_ghi-jkl_mno_pqr")
     }
 
     func testValidateRejectsNullLikeStrings() {
@@ -79,6 +79,6 @@ final class DidValidationTests: XCTestCase {
     }
 
     func testValidateRejectsPaddingCharInId() {
-        XCTAssertThrowsError(try Did.validate("did:ssdid:dGVzdDEyMzQ1Njc4OTAx="))
+        XCTAssertThrowsError(try Did.validate("did:ssdid:dGVzdDEyMzQ1Njc4OTAxMjM="))
     }
 }
