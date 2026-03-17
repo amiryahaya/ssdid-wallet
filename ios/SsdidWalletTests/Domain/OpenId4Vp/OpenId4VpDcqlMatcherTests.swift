@@ -1,7 +1,7 @@
 import XCTest
 @testable import SsdidWallet
 
-final class DcqlMatcherTests: XCTestCase {
+final class OpenId4VpDcqlMatcherTests: XCTestCase {
 
     private let matcher = DcqlMatcher()
 

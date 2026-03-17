@@ -1,7 +1,7 @@
 import XCTest
 @testable import SsdidWallet
 
-final class AuthorizationRequestTests: XCTestCase {
+final class AuthorizationRequestParsingTests: XCTestCase {
 
     func testParseByReference() throws {
         let uri = "openid4vp://?client_id=https://verifier.example.com&request_uri=https://verifier.example.com/request/123"

@@ -1,7 +1,7 @@
 import XCTest
 @testable import SsdidWallet
 
-final class VpTokenBuilderTests: XCTestCase {
+final class OpenId4VpTokenBuilderTests: XCTestCase {
 
     /// Dummy signer that returns a fixed 64-byte signature.
     private let signer: (Data) -> Data = { _ in Data(repeating: 0, count: 64) }

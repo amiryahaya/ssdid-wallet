@@ -1,7 +1,7 @@
 import XCTest
 @testable import SsdidWallet
 
-final class PresentationDefinitionMatcherTests: XCTestCase {
+final class OpenId4VpPresentationDefinitionMatcherTests: XCTestCase {
 
     private let matcher = PresentationDefinitionMatcher()
 
