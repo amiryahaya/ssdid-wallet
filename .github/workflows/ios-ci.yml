@@ -24,12 +24,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          lfs: true
 
       - name: Select Xcode
         run: |
-          # Use the latest available Xcode on the runner
           XCODE_PATH=$(ls -d /Applications/Xcode*.app 2>/dev/null | sort -V | tail -1)
           echo "Using $XCODE_PATH"
           sudo xcode-select -s "$XCODE_PATH/Contents/Developer"
@@ -42,7 +39,6 @@ jobs:
       - name: Find simulator destination
         id: sim
         run: |
-          # Pick the first available iPhone simulator
           DEST=$(xcrun simctl list devices available -j | python3 -c "
           import json, sys
           data = json.load(sys.stdin)
@@ -66,6 +62,7 @@ jobs:
           xcodebuild build \
             -scheme SsdidWallet \
             -destination '${{ steps.sim.outputs.destination }}' \
+            -derivedDataPath DerivedData \
             -clonedSourcePackagesDirPath .spm-cache \
             -skipPackagePluginValidation \
             CODE_SIGNING_ALLOWED=NO \
@@ -77,6 +74,7 @@ jobs:
           xcodebuild test \
             -scheme SsdidWallet \
             -destination '${{ steps.sim.outputs.destination }}' \
+            -derivedDataPath DerivedData \
             -clonedSourcePackagesDirPath .spm-cache \
             -skipPackagePluginValidation \
             CODE_SIGNING_ALLOWED=NO \
