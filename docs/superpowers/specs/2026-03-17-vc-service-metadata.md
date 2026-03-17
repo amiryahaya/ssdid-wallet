@@ -38,12 +38,14 @@ Services should include a `serviceName` field in the VC's `credentialSubject` wi
 
 ## New Fields
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `serviceName` | string | Recommended | Human-readable display name (e.g., "SSDID Drive", "Gov Portal") |
-| `serviceUrl` | string | Optional | Service's base URL for display |
+| Field | Type | Max Length | Required | Description |
+|-------|------|-----------|----------|-------------|
+| `serviceName` | string | 64 chars | Recommended | Human-readable display name (e.g., "SSDID Drive", "Gov Portal") |
+| `serviceUrl` | HTTPS URL | 256 chars | Optional | Service's base URL for display |
 
 The existing `service` field (internal identifier) is kept for backward compatibility and programmatic use.
+
+**Constraints:** `serviceName` must be a JSON string (not a number or boolean). The wallet truncates display to 1 line. `serviceUrl` should be a valid HTTPS URL.
 
 ## Wallet Fallback Chain
 

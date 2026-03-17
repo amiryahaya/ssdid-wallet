@@ -12,6 +12,7 @@ import kotlinx.serialization.json.JsonEncoder
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
 
 @Serializable
@@ -47,7 +48,7 @@ internal object CredentialSubjectSerializer : KSerializer<CredentialSubject> {
         val obj = jsonDecoder.decodeJsonElement().jsonObject
         val id = obj["id"]?.jsonPrimitive?.content ?: ""
         val claims = obj["claims"]?.jsonObject?.let { claimsObj ->
-            claimsObj.mapValues { (_, v) -> v.jsonPrimitive.content }
+            claimsObj.mapValues { (_, v) -> v.jsonPrimitive.contentOrNull ?: v.toString() }
         } ?: emptyMap()
         val extra = obj.filterKeys { it != "id" && it != "claims" }
         return CredentialSubject(id = id, claims = claims, additionalProperties = extra)

@@ -173,6 +173,7 @@ struct IdentityDetailScreen: View {
                                         Text(name)
                                             .font(.system(size: 14, weight: .medium))
                                             .foregroundStyle(Color.textPrimary)
+                                            .lineLimit(1)
                                         if let url = url {
                                             Text(url)
                                                 .font(.system(size: 11))
@@ -356,10 +357,14 @@ struct IdentityDetailScreen: View {
            let name = anyCodable.value as? String, !name.isEmpty {
             return name
         }
-        // Fallback: service identifier
+        // Fallback: service identifier, title-cased
         if let anyCodable = props["service"],
            let name = anyCodable.value as? String, !name.isEmpty {
-            return name.capitalized
+            // Title-case each word (split on space, underscore, hyphen)
+            return name.components(separatedBy: CharacterSet(charactersIn: " _-"))
+                .filter { !$0.isEmpty }
+                .map { $0.prefix(1).uppercased() + $0.dropFirst() }
+                .joined(separator: " ")
         }
         // Last resort: truncate issuer DID
         let issuer = vc.issuer

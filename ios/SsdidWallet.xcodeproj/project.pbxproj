@@ -214,7 +214,7 @@
 		18327CF1CBB3FD635354927D /* ProfileMigration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileMigration.swift; sourceTree = "<group>"; };
 		1A479DBE4CE46DD2D9315F4C /* PresentationSubmissionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationSubmissionTests.swift; sourceTree = "<group>"; };
 		1AED8BAD4F7407C4A0DC9FC3 /* StoredSdJwtVcTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredSdJwtVcTests.swift; sourceTree = "<group>"; };
-		1C2C982E606F4F5D11B8589F /* SsdidWalletTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = SsdidWalletTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1C2C982E606F4F5D11B8589F /* SsdidWalletTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SsdidWalletTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1C5771B6AC99929644562CF2 /* InstitutionalSetupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstitutionalSetupScreen.swift; sourceTree = "<group>"; };
 		1CEE96DC224F655B1B274BAC /* ServerApi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerApi.swift; sourceTree = "<group>"; };
 		1CF77EBBA7AF98CF775BE7F9 /* ProofJwtBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProofJwtBuilder.swift; sourceTree = "<group>"; };
@@ -1374,7 +1374,11 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = my.ssdid.wallet.tests;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SsdidWallet.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SsdidWallet";
 			};
 			name = Debug;
@@ -1549,7 +1553,11 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = my.ssdid.wallet.tests;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SsdidWallet.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SsdidWallet";
 			};
 			name = Release;

@@ -295,7 +295,7 @@ fun IdentityDetailScreen(
                                 )
                                 Spacer(Modifier.width(12.dp))
                                 Column(Modifier.weight(1f)) {
-                                    Text(name, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
+                                    Text(name, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = TextPrimary, maxLines = 1)
                                     if (url != null) {
                                         Text(url, fontSize = 11.sp, color = TextTertiary, maxLines = 1)
                                     }
@@ -437,18 +437,24 @@ fun vcDisplayStatus(vc: VerifiableCredential): VcDisplayStatus {
 fun serviceName(vc: VerifiableCredential): String {
     val props = vc.credentialSubject.additionalProperties
     // Prefer human-readable serviceName from VC (set by the service)
-    val displayName = props["serviceName"]?.toString()?.trim('"')
+    val displayName = (props["serviceName"] as? kotlinx.serialization.json.JsonPrimitive)
+        ?.takeIf { it.isString }?.content
     if (!displayName.isNullOrBlank()) return displayName
-    // Fallback: service identifier
-    val serviceId = props["service"]?.toString()?.trim('"')
-    if (!serviceId.isNullOrBlank()) return serviceId.replaceFirstChar { it.uppercase() }
+    // Fallback: service identifier, title-cased
+    val serviceId = (props["service"] as? kotlinx.serialization.json.JsonPrimitive)
+        ?.takeIf { it.isString }?.content
+    if (!serviceId.isNullOrBlank()) {
+        return serviceId.split(Regex("[ _-]"))
+            .joinToString(" ") { it.replaceFirstChar { c -> c.uppercase() } }
+    }
     // Last resort: truncate issuer DID
     val issuer = vc.issuer
     return if (issuer.length > 30) issuer.take(20) + "..." + issuer.takeLast(8) else issuer
 }
 
 fun serviceUrl(vc: VerifiableCredential): String? {
-    return vc.credentialSubject.additionalProperties["serviceUrl"]?.toString()?.trim('"')?.ifBlank { null }
+    return (vc.credentialSubject.additionalProperties["serviceUrl"] as? kotlinx.serialization.json.JsonPrimitive)
+        ?.takeIf { it.isString }?.content?.ifBlank { null }
 }
 
 @Composable
