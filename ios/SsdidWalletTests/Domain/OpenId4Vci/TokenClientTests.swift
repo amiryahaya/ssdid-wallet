@@ -108,6 +108,11 @@ final class TokenClientTests: XCTestCase {
 
 // MARK: - Mock
 
+/// Protocol removed from main source; kept here for test mock compatibility.
+private protocol TokenTransport: Sendable {
+    func postForm(url: String, body: String) async throws -> String
+}
+
 private final class MockTokenTransport: TokenTransport, @unchecked Sendable {
     let responseJson: String
     let statusCode: Int
