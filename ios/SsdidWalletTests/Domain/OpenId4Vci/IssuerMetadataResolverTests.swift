@@ -111,16 +111,13 @@ final class IssuerMetadataResolverTests: XCTestCase {
 private final class MockMetadataFetcher: MetadataFetcher, @unchecked Sendable {
     let responses: [String: String]
     private(set) var fetchCount = 0
-    private let lock = NSLock()
 
     init(responses: [String: String]) {
         self.responses = responses
     }
 
     func fetchJson(url: String) async throws -> [String: Any] {
-        lock.lock()
         fetchCount += 1
-        lock.unlock()
 
         // Match the URL suffix against response keys
         for (key, value) in responses {
