@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A1B2C3D4E5F6A7B80004BB01 /* KeyRotationManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B80004AA01 /* KeyRotationManagerTests.swift */; };
 		A1B2C3D4E5F6A7B80003BB01 /* DeviceManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B80003AA01 /* DeviceManagerTests.swift */; };
 		A1B2C3D4E5F6A7B80002BB01 /* DidValidationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B80002AA01 /* DidValidationTests.swift */; };
 		A1B2C3D4E5F6A7B80001BB01 /* ShamirSecretSharingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B80001AA01 /* ShamirSecretSharingTests.swift */; };
@@ -384,6 +385,7 @@
 		A1B2C3D4E5F6A7B80001AA01 /* ShamirSecretSharingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShamirSecretSharingTests.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B80001AA02 /* RecoveryManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryManagerTests.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B80001AA03 /* SocialRecoveryManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialRecoveryManagerTests.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B80004AA01 /* KeyRotationManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyRotationManagerTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -919,8 +921,17 @@
 				11506CD58D22C307605D8D2F /* OpenId4Vci */,
 				436A08A10A7FA318C6DD7D2C /* OpenId4Vp */,
 				A1B2C3D4E5F6A7B80001CC01 /* Recovery */,
+				A1B2C3D4E5F6A7B80004CC01 /* Rotation */,
 			);
 			path = Domain;
+			sourceTree = "<group>";
+		};
+		A1B2C3D4E5F6A7B80004CC01 /* Rotation */ = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D4E5F6A7B80004AA01 /* KeyRotationManagerTests.swift */,
+			);
+			path = Rotation;
 			sourceTree = "<group>";
 		};
 		A1B2C3D4E5F6A7B80003CC01 /* Device */ = {
@@ -1264,6 +1275,7 @@
 				A1B2C3D4E5F6A7B80001BB03 /* SocialRecoveryManagerTests.swift in Sources */,
 				A1B2C3D4E5F6A7B80002BB01 /* DidValidationTests.swift in Sources */,
 				A1B2C3D4E5F6A7B80003BB01 /* DeviceManagerTests.swift in Sources */,
+				A1B2C3D4E5F6A7B80004BB01 /* KeyRotationManagerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
