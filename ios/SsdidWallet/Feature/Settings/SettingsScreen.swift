@@ -3,8 +3,8 @@ import SwiftUI
 struct SettingsScreen: View {
     @Environment(AppRouter.self) private var router
 
-    @State private var biometricEnabled = true
-    @State private var autoLockMinutes = 5
+    @AppStorage("ssdid_biometric_enabled") private var biometricEnabled = true
+    @AppStorage("ssdid_auto_lock_minutes") private var autoLockMinutes = 5
     @State private var language = "en"
     @State private var showLanguageDialog = false
 

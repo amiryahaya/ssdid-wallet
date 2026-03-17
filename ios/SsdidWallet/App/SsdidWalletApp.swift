@@ -1,6 +1,7 @@
 import SwiftUI
 import SentrySwiftUI
 import UserNotifications
+import LocalAuthentication
 
 // MARK: - AppDelegate Adaptor
 
@@ -75,6 +76,8 @@ struct SsdidWalletApp: App {
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var coordinator = AppCoordinator()
     @StateObject private var services = ServiceContainer()
+    @State private var isLocked = false
+    @State private var backgroundTimestamp: Date?
 
     init() {
         SentryManager.start()
@@ -82,46 +85,122 @@ struct SsdidWalletApp: App {
 
     var body: some Scene {
         WindowGroup {
-            SentryTracedView("RootView") {
-                RootView()
-                    .environmentObject(coordinator)
-                    .environmentObject(services)
-                    .preferredColorScheme(.dark)
-                    .onOpenURL { url in
-                        coordinator.handleDeepLink(url)
-                    }
-                    .task {
-                        // Wire the delegate to the live NotifyManager before
-                        // requesting permission, so the token callback is handled.
-                        appDelegate.notifyManager = services.notifyManager
-
-                        // Wire identity provider so fetchAndDemux can resolve mailboxes.
-                        services.notifyManager.identityProvider = { [weak services] in
-                            guard let services = services else { return [] }
-                            return await services.vault.listIdentities()
+            ZStack {
+                SentryTracedView("RootView") {
+                    RootView()
+                        .environmentObject(coordinator)
+                        .environmentObject(services)
+                        .preferredColorScheme(.dark)
+                        .onOpenURL { url in
+                            coordinator.handleDeepLink(url)
                         }
+                        .task {
+                            // Wire the delegate to the live NotifyManager before
+                            // requesting permission, so the token callback is handled.
+                            appDelegate.notifyManager = services.notifyManager
 
-                        // Ensure the inbox exists before we request APNs permission.
-                        try? await services.notifyManager.ensureInboxRegistered()
+                            // Wire identity provider so fetchAndDemux can resolve mailboxes.
+                            services.notifyManager.identityProvider = { [weak services] in
+                                guard let services = services else { return [] }
+                                return await services.vault.listIdentities()
+                            }
 
-                        // Request notification authorization and register for APNs.
-                        let center = UNUserNotificationCenter.current()
-                        let granted = try? await center.requestAuthorization(
-                            options: [.alert, .sound, .badge]
-                        )
-                        if granted == true {
-                            await MainActor.run {
-                                UIApplication.shared.registerForRemoteNotifications()
+                            // Ensure the inbox exists before we request APNs permission.
+                            try? await services.notifyManager.ensureInboxRegistered()
+
+                            // Request notification authorization and register for APNs.
+                            let center = UNUserNotificationCenter.current()
+                            let granted = try? await center.requestAuthorization(
+                                options: [.alert, .sound, .badge]
+                            )
+                            if granted == true {
+                                await MainActor.run {
+                                    UIApplication.shared.registerForRemoteNotifications()
+                                }
                             }
                         }
-                    }
-                    .onChange(of: scenePhase) { _, newPhase in
-                        if newPhase == .active {
-                            Task {
-                                try? await services.notifyManager.fetchAndDemux()
+                        .onChange(of: scenePhase) { _, newPhase in
+                            switch newPhase {
+                            case .background:
+                                backgroundTimestamp = Date()
+                            case .active:
+                                if let bgTime = backgroundTimestamp {
+                                    let biometricEnabled = UserDefaults.standard.bool(forKey: "ssdid_biometric_enabled")
+                                    let autoLockMinutes = UserDefaults.standard.integer(forKey: "ssdid_auto_lock_minutes")
+                                    let effectiveMinutes = autoLockMinutes > 0 ? autoLockMinutes : 5
+                                    let elapsed = Date().timeIntervalSince(bgTime)
+                                    if biometricEnabled && elapsed > Double(effectiveMinutes * 60) {
+                                        isLocked = true
+                                    }
+                                }
+                                Task {
+                                    try? await services.notifyManager.fetchAndDemux()
+                                }
+                            default:
+                                break
                             }
                         }
+                }
+
+                if isLocked {
+                    LockOverlay(onUnlock: { isLocked = false })
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Lock Overlay
+
+struct LockOverlay: View {
+    let onUnlock: () -> Void
+    @State private var authFailed = false
+
+    var body: some View {
+        ZStack {
+            Color.bgPrimary.ignoresSafeArea()
+
+            VStack(spacing: 16) {
+                Text("\u{1F512}")
+                    .font(.system(size: 48))
+                Text("SSDID Wallet")
+                    .font(.ssdidTitle)
+                    .foregroundStyle(Color.textPrimary)
+                Text("Authenticate to unlock")
+                    .font(.system(size: 14))
+                    .foregroundStyle(Color.textSecondary)
+
+                if authFailed {
+                    Button("Unlock") {
+                        authenticate()
                     }
+                    .buttonStyle(.ssdidPrimary)
+                    .padding(.horizontal, 40)
+                    .padding(.top, 8)
+                }
+            }
+        }
+        .task {
+            authenticate()
+        }
+    }
+
+    private func authenticate() {
+        let context = LAContext()
+        context.localizedReason = "Unlock SSDID Wallet"
+        Task {
+            do {
+                let success = try await context.evaluatePolicy(
+                    .deviceOwnerAuthenticationWithBiometrics,
+                    localizedReason: "Unlock SSDID Wallet"
+                )
+                if success {
+                    await MainActor.run { onUnlock() }
+                } else {
+                    await MainActor.run { authFailed = true }
+                }
+            } catch {
+                await MainActor.run { authFailed = true }
             }
         }
     }
