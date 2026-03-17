@@ -20,5 +20,23 @@ value class Did(val value: String) {
             val didPart = keyId.substringBefore("#")
             return Did(didPart)
         }
+
+        fun validate(value: String): Result<Did> {
+            if (!value.startsWith("did:ssdid:")) {
+                return Result.failure(IllegalArgumentException("DID must start with 'did:ssdid:'"))
+            }
+            val id = value.removePrefix("did:ssdid:")
+            if (id.isEmpty()) {
+                return Result.failure(IllegalArgumentException("DID method-specific ID must not be empty"))
+            }
+            if (id.length < 16) {
+                return Result.failure(IllegalArgumentException("DID method-specific ID too short (minimum 16 characters)"))
+            }
+            val base64urlPattern = Regex("^[A-Za-z0-9_-]+$")
+            if (!base64urlPattern.matches(id)) {
+                return Result.failure(IllegalArgumentException("DID method-specific ID contains invalid characters"))
+            }
+            return Result.success(Did(value))
+        }
     }
 }
