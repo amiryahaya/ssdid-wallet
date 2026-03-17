@@ -53,7 +53,7 @@ extension SsdidClient: DidDocumentUpdater {}
 /// The rotation flow has two phases:
 /// 1. **Prepare**: Generate next keypair, publish pre-commitment hash.
 /// 2. **Execute**: Promote pre-committed key to active, publish update, clean up old key.
-final class KeyRotationManager {
+final class KeyRotationManager: @unchecked Sendable {
 
     private let vault: Vault
     private let storage: VaultStorage

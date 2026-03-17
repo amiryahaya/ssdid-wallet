@@ -2,6 +2,7 @@ import SwiftUI
 
 struct KeyRotationScreen: View {
     @Environment(AppRouter.self) private var router
+    @EnvironmentObject private var services: ServiceContainer
 
     let keyId: String
 
@@ -245,23 +246,68 @@ struct KeyRotationScreen: View {
             }
         }
         .background(Color.bgPrimary)
+        .task {
+            identity = await services.vault.getIdentity(keyId: keyId)
+            if let id = identity {
+                let manager = makeRotationManager(for: id)
+                let status = await manager.getRotationStatus(identity: id)
+                hasPreCommitment = status.hasPreCommitment
+                nextKeyHash = status.nextKeyHash
+                rotationHistory = status.rotationHistory.map { entry in
+                    RotationHistoryEntry(
+                        oldKeyFragment: entry.oldKeyIdFragment,
+                        newKeyFragment: entry.newKeyIdFragment,
+                        timestamp: entry.timestamp
+                    )
+                }
+            }
+        }
+    }
+
+    private func makeRotationManager(for identity: Identity) -> KeyRotationManager {
+        let provider: CryptoProvider = identity.algorithm.isPostQuantum
+            ? services.pqcProvider
+            : services.classicalProvider
+        return KeyRotationManager(
+            vault: services.vault,
+            storage: services.storage,
+            cryptoProvider: provider,
+            keychainManager: services.keychainManager,
+            ssdidClient: services.ssdidClient
+        )
     }
 
     private func prepareRotation() {
+        guard let id = identity else { return }
         state = .preparing
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            hasPreCommitment = true
-            nextKeyHash = "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4"
-            state = .success("Pre-commitment created")
+        Task {
+            do {
+                let manager = makeRotationManager(for: id)
+                let hash = try await manager.prepareRotation(identity: id)
+                identity = await services.vault.getIdentity(keyId: keyId)
+                hasPreCommitment = true
+                nextKeyHash = hash
+                state = .success("Pre-commitment created and published to registry")
+            } catch {
+                state = .error(error.localizedDescription)
+            }
         }
     }
 
     private func executeRotation() {
+        guard let id = identity else { return }
         state = .rotating
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            hasPreCommitment = false
-            nextKeyHash = nil
-            state = .success("Key rotated successfully")
+        Task {
+            do {
+                let manager = makeRotationManager(for: id)
+                let newIdentity = try await manager.executeRotation(identity: id)
+                identity = newIdentity
+                hasPreCommitment = false
+                nextKeyHash = nil
+                state = .success("Key rotated successfully. New key: \(newIdentity.keyId)")
+            } catch {
+                state = .error(error.localizedDescription)
+            }
         }
     }
 }
