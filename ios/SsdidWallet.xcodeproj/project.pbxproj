@@ -96,7 +96,7 @@
 		7F670B8E6B41A0C8F3D1ED2B /* BiometricSetupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 945F0BBE959883F3EF312B6A /* BiometricSetupScreen.swift */; };
 		80EE8439E71F083CC0617992 /* SdJwtVc.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6E2133CC89D5F088FDF8AA3 /* SdJwtVc.swift */; };
 		841822D189C386D4DFA887BA /* ProofJwtBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00F220DB6F75C9D8FF65DAD4 /* ProofJwtBuilderTests.swift */; };
-		846A070A3EE741B4A4EA6BED /* AuthorizationRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39C93072EE6DD2A070202689 /* AuthorizationRequestParsingTests.swift */; };
+		846A070A3EE741B4A4EA6BED /* AuthorizationRequestParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39C93072EE6DD2A070202689 /* AuthorizationRequestParsingTests.swift */; };
 		848664708D64BF70BF23D5E9 /* SdJwtParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0E591A51F8BBD214B87CB16 /* SdJwtParser.swift */; };
 		849B3E94FBA00CD046BA13F8 /* BackupManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6237909046A401164E5C6F /* BackupManager.swift */; };
 		84EB02AA73318EFB381D4989 /* CredentialOfferViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC4EAEEE5DB96C188932654 /* CredentialOfferViewModel.swift */; };
@@ -234,7 +234,7 @@
 		37816F75499BC573FEF4FA65 /* OpenId4VpHandlerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenId4VpHandlerTests.swift; sourceTree = "<group>"; };
 		38BE0905F1A93A73E632C50E /* MultiMethodResolverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiMethodResolverTests.swift; sourceTree = "<group>"; };
 		393D8CCFA06421676FDADA68 /* DidResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DidResolver.swift; sourceTree = "<group>"; };
-		39C93072EE6DD2A070202689 /* AuthorizationRequestParsingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorizationRequestTests.swift; sourceTree = "<group>"; };
+		39C93072EE6DD2A070202689 /* AuthorizationRequestParsingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorizationRequestParsingTests.swift; sourceTree = "<group>"; };
 		3A74A06329B8CF72F06B41D8 /* VerifiableCredential.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifiableCredential.swift; sourceTree = "<group>"; };
 		3B00C2D5E6A165D21C92284D /* UrlValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrlValidator.swift; sourceTree = "<group>"; };
 		3D135F84693ECD15EAC937DD /* DeviceManagementScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceManagementScreen.swift; sourceTree = "<group>"; };
@@ -1162,7 +1162,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				846A070A3EE741B4A4EA6BED /* AuthorizationRequestTests.swift in Sources */,
+				846A070A3EE741B4A4EA6BED /* AuthorizationRequestParsingTests.swift in Sources */,
 				77A74B464EDBA20295D8A51F /* AuthorizationRequestTests.swift in Sources */,
 				0D23547E7CB7C6B702F907EB /* BackupCryptoTests.swift in Sources */,
 				53E139DF5EF50E688C79CA82 /* CanonicalJsonTests.swift in Sources */,
