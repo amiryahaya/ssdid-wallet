@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A1B2C3D4E5F6A7B80001BB01 /* ShamirSecretSharingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B80001AA01 /* ShamirSecretSharingTests.swift */; };
+		A1B2C3D4E5F6A7B80001BB02 /* RecoveryManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B80001AA02 /* RecoveryManagerTests.swift */; };
+		A1B2C3D4E5F6A7B80001BB03 /* SocialRecoveryManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B80001AA03 /* SocialRecoveryManagerTests.swift */; };
 		00F49525F48481AC22D66679 /* CredentialOfferScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 729A1723ECFC5D9130597F2C /* CredentialOfferScreen.swift */; };
 		042ED673CBDAB0C431FEAE98 /* HttpStatusListFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 542B2934B2C3279561FF9F0C /* HttpStatusListFetcher.swift */; };
 		05F1E14E7BE0D5F123D150DF /* BiometricAuthenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0E96DC0F78ABBDE00C4DD0 /* BiometricAuthenticator.swift */; };
@@ -372,6 +375,9 @@
 		A1B2C3D4E5F6A7B8C9D0E1F2 /* ShamirSecretSharing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShamirSecretSharing.swift; sourceTree = "<group>"; };
 		B2C3D4E5F6A7B8C9D0E1F2A3 /* SocialRecoveryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialRecoveryManager.swift; sourceTree = "<group>"; };
 		C3D4E5F6A7B8C9D0E1F2A3B4 /* InstitutionalRecoveryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstitutionalRecoveryManager.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B80001AA01 /* ShamirSecretSharingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShamirSecretSharingTests.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B80001AA02 /* RecoveryManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryManagerTests.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B80001AA03 /* SocialRecoveryManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialRecoveryManagerTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -904,8 +910,19 @@
 			children = (
 				11506CD58D22C307605D8D2F /* OpenId4Vci */,
 				436A08A10A7FA318C6DD7D2C /* OpenId4Vp */,
+				A1B2C3D4E5F6A7B80001CC01 /* Recovery */,
 			);
 			path = Domain;
+			sourceTree = "<group>";
+		};
+		A1B2C3D4E5F6A7B80001CC01 /* Recovery */ = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D4E5F6A7B80001AA02 /* RecoveryManagerTests.swift */,
+				A1B2C3D4E5F6A7B80001AA01 /* ShamirSecretSharingTests.swift */,
+				A1B2C3D4E5F6A7B80001AA03 /* SocialRecoveryManagerTests.swift */,
+			);
+			path = Recovery;
 			sourceTree = "<group>";
 		};
 		B1B060979D0428F5FA697B3B /* SsdidWallet */ = {
@@ -1217,6 +1234,9 @@
 				6482F67031A3DCA21C78C45B /* TokenClientTests.swift in Sources */,
 				972447AA75A52526A102A754 /* VpTokenBuilderTests.swift in Sources */,
 				DFEFA05A441678A30DDAA67C /* OpenId4VpTokenBuilderTests.swift in Sources */,
+				A1B2C3D4E5F6A7B80001BB01 /* ShamirSecretSharingTests.swift in Sources */,
+				A1B2C3D4E5F6A7B80001BB02 /* RecoveryManagerTests.swift in Sources */,
+				A1B2C3D4E5F6A7B80001BB03 /* SocialRecoveryManagerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
