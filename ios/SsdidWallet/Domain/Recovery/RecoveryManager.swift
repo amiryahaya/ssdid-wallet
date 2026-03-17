@@ -2,7 +2,7 @@ import Foundation
 import CryptoKit
 
 /// Manages recovery key generation, storage, and identity restoration.
-final class RecoveryManager {
+final class RecoveryManager: @unchecked Sendable {
 
     private let vault: Vault
     private let storage: VaultStorage

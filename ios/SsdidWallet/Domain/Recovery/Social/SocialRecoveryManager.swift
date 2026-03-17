@@ -23,7 +23,7 @@ struct SocialRecoveryConfig: Codable, Equatable {
 /// Manages social recovery using Shamir's Secret Sharing.
 /// Splits the recovery private key into shares distributed to trusted guardians.
 /// Any K-of-N guardians can reconstruct the recovery key for restoration.
-final class SocialRecoveryManager {
+final class SocialRecoveryManager: @unchecked Sendable {
 
     private let recoveryManager: RecoveryManager
     private let vault: Vault
@@ -209,25 +209,4 @@ enum SocialRecoveryError: Error, LocalizedError {
     }
 }
 
-// MARK: - Base64URL Helpers
-
-private extension Data {
-    func base64URLEncodedString() -> String {
-        base64EncodedString()
-            .replacingOccurrences(of: "+", with: "-")
-            .replacingOccurrences(of: "/", with: "_")
-            .replacingOccurrences(of: "=", with: "")
-    }
-
-    init?(base64URLEncoded string: String) {
-        var base64 = string
-            .replacingOccurrences(of: "-", with: "+")
-            .replacingOccurrences(of: "_", with: "/")
-        // Pad to multiple of 4
-        let remainder = base64.count % 4
-        if remainder > 0 {
-            base64 += String(repeating: "=", count: 4 - remainder)
-        }
-        self.init(base64Encoded: base64)
-    }
-}
+// Base64URL helpers are defined in Data+Base64URL.swift

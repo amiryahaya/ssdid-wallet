@@ -16,7 +16,7 @@ struct OrgRecoveryConfig: Codable, Equatable {
 /// An organization enrolls as a recovery custodian by providing their DID.
 /// During recovery, the organization signs a recovery authorization that
 /// proves the user's identity claim, allowing key restoration.
-final class InstitutionalRecoveryManager {
+final class InstitutionalRecoveryManager: @unchecked Sendable {
 
     private let recoveryManager: RecoveryManager
     private let defaults: UserDefaults
