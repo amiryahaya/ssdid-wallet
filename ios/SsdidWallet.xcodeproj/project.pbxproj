@@ -31,7 +31,7 @@
 		16CEACDCA3C8371A28EC2944 /* DidResolutionError.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAF367B06CA40054FA742AA /* DidResolutionError.swift */; };
 		197A4201EE2A32276DD1530B /* Identity.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9A67835B6BAF26E99D578B1 /* Identity.swift */; };
 		19E4078DA5614EF7EDD2247F /* DidJwkResolverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6276251F95ECCEE8F80B18FF /* DidJwkResolverTests.swift */; };
-		1BE648F7BF86DA4431069840 /* DcqlMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF62BF5A8C70F04EC400DCE4 /* DcqlMatcherTests.swift */; };
+		1BE648F7BF86DA4431069840 /* OpenId4VpDcqlMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF62BF5A8C70F04EC400DCE4 /* OpenId4VpDcqlMatcherTests.swift */; };
 		1CEE0DA5B05C4DF6E0E4C98C /* SdJwtIssuerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1687262EFEAA3AC5FCF6F0 /* SdJwtIssuerTests.swift */; };
 		1DD5B8BE29BDCEDC168394E6 /* PresentationRequestViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92E4B9347CBF3BEB8EFA50C2 /* PresentationRequestViewModel.swift */; };
 		1F7C97FC01A264A277DC5354 /* SdJwtIssuer.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC0AE42EADF89D24B8DED44C /* SdJwtIssuer.swift */; };
@@ -159,7 +159,7 @@
 		DB256161FBE7580A47A9D99F /* NotificationsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A5C6CB760061598C4EC6ABC /* NotificationsScreen.swift */; };
 		DCD895780D488869F2C6E59E /* CredentialStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA9C300A9D36C503C04CB404 /* CredentialStatus.swift */; };
 		DDCE449AF52F388E93A437F4 /* Algorithm.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1F637B289271318F07012E /* Algorithm.swift */; };
-		DFEFA05A441678A30DDAA67C /* VpTokenBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5945D6FCCE8DC1A5D037F46B /* VpTokenBuilderTests.swift */; };
+		DFEFA05A441678A30DDAA67C /* OpenId4VpTokenBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5945D6FCCE8DC1A5D037F46B /* OpenId4VpTokenBuilderTests.swift */; };
 		E23B44C61386AFADBAAB59A4 /* CredentialQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8188771935DCCC3530C57F /* CredentialQuery.swift */; };
 		E6126F7E26A1E94421E6A61F /* OpenId4VciHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = E60FF8B19DE7E70DD4495D53 /* OpenId4VciHandler.swift */; };
 		E9CF0C727241FFCA043123FB /* ActivityStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF55A238411822B76DAF81AC /* ActivityStatus.swift */; };
@@ -176,7 +176,7 @@
 		F6BB77542B766E3873107DC3 /* OpenId4VpHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4422A8E04F680687834A4629 /* OpenId4VpHandler.swift */; };
 		FB1CC1B487CB6211BA519C54 /* RecoverySetupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01BB201CB4CDEB28460D9CD1 /* RecoverySetupScreen.swift */; };
 		FC1BF9B7CA0DDEC73B986E63 /* NonceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A500188B170DF85351E08BC /* NonceManager.swift */; };
-		FEE681E2A53DA29872E992D6 /* PresentationDefinitionMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F0287F0DB334A2A6359D684 /* PresentationDefinitionMatcherTests.swift */; };
+		FEE681E2A53DA29872E992D6 /* OpenId4VpPresentationDefinitionMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F0287F0DB334A2A6359D684 /* OpenId4VpPresentationDefinitionMatcherTests.swift */; };
 		FF80B5077EB5E9592EA9AB40 /* DcqlMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5E3FEBF6D33B0CBA2B33977 /* DcqlMatcherTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -261,7 +261,7 @@
 		542B2934B2C3279561FF9F0C /* HttpStatusListFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HttpStatusListFetcher.swift; sourceTree = "<group>"; };
 		54C1E5E47F3BA28B1824F44F /* DidKeyResolverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DidKeyResolverTests.swift; sourceTree = "<group>"; };
 		55C2A11CCEE2B911A05B6536 /* CredentialDtos.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialDtos.swift; sourceTree = "<group>"; };
-		5945D6FCCE8DC1A5D037F46B /* VpTokenBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VpTokenBuilderTests.swift; sourceTree = "<group>"; };
+		5945D6FCCE8DC1A5D037F46B /* OpenId4VpTokenBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenId4VpTokenBuilderTests.swift; sourceTree = "<group>"; };
 		5A6237909046A401164E5C6F /* BackupManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupManager.swift; sourceTree = "<group>"; };
 		5A91844C173AAC7D0A61D1B8 /* LocalNotificationStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalNotificationStorage.swift; sourceTree = "<group>"; };
 		5BD760DCC73FEDDA71E69AD7 /* SocialRecoverySetupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialRecoverySetupScreen.swift; sourceTree = "<group>"; };
@@ -302,7 +302,7 @@
 		97D45ED8B8353E4957E5C39E /* DriveLoginScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveLoginScreen.swift; sourceTree = "<group>"; };
 		97D5CB4F9B5B015A6E3E62DB /* PresentationDefinitionMatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationDefinitionMatcherTests.swift; sourceTree = "<group>"; };
 		9886C4604621EFB1CB87865D /* AnyCodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyCodable.swift; sourceTree = "<group>"; };
-		9F0287F0DB334A2A6359D684 /* PresentationDefinitionMatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationDefinitionMatcherTests.swift; sourceTree = "<group>"; };
+		9F0287F0DB334A2A6359D684 /* OpenId4VpPresentationDefinitionMatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenId4VpPresentationDefinitionMatcherTests.swift; sourceTree = "<group>"; };
 		9F315BF5D5F46406A9DA4C0A /* DidKeyResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DidKeyResolver.swift; sourceTree = "<group>"; };
 		9F90BB3DA04FB9FC371DDDCB /* TxSigningScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TxSigningScreen.swift; sourceTree = "<group>"; };
 		A0E591A51F8BBD214B87CB16 /* SdJwtParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SdJwtParser.swift; sourceTree = "<group>"; };
@@ -330,7 +330,7 @@
 		CA9C300A9D36C503C04CB404 /* CredentialStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialStatus.swift; sourceTree = "<group>"; };
 		CC948F801B8593F59008D757 /* IdentityDetailScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentityDetailScreen.swift; sourceTree = "<group>"; };
 		CCD151205BA7415914053A8C /* Verifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Verifier.swift; sourceTree = "<group>"; };
-		CF62BF5A8C70F04EC400DCE4 /* DcqlMatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DcqlMatcherTests.swift; sourceTree = "<group>"; };
+		CF62BF5A8C70F04EC400DCE4 /* OpenId4VpDcqlMatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenId4VpDcqlMatcherTests.swift; sourceTree = "<group>"; };
 		D2F27C4DF41CEED3085437A7 /* AppRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouter.swift; sourceTree = "<group>"; };
 		D3914B30D5EEA93BFD177E6D /* EmailVerificationScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailVerificationScreen.swift; sourceTree = "<group>"; };
 		D5E3FEBF6D33B0CBA2B33977 /* DcqlMatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DcqlMatcherTests.swift; sourceTree = "<group>"; };
@@ -599,10 +599,10 @@
 			isa = PBXGroup;
 			children = (
 				39C93072EE6DD2A070202689 /* AuthorizationRequestParsingTests.swift */,
-				CF62BF5A8C70F04EC400DCE4 /* DcqlMatcherTests.swift */,
-				9F0287F0DB334A2A6359D684 /* PresentationDefinitionMatcherTests.swift */,
+				CF62BF5A8C70F04EC400DCE4 /* OpenId4VpDcqlMatcherTests.swift */,
+				9F0287F0DB334A2A6359D684 /* OpenId4VpPresentationDefinitionMatcherTests.swift */,
 				1A479DBE4CE46DD2D9315F4C /* PresentationSubmissionTests.swift */,
-				5945D6FCCE8DC1A5D037F46B /* VpTokenBuilderTests.swift */,
+				5945D6FCCE8DC1A5D037F46B /* OpenId4VpTokenBuilderTests.swift */,
 			);
 			path = OpenId4Vp;
 			sourceTree = "<group>";
@@ -1169,7 +1169,7 @@
 				43236B7D8BEA1F07545BF9AA /* ClassicalProviderTests.swift in Sources */,
 				D0EA127584B834FAC8095998 /* CredentialOfferTests.swift in Sources */,
 				FF80B5077EB5E9592EA9AB40 /* DcqlMatcherTests.swift in Sources */,
-				1BE648F7BF86DA4431069840 /* DcqlMatcherTests.swift in Sources */,
+				1BE648F7BF86DA4431069840 /* OpenId4VpDcqlMatcherTests.swift in Sources */,
 				19E4078DA5614EF7EDD2247F /* DidJwkResolverTests.swift in Sources */,
 				A46BA3C1966818FE9F512DC1 /* DidKeyResolverTests.swift in Sources */,
 				3232CD3DA6CBA24CF9D559AA /* IssuerMetadataResolverTests.swift in Sources */,
@@ -1181,7 +1181,7 @@
 				D0F464449BA01EE36C1534E1 /* OpenId4VpTransportTests.swift in Sources */,
 				2CEA9E5E6BA508C343923DB4 /* PqcProviderTests.swift in Sources */,
 				4CBA1316C71699B980CCA53A /* PresentationDefinitionMatcherTests.swift in Sources */,
-				FEE681E2A53DA29872E992D6 /* PresentationDefinitionMatcherTests.swift in Sources */,
+				FEE681E2A53DA29872E992D6 /* OpenId4VpPresentationDefinitionMatcherTests.swift in Sources */,
 				AAD02F205A382057F68287CE /* PresentationSubmissionTests.swift in Sources */,
 				841822D189C386D4DFA887BA /* ProofJwtBuilderTests.swift in Sources */,
 				07D6FC43919981F321F6FBA6 /* RegistryIntegrationTests.swift in Sources */,
@@ -1191,7 +1191,7 @@
 				0C3EF330F97C9387A8CCFB4D /* StoredSdJwtVcTests.swift in Sources */,
 				6482F67031A3DCA21C78C45B /* TokenClientTests.swift in Sources */,
 				972447AA75A52526A102A754 /* VpTokenBuilderTests.swift in Sources */,
-				DFEFA05A441678A30DDAA67C /* VpTokenBuilderTests.swift in Sources */,
+				DFEFA05A441678A30DDAA67C /* OpenId4VpTokenBuilderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
