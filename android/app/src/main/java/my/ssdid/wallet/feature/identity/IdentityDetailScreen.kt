@@ -435,15 +435,14 @@ fun vcDisplayStatus(vc: VerifiableCredential): VcDisplayStatus {
 }
 
 fun serviceName(vc: VerifiableCredential): String {
-    val raw = vc.credentialSubject.additionalProperties["service"]?.toString()?.trim('"')
-    if (!raw.isNullOrBlank()) {
-        // Map known service identifiers to display names
-        return when (raw.lowercase()) {
-            "drive" -> "SSDID Drive"
-            else -> raw.replaceFirstChar { it.uppercase() }
-        }
-    }
-    // Fallback: truncate issuer DID
+    val props = vc.credentialSubject.additionalProperties
+    // Prefer human-readable serviceName from VC (set by the service)
+    val displayName = props["serviceName"]?.toString()?.trim('"')
+    if (!displayName.isNullOrBlank()) return displayName
+    // Fallback: service identifier
+    val serviceId = props["service"]?.toString()?.trim('"')
+    if (!serviceId.isNullOrBlank()) return serviceId.replaceFirstChar { it.uppercase() }
+    // Last resort: truncate issuer DID
     val issuer = vc.issuer
     return if (issuer.length > 30) issuer.take(20) + "..." + issuer.takeLast(8) else issuer
 }

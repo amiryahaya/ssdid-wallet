@@ -350,16 +350,18 @@ struct IdentityDetailScreen: View {
     }
 
     private func serviceName(_ vc: VerifiableCredential) -> String {
-        // additionalProperties values are AnyCodable — extract the underlying String
-        if let anyCodable = vc.credentialSubject.additionalProperties["service"],
+        let props = vc.credentialSubject.additionalProperties
+        // Prefer human-readable serviceName from VC (set by the service)
+        if let anyCodable = props["serviceName"],
            let name = anyCodable.value as? String, !name.isEmpty {
-            // Capitalize known service names for display
-            switch name.lowercased() {
-            case "drive": return "SSDID Drive"
-            default: return name.capitalized
-            }
+            return name
         }
-        // Fallback: truncate issuer DID
+        // Fallback: service identifier
+        if let anyCodable = props["service"],
+           let name = anyCodable.value as? String, !name.isEmpty {
+            return name.capitalized
+        }
+        // Last resort: truncate issuer DID
         let issuer = vc.issuer
         if issuer.count > 30 {
             return String(issuer.prefix(20)) + "..." + String(issuer.suffix(8))
