@@ -355,16 +355,22 @@ fun IdentityDetailScreen(
         }
 
         if (showDeactivateDialog) {
+            val serviceNames = credentials.map { serviceName(it) }
+            val warningMessage = if (credentials.isEmpty()) {
+                "This is irreversible. Your DID will be permanently " +
+                    "deactivated on the registry and all associated " +
+                    "data will be deleted."
+            } else {
+                "This identity is connected to ${credentials.size} " +
+                    "service${if (credentials.size == 1) "" else "s"} " +
+                    "(${serviceNames.joinToString(", ")}). " +
+                    "You may lose access to your data and accounts on these services.\n\n" +
+                    "This is irreversible. Your DID will be permanently deactivated on the registry."
+            }
             AlertDialog(
                 onDismissRequest = { showDeactivateDialog = false },
                 title = { Text("Deactivate Identity?") },
-                text = {
-                    Text(
-                        "This is irreversible. Your DID will be permanently " +
-                            "deactivated on the registry and all associated " +
-                            "data will be deleted."
-                    )
-                },
+                text = { Text(warningMessage) },
                 confirmButton = {
                     Button(
                         onClick = {

@@ -256,7 +256,13 @@ struct IdentityDetailScreen: View {
                 deactivateIdentity()
             }
         } message: {
-            Text("This is irreversible. Your DID will be permanently deactivated on the registry and all associated data will be deleted.")
+            if credentials.isEmpty {
+                Text("This is irreversible. Your DID will be permanently deactivated on the registry and all associated data will be deleted.")
+            } else {
+                let serviceNames = credentials.map { serviceName($0) }
+                let serviceList = serviceNames.joined(separator: ", ")
+                Text("This identity is connected to \(credentials.count) service\(credentials.count == 1 ? "" : "s") (\(serviceList)). You may lose access to your data and accounts on these services.\n\nThis is irreversible. Your DID will be permanently deactivated on the registry.")
+            }
         }
         .task {
             await loadIdentity()
