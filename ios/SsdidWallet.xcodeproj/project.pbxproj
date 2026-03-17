@@ -26,6 +26,7 @@
 		0B0C5C69565943EA467FDB3F /* OpenId4VpTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F210B1FF46FAEEF82D8A9915 /* OpenId4VpTransport.swift */; };
 		0C3EF330F97C9387A8CCFB4D /* StoredSdJwtVcTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AED8BAD4F7407C4A0DC9FC3 /* StoredSdJwtVcTests.swift */; };
 		0CB354B4BBC623849987C21E /* DeviceDtos.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51FF677B8A13ECAB3318B570 /* DeviceDtos.swift */; };
+		D5A1B2C3E4F5A6B7C8D9E0F1 /* DeviceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B6C7D8E9F0A1B2C3D4E5F6 /* DeviceManager.swift */; };
 		0D23547E7CB7C6B702F907EB /* BackupCryptoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69A3BC89A6C2482C86EE38D0 /* BackupCryptoTests.swift */; };
 		10B9ADCEE54AD12CC91B1AE7 /* LocalNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = E684AA53A7072380E40CF328 /* LocalNotification.swift */; };
 		11D5E7298435EEA97B925838 /* CredentialOffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D634A728705A9B4331DCA32 /* CredentialOffer.swift */; };
@@ -265,6 +266,7 @@
 		5028357E5D02FD6C84FD65D9 /* SsdidRegistryResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SsdidRegistryResolver.swift; sourceTree = "<group>"; };
 		51C7DAEE1525537740E2E55C /* SdJwtParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SdJwtParserTests.swift; sourceTree = "<group>"; };
 		51FF677B8A13ECAB3318B570 /* DeviceDtos.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceDtos.swift; sourceTree = "<group>"; };
+		A5B6C7D8E9F0A1B2C3D4E5F6 /* DeviceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceManager.swift; sourceTree = "<group>"; };
 		5369E28526160FBC85378310 /* ActivityRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityRecord.swift; sourceTree = "<group>"; };
 		542B2934B2C3279561FF9F0C /* HttpStatusListFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HttpStatusListFetcher.swift; sourceTree = "<group>"; };
 		54C1E5E47F3BA28B1824F44F /* DidKeyResolverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DidKeyResolverTests.swift; sourceTree = "<group>"; };
@@ -982,6 +984,7 @@
 		B9645243F5AF498B5FC64657 /* Device */ = {
 			isa = PBXGroup;
 			children = (
+				A5B6C7D8E9F0A1B2C3D4E5F6 /* DeviceManager.swift */,
 			);
 			path = Device;
 			sourceTree = "<group>";
@@ -1303,6 +1306,7 @@
 				261ED63E4F09A2FFE532528D /* DcqlMatcher.swift in Sources */,
 				136BD0485E3A34912E85BA64 /* DeepLinkHandler.swift in Sources */,
 				0CB354B4BBC623849987C21E /* DeviceDtos.swift in Sources */,
+				D5A1B2C3E4F5A6B7C8D9E0F1 /* DeviceManager.swift in Sources */,
 				EBF8AE78E98796EC2EC4558F /* DeviceEnrollScreen.swift in Sources */,
 				F1228CA959F2A118FFB7F7AB /* DeviceInfoProvider.swift in Sources */,
 				7EEE3F2F01DD1094C3F2D475 /* DeviceManagementScreen.swift in Sources */,
