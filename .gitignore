@@ -60,6 +60,10 @@ harmony/.idea/
 *.dylib
 *.a
 
+# Exception: pre-built xcframework static libraries needed for iOS CI
+!ios/Packages/KazSign/KazSignNative.xcframework/**/*.a
+!ios/Packages/LibOQS/LibOQSNative.xcframework/**/*.a
+
 # .NET / API
 api/SsdidEmailVerify/bin/
 api/SsdidEmailVerify/obj/
