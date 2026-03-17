@@ -50,7 +50,7 @@ enum DeviceManagerError: Error, LocalizedError {
 // MARK: - DeviceManager
 
 /// Manages multi-device enrollment: pairing initiation, joining, approval, revocation, and listing.
-final class DeviceManager {
+final class DeviceManager: @unchecked Sendable {
     private let vault: Vault
     private let registryClient: DeviceManagerRegistryClient
     private let ssdidClientProvider: DeviceManagerSsdidClientProvider
@@ -171,5 +171,45 @@ final class DeviceManager {
     /// Checks the current status of a pairing session.
     func checkPairingStatus(did: String, pairingId: String) async throws -> PairingStatusResponse {
         return try await registryClient.getPairingStatus(did: did, pairingId: pairingId)
+    }
+}
+
+// MARK: - Adapters
+
+/// Bridges RegistryApi to the DeviceManagerRegistryClient protocol.
+final class HttpDeviceManagerRegistryClient: DeviceManagerRegistryClient {
+    private let registryApi: RegistryApi
+
+    init(registryApi: RegistryApi) {
+        self.registryApi = registryApi
+    }
+
+    func initPairing(did: String, request: PairingInitRequest) async throws -> PairingInitResponse {
+        try await registryApi.initPairing(did: did, request: request)
+    }
+
+    func joinPairing(did: String, pairingId: String, request: PairingJoinRequest) async throws -> PairingJoinResponse {
+        try await registryApi.joinPairing(did: did, pairingId: pairingId, request: request)
+    }
+
+    func approvePairing(did: String, pairingId: String, request: PairingApproveRequest) async throws {
+        try await registryApi.approvePairing(did: did, pairingId: pairingId, request: request)
+    }
+
+    func getPairingStatus(did: String, pairingId: String) async throws -> PairingStatusResponse {
+        try await registryApi.getPairingStatus(did: did, pairingId: pairingId)
+    }
+}
+
+/// Bridges SsdidClient to the DeviceManagerSsdidClientProvider protocol.
+final class SsdidClientDeviceProvider: DeviceManagerSsdidClientProvider {
+    private let ssdidClient: SsdidClient
+
+    init(ssdidClient: SsdidClient) {
+        self.ssdidClient = ssdidClient
+    }
+
+    func updateDidDocument(keyId: String) async throws {
+        try await ssdidClient.updateDidDocument(keyId: keyId)
     }
 }

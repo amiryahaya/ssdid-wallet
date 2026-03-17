@@ -2,12 +2,14 @@ import SwiftUI
 
 struct DeviceEnrollScreen: View {
     @Environment(AppRouter.self) private var router
+    @EnvironmentObject private var services: ServiceContainer
 
     let keyId: String
     let mode: String // "primary" or "secondary"
 
     enum EnrollState {
         case idle
+        case loading
         case waitingForSecondary(pairingId: String, challenge: String)
         case pairingJoined(pairingId: String, deviceName: String)
         case approved
@@ -19,14 +21,28 @@ struct DeviceEnrollScreen: View {
     @State private var pairingIdInput = ""
     @State private var challengeInput = ""
     @State private var deviceNameInput = UIDevice.current.model
+    @State private var pollingTask: Task<Void, Never>?
 
     private var isPrimary: Bool { mode == "primary" }
+
+    private func makeDeviceManager() -> DeviceManager {
+        DeviceManager(
+            vault: services.vault,
+            registryClient: HttpDeviceManagerRegistryClient(registryApi: services.httpClient.registry),
+            ssdidClientProvider: SsdidClientDeviceProvider(ssdidClient: services.ssdidClient),
+            deviceName: UIDevice.current.name,
+            platform: "iOS"
+        )
+    }
 
     var body: some View {
         VStack(spacing: 0) {
             // Header
             HStack(spacing: 4) {
-                Button { router.pop() } label: {
+                Button {
+                    pollingTask?.cancel()
+                    router.pop()
+                } label: {
                     Image(systemName: "chevron.left")
                         .foregroundStyle(Color.textPrimary)
                         .font(.system(size: 20))
@@ -88,6 +104,9 @@ struct DeviceEnrollScreen: View {
             }
         }
         .background(Color.bgPrimary)
+        .onDisappear {
+            pollingTask?.cancel()
+        }
     }
 
     @ViewBuilder
@@ -105,11 +124,17 @@ struct DeviceEnrollScreen: View {
         switch state {
         case .idle:
             Button {
-                initiatePairing()
+                Task { await initiatePairing() }
             } label: {
                 Text("Start Pairing")
             }
             .buttonStyle(.ssdidPrimary)
+
+        case .loading:
+            ProgressView()
+                .progressViewStyle(CircularProgressViewStyle(tint: Color.ssdidAccent))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 20)
 
         case .waitingForSecondary(let pairingId, let challenge):
             VStack(alignment: .leading, spacing: 0) {
@@ -150,7 +175,7 @@ struct DeviceEnrollScreen: View {
             .ssdidCard()
 
             Button {
-                approvePairing()
+                Task { await approvePairing() }
             } label: {
                 Text("Approve Device")
                     .font(.ssdidBody.weight(.semibold))
@@ -218,7 +243,7 @@ struct DeviceEnrollScreen: View {
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.ssdidBorder, lineWidth: 1))
 
         Button {
-            joinPairing()
+            Task { await joinPairing() }
         } label: {
             Text("Join Pairing")
         }
@@ -226,27 +251,109 @@ struct DeviceEnrollScreen: View {
         .disabled(pairingIdInput.isEmpty || challengeInput.isEmpty)
     }
 
-    private func initiatePairing() {
-        // Mock pairing initiation
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            state = .waitingForSecondary(
-                pairingId: UUID().uuidString.prefix(8).lowercased() + "-pair",
-                challenge: UUID().uuidString.prefix(16).lowercased()
-            )
-            // Simulate device joining after delay
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-                if case .waitingForSecondary(let id, _) = state {
-                    state = .pairingJoined(pairingId: id, deviceName: "iPhone 15 Pro")
-                }
+    // MARK: - Actions
+
+    private func initiatePairing() async {
+        guard let identity = await services.vault.getIdentity(keyId: keyId) else {
+            state = .error("Identity not found")
+            return
+        }
+
+        state = .loading
+        let deviceManager = makeDeviceManager()
+
+        do {
+            let pairingData = try await deviceManager.initiatePairing(identity: identity)
+            state = .waitingForSecondary(pairingId: pairingData.pairingId, challenge: pairingData.challenge)
+
+            // Start polling for secondary device joining
+            pollingTask = Task {
+                await pollPairingStatus(
+                    deviceManager: deviceManager,
+                    did: identity.did,
+                    pairingId: pairingData.pairingId
+                )
             }
+        } catch {
+            state = .error("Failed to initiate pairing: \(error.localizedDescription)")
         }
     }
 
-    private func approvePairing() {
-        state = .approved
+    private func pollPairingStatus(deviceManager: DeviceManager, did: String, pairingId: String) async {
+        // Poll every 3 seconds for up to 5 minutes
+        let maxAttempts = 100
+        for _ in 0..<maxAttempts {
+            guard !Task.isCancelled else { return }
+
+            do {
+                try await Task.sleep(for: .seconds(3))
+            } catch {
+                return // Task cancelled
+            }
+
+            do {
+                let status = try await deviceManager.checkPairingStatus(did: did, pairingId: pairingId)
+                if status.status == "joined" || status.status == "pending_approval" {
+                    await MainActor.run {
+                        state = .pairingJoined(
+                            pairingId: pairingId,
+                            deviceName: status.deviceName ?? "Unknown Device"
+                        )
+                    }
+                    return
+                } else if status.status == "expired" || status.status == "rejected" {
+                    await MainActor.run {
+                        state = .error("Pairing session \(status.status)")
+                    }
+                    return
+                }
+            } catch {
+                // Continue polling on transient errors
+            }
+        }
+
+        await MainActor.run {
+            state = .error("Pairing timed out. Please try again.")
+        }
     }
 
-    private func joinPairing() {
-        state = .joinSuccess
+    private func approvePairing() async {
+        guard let identity = await services.vault.getIdentity(keyId: keyId) else {
+            state = .error("Identity not found")
+            return
+        }
+
+        guard case .pairingJoined(let pairingId, _) = state else { return }
+
+        let deviceManager = makeDeviceManager()
+        do {
+            try await deviceManager.approvePairing(identity: identity, pairingId: pairingId)
+            state = .approved
+        } catch {
+            state = .error("Failed to approve device: \(error.localizedDescription)")
+        }
+    }
+
+    private func joinPairing() async {
+        guard let identity = await services.vault.getIdentity(keyId: keyId) else {
+            state = .error("Identity not found")
+            return
+        }
+
+        state = .loading
+        let deviceManager = makeDeviceManager()
+
+        do {
+            _ = try await deviceManager.joinPairing(
+                did: identity.did,
+                pairingId: pairingIdInput.trimmingCharacters(in: .whitespacesAndNewlines),
+                challenge: challengeInput.trimmingCharacters(in: .whitespacesAndNewlines),
+                identity: identity,
+                deviceName: deviceNameInput.trimmingCharacters(in: .whitespacesAndNewlines)
+            )
+            state = .joinSuccess
+        } catch {
+            state = .error("Failed to join pairing: \(error.localizedDescription)")
+        }
     }
 }
