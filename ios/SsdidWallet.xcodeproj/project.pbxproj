@@ -178,6 +178,9 @@
 		FC1BF9B7CA0DDEC73B986E63 /* NonceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A500188B170DF85351E08BC /* NonceManager.swift */; };
 		FEE681E2A53DA29872E992D6 /* OpenId4VpPresentationDefinitionMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F0287F0DB334A2A6359D684 /* OpenId4VpPresentationDefinitionMatcherTests.swift */; };
 		FF80B5077EB5E9592EA9AB40 /* DcqlMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5E3FEBF6D33B0CBA2B33977 /* DcqlMatcherTests.swift */; };
+		F2E1D0C9B8A7F6E5D4C3B2A1 /* ShamirSecretSharing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F2 /* ShamirSecretSharing.swift */; };
+		A3F2E1D0C9B8A7F6E5D4C3B2 /* SocialRecoveryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C3D4E5F6A7B8C9D0E1F2A3 /* SocialRecoveryManager.swift */; };
+		B4A3F2E1D0C9B8A7F6E5D4C3 /* InstitutionalRecoveryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D4E5F6A7B8C9D0E1F2A3B4 /* InstitutionalRecoveryManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -366,6 +369,9 @@
 		F9A67835B6BAF26E99D578B1 /* Identity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Identity.swift; sourceTree = "<group>"; };
 		FA167CF225FDFA0E2F54E69C /* VaultStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultStorage.swift; sourceTree = "<group>"; };
 		FDAFB37385927F279F6A4EC0 /* TokenClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenClient.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E1F2 /* ShamirSecretSharing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShamirSecretSharing.swift; sourceTree = "<group>"; };
+		B2C3D4E5F6A7B8C9D0E1F2A3 /* SocialRecoveryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialRecoveryManager.swift; sourceTree = "<group>"; };
+		C3D4E5F6A7B8C9D0E1F2A3B4 /* InstitutionalRecoveryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstitutionalRecoveryManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -764,9 +770,28 @@
 		7467A80EA4287890F6E9A193 /* Recovery */ = {
 			isa = PBXGroup;
 			children = (
+				E5F6A7B8C9D0E1F2A3B4C5D6 /* Institutional */,
+				D4E5F6A7B8C9D0E1F2A3B4C5 /* Social */,
 				0164BDCEADFC8DFED9F7654A /* RecoveryManager.swift */,
 			);
 			path = Recovery;
+			sourceTree = "<group>";
+		};
+		D4E5F6A7B8C9D0E1F2A3B4C5 /* Social */ = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D4E5F6A7B8C9D0E1F2 /* ShamirSecretSharing.swift */,
+				B2C3D4E5F6A7B8C9D0E1F2A3 /* SocialRecoveryManager.swift */,
+			);
+			path = Social;
+			sourceTree = "<group>";
+		};
+		E5F6A7B8C9D0E1F2A3B4C5D6 /* Institutional */ = {
+			isa = PBXGroup;
+			children = (
+				C3D4E5F6A7B8C9D0E1F2A3B4 /* InstitutionalRecoveryManager.swift */,
+			);
+			path = Institutional;
 			sourceTree = "<group>";
 		};
 		74C55199CD7967DA9737D19F /* Did */ = {
@@ -1291,6 +1316,9 @@
 				A2A99E822D065F3A8F1D272A /* Proof.swift in Sources */,
 				493C67083661300A19985EB5 /* ProofJwtBuilder.swift in Sources */,
 				360E608B1F5EC4B8F1E4BA6F /* RecoveryManager.swift in Sources */,
+				F2E1D0C9B8A7F6E5D4C3B2A1 /* ShamirSecretSharing.swift in Sources */,
+				A3F2E1D0C9B8A7F6E5D4C3B2 /* SocialRecoveryManager.swift in Sources */,
+				B4A3F2E1D0C9B8A7F6E5D4C3 /* InstitutionalRecoveryManager.swift in Sources */,
 				EE79D3A113CD2360592A6F16 /* RecoveryRestoreScreen.swift in Sources */,
 				FB1CC1B487CB6211BA519C54 /* RecoverySetupScreen.swift in Sources */,
 				8B2F29C50E72D6920E51A3DC /* RegistrationScreen.swift in Sources */,
