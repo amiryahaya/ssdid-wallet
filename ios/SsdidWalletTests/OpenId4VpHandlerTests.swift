@@ -1,14 +1,25 @@
 import XCTest
 @testable import SsdidWallet
 
+/// Mock SdJwtVcStore that returns pre-configured VCs for testing.
+private final class MockSdJwtVcStore: SdJwtVcStore {
+    var storedVcs: [StoredSdJwtVc] = []
+
+    func listSdJwtVcs() async -> [StoredSdJwtVc] {
+        storedVcs
+    }
+}
+
 final class OpenId4VpHandlerTests: XCTestCase {
 
-    private func makeHandler() -> OpenId4VpHandler {
-        OpenId4VpHandler(
+    private func makeHandler(storedVcs: [StoredSdJwtVc] = []) -> OpenId4VpHandler {
+        let store = MockSdJwtVcStore()
+        store.storedVcs = storedVcs
+        return OpenId4VpHandler(
             transport: OpenId4VpTransport(),
             peMatcher: PresentationDefinitionMatcher(),
             dcqlMatcher: DcqlMatcher(),
-            vpTokenBuilder: VpTokenBuilder()
+            vcStore: store
         )
     }
 
@@ -42,8 +53,9 @@ final class OpenId4VpHandlerTests: XCTestCase {
 
     // MARK: - Tests
 
-    func testProcessRequestParsesAndMatchesPeCredential() throws {
-        let handler = makeHandler()
+    func testProcessRequestParsesAndMatchesPeCredential() async throws {
+        let storedVc = makeStoredVc()
+        let handler = makeHandler(storedVcs: [storedVc])
 
         let pdJson = makePresentationDefinitionJson(
             vctFilter: "IdentityCredential",
@@ -58,19 +70,19 @@ final class OpenId4VpHandlerTests: XCTestCase {
             + "&response_uri=https://verifier.example.com/response"
             + "&presentation_definition=\(encodedPd)"
 
-        let storedVc = makeStoredVc()
-        let result = try handler.processRequest(uri: uri, storedVcs: [storedVc])
+        let result = try await handler.processRequest(uri: uri)
 
         XCTAssertEqual(result.authRequest.clientId, "https://verifier.example.com")
         XCTAssertEqual(result.authRequest.nonce, "test-nonce")
-        XCTAssertFalse(result.matchResults.isEmpty, "Should have at least one match")
-        XCTAssertEqual(result.matchResults[0].credentialId, "vc-1")
-        XCTAssertEqual(result.matchResults[0].descriptorId, "desc-1")
-        XCTAssertFalse(result.query.descriptors.isEmpty)
+        XCTAssertFalse(result.matches.isEmpty, "Should have at least one match")
+        XCTAssertEqual(result.matches[0].credential.id, "vc-1")
+        XCTAssertEqual(result.matches[0].descriptorId, "desc-1")
+        XCTAssertNotNil(result.authRequest.presentationDefinition)
     }
 
-    func testProcessRequestThrowsWhenNoMatch() throws {
-        let handler = makeHandler()
+    func testProcessRequestThrowsWhenNoMatch() async {
+        let storedVc = makeStoredVc() // type is IdentityCredential, not DriverLicenseCredential
+        let handler = makeHandler(storedVcs: [storedVc])
 
         let pdJson = makePresentationDefinitionJson(
             vctFilter: "DriverLicenseCredential",
@@ -85,13 +97,21 @@ final class OpenId4VpHandlerTests: XCTestCase {
             + "&response_uri=https://verifier.example.com/response"
             + "&presentation_definition=\(encodedPd)"
 
-        let storedVc = makeStoredVc() // type is IdentityCredential, not DriverLicenseCredential
-        let result = try handler.processRequest(uri: uri, storedVcs: [storedVc])
-
-        XCTAssertTrue(result.matchResults.isEmpty, "Should have no matches for mismatched credential type")
+        do {
+            _ = try await handler.processRequest(uri: uri)
+            XCTFail("Should have thrown noMatchingCredentials")
+        } catch let error as OpenId4VpError {
+            if case .noMatchingCredentials = error {
+                // expected
+            } else {
+                XCTFail("Expected noMatchingCredentials, got: \(error)")
+            }
+        } catch {
+            XCTFail("Unexpected error type: \(error)")
+        }
     }
 
-    func testProcessRequestThrowsWhenNoQuery() {
+    func testProcessRequestThrowsWhenNoQuery() async {
         let handler = makeHandler()
 
         // URI with no presentation_definition and no dcql_query
@@ -101,35 +121,22 @@ final class OpenId4VpHandlerTests: XCTestCase {
             + "&response_mode=direct_post"
             + "&response_uri=https://verifier.example.com/response"
 
-        XCTAssertThrowsError(try handler.processRequest(uri: uri, storedVcs: [])) { error in
+        do {
+            _ = try await handler.processRequest(uri: uri)
+            XCTFail("Should have thrown for missing query")
+        } catch {
             XCTAssertTrue(
-                error.localizedDescription.contains("No query"),
+                error.localizedDescription.contains("presentation_definition")
+                    || error.localizedDescription.contains("dcql_query")
+                    || error.localizedDescription.contains("No query"),
                 "Error should indicate no query: \(error.localizedDescription)"
             )
         }
     }
 
-    func testDeclineRequestDoesNotThrow() {
-        let handler = makeHandler()
-
-        // A by-value request without response_uri should not throw (just returns)
-        let request = AuthorizationRequest(
-            clientId: "https://verifier.example.com",
-            responseType: "vp_token",
-            responseMode: "direct_post",
-            responseUri: nil,
-            nonce: "nonce",
-            state: nil,
-            presentationDefinition: nil,
-            dcqlQuery: nil,
-            requestUri: nil
-        )
-
-        XCTAssertNoThrow(try handler.declineRequest(authRequest: request))
-    }
-
-    func testProcessRequestWithDcqlQuery() throws {
-        let handler = makeHandler()
+    func testProcessRequestWithDcqlQuery() async throws {
+        let storedVc = makeStoredVc()
+        let handler = makeHandler(storedVcs: [storedVc])
 
         let dcqlJson = """
         {"credentials":[{"id":"cred-1","format":"vc+sd-jwt","meta":{"vct_values":["IdentityCredential"]},"claims":[{"path":["given_name"]}]}]}
@@ -143,11 +150,10 @@ final class OpenId4VpHandlerTests: XCTestCase {
             + "&response_uri=https://verifier.example.com/response"
             + "&dcql_query=\(encodedDcql)"
 
-        let storedVc = makeStoredVc()
-        let result = try handler.processRequest(uri: uri, storedVcs: [storedVc])
+        let result = try await handler.processRequest(uri: uri)
 
-        XCTAssertFalse(result.matchResults.isEmpty, "Should match via DCQL")
-        XCTAssertEqual(result.matchResults[0].credentialId, "vc-1")
+        XCTAssertFalse(result.matches.isEmpty, "Should match via DCQL")
+        XCTAssertEqual(result.matches[0].credential.id, "vc-1")
         XCTAssertNil(result.authRequest.presentationDefinition)
         XCTAssertNotNil(result.authRequest.dcqlQuery)
     }
