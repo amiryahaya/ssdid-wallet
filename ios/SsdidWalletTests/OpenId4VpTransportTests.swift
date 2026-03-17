@@ -30,7 +30,7 @@ final class OpenId4VpTransportTests: XCTestCase {
     }
 
     func testParseJsonRequestFailsWithMissingClientId() {
-        let json = """{"response_type": "vp_token"}"""
+        let json = #"{"response_type": "vp_token"}"#
         let result = OpenId4VpTransport.parseJsonRequest(json)
         switch result {
         case .success:
