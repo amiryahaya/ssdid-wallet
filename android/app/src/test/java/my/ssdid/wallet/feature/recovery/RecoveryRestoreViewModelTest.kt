@@ -30,8 +30,8 @@ class RecoveryRestoreViewModelTest {
 
     private val testIdentity = Identity(
         name = "Test",
-        did = "did:ssdid:test",
-        keyId = "did:ssdid:test#key-1",
+        did = "did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk",
+        keyId = "did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk#key-1",
         algorithm = Algorithm.ED25519,
         publicKeyMultibase = "z6Mk...",
         createdAt = "2024-01-01T00:00:00Z"
@@ -65,7 +65,7 @@ class RecoveryRestoreViewModelTest {
 
     @Test
     fun `restore with blank recoveryKey shows error`() = runTest {
-        viewModel.restore("did:ssdid:test", "", "Name", Algorithm.ED25519)
+        viewModel.restore("did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk", "", "Name", Algorithm.ED25519)
 
         assertThat(viewModel.state.value).isInstanceOf(RestoreState.Error::class.java)
         assertThat((viewModel.state.value as RestoreState.Error).message)
@@ -74,7 +74,7 @@ class RecoveryRestoreViewModelTest {
 
     @Test
     fun `restore with blank name shows error`() = runTest {
-        viewModel.restore("did:ssdid:test", "key", "", Algorithm.ED25519)
+        viewModel.restore("did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk", "key", "", Algorithm.ED25519)
 
         assertThat(viewModel.state.value).isInstanceOf(RestoreState.Error::class.java)
         assertThat((viewModel.state.value as RestoreState.Error).message)
@@ -87,7 +87,7 @@ class RecoveryRestoreViewModelTest {
 
         assertThat(viewModel.state.value).isInstanceOf(RestoreState.Error::class.java)
         assertThat((viewModel.state.value as RestoreState.Error).message)
-            .isEqualTo("Invalid DID format")
+            .contains("Invalid DID format")
     }
 
     @Test
@@ -96,7 +96,7 @@ class RecoveryRestoreViewModelTest {
             recoveryManager.restoreWithRecoveryKey(any(), any(), any(), any())
         } returns Result.success(testIdentity)
 
-        viewModel.restore("did:ssdid:test", "recoveryKey", "Test", Algorithm.ED25519)
+        viewModel.restore("did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk", "recoveryKey", "Test", Algorithm.ED25519)
         advanceUntilIdle()
 
         assertThat(viewModel.state.value).isEqualTo(RestoreState.Success)
@@ -111,7 +111,7 @@ class RecoveryRestoreViewModelTest {
         } returns Result.success(testIdentity)
         coEvery { ssdidClient.updateDidDocument(any()) } throws RuntimeException("Network error")
 
-        viewModel.restore("did:ssdid:test", "recoveryKey", "Test", Algorithm.ED25519)
+        viewModel.restore("did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk", "recoveryKey", "Test", Algorithm.ED25519)
         advanceUntilIdle()
 
         assertThat(viewModel.state.value).isEqualTo(RestoreState.Success)
@@ -124,7 +124,7 @@ class RecoveryRestoreViewModelTest {
             recoveryManager.restoreWithRecoveryKey(any(), any(), any(), any())
         } returns Result.failure(RuntimeException("Restoration failed"))
 
-        viewModel.restore("did:ssdid:test", "recoveryKey", "Test", Algorithm.ED25519)
+        viewModel.restore("did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk", "recoveryKey", "Test", Algorithm.ED25519)
         advanceUntilIdle()
 
         assertThat(viewModel.state.value).isInstanceOf(RestoreState.Error::class.java)
@@ -138,12 +138,12 @@ class RecoveryRestoreViewModelTest {
             recoveryManager.restoreWithRecoveryKey(any(), any(), any(), any())
         } returns Result.success(testIdentity)
 
-        viewModel.restore("did:ssdid:test", "  myKey  ", "MyName", Algorithm.KAZ_SIGN_192)
+        viewModel.restore("did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk", "  myKey  ", "MyName", Algorithm.KAZ_SIGN_192)
         advanceUntilIdle()
 
         coVerify {
             recoveryManager.restoreWithRecoveryKey(
-                "did:ssdid:test", "myKey", "MyName", Algorithm.KAZ_SIGN_192
+                "did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk", "myKey", "MyName", Algorithm.KAZ_SIGN_192
             )
         }
     }
@@ -154,12 +154,12 @@ class RecoveryRestoreViewModelTest {
             recoveryManager.restoreWithRecoveryKey(any(), any(), any(), any())
         } returns Result.success(testIdentity)
 
-        viewModel.restore("did:ssdid:test", "myKey", "MyName", Algorithm.KAZ_SIGN_192)
+        viewModel.restore("did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk", "myKey", "MyName", Algorithm.KAZ_SIGN_192)
         advanceUntilIdle()
 
         coVerify {
             recoveryManager.restoreWithRecoveryKey(
-                "did:ssdid:test", "myKey", "MyName", Algorithm.KAZ_SIGN_192
+                "did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk", "myKey", "MyName", Algorithm.KAZ_SIGN_192
             )
         }
     }

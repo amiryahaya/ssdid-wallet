@@ -30,10 +30,12 @@ final class VerifierImpl: Verifier {
     }
 
     func resolveDid(did: String) async throws -> DidDocument {
+        _ = try Did.validate(did)
         return try await didResolver.resolve(did: did)
     }
 
     func verifySignature(did: String, keyId: String, signature: Data, data: Data) async throws -> Bool {
+        _ = try Did.validate(did)
         let doc = try await resolveDid(did: did)
         guard let vm = doc.verificationMethod.first(where: { $0.id == keyId }) else {
             throw VerifierError.keyNotFound(keyId: keyId, did: did)

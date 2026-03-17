@@ -111,6 +111,14 @@ final class InviteAcceptViewModel {
                     request: AcceptWithWalletRequest(credential: vc, email: walletEmail)
                 )
 
+                // Validate server DID format
+                do {
+                    _ = try Did.validate(response.serverDid)
+                } catch {
+                    errorMessage = "Invalid server DID: \(error.localizedDescription)"
+                    return
+                }
+
                 // Verify server signature -- blank fields = fatal
                 guard !response.serverDid.isEmpty, !response.serverSignature.isEmpty else {
                     errorMessage = "Server did not provide identity proof. Please try again."

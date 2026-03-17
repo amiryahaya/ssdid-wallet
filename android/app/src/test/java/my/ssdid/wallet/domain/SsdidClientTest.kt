@@ -32,41 +32,41 @@ class SsdidClientTest {
     private val testProof = Proof(
         type = "Ed25519Signature2020",
         created = "2026-03-06T00:00:00Z",
-        verificationMethod = "did:ssdid:test#key-1",
+        verificationMethod = "did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk#key-1",
         proofPurpose = "assertionMethod",
         proofValue = "uABC123"
     )
 
     private val testIdentity = Identity(
         name = "Test",
-        did = "did:ssdid:test123",
-        keyId = "did:ssdid:test123#key-1",
+        did = "did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk",
+        keyId = "did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk#key-1",
         algorithm = Algorithm.ED25519,
         publicKeyMultibase = "uPublicKey",
         createdAt = "2026-03-06T00:00:00Z"
     )
 
     private val testDidDoc = DidDocument(
-        id = "did:ssdid:test123",
-        controller = "did:ssdid:test123",
+        id = "did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk",
+        controller = "did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk",
         verificationMethod = listOf(
             VerificationMethod(
-                id = "did:ssdid:test123#key-1",
+                id = "did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk#key-1",
                 type = "Ed25519VerificationKey2020",
-                controller = "did:ssdid:test123",
+                controller = "did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk",
                 publicKeyMultibase = "uPublicKey"
             )
         ),
-        authentication = listOf("did:ssdid:test123#key-1"),
-        assertionMethod = listOf("did:ssdid:test123#key-1")
+        authentication = listOf("did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk#key-1"),
+        assertionMethod = listOf("did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk#key-1")
     )
 
     private val testVc = VerifiableCredential(
         id = "urn:uuid:vc-1",
         type = listOf("VerifiableCredential"),
-        issuer = "did:ssdid:server",
+        issuer = "did:ssdid:dGVzdHNlcnZlcjEyMzQ1Ng",
         issuanceDate = "2026-03-06T00:00:00Z",
-        credentialSubject = CredentialSubject(id = "did:ssdid:test123"),
+        credentialSubject = CredentialSubject(id = "did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk"),
         proof = testProof
     )
 
@@ -95,7 +95,7 @@ class SsdidClientTest {
         coEvery { vault.createIdentity("Test", Algorithm.ED25519) } returns Result.success(testIdentity)
         coEvery { vault.buildDidDocument(testIdentity.keyId) } returns Result.success(testDidDoc)
         coEvery { vault.createProof(testIdentity.keyId, any(), "assertionMethod") } returns Result.success(testProof)
-        coEvery { registryApi.registerDid(any()) } returns RegisterDidResponse("did:ssdid:test123", "ok")
+        coEvery { registryApi.registerDid(any()) } returns RegisterDidResponse("did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk", "ok")
         coEvery { vault.listIdentities() } returns listOf(testIdentity)
 
         val result = client.initIdentity("Test", Algorithm.ED25519)
@@ -149,8 +149,8 @@ class SsdidClientTest {
     fun `registerWithService completes mutual auth and stores VC`() = runTest {
         val startResp = RegisterStartResponse(
             challenge = "server-challenge",
-            server_did = "did:ssdid:server",
-            server_key_id = "did:ssdid:server#key-1",
+            server_did = "did:ssdid:dGVzdHNlcnZlcjEyMzQ1Ng",
+            server_key_id = "did:ssdid:dGVzdHNlcnZlcjEyMzQ1Ng#key-1",
             server_signature = "uServerSig"
         )
         coEvery { serverApi.registerStart(any()) } returns startResp
@@ -170,8 +170,8 @@ class SsdidClientTest {
     fun `registerWithService fails when server mutual auth fails`() = runTest {
         val startResp = RegisterStartResponse(
             challenge = "challenge",
-            server_did = "did:ssdid:server",
-            server_key_id = "did:ssdid:server#key-1",
+            server_did = "did:ssdid:dGVzdHNlcnZlcjEyMzQ1Ng",
+            server_key_id = "did:ssdid:dGVzdHNlcnZlcjEyMzQ1Ng#key-1",
             server_signature = "uBadSig"
         )
         coEvery { serverApi.registerStart(any()) } returns startResp
@@ -188,8 +188,8 @@ class SsdidClientTest {
     fun `registerWithService fails when verifier throws`() = runTest {
         val startResp = RegisterStartResponse(
             challenge = "challenge",
-            server_did = "did:ssdid:server",
-            server_key_id = "did:ssdid:server#key-1",
+            server_did = "did:ssdid:dGVzdHNlcnZlcjEyMzQ1Ng",
+            server_key_id = "did:ssdid:dGVzdHNlcnZlcjEyMzQ1Ng#key-1",
             server_signature = "uSig"
         )
         coEvery { serverApi.registerStart(any()) } returns startResp
@@ -206,12 +206,12 @@ class SsdidClientTest {
     fun `authenticate verifies server session token`() = runTest {
         val authResp = AuthenticateResponse(
             session_token = "session-abc",
-            server_did = "did:ssdid:server",
-            server_key_id = "did:ssdid:server#key-1",
+            server_did = "did:ssdid:dGVzdHNlcnZlcjEyMzQ1Ng",
+            server_key_id = "did:ssdid:dGVzdHNlcnZlcjEyMzQ1Ng#key-1",
             server_signature = "uSessionSig"
         )
         coEvery { serverApi.authenticate(any()) } returns authResp
-        coEvery { verifier.verifyChallengeResponse("did:ssdid:server", "did:ssdid:server#key-1", "session-abc", "uSessionSig") } returns Result.success(true)
+        coEvery { verifier.verifyChallengeResponse("did:ssdid:dGVzdHNlcnZlcjEyMzQ1Ng", "did:ssdid:dGVzdHNlcnZlcjEyMzQ1Ng#key-1", "session-abc", "uSessionSig") } returns Result.success(true)
 
         val result = client.authenticate(testVc, "https://server.example.com")
 
@@ -223,8 +223,8 @@ class SsdidClientTest {
     fun `authenticate fails when server has no signature`() = runTest {
         val authResp = AuthenticateResponse(
             session_token = "session-abc",
-            server_did = "did:ssdid:server",
-            server_key_id = "did:ssdid:server#key-1",
+            server_did = "did:ssdid:dGVzdHNlcnZlcjEyMzQ1Ng",
+            server_key_id = "did:ssdid:dGVzdHNlcnZlcjEyMzQ1Ng#key-1",
             server_signature = null
         )
         coEvery { serverApi.authenticate(any()) } returns authResp
@@ -240,8 +240,8 @@ class SsdidClientTest {
     fun `authenticate fails when server signature verification fails`() = runTest {
         val authResp = AuthenticateResponse(
             session_token = "session-abc",
-            server_did = "did:ssdid:server",
-            server_key_id = "did:ssdid:server#key-1",
+            server_did = "did:ssdid:dGVzdHNlcnZlcjEyMzQ1Ng",
+            server_key_id = "did:ssdid:dGVzdHNlcnZlcjEyMzQ1Ng#key-1",
             server_signature = "uBadSig"
         )
         coEvery { serverApi.authenticate(any()) } returns authResp
@@ -344,12 +344,12 @@ class SsdidClientTest {
         coEvery { revocationManager.checkRevocation(testVc) } returns RevocationStatus.UNKNOWN
         val authResp = AuthenticateResponse(
             session_token = "session-abc",
-            server_did = "did:ssdid:server",
-            server_key_id = "did:ssdid:server#key-1",
+            server_did = "did:ssdid:dGVzdHNlcnZlcjEyMzQ1Ng",
+            server_key_id = "did:ssdid:dGVzdHNlcnZlcjEyMzQ1Ng#key-1",
             server_signature = "uSessionSig"
         )
         coEvery { serverApi.authenticate(any()) } returns authResp
-        coEvery { verifier.verifyChallengeResponse("did:ssdid:server", "did:ssdid:server#key-1", "session-abc", "uSessionSig") } returns Result.success(true)
+        coEvery { verifier.verifyChallengeResponse("did:ssdid:dGVzdHNlcnZlcjEyMzQ1Ng", "did:ssdid:dGVzdHNlcnZlcjEyMzQ1Ng#key-1", "session-abc", "uSessionSig") } returns Result.success(true)
 
         val result = client.authenticate(testVc, "https://server.example.com")
 

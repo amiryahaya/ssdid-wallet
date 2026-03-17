@@ -247,8 +247,10 @@ struct SocialRecoveryRestoreScreen: View {
     }
 
     private func recover() {
-        guard did.hasPrefix("did:") else {
-            state = .error("Invalid DID format")
+        do {
+            _ = try Did.validate(did)
+        } catch {
+            state = .error("Invalid DID format: \(error.localizedDescription)")
             return
         }
         state = .restoring

@@ -157,7 +157,8 @@ final class SsdidClient: @unchecked Sendable {
             keyId: identity.keyId
         ))
 
-        // Step 2: Verify server's signature (mutual auth)
+        // Step 2: Validate server DID and verify signature (mutual auth)
+        _ = try Did.validate(startResp.serverDid)
         let serverVerified = try await verifier.verifyChallengeResponse(
             did: startResp.serverDid,
             keyId: startResp.serverKeyId,
@@ -202,7 +203,8 @@ final class SsdidClient: @unchecked Sendable {
         let serverApi = httpClient.serverApi(baseURL: serverUrl)
         let resp = try await serverApi.authenticate(request: AuthenticateRequest(credential: credential))
 
-        // Verify server's session token signature (mutual auth -- mandatory)
+        // Validate server DID and verify session token signature (mutual auth -- mandatory)
+        _ = try Did.validate(resp.serverDid)
         guard let serverSig = resp.serverSignature else {
             throw SsdidClientError.mutualAuthFailed("Server did not provide mutual authentication signature")
         }

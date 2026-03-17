@@ -17,8 +17,8 @@ class VerifierImplTest {
     private lateinit var classicalProvider: CryptoProvider
     private lateinit var pqcProvider: CryptoProvider
 
-    private val serverDid = "did:ssdid:server"
-    private val serverKeyId = "did:ssdid:server#key-1"
+    private val serverDid = "did:ssdid:dGVzdHNlcnZlcjEyMzQ1Ng"
+    private val serverKeyId = "did:ssdid:dGVzdHNlcnZlcjEyMzQ1Ng#key-1"
     private val publicKeyBytes = "public-key-bytes".toByteArray()
     private val publicKeyMultibase = Multibase.encode(publicKeyBytes)
 
@@ -112,7 +112,7 @@ class VerifierImplTest {
     fun `verifySignature fails when keyId not found in document`() = runTest {
         coEvery { didResolver.resolve(serverDid) } returns Result.success(serverDidDoc)
 
-        val result = verifier.verifySignature(serverDid, "did:ssdid:server#key-999", "sig".toByteArray(), "data".toByteArray())
+        val result = verifier.verifySignature(serverDid, "did:ssdid:dGVzdHNlcnZlcjEyMzQ1Ng#key-999", "sig".toByteArray(), "data".toByteArray())
 
         assertThat(result.isFailure).isTrue()
         assertThat(result.exceptionOrNull()?.message).contains("not found in DID Document")
@@ -162,8 +162,8 @@ class VerifierImplTest {
 
     @Test
     fun `verifyCredential verifies issuer signature on credential`() = runTest {
-        val issuerDid = "did:ssdid:issuer"
-        val issuerKeyId = "did:ssdid:issuer#key-1"
+        val issuerDid = "did:ssdid:dGVzdGlzc3VlcjEyMzQ1Ng"
+        val issuerKeyId = "did:ssdid:dGVzdGlzc3VlcjEyMzQ1Ng#key-1"
         val issuerPublicKey = "issuer-pub".toByteArray()
         val issuerDoc = DidDocument(
             id = issuerDid,
@@ -209,14 +209,14 @@ class VerifierImplTest {
         val vc = VerifiableCredential(
             id = "urn:uuid:expired",
             type = listOf("VerifiableCredential"),
-            issuer = "did:ssdid:issuer",
+            issuer = "did:ssdid:dGVzdGlzc3VlcjEyMzQ1Ng",
             issuanceDate = "2020-01-01T00:00:00Z",
             expirationDate = "2020-12-31T23:59:59Z",
             credentialSubject = CredentialSubject(id = "did:ssdid:holder"),
             proof = Proof(
                 type = "Ed25519Signature2020",
                 created = "2020-01-01T00:00:00Z",
-                verificationMethod = "did:ssdid:issuer#key-1",
+                verificationMethod = "did:ssdid:dGVzdGlzc3VlcjEyMzQ1Ng#key-1",
                 proofPurpose = "assertionMethod",
                 proofValue = "uABC"
             )
@@ -231,7 +231,7 @@ class VerifierImplTest {
 
     @Test
     fun `verifyCredential fails when issuer key not found`() = runTest {
-        val issuerDid = "did:ssdid:issuer"
+        val issuerDid = "did:ssdid:dGVzdGlzc3VlcjEyMzQ1Ng"
         val issuerDoc = DidDocument(
             id = issuerDid,
             controller = issuerDid,
@@ -250,7 +250,7 @@ class VerifierImplTest {
             proof = Proof(
                 type = "Ed25519Signature2020",
                 created = "2026-03-06T00:00:00Z",
-                verificationMethod = "did:ssdid:issuer#key-1",
+                verificationMethod = "did:ssdid:dGVzdGlzc3VlcjEyMzQ1Ng#key-1",
                 proofPurpose = "assertionMethod",
                 proofValue = "uABC"
             )
@@ -264,8 +264,8 @@ class VerifierImplTest {
 
     @Test
     fun `verifyCredential succeeds when no expiration date`() = runTest {
-        val issuerDid = "did:ssdid:issuer"
-        val issuerKeyId = "did:ssdid:issuer#key-1"
+        val issuerDid = "did:ssdid:dGVzdGlzc3VlcjEyMzQ1Ng"
+        val issuerKeyId = "did:ssdid:dGVzdGlzc3VlcjEyMzQ1Ng#key-1"
         val issuerPublicKey = "pub".toByteArray()
         val issuerDoc = DidDocument(
             id = issuerDid,

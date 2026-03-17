@@ -29,6 +29,7 @@ import kotlinx.coroutines.withTimeout
 import my.ssdid.wallet.R
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.model.Algorithm
+import my.ssdid.wallet.domain.model.Did
 import my.ssdid.wallet.domain.recovery.RecoveryManager
 import my.ssdid.wallet.domain.vault.VaultStorage
 import androidx.compose.material.icons.Icons
@@ -61,8 +62,8 @@ class RecoveryRestoreViewModel @Inject constructor(
             _state.value = RestoreState.Error("All fields are required")
             return
         }
-        if (!did.startsWith("did:")) {
-            _state.value = RestoreState.Error("Invalid DID format")
+        Did.validate(did).onFailure {
+            _state.value = RestoreState.Error("Invalid DID format: ${it.message}")
             return
         }
         val trimmedKey = recoveryKey.trim()

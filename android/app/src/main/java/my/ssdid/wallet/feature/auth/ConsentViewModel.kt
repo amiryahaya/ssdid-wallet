@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import my.ssdid.wallet.domain.crypto.Multibase
+import my.ssdid.wallet.domain.model.Did
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.transport.SsdidHttpClient
 import my.ssdid.wallet.domain.transport.dto.AuthVerifyRequest
@@ -218,7 +219,10 @@ class ConsentViewModel @Inject constructor(
                     )
                 )
 
-                // Mutual auth
+                // Validate server DID and mutual auth
+                Did.validate(resp.serverDid).getOrElse {
+                    throw SecurityException("Invalid server DID in auth response: ${it.message}")
+                }
                 val verified = verifier.verifyChallengeResponse(
                     resp.serverDid, resp.serverKeyId,
                     resp.sessionToken, resp.serverSignature

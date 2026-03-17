@@ -33,8 +33,8 @@ class ConsentViewModelTest {
 
     private val testIdentity = Identity(
         name = "Personal",
-        did = "did:ssdid:user1",
-        keyId = "did:ssdid:user1#key-1",
+        did = "did:ssdid:dGVzdHVzZXIxYWJjZGVmZ2g",
+        keyId = "did:ssdid:dGVzdHVzZXIxYWJjZGVmZ2g#key-1",
         algorithm = Algorithm.ED25519,
         publicKeyMultibase = "uPubKey",
         createdAt = "2026-03-10T00:00:00Z",
@@ -44,8 +44,8 @@ class ConsentViewModelTest {
 
     private val pqcIdentity = Identity(
         name = "PQC",
-        did = "did:ssdid:user2",
-        keyId = "did:ssdid:user2#key-1",
+        did = "did:ssdid:dGVzdHVzZXIyYWJjZGVmZ2g",
+        keyId = "did:ssdid:dGVzdHVzZXIyYWJjZGVmZ2g#key-1",
         algorithm = Algorithm.KAZ_SIGN_192,
         publicKeyMultibase = "uPubKey2",
         createdAt = "2026-03-10T00:00:00Z",
@@ -56,8 +56,8 @@ class ConsentViewModelTest {
     private val challengeResponse = AuthChallengeResponse(
         challenge = "test-challenge",
         serverName = "TestApp",
-        serverDid = "did:ssdid:server1",
-        serverKeyId = "did:ssdid:server1#key-1"
+        serverDid = "did:ssdid:dGVzdHNlcnZlcjFhYmNkZQ",
+        serverKeyId = "did:ssdid:dGVzdHNlcnZlcjFhYmNkZQ#key-1"
     )
 
     @Before
@@ -105,8 +105,8 @@ class ConsentViewModelTest {
         coEvery { vault.sign(any(), any()) } returns Result.success(ByteArray(64))
         coEvery { serverApi.verifyAuth(any()) } returns AuthVerifyResponse(
             sessionToken = "tok-123",
-            serverDid = "did:ssdid:server1",
-            serverKeyId = "did:ssdid:server1#key-1",
+            serverDid = "did:ssdid:dGVzdHNlcnZlcjFhYmNkZQ",
+            serverKeyId = "did:ssdid:dGVzdHNlcnZlcjFhYmNkZQ#key-1",
             serverSignature = "uSig"
         )
         coEvery { verifier.verifyChallengeResponse(any(), any(), any(), any()) } returns Result.success(true)

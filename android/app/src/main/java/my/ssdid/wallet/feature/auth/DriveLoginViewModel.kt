@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import my.ssdid.wallet.domain.crypto.Multibase
+import my.ssdid.wallet.domain.model.Did
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.transport.DriveApi
@@ -155,7 +156,12 @@ class DriveLoginViewModel @Inject constructor(
             RegisterStartRequest(identity.did, identity.keyId)
         )
 
-        // Step 2: Verify server's signature (best-effort — Drive may not be in registry)
+        // Step 2: Validate server DID and verify signature (best-effort — Drive may not be in registry)
+        if (startResp.server_did.isNotBlank()) {
+            Did.validate(startResp.server_did).getOrElse {
+                android.util.Log.w("DriveLogin", "Invalid server DID in registration response: ${it.message}")
+            }
+        }
         if (startResp.server_did.isNotBlank() && startResp.server_signature.isNotBlank()) {
             val serverVerified = verifier.verifyChallengeResponse(
                 startResp.server_did,

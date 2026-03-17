@@ -30,7 +30,7 @@ class DeepLinkHandlerTest {
             host = "register",
             queryParams = mapOf(
                 "server_url" to "https://demo.ssdid.my",
-                "server_did" to "did:ssdid:server:demo"
+                "server_did" to "did:ssdid:dGVzdHNlcnZlcmRlbW8xMjM"
             )
         )
         val result = DeepLinkHandler.parse(uri)
@@ -38,7 +38,7 @@ class DeepLinkHandlerTest {
         assertThat(result).isNotNull()
         assertThat(result!!.action).isEqualTo("register")
         assertThat(result.serverUrl).isEqualTo("https://demo.ssdid.my")
-        assertThat(result.serverDid).isEqualTo("did:ssdid:server:demo")
+        assertThat(result.serverDid).isEqualTo("did:ssdid:dGVzdHNlcnZlcmRlbW8xMjM")
         assertThat(result.sessionToken).isEmpty()
     }
 
@@ -94,7 +94,7 @@ class DeepLinkHandlerTest {
         val uri = mockUri(
             scheme = "ssdid",
             host = "register",
-            queryParams = mapOf("server_did" to "did:ssdid:server:demo")
+            queryParams = mapOf("server_did" to "did:ssdid:dGVzdHNlcnZlcmRlbW8xMjM")
         )
         val result = DeepLinkHandler.parse(uri)
 
@@ -118,7 +118,7 @@ class DeepLinkHandlerTest {
         val deepLink = DeepLinkAction(
             action = "register",
             serverUrl = "https://demo.ssdid.my",
-            serverDid = "did:ssdid:server:demo"
+            serverDid = "did:ssdid:dGVzdHNlcnZlcmRlbW8xMjM"
         )
         val route = deepLink.toNavRoute()
 
@@ -181,7 +181,7 @@ class DeepLinkHandlerTest {
             host = "register",
             queryParams = mapOf(
                 "server_url" to "http://evil.example.com",
-                "server_did" to "did:ssdid:server:demo"
+                "server_did" to "did:ssdid:dGVzdHNlcnZlcmRlbW8xMjM"
             )
         )
         val result = DeepLinkHandler.parse(uri)
@@ -196,7 +196,7 @@ class DeepLinkHandlerTest {
             host = "register",
             queryParams = mapOf(
                 "server_url" to "https://192.168.1.1",
-                "server_did" to "did:ssdid:server:demo"
+                "server_did" to "did:ssdid:dGVzdHNlcnZlcmRlbW8xMjM"
             )
         )
         val result = DeepLinkHandler.parse(uri)
@@ -337,7 +337,7 @@ class DeepLinkHandlerTest {
             host = "register",
             queryParams = mapOf(
                 "server_url" to "https://demo.ssdid.my",
-                "server_did" to "did:ssdid:server:demo",
+                "server_did" to "did:ssdid:dGVzdHNlcnZlcmRlbW8xMjM",
                 "callback_url" to "ssdiddrive://auth/callback"
             )
         )

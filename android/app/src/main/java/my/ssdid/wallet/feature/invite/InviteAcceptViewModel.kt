@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
+import my.ssdid.wallet.domain.model.Did
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.transport.SsdidHttpClient
 import my.ssdid.wallet.domain.transport.dto.AcceptWithWalletRequest
@@ -137,6 +138,15 @@ class InviteAcceptViewModel @Inject constructor(
                         email = _selectedIdentity.value?.email ?: _state.value.walletEmail
                     )
                 )
+
+                // Validate server DID format
+                Did.validate(response.serverDid).onFailure {
+                    _state.update { s -> s.copy(
+                        isAccepting = false,
+                        error = "Invalid server DID: ${it.message}"
+                    ) }
+                    return@launch
+                }
 
                 // Verify server signature — blank fields = fatal (possible MITM)
                 if (response.serverDid.isBlank() || response.serverSignature.isBlank()) {

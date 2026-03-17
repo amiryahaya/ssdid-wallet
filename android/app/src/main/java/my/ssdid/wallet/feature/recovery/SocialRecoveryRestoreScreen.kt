@@ -28,6 +28,7 @@ import kotlinx.coroutines.withTimeout
 import my.ssdid.wallet.R
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.model.Algorithm
+import my.ssdid.wallet.domain.model.Did
 import my.ssdid.wallet.domain.recovery.social.SocialRecoveryManager
 import my.ssdid.wallet.domain.vault.VaultStorage
 import androidx.compose.material.icons.Icons
@@ -78,8 +79,8 @@ class SocialRecoveryRestoreViewModel @Inject constructor(
             _state.value = SocialRestoreState.Error("DID and identity name are required")
             return
         }
-        if (!did.startsWith("did:")) {
-            _state.value = SocialRestoreState.Error("Invalid DID format")
+        Did.validate(did).onFailure {
+            _state.value = SocialRestoreState.Error("Invalid DID format: ${it.message}")
             return
         }
 

@@ -30,8 +30,8 @@ class SocialRecoveryRestoreViewModelTest {
 
     private val testIdentity = Identity(
         name = "Test",
-        did = "did:ssdid:test",
-        keyId = "did:ssdid:test#key-1",
+        did = "did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk",
+        keyId = "did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk#key-1",
         algorithm = Algorithm.ED25519,
         publicKeyMultibase = "z6Mk...",
         createdAt = "2024-01-01T00:00:00Z"
@@ -98,7 +98,7 @@ class SocialRecoveryRestoreViewModelTest {
         viewModel.updateShare(0, ShareEntry(index = "abc", data = "sharedata1"))
         viewModel.updateShare(1, ShareEntry(index = "2", data = "sharedata2"))
 
-        viewModel.restore("did:ssdid:test", "Test", Algorithm.ED25519)
+        viewModel.restore("did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk", "Test", Algorithm.ED25519)
 
         assertThat(viewModel.state.value).isInstanceOf(SocialRestoreState.Error::class.java)
         assertThat((viewModel.state.value as SocialRestoreState.Error).message)
@@ -110,7 +110,7 @@ class SocialRecoveryRestoreViewModelTest {
         viewModel.updateShare(0, ShareEntry(index = "1", data = "sharedata1"))
         viewModel.updateShare(1, ShareEntry(index = "1", data = "sharedata2"))
 
-        viewModel.restore("did:ssdid:test", "Test", Algorithm.ED25519)
+        viewModel.restore("did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk", "Test", Algorithm.ED25519)
 
         assertThat(viewModel.state.value).isInstanceOf(SocialRestoreState.Error::class.java)
         assertThat((viewModel.state.value as SocialRestoreState.Error).message)
@@ -126,7 +126,7 @@ class SocialRecoveryRestoreViewModelTest {
 
         assertThat(viewModel.state.value).isInstanceOf(SocialRestoreState.Error::class.java)
         assertThat((viewModel.state.value as SocialRestoreState.Error).message)
-            .isEqualTo("Invalid DID format")
+            .contains("Invalid DID format")
     }
 
     @Test
@@ -134,7 +134,7 @@ class SocialRecoveryRestoreViewModelTest {
         viewModel.updateShare(0, ShareEntry(index = "1", data = "dGVzdA"))
         viewModel.updateShare(1, ShareEntry(index = "2", data = "dGVzdA"))
 
-        viewModel.restore("did:ssdid:test", "", Algorithm.ED25519)
+        viewModel.restore("did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk", "", Algorithm.ED25519)
 
         assertThat(viewModel.state.value).isInstanceOf(SocialRestoreState.Error::class.java)
         assertThat((viewModel.state.value as SocialRestoreState.Error).message)
@@ -146,7 +146,7 @@ class SocialRecoveryRestoreViewModelTest {
         viewModel.updateShare(0, ShareEntry(index = "1", data = "dGVzdA"))
         viewModel.updateShare(1, ShareEntry(index = "2", data = ""))
 
-        viewModel.restore("did:ssdid:test", "Test", Algorithm.ED25519)
+        viewModel.restore("did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk", "Test", Algorithm.ED25519)
 
         assertThat(viewModel.state.value).isInstanceOf(SocialRestoreState.Error::class.java)
         assertThat((viewModel.state.value as SocialRestoreState.Error).message)
@@ -158,7 +158,7 @@ class SocialRecoveryRestoreViewModelTest {
         viewModel.updateShare(0, ShareEntry(index = "1", data = "!!!invalid!!!"))
         viewModel.updateShare(1, ShareEntry(index = "2", data = "dGVzdA"))
 
-        viewModel.restore("did:ssdid:test", "Test", Algorithm.ED25519)
+        viewModel.restore("did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk", "Test", Algorithm.ED25519)
 
         assertThat(viewModel.state.value).isInstanceOf(SocialRestoreState.Error::class.java)
         assertThat((viewModel.state.value as SocialRestoreState.Error).message)
@@ -175,7 +175,7 @@ class SocialRecoveryRestoreViewModelTest {
         } returns Result.success(testIdentity)
         coEvery { storage.setOnboardingCompleted() } returns Unit
 
-        viewModel.restore("did:ssdid:test", "Test", Algorithm.ED25519)
+        viewModel.restore("did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk", "Test", Algorithm.ED25519)
         advanceUntilIdle()
 
         assertThat(viewModel.state.value).isEqualTo(SocialRestoreState.Success)
@@ -193,7 +193,7 @@ class SocialRecoveryRestoreViewModelTest {
         } returns Result.success(testIdentity)
         coEvery { ssdidClient.updateDidDocument(any()) } throws RuntimeException("Network error")
 
-        viewModel.restore("did:ssdid:test", "Test", Algorithm.ED25519)
+        viewModel.restore("did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk", "Test", Algorithm.ED25519)
         advanceUntilIdle()
 
         assertThat(viewModel.state.value).isEqualTo(SocialRestoreState.Success)
@@ -209,7 +209,7 @@ class SocialRecoveryRestoreViewModelTest {
             socialRecoveryManager.recoverWithShares(any(), any(), any(), any())
         } returns Result.failure(RuntimeException("Recovery failed"))
 
-        viewModel.restore("did:ssdid:test", "Test", Algorithm.ED25519)
+        viewModel.restore("did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk", "Test", Algorithm.ED25519)
         advanceUntilIdle()
 
         assertThat(viewModel.state.value).isInstanceOf(SocialRestoreState.Error::class.java)
@@ -221,7 +221,7 @@ class SocialRecoveryRestoreViewModelTest {
     fun `resetState returns to Idle`() = runTest {
         viewModel.updateShare(0, ShareEntry(index = "1", data = "dGVzdA"))
         viewModel.updateShare(1, ShareEntry(index = "2", data = "dGVzdA"))
-        viewModel.restore("did:ssdid:test", "", Algorithm.ED25519)
+        viewModel.restore("did:ssdid:dGVzdHVzZXIxMjM0NTY3ODk", "", Algorithm.ED25519)
         assertThat(viewModel.state.value).isInstanceOf(SocialRestoreState.Error::class.java)
 
         viewModel.resetState()

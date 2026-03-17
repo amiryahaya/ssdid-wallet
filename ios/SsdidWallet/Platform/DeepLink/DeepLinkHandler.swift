@@ -79,7 +79,12 @@ final class DeepLinkHandler {
                 throw DeepLinkError.missingRequiredParameter("server_url")
             }
             try urlValidator.validate(urlString: serverUrl)
-            return .register(serverUrl: serverUrl, serverDid: params["server_did"])
+            let serverDid: String? = if let rawDid = params["server_did"] {
+                (try? Did.validate(rawDid))?.value
+            } else {
+                nil
+            }
+            return .register(serverUrl: serverUrl, serverDid: serverDid)
 
         case "authenticate":
             guard let serverUrl = params["server_url"] else {

@@ -184,7 +184,10 @@ class SsdidClient(
             RegisterStartRequest(identity.did, identity.keyId)
         )
 
-        // Step 2: Verify server's signature (mutual auth)
+        // Step 2: Validate and verify server's signature (mutual auth)
+        Did.validate(startResp.server_did).getOrElse {
+            throw SecurityException("Invalid server DID in registration response: ${it.message}")
+        }
         val serverVerified = verifier.verifyChallengeResponse(
             startResp.server_did,
             startResp.server_key_id,
@@ -226,7 +229,10 @@ class SsdidClient(
         val serverApi = httpClient.serverApi(serverUrl)
         val resp = serverApi.authenticate(AuthenticateRequest(credential))
 
-        // Verify server's session token signature (mutual auth — mandatory)
+        // Validate and verify server's session token signature (mutual auth — mandatory)
+        Did.validate(resp.server_did).getOrElse {
+            throw SecurityException("Invalid server DID in authentication response: ${it.message}")
+        }
         val serverSig = resp.server_signature
             ?: throw SecurityException("Server did not provide mutual authentication signature")
         val verified = verifier.verifyChallengeResponse(

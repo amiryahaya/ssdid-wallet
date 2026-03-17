@@ -23,10 +23,12 @@ class VerifierImpl(
     }
 
     override suspend fun resolveDid(did: String): Result<DidDocument> {
+        Did.validate(did).getOrElse { return Result.failure(it) }
         return didResolver.resolve(did)
     }
 
     override suspend fun verifySignature(did: String, keyId: String, signature: ByteArray, data: ByteArray): Result<Boolean> = runCatching {
+        Did.validate(did).getOrThrow()
         val doc = resolveDid(did).getOrThrow()
         val vm = doc.verificationMethod.find { it.id == keyId }
             ?: throw IllegalArgumentException("Key $keyId not found in DID Document for $did")
