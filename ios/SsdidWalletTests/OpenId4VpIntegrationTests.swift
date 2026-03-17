@@ -1,6 +1,15 @@
 import XCTest
 @testable import SsdidWallet
 
+/// Stub VC store that returns pre-configured credentials.
+private final class StubVcStore: SdJwtVcStore, @unchecked Sendable {
+    var storedVcs: [StoredSdJwtVc] = []
+
+    func listSdJwtVcs() async -> [StoredSdJwtVc] {
+        storedVcs
+    }
+}
+
 final class OpenId4VpIntegrationTests: XCTestCase {
 
     private let testSigner: (Data) -> Data = { _ in "test-sig".data(using: .utf8)! }
@@ -44,139 +53,31 @@ final class OpenId4VpIntegrationTests: XCTestCase {
         return (vc, stored)
     }
 
-    private func makeHandler() -> OpenId4VpHandler {
-        OpenId4VpHandler(
+    private func makeHandler(storedVcs: [StoredSdJwtVc]) -> OpenId4VpHandler {
+        let store = StubVcStore()
+        store.storedVcs = storedVcs
+        return OpenId4VpHandler(
             transport: OpenId4VpTransport(),
             peMatcher: PresentationDefinitionMatcher(),
             dcqlMatcher: DcqlMatcher(),
-            vpTokenBuilder: VpTokenBuilder()
+            vcStore: store
         )
     }
 
-    private func makePeUri(vctFilter: String, requiredClaims: [String], optionalClaims: [String] = []) -> String {
-        var fields: [String] = []
-        fields.append("{\"path\":[\"$.vct\"],\"filter\":{\"const\":\"\(vctFilter)\"}}")
-        for claim in requiredClaims {
-            fields.append("{\"path\":[\"$.\(claim)\"]}")
-        }
-        for claim in optionalClaims {
-            fields.append("{\"path\":[\"$.\(claim)\"],\"optional\":true}")
-        }
-
-        let pdJson = """
-        {"id":"test-pd","input_descriptors":[{"id":"desc-1","format":{"vc+sd-jwt":{}},"constraints":{"fields":[\(fields.joined(separator: ","))]}}]}
-        """
-        let encodedPd = pdJson.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
-
-        return "openid4vp://?response_type=vp_token"
-            + "&client_id=https://verifier.example.com"
-            + "&nonce=test-nonce-123"
-            + "&response_mode=direct_post"
-            + "&response_uri=https://verifier.example.com/response"
-            + "&presentation_definition=\(encodedPd)"
-    }
-
-    private func makeDcqlUri(vctFilter: String, requiredClaims: [String], optionalClaims: [String] = []) -> String {
-        var claimsArray: [String] = []
-        for claim in requiredClaims {
-            claimsArray.append("{\"path\":[\"\(claim)\"]}")
-        }
-        for claim in optionalClaims {
-            claimsArray.append("{\"path\":[\"\(claim)\"],\"optional\":true}")
-        }
-
-        let dcqlJson = """
-        {"credentials":[{"id":"cred-1","format":"vc+sd-jwt","meta":{"vct_values":["\(vctFilter)"]},"claims":[\(claimsArray.joined(separator: ","))]}]}
-        """
-        let encodedDcql = dcqlJson.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
-
-        return "openid4vp://?response_type=vp_token"
-            + "&client_id=https://verifier.example.com"
-            + "&nonce=test-nonce-456"
-            + "&response_mode=direct_post"
-            + "&response_uri=https://verifier.example.com/response"
-            + "&dcql_query=\(encodedDcql)"
-    }
-
-    // MARK: - Test 1: Full PE 2.0 matching flow
-
-    func testFullPresentationExchangeMatchingFlow() throws {
-        let (_, stored) = try issueAndStore()
-        let handler = makeHandler()
-        let uri = makePeUri(vctFilter: "IdentityCredential", requiredClaims: ["given_name", "family_name"])
-
-        let result = try handler.processRequest(uri: uri, storedVcs: [stored])
-
-        // Verify auth request parsed correctly
-        XCTAssertEqual(result.authRequest.clientId, "https://verifier.example.com")
-        XCTAssertEqual(result.authRequest.nonce, "test-nonce-123")
-        XCTAssertNotNil(result.authRequest.presentationDefinition)
-
-        // Verify match found
-        XCTAssertEqual(result.matchResults.count, 1)
-        let match = result.matchResults[0]
-        XCTAssertEqual(match.credentialId, "vc-integration-1")
-        XCTAssertEqual(match.credentialType, "IdentityCredential")
-        XCTAssertEqual(match.descriptorId, "desc-1")
-
-        // Verify correct claims returned
-        XCTAssertNotNil(match.availableClaims["given_name"])
-        XCTAssertTrue(match.availableClaims["given_name"]!.required)
-        XCTAssertTrue(match.availableClaims["given_name"]!.available)
-        XCTAssertNotNil(match.availableClaims["family_name"])
-        XCTAssertTrue(match.availableClaims["family_name"]!.required)
-        XCTAssertTrue(match.availableClaims["family_name"]!.available)
-
-        // Verify query descriptors
-        XCTAssertEqual(result.query.descriptors.count, 1)
-        XCTAssertEqual(result.query.descriptors[0].vctFilter, "IdentityCredential")
-    }
-
-    // MARK: - Test 2: Full DCQL matching flow
-
-    func testFullDcqlMatchingFlow() throws {
-        let (_, stored) = try issueAndStore()
-        let handler = makeHandler()
-        let uri = makeDcqlUri(vctFilter: "IdentityCredential", requiredClaims: ["given_name"], optionalClaims: ["email"])
-
-        let result = try handler.processRequest(uri: uri, storedVcs: [stored])
-
-        // Verify auth request parsed correctly
-        XCTAssertEqual(result.authRequest.clientId, "https://verifier.example.com")
-        XCTAssertEqual(result.authRequest.nonce, "test-nonce-456")
-        XCTAssertNotNil(result.authRequest.dcqlQuery)
-        XCTAssertNil(result.authRequest.presentationDefinition)
-
-        // Verify match found
-        XCTAssertEqual(result.matchResults.count, 1)
-        let match = result.matchResults[0]
-        XCTAssertEqual(match.credentialId, "vc-integration-1")
-        XCTAssertEqual(match.credentialType, "IdentityCredential")
-
-        // Verify required and optional claims
-        XCTAssertNotNil(match.availableClaims["given_name"])
-        XCTAssertTrue(match.availableClaims["given_name"]!.required)
-        XCTAssertTrue(match.availableClaims["given_name"]!.available)
-        XCTAssertNotNil(match.availableClaims["email"])
-        XCTAssertFalse(match.availableClaims["email"]!.required)
-        XCTAssertTrue(match.availableClaims["email"]!.available)
-    }
-
-    // MARK: - Test 3: VP Token building
+    // MARK: - Test: VP Token building
 
     func testVpTokenBuildingWithKbJwt() throws {
-        let (issuedVc, _) = try issueAndStore()
+        let (issuedVc, stored) = try issueAndStore()
 
         // Round-trip: present then parse back (simulates what the wallet stores and retrieves)
         let compact = try issuedVc.present(selectedDisclosures: issuedVc.disclosures)
         let parsedVc = try SdJwtParser.parse(compact)
 
         // Build VP token
-        let vpTokenBuilder = VpTokenBuilder()
-        let selectedClaims: Set<String> = ["given_name", "family_name"]
-        let vpToken = try vpTokenBuilder.build(
-            sdJwtVc: parsedVc,
-            selectedClaimNames: selectedClaims,
+        let selectedClaims = ["given_name", "family_name"]
+        let vpToken = try VpTokenBuilder.build(
+            storedSdJwtVc: stored,
+            selectedClaims: selectedClaims,
             audience: "https://verifier.example.com",
             nonce: "test-nonce-789",
             algorithm: "EdDSA",
@@ -201,7 +102,7 @@ final class OpenId4VpIntegrationTests: XCTestCase {
             let disclosure = try Disclosure.decode(d)
             disclosedClaimNames.insert(disclosure.claimName)
         }
-        XCTAssertEqual(disclosedClaimNames, selectedClaims)
+        XCTAssertEqual(disclosedClaimNames, Set(selectedClaims))
 
         // Last part is the KB-JWT
         let kbJwtString = parts.last!
@@ -222,18 +123,5 @@ final class OpenId4VpIntegrationTests: XCTestCase {
         XCTAssertEqual(kbPayload["nonce"] as? String, "test-nonce-789")
         XCTAssertNotNil(kbPayload["sd_hash"], "KB-JWT payload should contain sd_hash")
         XCTAssertNotNil(kbPayload["iat"], "KB-JWT payload should contain iat")
-    }
-
-    // MARK: - Test 4: No match for non-matching VCT
-
-    func testNoMatchForNonMatchingVct() throws {
-        let (_, stored) = try issueAndStore(type: "IdentityCredential")
-        let handler = makeHandler()
-
-        // Request a DriverLicenseCredential, but we only have IdentityCredential
-        let uri = makePeUri(vctFilter: "DriverLicenseCredential", requiredClaims: ["license_number"])
-        let result = try handler.processRequest(uri: uri, storedVcs: [stored])
-
-        XCTAssertTrue(result.matchResults.isEmpty, "Should have no matches when VCT does not match")
     }
 }

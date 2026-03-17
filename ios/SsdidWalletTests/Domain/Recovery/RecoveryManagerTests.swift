@@ -4,7 +4,7 @@ import XCTest
 // MARK: - Test Doubles
 
 /// In-memory VaultStorage for testing (avoids file system and UserDefaults side effects).
-private final class InMemoryVaultStorage: VaultStorage {
+private final class InMemoryVaultStorage: VaultStorage, @unchecked Sendable {
     private var identities: [Identity] = []
     private var encryptedKeys: [String: Data] = [:]
     private var recoveryPublicKeys: [String: Data] = [:]
@@ -82,7 +82,7 @@ private final class InMemoryVaultStorage: VaultStorage {
 }
 
 /// Stub Vault implementation that delegates identity listing to its storage.
-private final class StubVault: Vault {
+private final class StubVault: Vault, @unchecked Sendable {
     let storage: InMemoryVaultStorage
 
     init(storage: InMemoryVaultStorage) {

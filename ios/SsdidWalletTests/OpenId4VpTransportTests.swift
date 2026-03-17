@@ -16,7 +16,7 @@ final class OpenId4VpTransportTests: XCTestCase {
         }
         """
 
-        let result = OpenId4VpTransport.parseJsonRequest(json)
+        let result = Result { try AuthorizationRequest.parseJson(json) }
         switch result {
         case .success(let req):
             XCTAssertEqual(req.clientId, "https://verifier.example.com")
@@ -31,7 +31,7 @@ final class OpenId4VpTransportTests: XCTestCase {
 
     func testParseJsonRequestFailsWithMissingClientId() {
         let json = #"{"response_type": "vp_token"}"#
-        let result = OpenId4VpTransport.parseJsonRequest(json)
+        let result = Result { try AuthorizationRequest.parseJson(json) }
         switch result {
         case .success:
             XCTFail("Should have failed")
@@ -52,7 +52,7 @@ final class OpenId4VpTransportTests: XCTestCase {
         }
         """
 
-        let result = OpenId4VpTransport.parseJsonRequest(json)
+        let result = Result { try AuthorizationRequest.parseJson(json) }
         switch result {
         case .success(let req):
             XCTAssertNotNil(req.dcqlQuery)

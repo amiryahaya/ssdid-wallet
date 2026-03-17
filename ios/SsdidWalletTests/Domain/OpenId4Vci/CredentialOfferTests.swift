@@ -15,7 +15,7 @@ final class CredentialOfferTests: XCTestCase {
             }
         }
         """
-        let offer = try CredentialOffer.parse(json: json)
+        let offer = try CredentialOffer.parse( json)
         XCTAssertEqual(offer.credentialIssuer, "https://issuer.example.com")
         XCTAssertEqual(offer.credentialConfigurationIds, ["UnivDegree"])
         XCTAssertEqual(offer.preAuthorizedCode, "abc123")
@@ -40,7 +40,7 @@ final class CredentialOfferTests: XCTestCase {
             }
         }
         """
-        let offer = try CredentialOffer.parse(json: json)
+        let offer = try CredentialOffer.parse( json)
         XCTAssertNotNil(offer.txCode)
         XCTAssertEqual(offer.txCode?.inputMode, "numeric")
         XCTAssertEqual(offer.txCode?.length, 6)
@@ -59,7 +59,7 @@ final class CredentialOfferTests: XCTestCase {
             }
         }
         """
-        let offer = try CredentialOffer.parse(json: json)
+        let offer = try CredentialOffer.parse( json)
         XCTAssertTrue(offer.authorizationCodeGrant)
         XCTAssertEqual(offer.issuerState, "state-abc")
         XCTAssertNil(offer.preAuthorizedCode)
@@ -69,7 +69,7 @@ final class CredentialOfferTests: XCTestCase {
         let json = """
         {"credential_issuer":"http://bad.com","credential_configuration_ids":["x"],"grants":{"authorization_code":{}}}
         """
-        XCTAssertThrowsError(try CredentialOffer.parse(json: json)) { error in
+        XCTAssertThrowsError(try CredentialOffer.parse( json)) { error in
             XCTAssertTrue("\(error)".contains("HTTPS"))
         }
     }
@@ -78,14 +78,14 @@ final class CredentialOfferTests: XCTestCase {
         let json = """
         {"credential_issuer":"https://issuer.example.com","credential_configuration_ids":[],"grants":{"authorization_code":{}}}
         """
-        XCTAssertThrowsError(try CredentialOffer.parse(json: json))
+        XCTAssertThrowsError(try CredentialOffer.parse( json))
     }
 
     func testRejectMissingGrants() {
         let json = """
         {"credential_issuer":"https://issuer.example.com","credential_configuration_ids":["x"]}
         """
-        XCTAssertThrowsError(try CredentialOffer.parse(json: json))
+        XCTAssertThrowsError(try CredentialOffer.parse( json))
     }
 
     func testParseFromUri() throws {
@@ -102,7 +102,7 @@ final class CredentialOfferTests: XCTestCase {
         let json = """
         {"credential_configuration_ids":["x"],"grants":{"authorization_code":{}}}
         """
-        XCTAssertThrowsError(try CredentialOffer.parse(json: json))
+        XCTAssertThrowsError(try CredentialOffer.parse( json))
     }
 
     func testParseMultipleConfigIds() throws {
@@ -117,7 +117,7 @@ final class CredentialOfferTests: XCTestCase {
             }
         }
         """
-        let offer = try CredentialOffer.parse(json: json)
+        let offer = try CredentialOffer.parse( json)
         XCTAssertEqual(offer.credentialConfigurationIds.count, 3)
         XCTAssertEqual(offer.credentialConfigurationIds, ["IdCard", "Diploma", "License"])
     }

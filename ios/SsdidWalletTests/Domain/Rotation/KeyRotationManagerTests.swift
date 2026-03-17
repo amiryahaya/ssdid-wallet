@@ -5,7 +5,7 @@ import XCTest
 
 /// Stub Vault for KeyRotationManager tests.
 /// Records calls and returns pre-configured responses.
-private final class StubVault: Vault {
+private final class StubVault: Vault, @unchecked Sendable {
     var identities: [String: Identity] = [:]
     var signResult: Data = Data(repeating: 0xAB, count: 64)
 
@@ -47,7 +47,7 @@ private final class StubVault: Vault {
 }
 
 /// Stub CryptoProvider that returns deterministic key pairs.
-private final class StubCryptoProvider: CryptoProvider {
+private final class StubCryptoProvider: CryptoProvider, @unchecked Sendable {
     var keyPairToReturn: KeyPairResult = KeyPairResult(
         publicKey: Data(repeating: 0x01, count: 32),
         privateKey: Data(repeating: 0x02, count: 32)
@@ -69,7 +69,7 @@ private final class StubCryptoProvider: CryptoProvider {
 }
 
 /// In-memory VaultStorage for testing.
-private final class InMemoryVaultStorage: VaultStorage {
+private final class InMemoryVaultStorage: VaultStorage, @unchecked Sendable {
     private var identities: [Identity] = []
     private var encryptedKeys: [String: Data] = [:]
     private var recoveryPublicKeys: [String: Data] = [:]
@@ -148,7 +148,7 @@ private final class InMemoryVaultStorage: VaultStorage {
 
 /// Stub SsdidClient that records updateDidDocument calls and can be
 /// configured to succeed or fail.
-private final class StubSsdidClient: DidDocumentUpdater {
+private final class StubSsdidClient: DidDocumentUpdater, @unchecked Sendable {
     var updateDidDocumentCalled = false
     var updateDidDocumentShouldFail = false
 
@@ -161,7 +161,7 @@ private final class StubSsdidClient: DidDocumentUpdater {
 }
 
 /// Stub KeychainManager for testing (no real Keychain access).
-private final class StubKeychainManager: KeychainManagerProtocol {
+private final class StubKeychainManager: KeychainManagerProtocol, @unchecked Sendable {
     private var keys: Set<String> = []
     private var encrypted: [String: Data] = [:]
 

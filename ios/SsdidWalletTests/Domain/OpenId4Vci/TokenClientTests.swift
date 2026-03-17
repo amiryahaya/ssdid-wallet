@@ -127,9 +127,9 @@ final class TokenClientTests: XCTestCase {
 // MARK: - Mock URLProtocol
 
 private final class MockURLProtocol: URLProtocol {
-    static var mockResponseJson: String = "{}"
-    static var mockStatusCode: Int = 200
-    static var lastRequestBody: String?
+    nonisolated(unsafe) static var mockResponseJson: String = "{}"
+    nonisolated(unsafe) static var mockStatusCode: Int = 200
+    nonisolated(unsafe) static var lastRequestBody: String?
 
     static func reset() {
         mockResponseJson = "{}"

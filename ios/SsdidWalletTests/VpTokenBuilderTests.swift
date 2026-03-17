@@ -5,21 +5,48 @@ final class VpTokenBuilderTests: XCTestCase {
 
     private let testSigner: (Data) -> Data = { _ in "test-sig".data(using: .utf8)! }
 
-    func testBuildsVpTokenWithSelectedDisclosuresAndKbJwt() throws {
+    /// Issues an SD-JWT VC and wraps it as a StoredSdJwtVc for VpTokenBuilder.
+    private func issueAndStore(
+        claims: [String: Any],
+        disclosable: Set<String>,
+        type: String = "VerifiedEmployee"
+    ) throws -> StoredSdJwtVc {
         let issuer = SdJwtIssuer(signer: testSigner, algorithm: "EdDSA")
         let sdJwt = try issuer.issue(
             issuer: "did:ssdid:issuer1",
             subject: "did:ssdid:holder1",
-            type: ["VerifiableCredential", "VerifiedEmployee"],
-            claims: ["name": "Ahmad", "dept": "Eng"],
-            disclosable: Set(["name", "dept"]),
+            type: ["VerifiableCredential", type],
+            claims: claims,
+            disclosable: disclosable
+        )
+        let compact = try sdJwt.present(selectedDisclosures: sdJwt.disclosures)
+
+        var claimStrings: [String: String] = [:]
+        for d in sdJwt.disclosures {
+            claimStrings[d.claimName] = "\(d.claimValue)"
+        }
+
+        return StoredSdJwtVc(
+            id: "vc-test",
+            compact: compact,
+            issuer: "did:ssdid:issuer1",
+            subject: "did:ssdid:holder1",
+            type: type,
+            claims: claimStrings,
+            disclosableClaims: Array(disclosable),
             issuedAt: 1719792000
         )
+    }
 
-        let builder = VpTokenBuilder()
-        let vpToken = try builder.build(
-            sdJwtVc: sdJwt,
-            selectedClaimNames: Set(["name"]),
+    func testBuildsVpTokenWithSelectedDisclosuresAndKbJwt() throws {
+        let stored = try issueAndStore(
+            claims: ["name": "Ahmad", "dept": "Eng"],
+            disclosable: Set(["name", "dept"])
+        )
+
+        let vpToken = try VpTokenBuilder.build(
+            storedSdJwtVc: stored,
+            selectedClaims: ["name"],
             audience: "https://verifier.example.com",
             nonce: "n-0S6_WzA2Mj",
             algorithm: "EdDSA",
@@ -34,10 +61,9 @@ final class VpTokenBuilderTests: XCTestCase {
     }
 
     func testBuildsPresentationSubmission() {
-        let builder = VpTokenBuilder()
-        let submission = builder.buildPresentationSubmission(
+        let submission = PresentationSubmission.create(
             definitionId: "req-1",
-            descriptorId: "emp-cred"
+            descriptorIds: ["emp-cred"]
         )
 
         XCTAssertEqual(submission.definitionId, "req-1")
@@ -48,19 +74,15 @@ final class VpTokenBuilderTests: XCTestCase {
     }
 
     func testSelectsOnlyMatchingDisclosures() throws {
-        let issuer = SdJwtIssuer(signer: testSigner, algorithm: "EdDSA")
-        let sdJwt = try issuer.issue(
-            issuer: "did:ssdid:issuer1",
-            subject: "did:ssdid:holder1",
-            type: ["VerifiableCredential"],
+        let stored = try issueAndStore(
             claims: ["a": "1", "b": "2", "c": "3"],
-            disclosable: Set(["a", "b", "c"])
+            disclosable: Set(["a", "b", "c"]),
+            type: "TestCredential"
         )
 
-        let builder = VpTokenBuilder()
-        let vpToken = try builder.build(
-            sdJwtVc: sdJwt,
-            selectedClaimNames: Set(["a", "c"]),
+        let vpToken = try VpTokenBuilder.build(
+            storedSdJwtVc: stored,
+            selectedClaims: ["a", "c"],
             audience: "https://v.example.com",
             nonce: "abc",
             algorithm: "EdDSA",

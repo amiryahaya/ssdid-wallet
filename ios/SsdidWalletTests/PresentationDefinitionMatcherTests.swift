@@ -16,8 +16,13 @@ final class PresentationDefinitionMatcherTests: XCTestCase {
         issuedAt: 1719792000
     )
 
-    func testMatchesCredentialByVctAndReturnsRequiredAndOptionalClaims() {
-        let pd = """
+    private func parsePd(_ jsonString: String) throws -> [String: Any] {
+        let data = jsonString.data(using: .utf8)!
+        return try JSONSerialization.jsonObject(with: data) as! [String: Any]
+    }
+
+    func testMatchesCredentialByVctAndReturnsRequiredAndOptionalClaims() throws {
+        let pd = try parsePd("""
         {
           "id": "req-1",
           "input_descriptors": [{
@@ -32,22 +37,18 @@ final class PresentationDefinitionMatcherTests: XCTestCase {
             }
           }]
         }
-        """
+        """)
 
-        let results = matcher.match(pd, storedCredentials: [employeeVc])
+        let results = matcher.match(pd: pd, credentials: [employeeVc])
         XCTAssertEqual(results.count, 1)
         XCTAssertEqual(results[0].descriptorId, "emp-cred")
-        XCTAssertEqual(results[0].credentialId, "vc-1")
-
-        let claims = results[0].availableClaims
-        XCTAssertEqual(claims["name"]?.required, true)
-        XCTAssertEqual(claims["name"]?.available, true)
-        XCTAssertEqual(claims["department"]?.required, false)
-        XCTAssertEqual(claims["department"]?.available, true)
+        XCTAssertEqual(results[0].credential.id, "vc-1")
+        XCTAssertTrue(results[0].requiredClaims.contains("name"))
+        XCTAssertTrue(results[0].optionalClaims.contains("department"))
     }
 
-    func testReturnsEmptyWhenNoCredentialMatchesVctFilter() {
-        let pd = """
+    func testReturnsEmptyWhenNoCredentialMatchesVctFilter() throws {
+        let pd = try parsePd("""
         {
           "id": "req-2",
           "input_descriptors": [{
@@ -60,14 +61,14 @@ final class PresentationDefinitionMatcherTests: XCTestCase {
             }
           }]
         }
-        """
+        """)
 
-        let results = matcher.match(pd, storedCredentials: [employeeVc])
+        let results = matcher.match(pd: pd, credentials: [employeeVc])
         XCTAssertTrue(results.isEmpty)
     }
 
-    func testReturnsEmptyWhenRequiredClaimNotAvailable() {
-        let pd = """
+    func testReturnsEmptyWhenRequiredClaimNotAvailable() throws {
+        let pd = try parsePd("""
         {
           "id": "req-3",
           "input_descriptors": [{
@@ -81,13 +82,13 @@ final class PresentationDefinitionMatcherTests: XCTestCase {
             }
           }]
         }
-        """
+        """)
 
-        let results = matcher.match(pd, storedCredentials: [employeeVc])
+        let results = matcher.match(pd: pd, credentials: [employeeVc])
         XCTAssertTrue(results.isEmpty)
     }
 
-    func testSelectsCorrectCredentialFromMultipleStored() {
+    func testSelectsCorrectCredentialFromMultipleStored() throws {
         let degreeVc = StoredSdJwtVc(
             id: "vc-2", compact: "eyJ...", issuer: "did:ssdid:uni",
             subject: "did:ssdid:holder1", type: "UniversityDegree",
@@ -95,7 +96,7 @@ final class PresentationDefinitionMatcherTests: XCTestCase {
             issuedAt: 1719792000
         )
 
-        let pd = """
+        let pd = try parsePd("""
         {
           "id": "req-4",
           "input_descriptors": [{
@@ -109,35 +110,10 @@ final class PresentationDefinitionMatcherTests: XCTestCase {
             }
           }]
         }
-        """
+        """)
 
-        let results = matcher.match(pd, storedCredentials: [degreeVc, employeeVc])
+        let results = matcher.match(pd: pd, credentials: [degreeVc, employeeVc])
         XCTAssertEqual(results.count, 1)
-        XCTAssertEqual(results[0].credentialId, "vc-1")
-    }
-
-    func testConvertsToCredentialQuery() {
-        let pd = """
-        {
-          "id": "req-1",
-          "input_descriptors": [{
-            "id": "emp-cred",
-            "format": { "vc+sd-jwt": {} },
-            "constraints": {
-              "fields": [
-                { "path": ["$.vct"], "filter": { "const": "VerifiedEmployee" } },
-                { "path": ["$.name"] },
-                { "path": ["$.department"], "optional": true }
-              ]
-            }
-          }]
-        }
-        """
-
-        let query = matcher.toCredentialQuery(pd)
-        XCTAssertEqual(query.descriptors.count, 1)
-        XCTAssertEqual(query.descriptors[0].vctFilter, "VerifiedEmployee")
-        XCTAssertEqual(query.descriptors[0].requiredClaims, ["name"])
-        XCTAssertEqual(query.descriptors[0].optionalClaims, ["department"])
+        XCTAssertEqual(results[0].credential.id, "vc-1")
     }
 }

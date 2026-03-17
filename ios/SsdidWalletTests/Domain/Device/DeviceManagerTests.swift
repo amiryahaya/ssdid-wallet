@@ -4,7 +4,7 @@ import XCTest
 // MARK: - Test Doubles
 
 /// Stub Vault that records calls and returns preconfigured results.
-private final class StubVault: Vault {
+private final class StubVault: Vault, @unchecked Sendable {
     var signResult: Result<Data, Error> = .success(Data([1, 2, 3, 4]))
     var buildDidDocumentResult: Result<DidDocument, Error>?
     var signCalledWith: (keyId: String, data: Data)?
@@ -30,18 +30,18 @@ private final class StubVault: Vault {
     }
 
     // Remaining Vault protocol requirements — stubs
-    func getPublicKey(keyId: String) async throws -> Data { Data() }
-    func exportEncryptedPrivateKey(keyId: String) async throws -> Data { Data() }
-    func importEncryptedPrivateKey(_ data: Data, for identity: Identity) async throws {}
-    func createRecoveryKey(keyId: String, algorithm: Algorithm) async throws -> Identity { fatalError() }
-    func getRecoveryPublicKey(keyId: String) async throws -> Data { Data() }
-    func createPreRotatedKey(keyId: String, algorithm: Algorithm) async throws -> PreRotatedKeyData { fatalError() }
-    func rotateKey(currentKeyId: String) async throws -> Identity { fatalError() }
-    func deactivateIdentity(keyId: String) async throws {}
+    func createProof(keyId: String, document: [String: Any], proofPurpose: String, challenge: String?, domain: String?) async throws -> Proof {
+        fatalError("Not needed in DeviceManager tests")
+    }
+    func storeCredential(_ credential: VerifiableCredential) async throws {}
+    func listCredentials() async -> [VerifiableCredential] { [] }
+    func getCredentialForDid(_ did: String) async -> VerifiableCredential? { nil }
+    func getCredentialsForDid(_ did: String) async -> [VerifiableCredential] { [] }
+    func deleteCredential(credentialId: String) async throws {}
 }
 
 /// Stub RegistryApi replacement that captures calls and returns preconfigured responses.
-private final class StubRegistryClient: DeviceManagerRegistryClient {
+private final class StubRegistryClient: DeviceManagerRegistryClient, @unchecked Sendable {
     var initPairingResult: Result<PairingInitResponse, Error> = .success(PairingInitResponse(pairingId: "pairing-1"))
     var joinPairingResult: Result<PairingJoinResponse, Error> = .success(PairingJoinResponse(status: "joined"))
     var approvePairingResult: Result<Void, Error> = .success(())
@@ -74,7 +74,7 @@ private final class StubRegistryClient: DeviceManagerRegistryClient {
 }
 
 /// Stub SsdidClient replacement for updateDidDocument calls.
-private final class StubSsdidClientProvider: DeviceManagerSsdidClientProvider {
+private final class StubSsdidClientProvider: DeviceManagerSsdidClientProvider, @unchecked Sendable {
     var updateDidDocumentResult: Result<Void, Error> = .success(())
     var updateDidDocumentCalledWith: String?
 
@@ -97,7 +97,7 @@ final class DeviceManagerTests: XCTestCase {
         name: "Test",
         did: "did:ssdid:abc123",
         keyId: "key-1",
-        algorithm: .ed25519,
+        algorithm: .ED25519,
         publicKeyMultibase: "uPublicKey",
         createdAt: "2024-01-01T00:00:00Z"
     )

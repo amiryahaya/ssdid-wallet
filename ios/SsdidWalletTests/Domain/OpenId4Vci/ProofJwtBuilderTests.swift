@@ -7,7 +7,7 @@ final class ProofJwtBuilderTests: XCTestCase {
     private let signer: (Data) -> Data = { data in Data(repeating: 0, count: 64) }
 
     func testBuildProofJwtStructure() throws {
-        let jwt = ProofJwtBuilder.build(
+        let jwt = try ProofJwtBuilder.build(
             algorithm: "EdDSA",
             keyId: "did:ssdid:holder1#key-1",
             walletDid: "did:ssdid:holder1",
@@ -35,7 +35,7 @@ final class ProofJwtBuilderTests: XCTestCase {
     }
 
     func testProofJwtContainsCorrectFields() throws {
-        let jwt = ProofJwtBuilder.build(
+        let jwt = try ProofJwtBuilder.build(
             algorithm: "ES256",
             keyId: "did:ssdid:h#k-1",
             walletDid: "did:ssdid:h",
@@ -51,14 +51,14 @@ final class ProofJwtBuilderTests: XCTestCase {
         XCTAssertTrue(headerJson.contains("ES256"))
     }
 
-    func testSignatureUsesHeaderDotPayloadAsInput() {
+    func testSignatureUsesHeaderDotPayloadAsInput() throws {
         var capturedInput: Data?
         let capturingSigner: (Data) -> Data = { data in
             capturedInput = data
             return Data(repeating: 0, count: 32)
         }
 
-        let jwt = ProofJwtBuilder.build(
+        let jwt = try ProofJwtBuilder.build(
             algorithm: "EdDSA",
             keyId: "did:ssdid:x#k",
             walletDid: "did:ssdid:x",
@@ -75,7 +75,7 @@ final class ProofJwtBuilderTests: XCTestCase {
     }
 
     func testHeaderContainsTypField() throws {
-        let jwt = ProofJwtBuilder.build(
+        let jwt = try ProofJwtBuilder.build(
             algorithm: "EdDSA",
             keyId: "did:ssdid:test#k1",
             walletDid: "did:ssdid:test",
@@ -92,7 +92,7 @@ final class ProofJwtBuilderTests: XCTestCase {
     }
 
     func testPayloadContainsAudAndIss() throws {
-        let jwt = ProofJwtBuilder.build(
+        let jwt = try ProofJwtBuilder.build(
             algorithm: "EdDSA",
             keyId: "did:ssdid:holder#k",
             walletDid: "did:ssdid:holder",
@@ -114,7 +114,7 @@ final class ProofJwtBuilderTests: XCTestCase {
 
     func testPayloadContainsExpClaim() throws {
         let iat: Int64 = 1_700_000_000
-        let jwt = ProofJwtBuilder.build(
+        let jwt = try ProofJwtBuilder.build(
             algorithm: "EdDSA",
             keyId: "did:ssdid:holder#k",
             walletDid: "did:ssdid:holder",

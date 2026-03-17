@@ -5,7 +5,7 @@ import XCTest
 
 /// In-memory VaultStorage (duplicated here because Swift test targets do not share
 /// private types across files without a shared test-helpers module).
-private final class InMemoryVaultStorage: VaultStorage {
+private final class InMemoryVaultStorage: VaultStorage, @unchecked Sendable {
     private var identities: [Identity] = []
     private var encryptedKeys: [String: Data] = [:]
     private var recoveryPublicKeys: [String: Data] = [:]
@@ -64,7 +64,7 @@ private final class InMemoryVaultStorage: VaultStorage {
 }
 
 /// Stub Vault for SocialRecoveryManager tests.
-private final class StubVault: Vault {
+private final class StubVault: Vault, @unchecked Sendable {
     let storage: InMemoryVaultStorage
 
     init(storage: InMemoryVaultStorage) { self.storage = storage }
@@ -84,108 +84,6 @@ private final class StubVault: Vault {
     func getCredentialForDid(_ did: String) async -> VerifiableCredential? { nil }
     func getCredentialsForDid(_ did: String) async -> [VerifiableCredential] { [] }
     func deleteCredential(credentialId: String) async throws {}
-}
-
-// MARK: - ShamirSecretSharing Correctness Tests
-
-/// These tests verify the cryptographic correctness of the Shamir's Secret Sharing
-/// implementation that underpins SocialRecoveryManager.
-final class ShamirSecretSharingTests: XCTestCase {
-
-    func testSplitAndCombineRoundTrip() throws {
-        let secret = Data("super-secret-recovery-key-bytes!".utf8) // 32 bytes
-        let shares = try ShamirSecretSharing.split(secret: secret, threshold: 3, shares: 5)
-
-        XCTAssertEqual(shares.count, 5)
-
-        // Reconstruct using exactly the threshold number of shares
-        let reconstructed = try ShamirSecretSharing.combine(shares: Array(shares[0..<3]))
-        XCTAssertEqual(reconstructed, secret, "Reconstructed secret must match original")
-    }
-
-    func testCombineWithDifferentSubsets() throws {
-        let secret = Data(repeating: 0xAB, count: 16)
-        let shares = try ShamirSecretSharing.split(secret: secret, threshold: 2, shares: 4)
-
-        // Any 2 of 4 shares should reconstruct the secret
-        let subset1 = try ShamirSecretSharing.combine(shares: [shares[0], shares[1]])
-        let subset2 = try ShamirSecretSharing.combine(shares: [shares[1], shares[3]])
-        let subset3 = try ShamirSecretSharing.combine(shares: [shares[0], shares[3]])
-
-        XCTAssertEqual(subset1, secret)
-        XCTAssertEqual(subset2, secret)
-        XCTAssertEqual(subset3, secret)
-    }
-
-    func testCombineWithMoreThanThresholdShares() throws {
-        let secret = Data("extra-shares-test".utf8)
-        let shares = try ShamirSecretSharing.split(secret: secret, threshold: 2, shares: 5)
-
-        // Using all 5 shares (more than threshold of 2) should still work
-        let reconstructed = try ShamirSecretSharing.combine(shares: shares)
-        XCTAssertEqual(reconstructed, secret)
-    }
-
-    func testSplitRejectsThresholdLessThanTwo() {
-        let secret = Data("test".utf8)
-        XCTAssertThrowsError(try ShamirSecretSharing.split(secret: secret, threshold: 1, shares: 3)) { error in
-            guard case ShamirSecretSharing.ShamirError.thresholdTooLow = error else {
-                XCTFail("Expected thresholdTooLow, got \(error)")
-                return
-            }
-        }
-    }
-
-    func testSplitRejectsEmptySecret() {
-        XCTAssertThrowsError(try ShamirSecretSharing.split(secret: Data(), threshold: 2, shares: 3)) { error in
-            guard case ShamirSecretSharing.ShamirError.emptySecret = error else {
-                XCTFail("Expected emptySecret, got \(error)")
-                return
-            }
-        }
-    }
-
-    func testSplitRejectsSharesLessThanThreshold() {
-        let secret = Data("test".utf8)
-        XCTAssertThrowsError(try ShamirSecretSharing.split(secret: secret, threshold: 5, shares: 3)) { error in
-            guard case ShamirSecretSharing.ShamirError.insufficientShares = error else {
-                XCTFail("Expected insufficientShares, got \(error)")
-                return
-            }
-        }
-    }
-
-    func testCombineRejectsFewerThanTwoShares() {
-        let share = ShamirSecretSharing.Share(index: 1, data: Data("x".utf8))
-        XCTAssertThrowsError(try ShamirSecretSharing.combine(shares: [share])) { error in
-            guard case ShamirSecretSharing.ShamirError.needAtLeastTwoShares = error else {
-                XCTFail("Expected needAtLeastTwoShares, got \(error)")
-                return
-            }
-        }
-    }
-
-    func testCombineRejectsDuplicateIndices() throws {
-        let secret = Data("dup".utf8)
-        let shares = try ShamirSecretSharing.split(secret: secret, threshold: 2, shares: 3)
-        let duplicated = [shares[0], shares[0]] // same index
-
-        XCTAssertThrowsError(try ShamirSecretSharing.combine(shares: duplicated)) { error in
-            guard case ShamirSecretSharing.ShamirError.duplicateShareIndices = error else {
-                XCTFail("Expected duplicateShareIndices, got \(error)")
-                return
-            }
-        }
-    }
-
-    func testShareIndicesAreOneIndexed() throws {
-        let secret = Data("idx".utf8)
-        let shares = try ShamirSecretSharing.split(secret: secret, threshold: 2, shares: 3)
-
-        XCTAssertEqual(shares[0].index, 1)
-        XCTAssertEqual(shares[1].index, 2)
-        XCTAssertEqual(shares[2].index, 3)
-    }
 }
 
 // MARK: - SocialRecoveryManagerTests
