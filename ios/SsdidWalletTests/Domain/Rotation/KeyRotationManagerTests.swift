@@ -148,7 +148,7 @@ private final class InMemoryVaultStorage: VaultStorage {
 
 /// Stub SsdidClient that records updateDidDocument calls and can be
 /// configured to succeed or fail.
-private final class StubSsdidClient {
+private final class StubSsdidClient: DidDocumentUpdater {
     var updateDidDocumentCalled = false
     var updateDidDocumentShouldFail = false
 
