@@ -68,18 +68,23 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             2>&1 | xcpretty --color
 
-      # TODO: Enable test step after fixing pre-existing broken test files:
-      # - OpenId4VpHandlerTests.swift (API mismatch with current OpenId4VpHandler)
-      # - IssuerMetadataResolverTests.swift (NSLock in async context)
-      # - name: Test
-      #   run: |
-      #     set -o pipefail
-      #     xcodebuild test \
-      #       -scheme SsdidWallet \
-      #       -destination '${{ steps.sim.outputs.destination }}' \
-      #       -derivedDataPath DerivedData \
-      #       -clonedSourcePackagesDirPath .spm-cache \
-      #       -skipPackagePluginValidation \
-      #       CODE_SIGNING_ALLOWED=NO \
-      #       -resultBundlePath TestResults \
-      #       2>&1 | xcpretty --color
+      - name: Test
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -scheme SsdidWallet \
+            -destination '${{ steps.sim.outputs.destination }}' \
+            -derivedDataPath DerivedData \
+            -clonedSourcePackagesDirPath .spm-cache \
+            -skipPackagePluginValidation \
+            CODE_SIGNING_ALLOWED=NO \
+            -resultBundlePath TestResults \
+            2>&1 | xcpretty --color
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-test-results
+          path: ios/TestResults.xcresult
+          retention-days: 14
