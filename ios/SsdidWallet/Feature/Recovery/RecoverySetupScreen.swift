@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RecoverySetupScreen: View {
     @Environment(AppRouter.self) private var router
+    @EnvironmentObject private var services: ServiceContainer
 
     let keyId: String
 
@@ -147,6 +148,31 @@ struct RecoverySetupScreen: View {
             }
         }
         .background(Color.bgPrimary)
+        .task {
+            identity = await services.vault.getIdentity(keyId: keyId)
+            if let identity = identity {
+                let socialManager = SocialRecoveryManager(
+                    recoveryManager: makeRecoveryManager(),
+                    vault: services.vault
+                )
+                hasSocialRecovery = socialManager.hasSocialRecovery(did: identity.did)
+
+                let institutionalManager = InstitutionalRecoveryManager(
+                    recoveryManager: makeRecoveryManager()
+                )
+                hasInstitutionalRecovery = institutionalManager.hasOrgRecovery(did: identity.did)
+            }
+        }
+    }
+
+    private func makeRecoveryManager() -> RecoveryManager {
+        RecoveryManager(
+            vault: services.vault,
+            storage: services.storage,
+            classicalProvider: services.classicalProvider,
+            pqcProvider: services.pqcProvider,
+            keychainManager: services.keychainManager
+        )
     }
 
     private var isGenerating: Bool {
@@ -228,10 +254,18 @@ struct RecoverySetupScreen: View {
     }
 
     private func generateRecoveryKey() {
+        guard let identity = identity else { return }
         state = .generating
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            // Mock recovery key
-            state = .success("dGhpc19pc19hX21vY2tfcmVjb3Zlcnlfa2V5X2Jhc2U2NA==")
+        Task {
+            do {
+                let recoveryManager = makeRecoveryManager()
+                let keyData = try await recoveryManager.generateRecoveryKey(identity: identity)
+                let base64Key = keyData.base64EncodedString()
+                self.identity = await services.vault.getIdentity(keyId: keyId)
+                state = .success(base64Key)
+            } catch {
+                state = .error(error.localizedDescription)
+            }
         }
     }
 }

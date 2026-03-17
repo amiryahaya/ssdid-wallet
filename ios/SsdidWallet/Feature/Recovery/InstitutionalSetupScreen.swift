@@ -2,6 +2,7 @@ import SwiftUI
 
 struct InstitutionalSetupScreen: View {
     @Environment(AppRouter.self) private var router
+    @EnvironmentObject private var services: ServiceContainer
 
     let keyId: String
 
@@ -173,6 +174,9 @@ struct InstitutionalSetupScreen: View {
             }
         }
         .background(Color.bgPrimary)
+        .task {
+            identity = await services.vault.getIdentity(keyId: keyId)
+        }
     }
 
     private func enroll() {
@@ -180,9 +184,34 @@ struct InstitutionalSetupScreen: View {
             state = .error("Invalid DID format")
             return
         }
+        guard let identity = identity else {
+            state = .error("Identity not found")
+            return
+        }
         state = .enrolling
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            state = .success(orgName)
+        Task {
+            do {
+                let recoveryManager = RecoveryManager(
+                    vault: services.vault,
+                    storage: services.storage,
+                    classicalProvider: services.classicalProvider,
+                    pqcProvider: services.pqcProvider,
+                    keychainManager: services.keychainManager
+                )
+                let institutionalManager = InstitutionalRecoveryManager(
+                    recoveryManager: recoveryManager
+                )
+                let encryptedKeyData = Data(encryptedKey.utf8)
+                _ = try await institutionalManager.enrollOrganization(
+                    identity: identity,
+                    orgDid: orgDid,
+                    orgName: orgName,
+                    encryptedRecoveryKey: encryptedKeyData
+                )
+                state = .success(orgName)
+            } catch {
+                state = .error(error.localizedDescription)
+            }
         }
     }
 }

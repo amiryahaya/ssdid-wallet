@@ -9,6 +9,8 @@ final class ServiceContainer: ObservableObject {
     let storage: VaultStorage
     let activityRepo: ActivityRepository
     let vault: Vault
+    let classicalProvider: CryptoProvider
+    let pqcProvider: CryptoProvider
     let backupManager: BackupManager
     let biometricAuthenticator: BiometricAuthenticator
     let httpClient: SsdidHttpClient
@@ -32,6 +34,9 @@ final class ServiceContainer: ObservableObject {
 
         let classical = ClassicalProvider()
         let pqc = PqcProvider()
+
+        self.classicalProvider = classical
+        self.pqcProvider = pqc
 
         let vaultImpl = VaultImpl(
             classicalProvider: classical,

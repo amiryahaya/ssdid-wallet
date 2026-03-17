@@ -3,6 +3,7 @@ import SwiftUI
 struct SocialRecoveryRestoreScreen: View {
     @Environment(AppRouter.self) private var router
     @EnvironmentObject var coordinator: AppCoordinator
+    @EnvironmentObject private var services: ServiceContainer
 
     struct ShareEntry: Identifiable {
         let id = UUID()
@@ -251,8 +252,37 @@ struct SocialRecoveryRestoreScreen: View {
             return
         }
         state = .restoring
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            state = .success
+        Task {
+            do {
+                let recoveryManager = RecoveryManager(
+                    vault: services.vault,
+                    storage: services.storage,
+                    classicalProvider: services.classicalProvider,
+                    pqcProvider: services.pqcProvider,
+                    keychainManager: services.keychainManager
+                )
+                let socialManager = SocialRecoveryManager(
+                    recoveryManager: recoveryManager,
+                    vault: services.vault
+                )
+                var collectedShares: [Int: String] = [:]
+                for share in shares {
+                    guard let index = Int(share.index) else {
+                        state = .error("Share index must be a number")
+                        return
+                    }
+                    collectedShares[index] = share.data
+                }
+                _ = try await socialManager.recoverWithShares(
+                    did: did,
+                    collectedShares: collectedShares,
+                    name: name,
+                    algorithm: selectedAlgorithm
+                )
+                state = .success
+            } catch {
+                state = .error(error.localizedDescription)
+            }
         }
     }
 }

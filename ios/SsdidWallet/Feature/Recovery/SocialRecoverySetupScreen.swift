@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SocialRecoverySetupScreen: View {
     @Environment(AppRouter.self) private var router
+    @EnvironmentObject private var services: ServiceContainer
 
     let keyId: String
 
@@ -298,11 +299,42 @@ struct SocialRecoverySetupScreen: View {
             }
         }
         state = .creating
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            let shares = guardians.map { g in
-                (name: g.name, share: "c2hhcmVfZGF0YV9mb3JfXChnLm5hbWUp_\(UUID().uuidString.prefix(8))")
+        Task {
+            do {
+                guard let identity = await services.vault.getIdentity(keyId: keyId) else {
+                    state = .error("Identity not found")
+                    return
+                }
+                let recoveryManager = RecoveryManager(
+                    vault: services.vault,
+                    storage: services.storage,
+                    classicalProvider: services.classicalProvider,
+                    pqcProvider: services.pqcProvider,
+                    keychainManager: services.keychainManager
+                )
+                let socialManager = SocialRecoveryManager(
+                    recoveryManager: recoveryManager,
+                    vault: services.vault
+                )
+                let shareMap = try await socialManager.setupSocialRecovery(
+                    identity: identity,
+                    guardianNames: guardians.map { ($0.name, $0.did) },
+                    threshold: threshold
+                )
+                // Map guardian IDs back to names for display
+                let config = socialManager.getConfig(did: identity.did)
+                let shares: [(name: String, share: String)] = guardians.enumerated().compactMap { index, guardian in
+                    if let config = config,
+                       index < config.guardians.count,
+                       let share = shareMap[config.guardians[index].id] {
+                        return (name: guardian.name, share: share)
+                    }
+                    return nil
+                }
+                state = .success(shares)
+            } catch {
+                state = .error(error.localizedDescription)
             }
-            state = .success(shares)
         }
     }
 }
