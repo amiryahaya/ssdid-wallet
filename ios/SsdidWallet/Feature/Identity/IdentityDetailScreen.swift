@@ -12,6 +12,7 @@ struct IdentityDetailScreen: View {
     @State private var isDeactivating = false
     @State private var didCopied = false
     @State private var errorMessage: String?
+    @State private var revocationResults: [String: RevocationStatus] = [:]
 
     var body: some View {
         VStack(spacing: 0) {
@@ -269,6 +270,12 @@ struct IdentityDetailScreen: View {
             await loadIdentity()
             if let id = identity {
                 credentials = await services.vault.getCredentialsForDid(id.did)
+                var results: [String: RevocationStatus] = [:]
+                for vc in credentials {
+                    let status = await services.revocationManager.checkRevocation(vc)
+                    results[vc.id] = status
+                }
+                revocationResults = results
             }
         }
     }
@@ -321,13 +328,14 @@ struct IdentityDetailScreen: View {
     }
 
     private enum ServiceConnectionStatus {
-        case active, expiring, expired
+        case active, expiring, expired, revoked
 
         var color: Color {
             switch self {
             case .active: return .success
             case .expiring: return .warning
             case .expired: return .danger
+            case .revoked: return .danger
             }
         }
 
@@ -336,11 +344,13 @@ struct IdentityDetailScreen: View {
             case .active: return "Active"
             case .expiring: return "Expiring soon"
             case .expired: return "Expired"
+            case .revoked: return "Revoked"
             }
         }
     }
 
     private func serviceConnectionStatus(_ vc: VerifiableCredential) -> ServiceConnectionStatus {
+        if revocationResults[vc.id] == .revoked { return .revoked }
         guard let exp = vc.expirationDate else { return .active }
         let formatter = ISO8601DateFormatter()
         guard let expDate = formatter.date(from: exp) else { return .active }

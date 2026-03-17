@@ -33,6 +33,8 @@ import kotlinx.coroutines.launch
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.model.VerifiableCredential
+import my.ssdid.wallet.domain.revocation.RevocationManager
+import my.ssdid.wallet.domain.revocation.RevocationStatus
 import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.ui.theme.*
 import java.time.Instant
@@ -43,6 +45,7 @@ import javax.inject.Inject
 class IdentityDetailViewModel @Inject constructor(
     private val vault: Vault,
     private val ssdidClient: SsdidClient,
+    private val revocationManager: RevocationManager,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val keyId: String = savedStateHandle["keyId"] ?: ""
@@ -51,6 +54,9 @@ class IdentityDetailViewModel @Inject constructor(
 
     private val _credentials = MutableStateFlow<List<VerifiableCredential>>(emptyList())
     val credentials = _credentials.asStateFlow()
+
+    private val _revocationResults = MutableStateFlow<Map<String, RevocationStatus>>(emptyMap())
+    val revocationResults = _revocationResults.asStateFlow()
 
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
@@ -63,7 +69,13 @@ class IdentityDetailViewModel @Inject constructor(
             val id = vault.getIdentity(keyId)
             _identity.value = id
             if (id != null) {
-                _credentials.value = vault.getCredentialsForDid(id.did)
+                val creds = vault.getCredentialsForDid(id.did)
+                _credentials.value = creds
+                val results = mutableMapOf<String, RevocationStatus>()
+                for (vc in creds) {
+                    results[vc.id] = revocationManager.checkRevocation(vc)
+                }
+                _revocationResults.value = results
             }
         }
     }
@@ -102,6 +114,7 @@ fun IdentityDetailScreen(
 ) {
     val identity by viewModel.identity.collectAsState()
     val credentials by viewModel.credentials.collectAsState()
+    val revocationResults by viewModel.revocationResults.collectAsState()
     val error by viewModel.error.collectAsState()
     val isDeactivating by viewModel.isDeactivating.collectAsState()
     val view = LocalView.current
@@ -270,18 +283,21 @@ fun IdentityDetailScreen(
                 } else {
                     items(credentials.size) { index ->
                         val vc = credentials[index]
-                        val status = vcDisplayStatus(vc)
+                        val revocationStatus = revocationResults[vc.id]
+                        val status = resolveDisplayStatus(vc, revocationStatus)
                         val name = serviceName(vc)
                         val url = serviceUrl(vc)
                         val statusColor = when (status) {
                             VcDisplayStatus.ACTIVE -> Success
                             VcDisplayStatus.EXPIRING -> Warning
                             VcDisplayStatus.EXPIRED -> Danger
+                            VcDisplayStatus.REVOKED -> Danger
                         }
                         val statusLabel = when (status) {
                             VcDisplayStatus.ACTIVE -> "Active"
                             VcDisplayStatus.EXPIRING -> "Expiring soon"
                             VcDisplayStatus.EXPIRED -> "Expired"
+                            VcDisplayStatus.REVOKED -> "Revoked"
                         }
 
                         Card(
@@ -417,7 +433,7 @@ fun ActionCard(icon: String, label: String, modifier: Modifier = Modifier, onCli
     }
 }
 
-enum class VcDisplayStatus { ACTIVE, EXPIRING, EXPIRED }
+enum class VcDisplayStatus { ACTIVE, EXPIRING, EXPIRED, REVOKED }
 
 fun vcDisplayStatus(vc: VerifiableCredential): VcDisplayStatus {
     val exp = vc.expirationDate ?: return VcDisplayStatus.ACTIVE
@@ -432,6 +448,11 @@ fun vcDisplayStatus(vc: VerifiableCredential): VcDisplayStatus {
     } catch (_: Exception) {
         VcDisplayStatus.ACTIVE
     }
+}
+
+fun resolveDisplayStatus(vc: VerifiableCredential, revocationStatus: RevocationStatus?): VcDisplayStatus {
+    if (revocationStatus == RevocationStatus.REVOKED) return VcDisplayStatus.REVOKED
+    return vcDisplayStatus(vc)
 }
 
 fun serviceName(vc: VerifiableCredential): String {
