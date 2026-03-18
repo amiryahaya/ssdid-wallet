@@ -162,33 +162,36 @@ struct ScanQrScreen: View {
         guard let action = try? handler.parse(urlString: content) else { return }
 
         switch action {
-        case .login(let serverUrl, let serviceName, let challengeId, let callbackUrl, let requestedClaims, let inviteCode):
+        case .login(let serverUrl, let serviceName, let challengeId, let callbackUrl, let requestedClaims, let inviteCode, let state):
             router.push(.driveLogin(
                 serviceUrl: serverUrl,
                 serviceName: serviceName ?? "SSDID Drive",
                 challengeId: challengeId ?? "",
                 callbackUrl: callbackUrl,
                 requestedClaims: requestedClaims ?? "",
-                inviteCode: inviteCode
+                inviteCode: inviteCode,
+                state: state
             ))
         case .register(let serverUrl, let serverDid):
             router.push(.registration(
                 serverUrl: serverUrl,
                 serverDid: serverDid ?? ""
             ))
-        case .authenticate(let serverUrl, let callbackUrl, let sessionId, let requestedClaims, let acceptedAlgorithms):
+        case .authenticate(let serverUrl, let callbackUrl, let sessionId, let requestedClaims, let acceptedAlgorithms, let state):
             if sessionId != nil || requestedClaims != nil {
                 router.push(.consent(
                     serverUrl: serverUrl,
                     callbackUrl: callbackUrl,
                     sessionId: sessionId ?? "",
                     requestedClaims: requestedClaims ?? "",
-                    acceptedAlgorithms: acceptedAlgorithms
+                    acceptedAlgorithms: acceptedAlgorithms,
+                    state: state
                 ))
             } else {
                 router.push(.authFlow(
                     serverUrl: serverUrl,
-                    callbackUrl: callbackUrl
+                    callbackUrl: callbackUrl,
+                    state: state
                 ))
             }
         case .sign(let serverUrl, let sessionToken):
@@ -201,11 +204,12 @@ struct ScanQrScreen: View {
                 issuerUrl: issuerUrl,
                 offerId: offerId
             ))
-        case .invite(let serverUrl, let token, let callbackUrl):
+        case .invite(let serverUrl, let token, let callbackUrl, let state):
             router.push(.inviteAccept(
                 serverUrl: serverUrl,
                 token: token,
-                callbackUrl: callbackUrl
+                callbackUrl: callbackUrl,
+                state: state
             ))
         case .openid4vp(let rawUri):
             router.push(.presentationRequest(rawUri: rawUri))

@@ -5,6 +5,7 @@ struct AuthFlowScreen: View {
 
     let serverUrl: String
     let callbackUrl: String
+    let csrfState: String?
 
     enum AuthState {
         case idle

@@ -19,7 +19,8 @@ data class DeepLinkAction(
     val sessionId: String = "",
     val token: String = "",
     val requestedClaims: List<ClaimRequest> = emptyList(),
-    val acceptedAlgorithms: List<String> = emptyList()
+    val acceptedAlgorithms: List<String> = emptyList(),
+    val state: String = ""
 ) {
     /**
      * Returns the navigation route for this deep link action,
@@ -32,9 +33,9 @@ data class DeepLinkAction(
                 val claimsJson = Json.encodeToString(requestedClaims)
                 val algosJson = if (acceptedAlgorithms.isNotEmpty())
                     Json.encodeToString(acceptedAlgorithms) else ""
-                Screen.Consent.createRoute(serverUrl, callbackUrl, sessionId, claimsJson, algosJson)
+                Screen.Consent.createRoute(serverUrl, callbackUrl, sessionId, claimsJson, algosJson, state)
             } else {
-                Screen.AuthFlow.createRoute(serverUrl, callbackUrl)
+                Screen.AuthFlow.createRoute(serverUrl, callbackUrl, state)
             }
         }
         "sign" -> Screen.TxSigning.createRoute(serverUrl, sessionToken)
@@ -103,6 +104,11 @@ object DeepLinkHandler {
             if (isValidCallbackUrl(rawCallbackUrl)) rawCallbackUrl else ""
         } else ""
 
+        // Parse state parameter for CSRF protection (OAuth 2.0 pattern)
+        val state = if (action in setOf("authenticate", "invite")) {
+            uri.getQueryParameter("state") ?: ""
+        } else ""
+
         val sessionId = uri.getQueryParameter("session_id") ?: ""
         val token = uri.getQueryParameter("token") ?: ""
 
@@ -134,7 +140,8 @@ object DeepLinkHandler {
             sessionId = sessionId,
             token = token,
             requestedClaims = requestedClaims,
-            acceptedAlgorithms = acceptedAlgorithms
+            acceptedAlgorithms = acceptedAlgorithms,
+            state = state
         )
     }
 

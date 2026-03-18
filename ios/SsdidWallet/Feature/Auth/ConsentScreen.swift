@@ -8,6 +8,7 @@ struct ConsentScreen: View {
     let sessionId: String
     let requestedClaims: String
     let acceptedAlgorithms: String?
+    let state: String?
     var credentialFormat: String = "vc" // "vc" or "sd-jwt-vc"
 
     struct ClaimItem: Identifiable {

@@ -7,6 +7,7 @@ struct InviteAcceptScreen: View {
     let serverUrl: String
     let token: String
     let callbackUrl: String
+    let state: String?
 
     @State private var viewModel: InviteAcceptViewModel?
 
@@ -31,6 +32,7 @@ struct InviteAcceptScreen: View {
                     serverUrl: serverUrl,
                     token: token,
                     callbackUrl: callbackUrl,
+                    state: state,
                     services: services
                 )
                 viewModel = created

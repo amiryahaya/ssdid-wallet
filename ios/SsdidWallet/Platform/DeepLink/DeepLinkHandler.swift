@@ -3,11 +3,11 @@ import Foundation
 /// Represents a parsed deep link action from an ssdid:// URL.
 enum DeepLinkAction: Equatable {
     case register(serverUrl: String, serverDid: String?)
-    case authenticate(serverUrl: String, callbackUrl: String, sessionId: String?, requestedClaims: String?, acceptedAlgorithms: String?)
+    case authenticate(serverUrl: String, callbackUrl: String, sessionId: String?, requestedClaims: String?, acceptedAlgorithms: String?, state: String?)
     case sign(serverUrl: String, sessionToken: String)
     case credentialOffer(issuerUrl: String, offerId: String)
-    case login(serverUrl: String, serviceName: String?, challengeId: String?, callbackUrl: String, requestedClaims: String?, inviteCode: String?)
-    case invite(serverUrl: String, token: String, callbackUrl: String)
+    case login(serverUrl: String, serviceName: String?, challengeId: String?, callbackUrl: String, requestedClaims: String?, inviteCode: String?, state: String?)
+    case invite(serverUrl: String, token: String, callbackUrl: String, state: String?)
     case openid4vp(rawUri: String)
     case openidCredentialOffer(offerData: String)
 }
@@ -100,7 +100,8 @@ final class DeepLinkHandler {
                 callbackUrl: callbackUrl,
                 sessionId: params["session_id"],
                 requestedClaims: params["requested_claims"],
-                acceptedAlgorithms: params["accepted_algorithms"]
+                acceptedAlgorithms: params["accepted_algorithms"],
+                state: params["state"]
             )
 
         case "sign":
@@ -138,7 +139,8 @@ final class DeepLinkHandler {
                 challengeId: params["challenge_id"],
                 callbackUrl: callbackUrl,
                 requestedClaims: params["requested_claims"],
-                inviteCode: params["invite_code"]
+                inviteCode: params["invite_code"],
+                state: params["state"]
             )
 
         case "invite":
@@ -153,7 +155,7 @@ final class DeepLinkHandler {
             if !callbackUrl.isEmpty {
                 try Self.validateCallbackUrl(callbackUrl)
             }
-            return .invite(serverUrl: serverUrl, token: token, callbackUrl: callbackUrl)
+            return .invite(serverUrl: serverUrl, token: token, callbackUrl: callbackUrl, state: params["state"])
 
         default:
             throw DeepLinkError.invalidHost(host)

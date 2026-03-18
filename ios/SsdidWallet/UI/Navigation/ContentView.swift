@@ -52,26 +52,28 @@ struct RootView: View {
         guard let action = try? handler.parse(url: url) else { return }
 
         switch action {
-        case .login(let serverUrl, let serviceName, let challengeId, let callbackUrl, let requestedClaims, let inviteCode):
+        case .login(let serverUrl, let serviceName, let challengeId, let callbackUrl, let requestedClaims, let inviteCode, let state):
             router.push(.driveLogin(
                 serviceUrl: serverUrl,
                 serviceName: serviceName ?? "SSDID Drive",
                 challengeId: challengeId ?? "",
                 callbackUrl: callbackUrl,
                 requestedClaims: requestedClaims ?? "",
-                inviteCode: inviteCode
+                inviteCode: inviteCode,
+                state: state
             ))
-        case .authenticate(let serverUrl, let callbackUrl, let sessionId, let requestedClaims, let acceptedAlgorithms):
+        case .authenticate(let serverUrl, let callbackUrl, let sessionId, let requestedClaims, let acceptedAlgorithms, let state):
             if sessionId != nil || requestedClaims != nil {
                 router.push(.consent(
                     serverUrl: serverUrl,
                     callbackUrl: callbackUrl,
                     sessionId: sessionId ?? "",
                     requestedClaims: requestedClaims ?? "",
-                    acceptedAlgorithms: acceptedAlgorithms
+                    acceptedAlgorithms: acceptedAlgorithms,
+                    state: state
                 ))
             } else {
-                router.push(.authFlow(serverUrl: serverUrl, callbackUrl: callbackUrl))
+                router.push(.authFlow(serverUrl: serverUrl, callbackUrl: callbackUrl, state: state))
             }
         case .register(let serverUrl, let serverDid):
             router.push(.registration(serverUrl: serverUrl, serverDid: serverDid ?? ""))
@@ -79,8 +81,8 @@ struct RootView: View {
             router.push(.txSigning(serverUrl: serverUrl, sessionToken: sessionToken))
         case .credentialOffer(let issuerUrl, let offerId):
             router.push(.credentialOffer(issuerUrl: issuerUrl, offerId: offerId))
-        case .invite(let serverUrl, let token, let callbackUrl):
-            router.push(.inviteAccept(serverUrl: serverUrl, token: token, callbackUrl: callbackUrl))
+        case .invite(let serverUrl, let token, let callbackUrl, let state):
+            router.push(.inviteAccept(serverUrl: serverUrl, token: token, callbackUrl: callbackUrl, state: state))
         case .openid4vp(let rawUri):
             router.push(.presentationRequest(rawUri: rawUri))
         case .openidCredentialOffer(let offerData):
@@ -107,12 +109,12 @@ struct RootView: View {
             ScanQrScreen()
         case .registration(let serverUrl, let serverDid):
             RegistrationScreen(serverUrl: serverUrl, serverDid: serverDid)
-        case .authFlow(let serverUrl, let callbackUrl):
-            AuthFlowScreen(serverUrl: serverUrl, callbackUrl: callbackUrl)
-        case .consent(let serverUrl, let callbackUrl, let sessionId, let requestedClaims, let acceptedAlgorithms):
-            ConsentScreen(serverUrl: serverUrl, callbackUrl: callbackUrl, sessionId: sessionId, requestedClaims: requestedClaims, acceptedAlgorithms: acceptedAlgorithms)
-        case .driveLogin(let serviceUrl, let serviceName, let challengeId, let callbackUrl, let requestedClaims, let inviteCode):
-            DriveLoginScreen(serviceUrl: serviceUrl, serviceName: serviceName, challengeId: challengeId, callbackUrl: callbackUrl, requestedClaims: requestedClaims, inviteCode: inviteCode)
+        case .authFlow(let serverUrl, let callbackUrl, let state):
+            AuthFlowScreen(serverUrl: serverUrl, callbackUrl: callbackUrl, csrfState: state)
+        case .consent(let serverUrl, let callbackUrl, let sessionId, let requestedClaims, let acceptedAlgorithms, let state):
+            ConsentScreen(serverUrl: serverUrl, callbackUrl: callbackUrl, sessionId: sessionId, requestedClaims: requestedClaims, acceptedAlgorithms: acceptedAlgorithms, state: state)
+        case .driveLogin(let serviceUrl, let serviceName, let challengeId, let callbackUrl, let requestedClaims, let inviteCode, let state):
+            DriveLoginScreen(serviceUrl: serviceUrl, serviceName: serviceName, challengeId: challengeId, callbackUrl: callbackUrl, requestedClaims: requestedClaims, inviteCode: inviteCode, state: state)
         case .txSigning(let serverUrl, let sessionToken):
             TxSigningScreen(serverUrl: serverUrl, sessionToken: sessionToken)
         case .credentials:
@@ -145,8 +147,8 @@ struct RootView: View {
             DeviceManagementScreen(keyId: keyId)
         case .deviceEnroll(let keyId, let mode):
             DeviceEnrollScreen(keyId: keyId, mode: mode)
-        case .inviteAccept(let serverUrl, let token, let callbackUrl):
-            InviteAcceptScreen(serverUrl: serverUrl, token: token, callbackUrl: callbackUrl)
+        case .inviteAccept(let serverUrl, let token, let callbackUrl, let state):
+            InviteAcceptScreen(serverUrl: serverUrl, token: token, callbackUrl: callbackUrl, state: state)
         case .presentationRequest(let rawUri):
             PresentationRequestScreen(rawUri: rawUri)
         }

@@ -58,6 +58,7 @@ class AuthFlowViewModel @Inject constructor(
 ) : ViewModel() {
     val serverUrl: String = savedStateHandle["serverUrl"] ?: ""
     val callbackUrl: String = savedStateHandle["callbackUrl"] ?: ""
+    private val csrfState: String = savedStateHandle["state"] ?: ""
     val hasCallback: Boolean get() = callbackUrl.isNotEmpty()
 
     private val _state = MutableStateFlow<AuthState>(AuthState.Idle)
@@ -100,10 +101,13 @@ class AuthFlowViewModel @Inject constructor(
 
     fun buildCallbackUri(sessionToken: String): android.net.Uri? {
         if (callbackUrl.isEmpty()) return null
-        return android.net.Uri.parse(callbackUrl)
+        val builder = android.net.Uri.parse(callbackUrl)
             .buildUpon()
             .appendQueryParameter("session_token", sessionToken)
-            .build()
+        if (csrfState.isNotEmpty()) {
+            builder.appendQueryParameter("state", csrfState)
+        }
+        return builder.build()
     }
 }
 

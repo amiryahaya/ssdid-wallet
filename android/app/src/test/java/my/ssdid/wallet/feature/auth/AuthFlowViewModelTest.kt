@@ -55,10 +55,12 @@ class AuthFlowViewModelTest {
 
     private fun createViewModel(
         serverUrl: String = "https://example.com",
-        callbackUrl: String = ""
+        callbackUrl: String = "",
+        state: String = ""
     ): AuthFlowViewModel {
         val map = mutableMapOf<String, Any>("serverUrl" to serverUrl)
         if (callbackUrl.isNotEmpty()) map["callbackUrl"] = callbackUrl
+        if (state.isNotEmpty()) map["state"] = state
         return AuthFlowViewModel(
             client = client,
             vault = vault,
@@ -243,6 +245,25 @@ class AuthFlowViewModelTest {
         val callbackUri = vm.buildCallbackUri(success.sessionToken)
         assertThat(callbackUri).isNotNull()
         assertThat(callbackUri!!.getQueryParameter("session_token")).isEqualTo("tok_abc")
+    }
+
+    // --- CSRF state parameter tests ---
+
+    @Test
+    fun `buildCallbackUri includes state parameter when provided`() {
+        val vm = createViewModel(callbackUrl = "ssdiddrive://auth/callback", state = "csrf-state-123")
+        val uri = vm.buildCallbackUri("tok-abc")
+        assertThat(uri).isNotNull()
+        assertThat(uri!!.getQueryParameter("session_token")).isEqualTo("tok-abc")
+        assertThat(uri.getQueryParameter("state")).isEqualTo("csrf-state-123")
+    }
+
+    @Test
+    fun `buildCallbackUri omits state parameter when empty`() {
+        val vm = createViewModel(callbackUrl = "ssdiddrive://auth/callback", state = "")
+        val uri = vm.buildCallbackUri("tok-abc")
+        assertThat(uri).isNotNull()
+        assertThat(uri!!.getQueryParameter("state")).isNull()
     }
 
     @Test

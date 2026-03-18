@@ -588,4 +588,104 @@ class DeepLinkHandlerTest {
         assertThat(route).isNotNull()
         assertThat(route).contains("credential_offer")
     }
+
+    // --- CSRF state parameter tests ---
+
+    @Test
+    fun `parse authenticate with state parameter preserves state`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "authenticate",
+            queryParams = mapOf(
+                "server_url" to "https://demo.ssdid.my",
+                "callback_url" to "ssdiddrive://auth/callback",
+                "state" to "csrf-token-abc123"
+            )
+        )
+        val result = DeepLinkHandler.parse(uri)
+
+        assertThat(result).isNotNull()
+        assertThat(result!!.state).isEqualTo("csrf-token-abc123")
+    }
+
+    @Test
+    fun `parse authenticate without state parameter has empty state`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "authenticate",
+            queryParams = mapOf(
+                "server_url" to "https://demo.ssdid.my",
+                "callback_url" to "ssdiddrive://auth/callback"
+            )
+        )
+        val result = DeepLinkHandler.parse(uri)
+
+        assertThat(result).isNotNull()
+        assertThat(result!!.state).isEmpty()
+    }
+
+    @Test
+    fun `parse invite with state parameter preserves state`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "invite",
+            queryParams = mapOf(
+                "server_url" to "https://demo.ssdid.my",
+                "token" to "invite-tok",
+                "callback_url" to "ssdiddrive://auth/callback",
+                "state" to "invite-state-xyz"
+            )
+        )
+        val result = DeepLinkHandler.parse(uri)
+
+        assertThat(result).isNotNull()
+        assertThat(result!!.state).isEqualTo("invite-state-xyz")
+    }
+
+    @Test
+    fun `toNavRoute for authenticate includes state in consent route`() {
+        val deepLink = DeepLinkAction(
+            action = "authenticate",
+            serverUrl = "https://demo.ssdid.my",
+            callbackUrl = "ssdiddrive://auth/callback",
+            sessionId = "sess-1",
+            requestedClaims = listOf(),
+            state = "my-state-param"
+        )
+        val route = deepLink.toNavRoute()
+
+        assertThat(route).isNotNull()
+        assertThat(route).contains("state=my-state-param")
+    }
+
+    @Test
+    fun `toNavRoute for authenticate includes state in auth_flow route`() {
+        val deepLink = DeepLinkAction(
+            action = "authenticate",
+            serverUrl = "https://demo.ssdid.my",
+            callbackUrl = "ssdiddrive://auth/callback",
+            state = "flow-state-123"
+        )
+        val route = deepLink.toNavRoute()
+
+        assertThat(route).isNotNull()
+        assertThat(route).contains("auth_flow")
+        assertThat(route).contains("state=flow-state-123")
+    }
+
+    @Test
+    fun `parse register does not parse state parameter`() {
+        val uri = mockUri(
+            scheme = "ssdid",
+            host = "register",
+            queryParams = mapOf(
+                "server_url" to "https://demo.ssdid.my",
+                "server_did" to "did:ssdid:dGVzdHNlcnZlcmRlbW8xMjM",
+                "state" to "should-be-ignored"
+            )
+        )
+        val result = DeepLinkHandler.parse(uri)
+        assertThat(result).isNotNull()
+        assertThat(result!!.state).isEmpty()
+    }
 }

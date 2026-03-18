@@ -50,6 +50,7 @@ class ConsentViewModel @Inject constructor(
     val serverUrl: String = savedStateHandle["serverUrl"] ?: ""
     val callbackUrl: String = savedStateHandle["callbackUrl"] ?: ""
     val sessionId: String = savedStateHandle["sessionId"] ?: ""
+    private val csrfState: String = savedStateHandle["state"] ?: ""
     val hasCallback: Boolean get() = callbackUrl.isNotEmpty()
     val isWebFlow: Boolean get() = sessionId.isNotEmpty()
 
@@ -249,18 +250,24 @@ class ConsentViewModel @Inject constructor(
         if (callbackUrl.isEmpty()) return null
         val uri = Uri.parse(callbackUrl)
         if (uri.scheme != "ssdid" && uri.scheme != "https") return null
-        return uri.buildUpon()
+        val builder = uri.buildUpon()
             .appendQueryParameter("session_token", sessionToken)
             .appendQueryParameter("did", _selectedIdentity.value?.did ?: "")
-            .build()
+        if (csrfState.isNotEmpty()) {
+            builder.appendQueryParameter("state", csrfState)
+        }
+        return builder.build()
     }
 
     fun buildDeclineCallbackUri(): Uri? {
         if (callbackUrl.isEmpty()) return null
         val uri = Uri.parse(callbackUrl)
         if (uri.scheme != "ssdid" && uri.scheme != "https") return null
-        return uri.buildUpon()
+        val builder = uri.buildUpon()
             .appendQueryParameter("error", "user_declined")
-            .build()
+        if (csrfState.isNotEmpty()) {
+            builder.appendQueryParameter("state", csrfState)
+        }
+        return builder.build()
     }
 }

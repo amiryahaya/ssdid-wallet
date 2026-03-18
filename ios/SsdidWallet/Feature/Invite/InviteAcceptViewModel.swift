@@ -24,14 +24,16 @@ final class InviteAcceptViewModel {
     private let serverUrl: String
     private let token: String
     private let callbackUrl: String
+    private let state: String?
     private let services: ServiceContainer
     private var acceptTask: Task<Void, Never>?
     private var hasReturned = false
 
-    init(serverUrl: String, token: String, callbackUrl: String, services: ServiceContainer) {
+    init(serverUrl: String, token: String, callbackUrl: String, state: String? = nil, services: ServiceContainer) {
         self.serverUrl = serverUrl
         self.token = token
         self.callbackUrl = callbackUrl
+        self.state = state
         self.services = services
     }
 
@@ -171,6 +173,9 @@ final class InviteAcceptViewModel {
         var items = components.queryItems ?? []
         items.append(URLQueryItem(name: "session_token", value: sessionToken))
         items.append(URLQueryItem(name: "status", value: "success"))
+        if let state, !state.isEmpty {
+            items.append(URLQueryItem(name: "state", value: state))
+        }
         components.queryItems = items
 
         if let url = components.url, UIApplication.shared.canOpenURL(url) {
@@ -187,6 +192,9 @@ final class InviteAcceptViewModel {
             }
             var items = components.queryItems ?? []
             items.append(URLQueryItem(name: "status", value: "cancelled"))
+            if let state, !state.isEmpty {
+                items.append(URLQueryItem(name: "state", value: state))
+            }
             components.queryItems = items
             if let url = components.url, UIApplication.shared.canOpenURL(url) {
                 UIApplication.shared.open(url)

@@ -22,18 +22,19 @@ object EmailVerification : Screen("email_verification?email={email}") {
         fun createRoute(serverUrl: String, serverDid: String) =
             "registration?serverUrl=${Uri.encode(serverUrl)}&serverDid=${Uri.encode(serverDid)}"
     }
-    object AuthFlow : Screen("auth_flow?serverUrl={serverUrl}&callbackUrl={callbackUrl}") {
-        fun createRoute(serverUrl: String, callbackUrl: String = "") =
-            "auth_flow?serverUrl=${Uri.encode(serverUrl)}&callbackUrl=${Uri.encode(callbackUrl)}"
+    object AuthFlow : Screen("auth_flow?serverUrl={serverUrl}&callbackUrl={callbackUrl}&state={state}") {
+        fun createRoute(serverUrl: String, callbackUrl: String = "", state: String = "") =
+            "auth_flow?serverUrl=${Uri.encode(serverUrl)}&callbackUrl=${Uri.encode(callbackUrl)}&state=${Uri.encode(state)}"
     }
-    object Consent : Screen("consent?serverUrl={serverUrl}&callbackUrl={callbackUrl}&sessionId={sessionId}&requestedClaims={requestedClaims}&acceptedAlgorithms={acceptedAlgorithms}") {
+    object Consent : Screen("consent?serverUrl={serverUrl}&callbackUrl={callbackUrl}&sessionId={sessionId}&requestedClaims={requestedClaims}&acceptedAlgorithms={acceptedAlgorithms}&state={state}") {
         fun createRoute(
             serverUrl: String,
             callbackUrl: String = "",
             sessionId: String = "",
             requestedClaims: String = "",
-            acceptedAlgorithms: String = ""
-        ): String = "consent?serverUrl=${Uri.encode(serverUrl)}&callbackUrl=${Uri.encode(callbackUrl)}&sessionId=${Uri.encode(sessionId)}&requestedClaims=${Uri.encode(requestedClaims)}&acceptedAlgorithms=${Uri.encode(acceptedAlgorithms)}"
+            acceptedAlgorithms: String = "",
+            state: String = ""
+        ): String = "consent?serverUrl=${Uri.encode(serverUrl)}&callbackUrl=${Uri.encode(callbackUrl)}&sessionId=${Uri.encode(sessionId)}&requestedClaims=${Uri.encode(requestedClaims)}&acceptedAlgorithms=${Uri.encode(acceptedAlgorithms)}&state=${Uri.encode(state)}"
     }
     object DriveLogin : Screen("drive_login?serviceUrl={serviceUrl}&serviceName={serviceName}&challengeId={challengeId}&requestedClaims={requestedClaims}") {
         fun createRoute(

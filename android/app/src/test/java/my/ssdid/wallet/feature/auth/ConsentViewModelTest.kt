@@ -81,14 +81,16 @@ class ConsentViewModelTest {
         requestedClaims: String = """[{"key":"name","required":true},{"key":"phone","required":false}]""",
         acceptedAlgorithms: String = "",
         callbackUrl: String = "",
-        sessionId: String = ""
+        sessionId: String = "",
+        state: String = ""
     ): ConsentViewModel {
         val handle = SavedStateHandle(mapOf(
             "serverUrl" to serverUrl,
             "requestedClaims" to requestedClaims,
             "acceptedAlgorithms" to acceptedAlgorithms,
             "callbackUrl" to callbackUrl,
-            "sessionId" to sessionId
+            "sessionId" to sessionId,
+            "state" to state
         ))
         return ConsentViewModel(vault, httpClient, verifier, biometricAuth, handle)
     }
@@ -469,5 +471,42 @@ class ConsentViewModelTest {
         advanceUntilIdle()
         assertThat(vm.state.value).isInstanceOf(ConsentState.Error::class.java)
         assertThat((vm.state.value as ConsentState.Error).message).contains("No identity selected")
+    }
+
+    // --- CSRF state parameter tests ---
+
+    @Test
+    fun `buildCallbackUri includes state parameter when provided`() = runTest {
+        coEvery { vault.listIdentities() } returns listOf(testIdentity)
+        stubInitChallenge()
+        val vm = createViewModel(callbackUrl = "ssdid://cb", state = "csrf-abc123")
+        advanceUntilIdle()
+        val uri = vm.buildCallbackUri("tok-123")
+        assertThat(uri).isNotNull()
+        assertThat(uri.toString()).contains("session_token=tok-123")
+        assertThat(uri.toString()).contains("state=csrf-abc123")
+    }
+
+    @Test
+    fun `buildCallbackUri omits state parameter when empty`() = runTest {
+        coEvery { vault.listIdentities() } returns listOf(testIdentity)
+        stubInitChallenge()
+        val vm = createViewModel(callbackUrl = "ssdid://cb", state = "")
+        advanceUntilIdle()
+        val uri = vm.buildCallbackUri("tok-123")
+        assertThat(uri).isNotNull()
+        assertThat(uri.toString()).doesNotContain("state=")
+    }
+
+    @Test
+    fun `buildDeclineCallbackUri includes state parameter when provided`() = runTest {
+        coEvery { vault.listIdentities() } returns listOf(testIdentity)
+        stubInitChallenge()
+        val vm = createViewModel(callbackUrl = "ssdid://cb", state = "csrf-decline-xyz")
+        advanceUntilIdle()
+        val uri = vm.buildDeclineCallbackUri()
+        assertThat(uri).isNotNull()
+        assertThat(uri.toString()).contains("error=user_declined")
+        assertThat(uri.toString()).contains("state=csrf-decline-xyz")
     }
 }

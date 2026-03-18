@@ -11,13 +11,14 @@ enum Route: Hashable {
     case identityDetail(keyId: String)
     case scanQr
     case registration(serverUrl: String, serverDid: String)
-    case authFlow(serverUrl: String, callbackUrl: String)
+    case authFlow(serverUrl: String, callbackUrl: String, state: String? = nil)
     case consent(
         serverUrl: String,
         callbackUrl: String,
         sessionId: String,
         requestedClaims: String,
-        acceptedAlgorithms: String? = nil
+        acceptedAlgorithms: String? = nil,
+        state: String? = nil
     )
     case driveLogin(
         serviceUrl: String,
@@ -25,7 +26,8 @@ enum Route: Hashable {
         challengeId: String,
         callbackUrl: String,
         requestedClaims: String,
-        inviteCode: String? = nil
+        inviteCode: String? = nil,
+        state: String? = nil
     )
     case txSigning(serverUrl: String, sessionToken: String)
     case credentials
@@ -43,7 +45,7 @@ enum Route: Hashable {
     case socialRecoveryRestore
     case deviceManagement(keyId: String)
     case deviceEnroll(keyId: String, mode: String)
-    case inviteAccept(serverUrl: String, token: String, callbackUrl: String)
+    case inviteAccept(serverUrl: String, token: String, callbackUrl: String, state: String? = nil)
     case presentationRequest(rawUri: String)
 }
 

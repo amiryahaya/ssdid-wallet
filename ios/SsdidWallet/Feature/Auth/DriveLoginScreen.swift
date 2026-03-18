@@ -10,6 +10,7 @@ struct DriveLoginScreen: View {
     let callbackUrl: String
     let requestedClaims: String
     let inviteCode: String?
+    let state: String?
 
     struct ClaimItem: Identifiable {
         let id: String
@@ -433,6 +434,9 @@ struct DriveLoginScreen: View {
 
         var items = components.queryItems ?? []
         items.append(URLQueryItem(name: "session_token", value: sessionToken))
+        if let state, !state.isEmpty {
+            items.append(URLQueryItem(name: "state", value: state))
+        }
         components.queryItems = items
 
         if let url = components.url, UIApplication.shared.canOpenURL(url) {
