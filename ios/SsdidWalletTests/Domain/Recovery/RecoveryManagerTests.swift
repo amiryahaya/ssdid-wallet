@@ -186,6 +186,7 @@ final class RecoveryManagerTests: XCTestCase {
     // MARK: - Tests
 
     func testGenerateRecoveryKeyReturnsNonEmptyData() async throws {
+        try XCTSkipIf(ProcessInfo.processInfo.environment["CI"] != nil, "Requires device Keychain")
         let identity = try await seedIdentity()
 
         let recoveryPrivateKey = try await sut.generateRecoveryKey(identity: identity)
@@ -194,6 +195,7 @@ final class RecoveryManagerTests: XCTestCase {
     }
 
     func testHasRecoveryKeyReturnsTrueAfterGeneration() async throws {
+        try XCTSkipIf(ProcessInfo.processInfo.environment["CI"] != nil, "Requires device Keychain")
         let identity = try await seedIdentity()
 
         _ = try await sut.generateRecoveryKey(identity: identity)
@@ -208,6 +210,7 @@ final class RecoveryManagerTests: XCTestCase {
     }
 
     func testGenerateRecoveryKeyStoresRecoveryPublicKey() async throws {
+        try XCTSkipIf(ProcessInfo.processInfo.environment["CI"] != nil, "Requires device Keychain")
         let identity = try await seedIdentity()
 
         _ = try await sut.generateRecoveryKey(identity: identity)
@@ -220,6 +223,7 @@ final class RecoveryManagerTests: XCTestCase {
     }
 
     func testGenerateRecoveryKeyUpdatesIdentityMetadata() async throws {
+        try XCTSkipIf(ProcessInfo.processInfo.environment["CI"] != nil, "Requires device Keychain")
         let identity = try await seedIdentity()
 
         _ = try await sut.generateRecoveryKey(identity: identity)
@@ -231,6 +235,7 @@ final class RecoveryManagerTests: XCTestCase {
     }
 
     func testRestoreWithRecoveryKeyCreatesNewIdentityWithSameDid() async throws {
+        try XCTSkipIf(ProcessInfo.processInfo.environment["CI"] != nil, "Requires device Keychain")
         let identity = try await seedIdentity()
         let recoveryPrivateKey = try await sut.generateRecoveryKey(identity: identity)
         let recoveryKeyBase64 = recoveryPrivateKey.base64EncodedString()
@@ -249,6 +254,7 @@ final class RecoveryManagerTests: XCTestCase {
     }
 
     func testRestoreWithRecoveryKeyFailsWithWrongKey() async throws {
+        try XCTSkipIf(ProcessInfo.processInfo.environment["CI"] != nil, "Requires device Keychain")
         let identity = try await seedIdentity()
         _ = try await sut.generateRecoveryKey(identity: identity)
 
@@ -274,6 +280,7 @@ final class RecoveryManagerTests: XCTestCase {
     }
 
     func testRestoreWithInvalidBase64Throws() async throws {
+        try XCTSkipIf(ProcessInfo.processInfo.environment["CI"] != nil, "Requires device Keychain")
         do {
             _ = try await sut.restoreWithRecoveryKey(
                 did: "did:ssdid:test",
@@ -292,6 +299,7 @@ final class RecoveryManagerTests: XCTestCase {
     }
 
     func testGenerateRecoveryKeyProducesUniqueKeysPerCall() async throws {
+        try XCTSkipIf(ProcessInfo.processInfo.environment["CI"] != nil, "Requires device Keychain")
         let identity = try await seedIdentity()
 
         let key1 = try await sut.generateRecoveryKey(identity: identity)

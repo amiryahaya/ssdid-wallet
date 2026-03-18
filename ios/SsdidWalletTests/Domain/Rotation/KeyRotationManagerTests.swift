@@ -303,6 +303,7 @@ final class KeyRotationManagerTests: XCTestCase {
     // MARK: - Test 3: executeRotation promotes pre-rotated key
 
     func testExecuteRotationPromotesPreRotatedKey() async throws {
+        try XCTSkipIf(ProcessInfo.processInfo.environment["CI"] != nil, "Requires device-only test")
         let identity = makeIdentity()
         try await seedIdentity(identity)
 

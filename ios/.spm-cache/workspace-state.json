@@ -1,0 +1,165 @@
+{
+  "object" : {
+    "artifacts" : [
+      {
+        "kind" : {
+          "xcframework" : {
+
+          }
+        },
+        "packageRef" : {
+          "identity" : "kazsign",
+          "kind" : "root",
+          "location" : "/Users/amirrudinyahaya/Workspace/ssdid-wallet/ios/Packages/KazSign",
+          "name" : "KazSign"
+        },
+        "path" : "/Users/amirrudinyahaya/Workspace/ssdid-wallet/ios/Packages/KazSign/KazSignNative.xcframework",
+        "source" : {
+          "type" : "local"
+        },
+        "targetName" : "KazSignNative"
+      },
+      {
+        "kind" : {
+          "xcframework" : {
+
+          }
+        },
+        "packageRef" : {
+          "identity" : "liboqs",
+          "kind" : "root",
+          "location" : "/Users/amirrudinyahaya/Workspace/ssdid-wallet/ios/Packages/LibOQS",
+          "name" : "LibOQS"
+        },
+        "path" : "/Users/amirrudinyahaya/Workspace/ssdid-wallet/ios/Packages/LibOQS/LibOQSNative.xcframework",
+        "source" : {
+          "type" : "local"
+        },
+        "targetName" : "LibOQSNative"
+      },
+      {
+        "kind" : {
+          "xcframework" : {
+
+          }
+        },
+        "packageRef" : {
+          "identity" : "sentry-cocoa",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/getsentry/sentry-cocoa.git",
+          "name" : "Sentry"
+        },
+        "path" : "/Users/amirrudinyahaya/Workspace/ssdid-wallet/ios/.spm-cache/artifacts/sentry-cocoa/Sentry/Sentry.xcframework",
+        "source" : {
+          "checksum" : "2f1aa2f53d061da351a7ae05857c4bf41a74905cfeb41f6a691de20b25ff6893",
+          "type" : "remote",
+          "url" : "https://github.com/getsentry/sentry-cocoa/releases/download/9.7.0/Sentry.xcframework.zip"
+        },
+        "targetName" : "Sentry"
+      },
+      {
+        "kind" : {
+          "xcframework" : {
+
+          }
+        },
+        "packageRef" : {
+          "identity" : "sentry-cocoa",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/getsentry/sentry-cocoa.git",
+          "name" : "Sentry"
+        },
+        "path" : "/Users/amirrudinyahaya/Workspace/ssdid-wallet/ios/.spm-cache/artifacts/sentry-cocoa/Sentry-Dynamic/Sentry-Dynamic.xcframework",
+        "source" : {
+          "checksum" : "b38c0065a4e660462568cf6dcff8b912c3c3a3217eee60be64372bbe500bccbf",
+          "type" : "remote",
+          "url" : "https://github.com/getsentry/sentry-cocoa/releases/download/9.7.0/Sentry-Dynamic.xcframework.zip"
+        },
+        "targetName" : "Sentry-Dynamic"
+      },
+      {
+        "kind" : {
+          "xcframework" : {
+
+          }
+        },
+        "packageRef" : {
+          "identity" : "sentry-cocoa",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/getsentry/sentry-cocoa.git",
+          "name" : "Sentry"
+        },
+        "path" : "/Users/amirrudinyahaya/Workspace/ssdid-wallet/ios/.spm-cache/artifacts/sentry-cocoa/Sentry-WithoutUIKitOrAppKit/Sentry-WithoutUIKitOrAppKit.xcframework",
+        "source" : {
+          "checksum" : "6a2945007b46cb273beb311ac7ce911ed4b7d1ce7f29e251b8aa667be5d145e4",
+          "type" : "remote",
+          "url" : "https://github.com/getsentry/sentry-cocoa/releases/download/9.7.0/Sentry-WithoutUIKitOrAppKit.xcframework.zip"
+        },
+        "targetName" : "Sentry-WithoutUIKitOrAppKit"
+      },
+      {
+        "kind" : {
+          "xcframework" : {
+
+          }
+        },
+        "packageRef" : {
+          "identity" : "sentry-cocoa",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/getsentry/sentry-cocoa.git",
+          "name" : "Sentry"
+        },
+        "path" : "/Users/amirrudinyahaya/Workspace/ssdid-wallet/ios/.spm-cache/artifacts/sentry-cocoa/Sentry-Dynamic-WithARM64e/Sentry-Dynamic-WithARM64e.xcframework",
+        "source" : {
+          "checksum" : "01f528b0add1ae2a8e7e294a24c80340b4b3f366bb9788c90264100076f0c799",
+          "type" : "remote",
+          "url" : "https://github.com/getsentry/sentry-cocoa/releases/download/9.7.0/Sentry-Dynamic-WithARM64e.xcframework.zip"
+        },
+        "targetName" : "Sentry-Dynamic-WithARM64e"
+      },
+      {
+        "kind" : {
+          "xcframework" : {
+
+          }
+        },
+        "packageRef" : {
+          "identity" : "sentry-cocoa",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/getsentry/sentry-cocoa.git",
+          "name" : "Sentry"
+        },
+        "path" : "/Users/amirrudinyahaya/Workspace/ssdid-wallet/ios/.spm-cache/artifacts/sentry-cocoa/Sentry-WithoutUIKitOrAppKit-WithARM64e/Sentry-WithoutUIKitOrAppKit-WithARM64e.xcframework",
+        "source" : {
+          "checksum" : "422293885c8b51c25da69c4cde3825532983138a228f410873f99b61773ba052",
+          "type" : "remote",
+          "url" : "https://github.com/getsentry/sentry-cocoa/releases/download/9.7.0/Sentry-WithoutUIKitOrAppKit-WithARM64e.xcframework.zip"
+        },
+        "targetName" : "Sentry-WithoutUIKitOrAppKit-WithARM64e"
+      }
+    ],
+    "dependencies" : [
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "sentry-cocoa",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/getsentry/sentry-cocoa.git",
+          "name" : "Sentry"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "c63a66f1b5107eec3792249bb03e65015eeba905",
+            "version" : "9.7.0"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "sentry-cocoa"
+      }
+    ],
+    "prebuilts" : [
+
+    ]
+  },
+  "version" : 7
+}

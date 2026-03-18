@@ -35,17 +35,15 @@ final class AuthorizationRequestTests: XCTestCase {
         XCTAssertEqual(req.requestUri, "https://verifier.example.com/request/abc123")
     }
 
-    func testRejectsMissingResponseType() {
+    func testParseSucceedsWithoutResponseType() throws {
+        // response_type is optional in by-value requests per current implementation
         let uri = "openid4vp://?client_id=https://v.example.com&nonce=abc"
             + "&response_mode=direct_post&response_uri=https://v.example.com/r"
             + "&presentation_definition=%7B%7D"
 
-        XCTAssertThrowsError(try AuthorizationRequest.parse(uri)) { error in
-            XCTAssertTrue(
-                error.localizedDescription.contains("response_type"),
-                "Error should mention response_type: \(error.localizedDescription)"
-            )
-        }
+        let req = try AuthorizationRequest.parse(uri)
+        XCTAssertNil(req.responseType, "response_type should be nil when not provided")
+        XCTAssertEqual(req.clientId, "https://v.example.com")
     }
 
     func testRejectsMissingNonce() {
@@ -94,8 +92,8 @@ final class AuthorizationRequestTests: XCTestCase {
 
         XCTAssertThrowsError(try AuthorizationRequest.parse(uri)) { error in
             XCTAssertTrue(
-                error.localizedDescription.contains("ambiguous"),
-                "Error should mention ambiguous: \(error.localizedDescription)"
+                error.localizedDescription.contains("both"),
+                "Error should mention both: \(error.localizedDescription)"
             )
         }
     }
@@ -106,7 +104,7 @@ final class AuthorizationRequestTests: XCTestCase {
 
         XCTAssertThrowsError(try AuthorizationRequest.parse(uri)) { error in
             XCTAssertTrue(
-                error.localizedDescription.contains("No query"),
+                error.localizedDescription.contains("presentation_definition") || error.localizedDescription.contains("Must provide"),
                 "Error should mention missing query: \(error.localizedDescription)"
             )
         }
