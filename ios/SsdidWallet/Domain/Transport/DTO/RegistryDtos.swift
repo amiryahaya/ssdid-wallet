@@ -35,11 +35,13 @@ struct ChallengeResponse: Codable {
     let challenge: String
     var expiresAt: String? = nil
     var domain: String? = nil
+    var protocolVersion: String? = nil
 
     enum CodingKeys: String, CodingKey {
         case challenge
         case expiresAt = "expires_at"
         case domain
+        case protocolVersion = "protocol_version"
     }
 }
 

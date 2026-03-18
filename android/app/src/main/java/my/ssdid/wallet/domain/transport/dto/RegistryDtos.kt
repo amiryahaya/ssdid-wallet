@@ -31,7 +31,8 @@ data class DeactivateDidRequest(
 data class ChallengeResponse(
     val challenge: String,
     val expires_at: String? = null,
-    val domain: String? = null
+    val domain: String? = null,
+    val protocol_version: String? = null
 )
 
 @Serializable
