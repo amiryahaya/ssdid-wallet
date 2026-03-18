@@ -4,27 +4,27 @@ import LibOQS
 /// Concrete implementation of the Vault protocol.
 /// Uses CryptoProvider for key operations, KeychainManager for key wrapping,
 /// and VaultStorage for persistence.
-/// Actor isolation eliminates the TOCTOU window on name-uniqueness checks
-/// and removes the need for manual locking during key migration.
-actor VaultImpl: @preconcurrency Vault {
+/// Concrete implementation of the Vault protocol.
+/// Uses @unchecked Sendable because dependencies (CryptoProvider, KeychainManager,
+/// VaultStorage) are not Sendable. Actor migration requires making all dependencies
+/// Sendable first. The TOCTOU window on createIdentity name uniqueness is documented;
+/// in practice concurrent identity creation is extremely rare.
+final class VaultImpl: Vault, @unchecked Sendable {
 
-    // ISO8601DateFormatter is not Sendable; safe here because access is
-    // serialised by the actor and the formatter carries no external references.
-    nonisolated(unsafe) private static let iso8601 = ISO8601DateFormatter()
+    private nonisolated(unsafe) static let iso8601 = ISO8601DateFormatter()
 
-    // Dependencies are immutable references assigned once in init.
-    // nonisolated(unsafe) avoids spurious 'sending' errors for non-Sendable types
-    // while preserving the same safety guarantees as the prior @unchecked Sendable class.
-    nonisolated(unsafe) private let classicalProvider: CryptoProvider
-    nonisolated(unsafe) private let pqcProvider: CryptoProvider
-    nonisolated(unsafe) private let keychainManager: KeychainManager
-    nonisolated(unsafe) private let storage: VaultStorage
+    private let classicalProvider: CryptoProvider
+    private let pqcProvider: CryptoProvider
+    private let keychainManager: KeychainManager
+    private let storage: VaultStorage
+    private let migrationLock = NSLock()
+    private var migratingAliases = Set<String>()
 
     init(
-        classicalProvider: sending CryptoProvider,
-        pqcProvider: sending CryptoProvider,
-        keychainManager: sending KeychainManager,
-        storage: sending VaultStorage
+        classicalProvider: CryptoProvider,
+        pqcProvider: CryptoProvider,
+        keychainManager: KeychainManager,
+        storage: VaultStorage
     ) {
         self.classicalProvider = classicalProvider
         self.pqcProvider = pqcProvider
@@ -154,13 +154,24 @@ actor VaultImpl: @preconcurrency Vault {
     }
 
     /// Migrates a legacy software-wrapped key to SE-derived wrapping, then signs.
-    /// Actor isolation prevents concurrent migration of the same identity.
+    /// Uses per-alias tracking to prevent concurrent migration of the same identity.
     private func migrateAndSign(
         identity: Identity,
         wrappingAlias: String,
         encryptedPrivateKey: Data,
         data: Data
     ) async throws -> Data {
+        // Check / mark alias under lock to prevent concurrent migration
+        try migrationLock.withLock {
+            guard !migratingAliases.contains(wrappingAlias) else {
+                throw VaultError.storageFailed("Migration in progress for this identity, please retry")
+            }
+            migratingAliases.insert(wrappingAlias)
+        }
+        defer {
+            migrationLock.withLock { _ = migratingAliases.remove(wrappingAlias) }
+        }
+
         // Check if already migrated by a previous call
         if keychainManager.hasEphemeralKey(alias: wrappingAlias),
            !keychainManager.hasLegacyKey(alias: wrappingAlias) {
@@ -305,7 +316,7 @@ actor VaultImpl: @preconcurrency Vault {
 
 // Allow calling canonicalJson as instance method forwarding to static
 extension VaultImpl {
-    nonisolated func canonicalJson(_ value: Any) -> String {
+    func canonicalJson(_ value: Any) -> String {
         JsonUtils.canonicalJson(value)
     }
 }
