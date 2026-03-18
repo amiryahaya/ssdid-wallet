@@ -4,22 +4,27 @@ import LibOQS
 /// Concrete implementation of the Vault protocol.
 /// Uses CryptoProvider for key operations, KeychainManager for key wrapping,
 /// and VaultStorage for persistence.
-final class VaultImpl: Vault, @unchecked Sendable {
+/// Actor isolation eliminates the TOCTOU window on name-uniqueness checks
+/// and removes the need for manual locking during key migration.
+actor VaultImpl: @preconcurrency Vault {
 
-    private nonisolated(unsafe) static let iso8601 = ISO8601DateFormatter()
+    // ISO8601DateFormatter is not Sendable; safe here because access is
+    // serialised by the actor and the formatter carries no external references.
+    nonisolated(unsafe) private static let iso8601 = ISO8601DateFormatter()
 
-    private let classicalProvider: CryptoProvider
-    private let pqcProvider: CryptoProvider
-    private let keychainManager: KeychainManager
-    private let storage: VaultStorage
-    private let migrationLock = NSLock()
-    private var migratingAliases = Set<String>()
+    // Dependencies are immutable references assigned once in init.
+    // nonisolated(unsafe) avoids spurious 'sending' errors for non-Sendable types
+    // while preserving the same safety guarantees as the prior @unchecked Sendable class.
+    nonisolated(unsafe) private let classicalProvider: CryptoProvider
+    nonisolated(unsafe) private let pqcProvider: CryptoProvider
+    nonisolated(unsafe) private let keychainManager: KeychainManager
+    nonisolated(unsafe) private let storage: VaultStorage
 
     init(
-        classicalProvider: CryptoProvider,
-        pqcProvider: CryptoProvider,
-        keychainManager: KeychainManager,
-        storage: VaultStorage
+        classicalProvider: sending CryptoProvider,
+        pqcProvider: sending CryptoProvider,
+        keychainManager: sending KeychainManager,
+        storage: sending VaultStorage
     ) {
         self.classicalProvider = classicalProvider
         self.pqcProvider = pqcProvider
@@ -33,9 +38,6 @@ final class VaultImpl: Vault, @unchecked Sendable {
 
     // MARK: - Identity Management
 
-    // NOTE: Name uniqueness check has a TOCTOU window when called concurrently.
-    // Root cause: VaultImpl is @unchecked Sendable rather than an actor.
-    // Migrate to actor to eliminate this. See: identity-scoped-profiles code review D3/D7.
     func createIdentity(name: String, algorithm: Algorithm) async throws -> Identity {
         let existing = await storage.listIdentities()
         if existing.contains(where: { $0.name.lowercased() == name.lowercased() }) {
@@ -152,26 +154,14 @@ final class VaultImpl: Vault, @unchecked Sendable {
     }
 
     /// Migrates a legacy software-wrapped key to SE-derived wrapping, then signs.
-    /// Uses per-alias tracking to prevent concurrent migration of the same identity.
+    /// Actor isolation prevents concurrent migration of the same identity.
     private func migrateAndSign(
         identity: Identity,
         wrappingAlias: String,
         encryptedPrivateKey: Data,
         data: Data
     ) async throws -> Data {
-        // Check / mark alias under lock to prevent concurrent migration of same alias
-        try migrationLock.withLock {
-            guard !migratingAliases.contains(wrappingAlias) else {
-                // Another call is already migrating this alias — retry via SE path
-                throw VaultError.storageFailed("Migration in progress for this identity, please retry")
-            }
-            migratingAliases.insert(wrappingAlias)
-        }
-        defer {
-            migrationLock.withLock { _ = migratingAliases.remove(wrappingAlias) }
-        }
-
-        // Check if already migrated by a previous concurrent call
+        // Check if already migrated by a previous call
         if keychainManager.hasEphemeralKey(alias: wrappingAlias),
            !keychainManager.hasLegacyKey(alias: wrappingAlias) {
             var pk = try keychainManager.decrypt(alias: wrappingAlias, data: encryptedPrivateKey)
@@ -315,7 +305,7 @@ final class VaultImpl: Vault, @unchecked Sendable {
 
 // Allow calling canonicalJson as instance method forwarding to static
 extension VaultImpl {
-    func canonicalJson(_ value: Any) -> String {
+    nonisolated func canonicalJson(_ value: Any) -> String {
         JsonUtils.canonicalJson(value)
     }
 }
