@@ -91,3 +91,5 @@ google-services.json
 .claude/
 .superpowers/
 .worktrees/
+ios/.spm-cache/
+ios/DerivedData/
