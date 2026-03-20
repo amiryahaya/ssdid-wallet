@@ -189,6 +189,7 @@
 		FC1BF9B7CA0DDEC73B986E63 /* NonceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A500188B170DF85351E08BC /* NonceManager.swift */; };
 		FEE681E2A53DA29872E992D6 /* OpenId4VpPresentationDefinitionMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F0287F0DB334A2A6359D684 /* OpenId4VpPresentationDefinitionMatcherTests.swift */; };
 		FF80B5077EB5E9592EA9AB40 /* DcqlMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5E3FEBF6D33B0CBA2B33977 /* DcqlMatcherTests.swift */; };
+		A1C2D3E4F5A6B7C80010AA02 /* TestAvailability.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C2D3E4F5A6B7C80010AA01 /* TestAvailability.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -388,6 +389,7 @@
 		F9A67835B6BAF26E99D578B1 /* Identity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Identity.swift; sourceTree = "<group>"; };
 		FA167CF225FDFA0E2F54E69C /* VaultStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultStorage.swift; sourceTree = "<group>"; };
 		FDAFB37385927F279F6A4EC0 /* TokenClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenClient.swift; sourceTree = "<group>"; };
+		A1C2D3E4F5A6B7C80010AA01 /* TestAvailability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestAvailability.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -467,6 +469,7 @@
 			isa = PBXGroup;
 			children = (
 				93D7F0CB5E9158132DAB040F /* Domain */,
+				A1C2D3E4F5A6B7C80010AA03 /* TestHelpers */,
 				BB36A1F17A7E34D45AE2CF60 /* AuthorizationRequestTests.swift */,
 				69A3BC89A6C2482C86EE38D0 /* BackupCryptoTests.swift */,
 				E1869678D7810D9602D67163 /* CanonicalJsonTests.swift */,
@@ -490,6 +493,14 @@
 				73C7A22656EE55DBF1F477A5 /* VpTokenBuilderTests.swift */,
 			);
 			path = SsdidWalletTests;
+			sourceTree = "<group>";
+		};
+		A1C2D3E4F5A6B7C80010AA03 /* TestHelpers */ = {
+			isa = PBXGroup;
+			children = (
+				A1C2D3E4F5A6B7C80010AA01 /* TestAvailability.swift */,
+			);
+			path = TestHelpers;
 			sourceTree = "<group>";
 		};
 		1DCEFF05A6EE9C2FBEDBA5EF /* Vault */ = {
@@ -1278,6 +1289,7 @@
 				A1B2C3D4E5F6A7B80002BB01 /* DidValidationTests.swift in Sources */,
 				A1B2C3D4E5F6A7B80003BB01 /* DeviceManagerTests.swift in Sources */,
 				A1B2C3D4E5F6A7B80004BB01 /* KeyRotationManagerTests.swift in Sources */,
+				A1C2D3E4F5A6B7C80010AA02 /* TestAvailability.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

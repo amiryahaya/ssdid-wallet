@@ -167,7 +167,7 @@ final class SocialRecoveryManagerTests: XCTestCase {
     // MARK: - Tests
 
     func testSetupSocialRecoveryGeneratesSharesForEachGuardian() async throws {
-        try XCTSkipIf(ProcessInfo.processInfo.environment["CI"] != nil, "Requires device Keychain")
+        try XCTSkipUnless(KeychainAvailability.isAvailable, "Keychain not available (CI simulator)")
         let identity = try await seedIdentity()
         let guardians = guardianNames(count: 3)
 
@@ -186,7 +186,7 @@ final class SocialRecoveryManagerTests: XCTestCase {
     }
 
     func testRecoverWithSharesReconstructsIdentity() async throws {
-        try XCTSkipIf(ProcessInfo.processInfo.environment["CI"] != nil, "Requires device Keychain")
+        try XCTSkipUnless(KeychainAvailability.isAvailable, "Keychain not available (CI simulator)")
         let identity = try await seedIdentity()
         let guardians = guardianNames(count: 3)
 
@@ -256,7 +256,7 @@ final class SocialRecoveryManagerTests: XCTestCase {
     }
 
     func testHasSocialRecoveryReturnsTrueWhenConfigured() async throws {
-        try XCTSkipIf(ProcessInfo.processInfo.environment["CI"] != nil, "Requires device Keychain")
+        try XCTSkipUnless(KeychainAvailability.isAvailable, "Keychain not available (CI simulator)")
         let identity = try await seedIdentity()
 
         _ = try await sut.setupSocialRecovery(
@@ -273,7 +273,7 @@ final class SocialRecoveryManagerTests: XCTestCase {
     }
 
     func testRecoverFailsWithInsufficientShares() async throws {
-        try XCTSkipIf(ProcessInfo.processInfo.environment["CI"] != nil, "Requires device Keychain")
+        try XCTSkipUnless(KeychainAvailability.isAvailable, "Keychain not available (CI simulator)")
         let identity = try await seedIdentity()
         let guardians = guardianNames(count: 4)
 

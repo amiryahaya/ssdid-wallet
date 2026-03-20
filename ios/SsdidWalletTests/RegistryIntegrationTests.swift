@@ -15,7 +15,7 @@ final class RegistryIntegrationTests: XCTestCase {
     override func setUp() async throws {
         try await super.setUp()
 
-        try XCTSkipIf(ProcessInfo.processInfo.environment["CI"] != nil, "Requires live registry")
+        try XCTSkipIf(!RegistryAvailability.isReachable, "Registry not reachable")
         try XCTSkipUnless(isRegistryReachable(), "Registry unreachable - skipping integration tests")
 
         httpClient = SsdidHttpClient(registryURL: "https://registry.ssdid.my")
