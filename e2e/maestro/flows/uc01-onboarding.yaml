@@ -10,10 +10,10 @@ appId: my.ssdid.wallet
 - assertVisible: "Self-Sovereign Identity"
 - swipe:
     direction: LEFT
-- assertVisible: "Post-Quantum"
+- assertVisible: "Post-Quantum Security"
 - swipe:
     direction: LEFT
-- assertVisible: "Privacy"
+- assertVisible: "Privacy First"
 - tapOn: "Get Started"
 - assertVisible: "Create Identity"
 
