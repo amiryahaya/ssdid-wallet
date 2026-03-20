@@ -93,3 +93,4 @@ google-services.json
 .worktrees/
 ios/.spm-cache/
 ios/DerivedData/
+e2e/playwright/node_modules/
