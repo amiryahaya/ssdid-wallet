@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 /// Error types for HTTP operations.
 enum HttpError: Error, LocalizedError {
@@ -37,9 +38,14 @@ enum NetworkResult<T> {
 /// URLSession delegate that implements SSL certificate pinning for SSDID hosts.
 /// Validates server certificates against known pins for production builds.
 final class CertificatePinningDelegate: NSObject, URLSessionDelegate {
-    // TODO: Replace with actual certificate SPKI SHA-256 pins before production release.
-    // Pins should include both the leaf certificate and at least one backup pin.
     private let pinnedHosts: Set<String> = ["registry.ssdid.my", "notify.ssdid.my"]
+
+    // Certificate SPKI SHA-256 pins for registry and notification services.
+    // Pin both leaf cert and intermediate CA for rotation safety.
+    private let pinnedHashes: Set<String> = [
+        "6HndsMosiTeHfV+W29g33ZHsyuPe4Yo7fPdSCUWdeF0=",  // leaf cert
+        "y7xVm0TVJNahMr2sZydE2jQH8SquXV9yLF9seROHHHU="   // intermediate CA
+    ]
 
     func urlSession(
         _ session: URLSession,
@@ -53,15 +59,27 @@ final class CertificatePinningDelegate: NSObject, URLSessionDelegate {
             return
         }
 
-        // TODO: Implement actual pin validation against known certificate SPKI hashes.
-        // Example flow:
-        //   1. Extract the server's leaf certificate from serverTrust
-        //   2. Compute SHA-256 of the certificate's Subject Public Key Info (SPKI)
-        //   3. Compare against a hardcoded set of known pin hashes
-        //   4. Reject if no match: completionHandler(.cancelAuthenticationChallenge, nil)
-        // For now, perform default TLS validation only.
-        let credential = URLCredential(trust: serverTrust)
-        completionHandler(.useCredential, credential)
+        // Extract certificate chain and check each certificate's SPKI hash against pins.
+        guard let certChain = SecTrustCopyCertificateChain(serverTrust) as? [SecCertificate] else {
+            completionHandler(.cancelAuthenticationChallenge, nil)
+            return
+        }
+
+        for cert in certChain {
+            guard let publicKey = SecCertificateCopyKey(cert),
+                  let keyData = SecKeyCopyExternalRepresentation(publicKey, nil) as Data? else {
+                continue
+            }
+            let hash = SHA256.hash(data: keyData)
+            let hashBase64 = Data(hash).base64EncodedString()
+            if pinnedHashes.contains(hashBase64) {
+                completionHandler(.useCredential, URLCredential(trust: serverTrust))
+                return
+            }
+        }
+
+        // No pin matched — reject the connection.
+        completionHandler(.cancelAuthenticationChallenge, nil)
     }
 }
 

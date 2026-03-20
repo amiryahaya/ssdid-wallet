@@ -108,10 +108,17 @@ object AppModule {
             })
 
         if (!BuildConfig.DEBUG) {
-            // TODO: Replace placeholder pins with actual certificate SHA-256 pins before production release
+            // Certificate SPKI SHA-256 pins for registry and notification services.
+            // Pin both leaf cert and intermediate CA for rotation safety.
             val pinner = CertificatePinner.Builder()
-                .add("registry.ssdid.my", "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
-                .add("notify.ssdid.my", "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+                .add("registry.ssdid.my",
+                    "sha256/6HndsMosiTeHfV+W29g33ZHsyuPe4Yo7fPdSCUWdeF0=",  // leaf
+                    "sha256/y7xVm0TVJNahMr2sZydE2jQH8SquXV9yLF9seROHHHU="   // intermediate CA
+                )
+                .add("notify.ssdid.my",
+                    "sha256/6HndsMosiTeHfV+W29g33ZHsyuPe4Yo7fPdSCUWdeF0=",  // leaf
+                    "sha256/y7xVm0TVJNahMr2sZydE2jQH8SquXV9yLF9seROHHHU="   // intermediate CA
+                )
                 .build()
             builder.certificatePinner(pinner)
         }
