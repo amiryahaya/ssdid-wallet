@@ -20,6 +20,7 @@ struct TxSigningScreen: View {
     @State private var timerSeconds = 120
     @State private var txDetails: [(key: String, value: String)] = []
     @State private var timerActive = true
+    @State private var selectedIdentity: Identity?
 
     private var timerColor: Color {
         if timerSeconds > 30 { return .success }
@@ -280,14 +281,22 @@ struct TxSigningScreen: View {
     }
 
     private func loadTransactionDetails() {
-        // TODO: Replace mock data with real service call via services.ssdidClient
-        // e.g. try await services.ssdidClient.fetchTransactionDetails(sessionToken:serverUrl:)
-        txDetails = [
-            (key: "type", value: "Transfer"),
-            (key: "amount", value: "1,000.00 MYR"),
-            (key: "recipient", value: "did:ssdid:abc123def456"),
-            (key: "reference", value: "INV-2024-001")
-        ]
+        Task {
+            do {
+                let identities = await services.vault.listIdentities().filter { $0.isActive }
+                selectedIdentity = identities.first
+
+                let details = try await services.ssdidClient.fetchTransactionDetails(
+                    sessionToken: sessionToken,
+                    serverUrl: serverUrl
+                )
+                txDetails = details.map { (key: $0.key, value: $0.value) }
+            } catch {
+                withAnimation(reduceMotion ? nil : .default) {
+                    state = .failed(error.localizedDescription)
+                }
+            }
+        }
     }
 
     private func signTransaction() {
@@ -295,14 +304,32 @@ struct TxSigningScreen: View {
             state = .loading
         }
         Task {
-            // TODO: Replace with real server call via services.ssdidClient
-            try? await Task.sleep(for: .seconds(1.5))
-            await MainActor.run {
+            do {
+                guard let identity = selectedIdentity else {
+                    withAnimation(reduceMotion ? nil : .default) {
+                        state = .failed("No identity selected")
+                    }
+                    return
+                }
+                let transaction = txDetails.reduce(into: [String: String]()) { dict, item in
+                    dict[item.key] = item.value
+                }
+                _ = try await services.ssdidClient.signTransaction(
+                    sessionToken: sessionToken,
+                    identity: identity,
+                    transaction: transaction,
+                    serverUrl: serverUrl
+                )
                 HapticManager.notification(.success)
                 withAnimation(reduceMotion ? nil : .default) {
                     state = .confirmed
                 }
                 timerActive = false
+            } catch {
+                HapticManager.notification(.error)
+                withAnimation(reduceMotion ? nil : .default) {
+                    state = .failed(error.localizedDescription)
+                }
             }
         }
     }
