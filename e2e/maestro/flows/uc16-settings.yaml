@@ -1,0 +1,48 @@
+# UC-16: Settings
+# Prerequisite: App initialized
+appId: my.ssdid.wallet
+
+---
+
+# TC-16.1: Change language
+- launchApp
+# Navigate to settings (from home)
+- tapOn:
+    id: "settings"
+    contentDescription: "Settings"
+    optional: true
+- assertVisible: "Settings"
+- scrollUntilVisible:
+    element: "Language"
+- tapOn: "Language"
+- assertVisible: "Select Language"
+- tapOn: "Bahasa Melayu"
+# Language dialog should close, UI should update
+# Note: Verify UI strings changed (depends on localization implementation)
+
+---
+
+# TC-16.2: View registry URL
+- launchApp
+- tapOn:
+    contentDescription: "Settings"
+    optional: true
+- assertVisible: "Settings"
+- scrollUntilVisible:
+    element: "Registry URL"
+- assertVisible: "registry.ssdid.my"
+
+---
+
+# TC-16.3: Navigate to backup
+- launchApp
+- tapOn:
+    contentDescription: "Settings"
+    optional: true
+- assertVisible: "Settings"
+- scrollUntilVisible:
+    element: "Backup & Export"
+- tapOn: "Backup & Export"
+- assertVisible:
+    text: "Backup|Export"
+    optional: true

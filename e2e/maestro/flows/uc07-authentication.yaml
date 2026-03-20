@@ -1,0 +1,24 @@
+# UC-07: Service Authentication (Drive Login)
+# Prerequisite: Identity exists, ssdid-drive running
+# Note: Requires deep link trigger — use adb/xcrun to send deep link
+appId: my.ssdid.wallet
+
+---
+
+# TC-7.1: Authentication via deep link (Android)
+# Trigger with: adb shell am start -a android.intent.action.VIEW -d "ssdid://login?service_url=https://drive.ssdid.my&service_name=SSDID+Drive&callback_url=ssdid://callback&requested_claims=%5B%7B%22key%22%3A%22name%22%2C%22required%22%3Atrue%7D%5D"
+- launchApp
+- assertVisible: "Sign In Request"
+- assertVisible: "IDENTITY"
+- assertVisible:
+    text: "did:ssdid:"
+    containsText: true
+- assertVisible: "REQUESTED INFORMATION"
+- assertVisible: "Name"
+
+---
+
+# TC-7.5: Decline authentication
+- assertVisible: "Decline"
+- tapOn: "Decline"
+# Should navigate back or trigger callback with error

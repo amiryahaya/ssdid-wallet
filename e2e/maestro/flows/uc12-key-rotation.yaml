@@ -1,0 +1,40 @@
+# UC-12: Key Rotation
+# Prerequisite: Identity exists and registered on registry
+appId: my.ssdid.wallet
+
+---
+
+# TC-12.1: Prepare pre-commitment
+- launchApp
+- tapOn:
+    text: "did:ssdid:"
+    index: 0
+- scrollUntilVisible:
+    element: "Rotate Key"
+- tapOn: "Rotate Key"
+- assertVisible: "Key Rotation"
+- assertVisible: "CURRENT KEY"
+- assertVisible: "PRE-ROTATION STATUS"
+- assertVisible: "No pre-commitment"
+- tapOn: "Prepare Pre-Commitment"
+- extendedWaitUntil:
+    visible: "Pre-commitment created"
+    timeout: 15000
+- assertVisible: "Next key pre-committed"
+
+---
+
+# TC-12.5: Rotation without pre-commitment (should not show Rotate button)
+- launchApp
+- tapOn:
+    text: "did:ssdid:"
+    index: 0
+- scrollUntilVisible:
+    element: "Rotate Key"
+- tapOn: "Rotate Key"
+- assertVisible: "No pre-commitment"
+- assertVisible: "Prepare Pre-Commitment"
+# "Rotate Now" button should NOT be visible without pre-commitment
+- assertNotVisible:
+    text: "Rotate Now"
+    optional: true

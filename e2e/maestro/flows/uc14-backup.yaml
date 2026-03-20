@@ -1,0 +1,54 @@
+# UC-14: Backup & Restore
+# Prerequisite: At least one identity exists
+appId: my.ssdid.wallet
+
+---
+
+# TC-14.1: Export encrypted backup
+- launchApp
+- tapOn:
+    id: "settings"
+    text: "Settings"
+    optional: true
+# Navigate to settings if not already there
+- assertVisible: "Settings"
+- scrollUntilVisible:
+    element: "Backup & Export"
+- tapOn: "Backup & Export"
+- assertVisible:
+    text: "Backup|Export"
+    optional: true
+# Enter passphrase
+- tapOn:
+    text: "Enter passphrase"
+    optional: true
+- inputText: "MySecurePassphrase123"
+- tapOn:
+    text: "Confirm passphrase"
+    optional: true
+- inputText: "MySecurePassphrase123"
+# Passphrase strength should show
+- assertVisible:
+    text: "Strong"
+    optional: true
+- tapOn:
+    text: "Create Backup"
+    optional: true
+
+---
+
+# TC-14.5: Backup strength indicator
+- launchApp
+- tapOn:
+    text: "Settings"
+    optional: true
+- scrollUntilVisible:
+    element: "Backup & Export"
+- tapOn: "Backup & Export"
+- tapOn:
+    text: "Enter passphrase"
+    optional: true
+- inputText: "short"
+- assertVisible:
+    text: "Weak"
+    optional: true

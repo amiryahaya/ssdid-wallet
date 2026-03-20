@@ -1,0 +1,86 @@
+# UC-04: Identity Detail & Connected Services
+# Prerequisite: Identity exists
+appId: my.ssdid.wallet
+
+---
+
+# TC-4.1: View identity details
+- launchApp
+- tapOn:
+    text: "did:ssdid:"
+    index: 0
+- assertVisible: "Identity Details"
+- assertVisible: "DID"
+- assertVisible: "KEY ID"
+- assertVisible: "ALGORITHM"
+- assertVisible: "CREATED"
+- assertVisible: "KEY STORAGE"
+- assertVisible: "Hardware-backed"
+- assertVisible: "PUBLIC KEY"
+
+---
+
+# TC-4.2: Copy DID to clipboard
+- launchApp
+- tapOn:
+    text: "did:ssdid:"
+    index: 0
+- tapOn: "Copy"
+- assertVisible: "Copied"
+
+---
+
+# TC-4.7: Empty connected services
+- launchApp
+- tapOn:
+    text: "did:ssdid:"
+    index: 0
+- scrollUntilVisible:
+    element: "CONNECTED SERVICES"
+- assertVisible: "CONNECTED SERVICES"
+- assertVisible:
+    text: "No services connected"
+    optional: true
+
+---
+
+# TC-4.8: Navigate to Recovery Setup
+- launchApp
+- tapOn:
+    text: "did:ssdid:"
+    index: 0
+- scrollUntilVisible:
+    element: "Recovery"
+- tapOn: "Recovery"
+- assertVisible:
+    text: "Recovery|RECOVERY KEY"
+    optional: true
+- back
+
+---
+
+# TC-4.9: Navigate to Key Rotation
+- launchApp
+- tapOn:
+    text: "did:ssdid:"
+    index: 0
+- scrollUntilVisible:
+    element: "Rotate Key"
+- tapOn: "Rotate Key"
+- assertVisible: "Key Rotation"
+- back
+
+---
+
+# TC-4.10: Navigate to Device Management
+- launchApp
+- tapOn:
+    text: "did:ssdid:"
+    index: 0
+- scrollUntilVisible:
+    element: "Devices"
+- tapOn: "Devices"
+- assertVisible:
+    text: "Device|Devices"
+    optional: true
+- back

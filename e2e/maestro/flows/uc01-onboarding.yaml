@@ -1,0 +1,29 @@
+# UC-01: First-Time Onboarding
+# Prerequisite: Fresh app install, no existing identities
+appId: my.ssdid.wallet
+
+---
+
+# TC-1.1: Complete onboarding carousel
+- launchApp:
+    clearState: true
+- assertVisible: "Self-Sovereign Identity"
+- swipe:
+    direction: LEFT
+- assertVisible: "Post-Quantum"
+- swipe:
+    direction: LEFT
+- assertVisible: "Privacy"
+- tapOn: "Get Started"
+- assertVisible: "Create Identity"
+
+---
+
+# TC-1.2: Skip onboarding
+- launchApp:
+    clearState: true
+- assertVisible: "Self-Sovereign Identity"
+- tapOn: "Next"
+- tapOn: "Next"
+- tapOn: "Get Started"
+- assertVisible: "Create Identity"

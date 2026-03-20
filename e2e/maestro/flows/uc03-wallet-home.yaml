@@ -1,0 +1,31 @@
+# UC-03: Wallet Home
+# Prerequisite: At least one identity exists
+appId: my.ssdid.wallet
+
+---
+
+# TC-3.1: View identity card
+- launchApp
+- assertVisible: "MY IDENTITIES"
+- assertVisible:
+    text: "did:ssdid:"
+    containsText: true
+- assertVisible: "Active"
+
+---
+
+# TC-3.3: Create additional identity
+- launchApp
+- tapOn: "+ New"
+- assertVisible: "Create Identity"
+- back
+
+---
+
+# TC-3.4: Navigate to identity detail
+- launchApp
+- tapOn:
+    text: "did:ssdid:"
+    index: 0
+- assertVisible: "Identity Details"
+- back

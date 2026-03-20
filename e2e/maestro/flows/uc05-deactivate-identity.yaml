@@ -1,0 +1,32 @@
+# UC-05: Deactivate Identity
+# Prerequisite: Identity exists (create a test identity first)
+appId: my.ssdid.wallet
+
+---
+
+# TC-5.3: Cancel deactivation
+- launchApp
+- tapOn:
+    text: "did:ssdid:"
+    index: 0
+- scrollUntilVisible:
+    element: "Deactivate Identity"
+- tapOn: "Deactivate Identity"
+- assertVisible: "Deactivate Identity?"
+- tapOn: "Cancel"
+- assertVisible: "Identity Details"  # Still on detail screen
+
+---
+
+# TC-5.1: Deactivate identity (DESTRUCTIVE — run last)
+# WARNING: This permanently deactivates the identity on the registry
+# - launchApp
+# - tapOn:
+#     text: "did:ssdid:"
+#     index: 0
+# - scrollUntilVisible:
+#     element: "Deactivate Identity"
+# - tapOn: "Deactivate Identity"
+# - assertVisible: "Deactivate Identity?"
+# - tapOn: "Deactivate"
+# - assertVisible: "MY IDENTITIES"  # Back on home

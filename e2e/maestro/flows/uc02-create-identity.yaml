@@ -1,0 +1,78 @@
+# UC-02: Create Identity (3-Step Wizard)
+# Prerequisite: On Create Identity screen (after onboarding)
+appId: my.ssdid.wallet
+
+---
+
+# TC-2.1: Create identity with Ed25519 (full happy path)
+- launchApp:
+    clearState: true
+# Navigate through onboarding
+- tapOn: "Get Started"
+- assertVisible: "Step 1 of 3"
+
+# Step 1: Profile
+- tapOn:
+    id: "display-name-field"
+    text: "Your full name"
+- inputText: "Test User"
+- tapOn:
+    id: "email-field"
+    text: "your@email.com"
+- inputText: "test@ssdid.my"
+- tapOn: "Verify Email"
+
+# Step 2: Email verification
+- assertVisible: "Step 2 of 3"
+- assertVisible: "test@ssdid.my"
+# Note: In E2E, you need a way to get the OTP code
+# Option A: Use a test email API to fetch the code
+# Option B: Use a hardcoded test bypass in debug builds
+- tapOn:
+    id: "verification-code-field"
+    text: "Enter 6-digit code"
+- inputText: "000000"  # Test code — requires debug bypass or real OTP
+- tapOn: "Verify"
+
+# Step 3: Identity creation
+- assertVisible: "Step 3 of 3"
+- tapOn:
+    id: "identity-name-field"
+    text: "e.g. Personal, Work"
+- inputText: "Test Identity"
+# Ed25519 should be available (may not be default)
+- tapOn: "Create Identity"
+
+# Should navigate to biometric setup or home
+- assertVisible:
+    text: "Biometric|Home"
+    optional: true
+
+---
+
+# TC-2.7: Invalid email format rejected
+- launchApp:
+    clearState: true
+- tapOn: "Get Started"
+- tapOn:
+    text: "Your full name"
+- inputText: "Test User"
+- tapOn:
+    text: "your@email.com"
+- inputText: "notanemail"
+# Verify Email button should be disabled
+- assertVisible: "Verify Email"
+- assertNotVisible: "Step 2 of 3"  # Should NOT advance
+
+---
+
+# TC-2.8: Empty display name prevents advancing
+- launchApp:
+    clearState: true
+- tapOn: "Get Started"
+# Don't enter display name
+- tapOn:
+    text: "your@email.com"
+- inputText: "test@ssdid.my"
+# Button should be disabled with empty name
+- assertVisible: "Verify Email"

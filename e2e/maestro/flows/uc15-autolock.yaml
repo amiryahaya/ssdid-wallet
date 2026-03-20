@@ -1,0 +1,24 @@
+# UC-15: Auto-Lock & Biometric
+# Prerequisite: Biometric enabled in settings
+appId: my.ssdid.wallet
+
+---
+
+# TC-15.5: Disable biometric in settings
+- launchApp
+- tapOn:
+    text: "Settings"
+    optional: true
+# If already on home, navigate to settings
+- assertVisible: "Settings"
+- assertVisible: "Biometric Authentication"
+# Toggle should be visible
+- tapOn: "Biometric Authentication"
+# Toggle state should change
+
+---
+
+# TC-15.1: Auto-lock after timeout
+# Note: This test requires backgrounding the app for 5+ minutes
+# which is impractical in automated testing. Mark as manual-only.
+# Use shorter timeout (e.g., 1 minute) for testing or mock time.

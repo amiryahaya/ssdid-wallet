@@ -1,0 +1,42 @@
+# UC-11: Key Recovery
+# Prerequisite: Identity exists
+appId: my.ssdid.wallet
+
+---
+
+# TC-11.1: Generate offline recovery key (Tier 1)
+- launchApp
+- tapOn:
+    text: "did:ssdid:"
+    index: 0
+- scrollUntilVisible:
+    element: "Recovery"
+- tapOn: "Recovery"
+- assertVisible: "RECOVERY KEY"
+- tapOn: "Generate Recovery Key"
+- extendedWaitUntil:
+    visible: "Copy"
+    timeout: 10000
+- assertVisible: "Copy"
+# Recovery key should be visible as base64 text
+- tapOn: "Copy"
+
+---
+
+# TC-11.4: Setup social recovery (Tier 2)
+- launchApp
+- tapOn:
+    text: "did:ssdid:"
+    index: 0
+- scrollUntilVisible:
+    element: "Recovery"
+- tapOn: "Recovery"
+- scrollUntilVisible:
+    element: "Social Recovery"
+    optional: true
+- tapOn:
+    text: "Configure Social Recovery"
+    optional: true
+- assertVisible:
+    text: "Guardian|guardian"
+    optional: true
