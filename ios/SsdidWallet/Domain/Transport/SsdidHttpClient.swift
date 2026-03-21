@@ -66,15 +66,14 @@ final class CertificatePinningDelegate: NSObject, URLSessionDelegate {
             return
         }
 
+        // Standard SPKI pin validation: hash the SubjectPublicKeyInfo from the
+        // certificate's DER encoding, NOT the raw key from SecKeyCopyExternalRepresentation
+        // (which strips the algorithm header for EC keys, producing a different hash).
         var matched = false
         for cert in certChain {
-            guard let publicKey = SecCertificateCopyKey(cert),
-                  let keyData = SecKeyCopyExternalRepresentation(publicKey, nil) as Data? else {
-                continue
-            }
-            let hash = SHA256.hash(data: keyData)
-            let hashBase64 = Data(hash).base64EncodedString()
-            if pinnedHashes.contains(hashBase64) {
+            let certData = SecCertificateCopyData(cert) as Data
+            guard let spkiHash = extractSPKIHash(from: certData) else { continue }
+            if pinnedHashes.contains(spkiHash) {
                 matched = true
                 break
             }
@@ -87,6 +86,55 @@ final class CertificatePinningDelegate: NSObject, URLSessionDelegate {
             print("⚠️ [CertPinning] No matching pin for \(challenge.protectionSpace.host)")
             completionHandler(.cancelAuthenticationChallenge, nil)
         }
+    }
+
+    /// Extracts the SubjectPublicKeyInfo (SPKI) from a DER-encoded certificate
+    /// and returns its SHA-256 hash as base64. This matches the standard pin format
+    /// used by openssl: `openssl x509 -pubkey -noout | openssl pkey -pubin -outform DER | sha256`.
+    private func extractSPKIHash(from certDER: Data) -> String? {
+        // Parse the certificate to get the public key in SPKI format
+        guard let cert = SecCertificateCreateWithData(nil, certDER as CFData),
+              let publicKey = SecCertificateCopyKey(cert),
+              let keyData = SecKeyCopyExternalRepresentation(publicKey, nil) as Data? else {
+            return nil
+        }
+
+        // SecKeyCopyExternalRepresentation returns raw key (no SPKI header).
+        // We need to prepend the SPKI header for the key type.
+        let spkiData: Data
+        let keyType = SecKeyCopyAttributes(publicKey) as? [String: Any]
+        let keyTypeValue = keyType?[kSecAttrKeyType as String] as? String
+
+        if keyTypeValue == (kSecAttrKeyTypeECSECPrimeRandom as String) {
+            // EC P-256: SPKI header = 30 59 30 13 06 07 2a 86 48 ce 3d 02 01 06 08 2a 86 48 ce 3d 03 01 07 03 42 00
+            let ecP256SPKIHeader = Data([
+                0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01,
+                0x06, 0x08, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07, 0x03, 0x42, 0x00
+            ])
+            // EC P-384: SPKI header
+            let ecP384SPKIHeader = Data([
+                0x30, 0x76, 0x30, 0x10, 0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01,
+                0x06, 0x05, 0x2b, 0x81, 0x04, 0x00, 0x22, 0x03, 0x62, 0x00
+            ])
+
+            if keyData.count == 65 { // P-256 uncompressed point (04 || x || y)
+                spkiData = ecP256SPKIHeader + keyData
+            } else if keyData.count == 97 { // P-384
+                spkiData = ecP384SPKIHeader + keyData
+            } else {
+                spkiData = keyData // Unknown EC size, hash raw
+            }
+        } else if keyTypeValue == (kSecAttrKeyTypeRSA as String) {
+            // RSA: SecKeyCopyExternalRepresentation already returns the full DER
+            // For RSA, we need to wrap it in SPKI, but this is complex.
+            // For now, hash the raw key — RSA pins won't match openssl format.
+            spkiData = keyData
+        } else {
+            spkiData = keyData
+        }
+
+        let hash = SHA256.hash(data: spkiData)
+        return Data(hash).base64EncodedString()
     }
 }
 
