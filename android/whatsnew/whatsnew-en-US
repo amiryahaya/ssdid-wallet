@@ -1,0 +1,10 @@
+SSDID Wallet — Self-Sovereign Identity with Post-Quantum Cryptography
+
+• Identity-scoped profiles with email verification
+• 3-tier key recovery (offline, social, institutional)
+• KERI-style key rotation with pre-commitment
+• Multi-device enrollment with QR pairing
+• Secure Enclave key wrapping (iOS)
+• Auto-lock with biometric gate
+• Connected Services with revocation status
+• W3C DID 1.1 compliant
