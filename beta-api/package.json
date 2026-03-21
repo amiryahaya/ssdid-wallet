@@ -1,0 +1,13 @@
+{
+  "name": "ssdid-beta-api",
+  "version": "1.0.0",
+  "description": "Simple API for SSDID Wallet TestFlight beta signup",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^9.0.0"
+  }
+}
