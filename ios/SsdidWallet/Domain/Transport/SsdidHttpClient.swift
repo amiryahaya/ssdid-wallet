@@ -113,17 +113,16 @@ final class SsdidHttpClient: @unchecked Sendable {
     init(registryURL: String = "https://registry.ssdid.my", session: URLSession = .shared) {
         self.registryBaseURL = registryURL.hasSuffix("/") ? String(registryURL.dropLast()) : registryURL
 
-        // Certificate pinning is temporarily disabled for TestFlight testing.
-        // TODO: Re-enable after verifying pin hashes match on physical devices.
-        // #if !DEBUG
-        // let pinningDelegate = CertificatePinningDelegate()
-        // let configuration = URLSessionConfiguration.default
-        // configuration.timeoutIntervalForRequest = 30
-        // configuration.timeoutIntervalForResource = 60
-        // self.session = URLSession(configuration: configuration, delegate: pinningDelegate, delegateQueue: nil)
-        // #else
+        #if !DEBUG
+        // Release builds use certificate pinning for SSDID hosts.
+        let pinningDelegate = CertificatePinningDelegate()
+        let configuration = URLSessionConfiguration.default
+        configuration.timeoutIntervalForRequest = 30
+        configuration.timeoutIntervalForResource = 60
+        self.session = URLSession(configuration: configuration, delegate: pinningDelegate, delegateQueue: nil)
+        #else
         self.session = session
-        // #endif
+        #endif
     }
 
     // MARK: - API Accessors
