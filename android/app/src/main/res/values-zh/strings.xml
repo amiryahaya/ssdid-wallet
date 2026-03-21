@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SSDID</string>
+    <string name="app_name">SSDID Wallet</string>
 
     <!-- Common -->
     <string name="back">返回</string>
@@ -49,7 +49,7 @@
 
     <!-- Wallet Home -->
     <string name="wallet_identity_label">身份钱包</string>
-    <string name="wallet_app_name">SSDID</string>
+    <string name="wallet_app_name">SSDID Wallet</string>
     <string name="wallet_my_identities">我的身份</string>
     <string name="wallet_new">+ 新建</string>
     <string name="wallet_create_first">创建您的第一个身份</string>

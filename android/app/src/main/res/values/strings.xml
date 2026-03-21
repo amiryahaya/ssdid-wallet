@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SSDID</string>
+    <string name="app_name">SSDID Wallet</string>
 
     <!-- Common -->
     <string name="back">Back</string>
@@ -50,7 +50,7 @@
 
     <!-- Wallet Home -->
     <string name="wallet_identity_label">IDENTITY WALLET</string>
-    <string name="wallet_app_name">SSDID</string>
+    <string name="wallet_app_name">SSDID Wallet</string>
     <string name="wallet_my_identities">MY IDENTITIES</string>
     <string name="wallet_new">+ New</string>
     <string name="wallet_create_first">Create your first identity</string>

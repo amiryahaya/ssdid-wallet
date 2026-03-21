@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SSDID</string>
+    <string name="app_name">SSDID Wallet</string>
 
     <!-- Common / Umum -->
     <string name="back">Kembali</string>
@@ -49,7 +49,7 @@
 
     <!-- Wallet Home / Dompet Utama -->
     <string name="wallet_identity_label">DOMPET IDENTITI</string>
-    <string name="wallet_app_name">SSDID</string>
+    <string name="wallet_app_name">SSDID Wallet</string>
     <string name="wallet_my_identities">IDENTITI SAYA</string>
     <string name="wallet_new">+ Baru</string>
     <string name="wallet_create_first">Cipta identiti pertama anda</string>
