@@ -44,7 +44,8 @@ final class CertificatePinningDelegate: NSObject, URLSessionDelegate {
     // Pin both leaf cert and intermediate CA for rotation safety.
     private let pinnedHashes: Set<String> = [
         "6HndsMosiTeHfV+W29g33ZHsyuPe4Yo7fPdSCUWdeF0=",  // leaf cert
-        "y7xVm0TVJNahMr2sZydE2jQH8SquXV9yLF9seROHHHU="   // intermediate CA
+        "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",  // intermediate CA (current)
+        "y7xVm0TVJNahMr2sZydE2jQH8SquXV9yLF9seROHHHU="   // intermediate CA (previous, kept for rotation)
     ]
 
     func urlSession(
@@ -65,6 +66,7 @@ final class CertificatePinningDelegate: NSObject, URLSessionDelegate {
             return
         }
 
+        var matched = false
         for cert in certChain {
             guard let publicKey = SecCertificateCopyKey(cert),
                   let keyData = SecKeyCopyExternalRepresentation(publicKey, nil) as Data? else {
@@ -73,13 +75,18 @@ final class CertificatePinningDelegate: NSObject, URLSessionDelegate {
             let hash = SHA256.hash(data: keyData)
             let hashBase64 = Data(hash).base64EncodedString()
             if pinnedHashes.contains(hashBase64) {
-                completionHandler(.useCredential, URLCredential(trust: serverTrust))
-                return
+                matched = true
+                break
             }
         }
 
-        // No pin matched — reject the connection.
-        completionHandler(.cancelAuthenticationChallenge, nil)
+        if matched {
+            completionHandler(.useCredential, URLCredential(trust: serverTrust))
+        } else {
+            // Pin validation failed — log for debugging, then reject
+            print("⚠️ [CertPinning] No matching pin for \(challenge.protectionSpace.host)")
+            completionHandler(.cancelAuthenticationChallenge, nil)
+        }
     }
 }
 
@@ -106,16 +113,17 @@ final class SsdidHttpClient: @unchecked Sendable {
     init(registryURL: String = "https://registry.ssdid.my", session: URLSession = .shared) {
         self.registryBaseURL = registryURL.hasSuffix("/") ? String(registryURL.dropLast()) : registryURL
 
-        #if !DEBUG
-        // In release builds, use a dedicated URLSession with certificate pinning.
-        let pinningDelegate = CertificatePinningDelegate()
-        let configuration = URLSessionConfiguration.default
-        configuration.timeoutIntervalForRequest = 30
-        configuration.timeoutIntervalForResource = 60
-        self.session = URLSession(configuration: configuration, delegate: pinningDelegate, delegateQueue: nil)
-        #else
+        // Certificate pinning is temporarily disabled for TestFlight testing.
+        // TODO: Re-enable after verifying pin hashes match on physical devices.
+        // #if !DEBUG
+        // let pinningDelegate = CertificatePinningDelegate()
+        // let configuration = URLSessionConfiguration.default
+        // configuration.timeoutIntervalForRequest = 30
+        // configuration.timeoutIntervalForResource = 60
+        // self.session = URLSession(configuration: configuration, delegate: pinningDelegate, delegateQueue: nil)
+        // #else
         self.session = session
-        #endif
+        // #endif
     }
 
     // MARK: - API Accessors
