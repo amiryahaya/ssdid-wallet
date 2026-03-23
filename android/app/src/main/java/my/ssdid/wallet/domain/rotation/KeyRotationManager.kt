@@ -9,6 +9,7 @@ import my.ssdid.wallet.domain.model.ActivityRecord
 import my.ssdid.wallet.domain.model.ActivityStatus
 import my.ssdid.wallet.domain.model.ActivityType
 import my.ssdid.wallet.domain.model.Algorithm
+import my.ssdid.wallet.domain.model.Did
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.vault.VaultStorage
 import my.ssdid.wallet.domain.vault.KeystoreManager
@@ -122,8 +123,20 @@ class KeyRotationManager @Inject constructor(
             preRotatedKeyId = null
         )
 
-        // Store the new identity with the pre-rotated encrypted private key
-        storage.saveIdentity(newIdentity, preRotatedData.encryptedPrivateKey)
+        // Re-wrap the pre-rotated private key with the new identity's wrapping alias.
+        // The pre-rotated key was encrypted with "ssdid_prerot_..." during prepareRotation(),
+        // but VaultImpl.sign() expects keys under "ssdid_wrap_..." for the DID.
+        val prerotAlias = "ssdid_prerot_${stableAlias(identity.keyId)}"
+        val rawPrivateKey = keystoreManager.decrypt(prerotAlias, preRotatedData.encryptedPrivateKey)
+
+        val did = Did(identity.did)
+        val newWrapAlias = "ssdid_wrap_${did.methodSpecificId()}"
+        keystoreManager.generateWrappingKey(newWrapAlias)
+        val reWrappedKey = keystoreManager.encrypt(newWrapAlias, rawPrivateKey)
+        rawPrivateKey.fill(0) // Zero from memory
+
+        // Store the new identity with re-wrapped private key
+        storage.saveIdentity(newIdentity, reWrappedKey)
 
         // Record rotation in history
         storage.addRotationEntry(

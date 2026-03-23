@@ -11,13 +11,13 @@
 		042ED673CBDAB0C431FEAE98 /* HttpStatusListFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 542B2934B2C3279561FF9F0C /* HttpStatusListFetcher.swift */; };
 		05F1E14E7BE0D5F123D150DF /* BiometricAuthenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0E96DC0F78ABBDE00C4DD0 /* BiometricAuthenticator.swift */; };
 		07D6FC43919981F321F6FBA6 /* RegistryIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B68ED71CE63FCC4DE1B98E57 /* RegistryIntegrationTests.swift */; };
-		0A1B2C3D4E5F6A7B8C9D0E1F /* WalletRegistryIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F7A8B9C0D1E2F /* WalletRegistryIntegrationTests.swift */; };
 		092ED1F41BCC4D09ECF24B54 /* DidDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D296D81D371037D0C6D38E7 /* DidDocument.swift */; };
 		093576AB1A8A29B95B44C00A /* VerificationMethod.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0864D8CCB4750CB46D2724F9 /* VerificationMethod.swift */; };
 		0993DDFC9998E942A1E185B9 /* UrlValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B00C2D5E6A165D21C92284D /* UrlValidator.swift */; };
 		09AA6B7EF8632365006D7478 /* SentryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E4D1FD9B101F063186485B2 /* SentryManager.swift */; };
 		09F58DF362181D20B7B40AD5 /* AuthFlowScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 679AE5250961641DD98FF710 /* AuthFlowScreen.swift */; };
 		0A056BFE509D73C851D7C5AA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 949D7E9FA627E70DA395637D /* ContentView.swift */; };
+		0A1B2C3D4E5F6A7B8C9D0E1F /* WalletRegistryIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F7A8B9C0D1E2F /* WalletRegistryIntegrationTests.swift */; };
 		0A31E18B806C2ECDEB677F29 /* SsdidClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45B7A80A92BA2FB3FDED8C4A /* SsdidClient.swift */; };
 		0B0C5C69565943EA467FDB3F /* OpenId4VpTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F210B1FF46FAEEF82D8A9915 /* OpenId4VpTransport.swift */; };
 		0C3EF330F97C9387A8CCFB4D /* StoredSdJwtVcTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AED8BAD4F7407C4A0DC9FC3 /* StoredSdJwtVcTests.swift */; };
@@ -123,6 +123,7 @@
 		A1B2C3D4E5F6A7B80002BB01 /* DidValidationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B80002AA01 /* DidValidationTests.swift */; };
 		A1B2C3D4E5F6A7B80003BB01 /* DeviceManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B80003AA01 /* DeviceManagerTests.swift */; };
 		A1B2C3D4E5F6A7B80004BB01 /* KeyRotationManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B80004AA01 /* KeyRotationManagerTests.swift */; };
+		A1C2D3E4F5A6B7C80010AA02 /* TestAvailability.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C2D3E4F5A6B7C80010AA01 /* TestAvailability.swift */; };
 		A1EE571EB471947545FA816D /* NotifyApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91D5C3F7CEC06587E13C210 /* NotifyApi.swift */; };
 		A20495017D82010CBD193758 /* IssuerMetadataResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = B716EEFB8BF8BCD6C7A9D727 /* IssuerMetadataResolver.swift */; };
 		A2A99E822D065F3A8F1D272A /* Proof.swift in Sources */ = {isa = PBXBuildFile; fileRef = F41276ECD689DC7E6C25979B /* Proof.swift */; };
@@ -190,7 +191,6 @@
 		FC1BF9B7CA0DDEC73B986E63 /* NonceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A500188B170DF85351E08BC /* NonceManager.swift */; };
 		FEE681E2A53DA29872E992D6 /* OpenId4VpPresentationDefinitionMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F0287F0DB334A2A6359D684 /* OpenId4VpPresentationDefinitionMatcherTests.swift */; };
 		FF80B5077EB5E9592EA9AB40 /* DcqlMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5E3FEBF6D33B0CBA2B33977 /* DcqlMatcherTests.swift */; };
-		A1C2D3E4F5A6B7C80010AA02 /* TestAvailability.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C2D3E4F5A6B7C80010AA01 /* TestAvailability.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -225,6 +225,7 @@
 		12D666A531A1CFAE8BDDCB22 /* RevocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RevocationManager.swift; sourceTree = "<group>"; };
 		156E117108E875BDE2A2D9E2 /* KeyBindingJwtTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyBindingJwtTests.swift; sourceTree = "<group>"; };
 		18327CF1CBB3FD635354927D /* ProfileMigration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileMigration.swift; sourceTree = "<group>"; };
+		1A2B3C4D5E6F7A8B9C0D1E2F /* WalletRegistryIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletRegistryIntegrationTests.swift; sourceTree = "<group>"; };
 		1A479DBE4CE46DD2D9315F4C /* PresentationSubmissionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationSubmissionTests.swift; sourceTree = "<group>"; };
 		1AED8BAD4F7407C4A0DC9FC3 /* StoredSdJwtVcTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredSdJwtVcTests.swift; sourceTree = "<group>"; };
 		1C2C982E606F4F5D11B8589F /* SsdidWalletTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SsdidWalletTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -327,6 +328,7 @@
 		A1B2C3D4E5F6A7B80003AA01 /* DeviceManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceManagerTests.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B80004AA01 /* KeyRotationManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyRotationManagerTests.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E1F2 /* ShamirSecretSharing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShamirSecretSharing.swift; sourceTree = "<group>"; };
+		A1C2D3E4F5A6B7C80010AA01 /* TestAvailability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestAvailability.swift; sourceTree = "<group>"; };
 		A4A62F09199334FE5456A34F /* CredentialSubject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialSubject.swift; sourceTree = "<group>"; };
 		A5B6C7D8E9F0A1B2C3D4E5F6 /* DeviceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceManager.swift; sourceTree = "<group>"; };
 		A7FB896692C4E9DBDE438C69 /* ServiceContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceContainer.swift; sourceTree = "<group>"; };
@@ -337,7 +339,6 @@
 		B56EA9DC9B66504E93267F77 /* WalletHomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletHomeScreen.swift; sourceTree = "<group>"; };
 		B65EBC41C02E3686A0F945F7 /* PqcProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PqcProviderTests.swift; sourceTree = "<group>"; };
 		B68ED71CE63FCC4DE1B98E57 /* RegistryIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistryIntegrationTests.swift; sourceTree = "<group>"; };
-		1A2B3C4D5E6F7A8B9C0D1E2F /* WalletRegistryIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletRegistryIntegrationTests.swift; sourceTree = "<group>"; };
 		B716EEFB8BF8BCD6C7A9D727 /* IssuerMetadataResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssuerMetadataResolver.swift; sourceTree = "<group>"; };
 		B7838644C3FDD99282FDE709 /* PresentationDefinitionMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationDefinitionMatcher.swift; sourceTree = "<group>"; };
 		B79CDEC59980D19742B82413 /* DeviceEnrollScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceEnrollScreen.swift; sourceTree = "<group>"; };
@@ -391,7 +392,6 @@
 		F9A67835B6BAF26E99D578B1 /* Identity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Identity.swift; sourceTree = "<group>"; };
 		FA167CF225FDFA0E2F54E69C /* VaultStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultStorage.swift; sourceTree = "<group>"; };
 		FDAFB37385927F279F6A4EC0 /* TokenClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenClient.swift; sourceTree = "<group>"; };
-		A1C2D3E4F5A6B7C80010AA01 /* TestAvailability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestAvailability.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -498,22 +498,6 @@
 			path = SsdidWalletTests;
 			sourceTree = "<group>";
 		};
-		A1C2D3E4F5A6B7C80010AA03 /* TestHelpers */ = {
-			isa = PBXGroup;
-			children = (
-				A1C2D3E4F5A6B7C80010AA01 /* TestAvailability.swift */,
-			);
-			path = TestHelpers;
-			sourceTree = "<group>";
-		};
-		2A3B4C5D6E7F8A9B0C1D2E3F /* Integration */ = {
-			isa = PBXGroup;
-			children = (
-				1A2B3C4D5E6F7A8B9C0D1E2F /* WalletRegistryIntegrationTests.swift */,
-			);
-			path = Integration;
-			sourceTree = "<group>";
-		};
 		1DCEFF05A6EE9C2FBEDBA5EF /* Vault */ = {
 			isa = PBXGroup;
 			children = (
@@ -557,6 +541,14 @@
 				45B7A80A92BA2FB3FDED8C4A /* SsdidClient.swift */,
 			);
 			path = Domain;
+			sourceTree = "<group>";
+		};
+		2A3B4C5D6E7F8A9B0C1D2E3F /* Integration */ = {
+			isa = PBXGroup;
+			children = (
+				1A2B3C4D5E6F7A8B9C0D1E2F /* WalletRegistryIntegrationTests.swift */,
+			);
+			path = Integration;
 			sourceTree = "<group>";
 		};
 		2A58E4B012DCB3215AFB7C1E /* Scan */ = {
@@ -968,6 +960,14 @@
 			path = Rotation;
 			sourceTree = "<group>";
 		};
+		A1C2D3E4F5A6B7C80010AA03 /* TestHelpers */ = {
+			isa = PBXGroup;
+			children = (
+				A1C2D3E4F5A6B7C80010AA01 /* TestAvailability.swift */,
+			);
+			path = TestHelpers;
+			sourceTree = "<group>";
+		};
 		B1B060979D0428F5FA697B3B /* SsdidWallet */ = {
 			isa = PBXGroup;
 			children = (
@@ -1234,8 +1234,8 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				937A8918B7F0DE5BDE197904 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
-				695D9D513ADCFB1F8530F0E3 /* XCLocalSwiftPackageReference "KazSign" */,
-				C739842A39A966593F976862 /* XCLocalSwiftPackageReference "LibOQS" */,
+				695D9D513ADCFB1F8530F0E3 /* XCLocalSwiftPackageReference "Packages/KazSign" */,
+				C739842A39A966593F976862 /* XCLocalSwiftPackageReference "Packages/LibOQS" */,
 			);
 			productRefGroup = 69D8E637B23C344E83348B5A /* Products */;
 			projectDirPath = "";
@@ -1564,14 +1564,13 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SsdidWallet.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SsdidWallet/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "SSDID Wallet";
 				INFOPLIST_KEY_NSCameraUsageDescription = "SSDID Wallet needs camera access to scan QR codes for identity verification and service registration.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "SSDID Wallet uses Face ID to protect your decentralized identity and authorize transactions.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = NO;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1684,14 +1683,13 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SsdidWallet.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SsdidWallet/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "SSDID Wallet";
 				INFOPLIST_KEY_NSCameraUsageDescription = "SSDID Wallet needs camera access to scan QR codes for identity verification and service registration.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "SSDID Wallet uses Face ID to protect your decentralized identity and authorize transactions.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = NO;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1743,11 +1741,11 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		695D9D513ADCFB1F8530F0E3 /* XCLocalSwiftPackageReference "KazSign" */ = {
+		695D9D513ADCFB1F8530F0E3 /* XCLocalSwiftPackageReference "Packages/KazSign" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/KazSign;
 		};
-		C739842A39A966593F976862 /* XCLocalSwiftPackageReference "LibOQS" */ = {
+		C739842A39A966593F976862 /* XCLocalSwiftPackageReference "Packages/LibOQS" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/LibOQS;
 		};

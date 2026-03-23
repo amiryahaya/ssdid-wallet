@@ -111,7 +111,16 @@ class SsdidClient(
             Sentry.addBreadcrumb(Breadcrumb().apply {
                 category = "identity"; message = "Registering DID with registry"; level = SentryLevel.INFO
             })
-            httpClient.registry.registerDid(RegisterDidRequest(didDoc, proof))
+            try {
+                httpClient.registry.registerDid(RegisterDidRequest(didDoc, proof))
+            } catch (e: retrofit2.HttpException) {
+                if (e.code() == 409) {
+                    // DID collision — clean up and retry with a new DID
+                    try { vault.deleteIdentity(identity.keyId) } catch (_: Exception) {}
+                    return initIdentity(name, algorithm) // Recursive retry (new random DID)
+                }
+                throw e
+            }
             logActivity(ActivityType.IDENTITY_CREATED, identity.did, details = mapOf("algorithm" to algorithm.name))
             notifyManager.createMailbox(identity)
             notifyManager.updateKnownIdentities(vault.listIdentities())

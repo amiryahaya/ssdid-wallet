@@ -74,7 +74,16 @@ final class SsdidClient: @unchecked Sendable {
             )
 
             let request = RegisterDidRequest(didDocument: didDoc, proof: proof)
-            _ = try await httpClient.registry.registerDid(request: request)
+            do {
+                _ = try await httpClient.registry.registerDid(request: request)
+            } catch let httpError as HttpError {
+                if case .requestFailed(let statusCode, _) = httpError, statusCode == 409 {
+                    // DID collision — clean up and retry with a new DID
+                    try? await vault.deleteIdentity(keyId: identity.keyId)
+                    return try await initIdentity(name: name, algorithm: algorithm)
+                }
+                throw httpError
+            }
         } catch {
             // Roll back: remove the locally saved identity on failure
             try? await vault.deleteIdentity(keyId: identity.keyId)
