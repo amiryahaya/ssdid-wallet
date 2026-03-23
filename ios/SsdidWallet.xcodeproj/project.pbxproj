@@ -194,10 +194,19 @@
 		D1A2B3C4E5F6A7B80005BB01 /* OfflineVerifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A2B3C4E5F6A7B80005AA01 /* OfflineVerifier.swift */; };
 		D1A2B3C4E5F6A7B80005BB02 /* VerificationBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A2B3C4E5F6A7B80005AA02 /* VerificationBundle.swift */; };
 		D1A2B3C4E5F6A7B80005BB03 /* OfflineVerifierTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A2B3C4E5F6A7B80005AA03 /* OfflineVerifierTests.swift */; };
+		E1F2A3B4C5D6E7F80006BB01 /* IdentityCreationUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F2A3B4C5D6E7F80006AA01 /* IdentityCreationUITests.swift */; };
+		E1F2A3B4C5D6E7F80006BB02 /* RecoveryFlowUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F2A3B4C5D6E7F80006AA02 /* RecoveryFlowUITests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
 		077D52F2F4C872835B2D5179 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F7F40276B6EBB233D9FDDF69 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B43F607F013223DC880A2AFB;
+			remoteInfo = SsdidWallet;
+		};
+		E1F2A3B4C5D6E7F80006DD02 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F7F40276B6EBB233D9FDDF69 /* Project object */;
 			proxyType = 1;
@@ -398,6 +407,9 @@
 		D1A2B3C4E5F6A7B80005AA01 /* OfflineVerifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineVerifier.swift; sourceTree = "<group>"; };
 		D1A2B3C4E5F6A7B80005AA02 /* VerificationBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerificationBundle.swift; sourceTree = "<group>"; };
 		D1A2B3C4E5F6A7B80005AA03 /* OfflineVerifierTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineVerifierTests.swift; sourceTree = "<group>"; };
+		E1F2A3B4C5D6E7F80006AA01 /* IdentityCreationUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentityCreationUITests.swift; sourceTree = "<group>"; };
+		E1F2A3B4C5D6E7F80006AA02 /* RecoveryFlowUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryFlowUITests.swift; sourceTree = "<group>"; };
+		E1F2A3B4C5D6E7F80006AA03 /* SsdidWalletUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SsdidWalletUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -408,6 +420,13 @@
 				AEF75A1198E1D68A8481E002 /* KazSign in Frameworks */,
 				402EF11C875CADF8CB46B34B /* LibOQS in Frameworks */,
 				A051A3C1C338D957C7D801EB /* SentrySwiftUI in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E1F2A3B4C5D6E7F80006EE02 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -705,6 +724,7 @@
 				E9C6DCF81B4B282AB0BF0C28 /* Packages */,
 				B1B060979D0428F5FA697B3B /* SsdidWallet */,
 				1DAEDF0F34C61B531009AAB8 /* SsdidWalletTests */,
+				E1F2A3B4C5D6E7F80006CC01 /* SsdidWalletUITests */,
 				69D8E637B23C344E83348B5A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -748,6 +768,7 @@
 			children = (
 				893874D5D6CAFB993028741F /* SsdidWallet.app */,
 				1C2C982E606F4F5D11B8589F /* SsdidWalletTests.xctest */,
+				E1F2A3B4C5D6E7F80006AA03 /* SsdidWalletUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1185,6 +1206,15 @@
 			path = Sentry;
 			sourceTree = "<group>";
 		};
+		E1F2A3B4C5D6E7F80006CC01 /* SsdidWalletUITests */ = {
+			isa = PBXGroup;
+			children = (
+				E1F2A3B4C5D6E7F80006AA01 /* IdentityCreationUITests.swift */,
+				E1F2A3B4C5D6E7F80006AA02 /* RecoveryFlowUITests.swift */,
+			);
+			path = SsdidWalletUITests;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1226,6 +1256,23 @@
 			productReference = 893874D5D6CAFB993028741F /* SsdidWallet.app */;
 			productType = "com.apple.product-type.application";
 		};
+		E1F2A3B4C5D6E7F80006DD01 /* SsdidWalletUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E1F2A3B4C5D6E7F80006FF03 /* Build configuration list for PBXNativeTarget "SsdidWalletUITests" */;
+			buildPhases = (
+				E1F2A3B4C5D6E7F80006EE01 /* Sources */,
+				E1F2A3B4C5D6E7F80006EE02 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E1F2A3B4C5D6E7F80006DD03 /* PBXTargetDependency */,
+			);
+			name = SsdidWalletUITests;
+			productName = SsdidWalletUITests;
+			productReference = E1F2A3B4C5D6E7F80006AA03 /* SsdidWalletUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -1242,6 +1289,11 @@
 					B43F607F013223DC880A2AFB = {
 						DevelopmentTeam = HY5S7B8P9R;
 						ProvisioningStyle = Automatic;
+					};
+					E1F2A3B4C5D6E7F80006DD01 = {
+						DevelopmentTeam = HY5S7B8P9R;
+						ProvisioningStyle = Automatic;
+						TestTargetID = B43F607F013223DC880A2AFB;
 					};
 				};
 			};
@@ -1268,6 +1320,7 @@
 			targets = (
 				B43F607F013223DC880A2AFB /* SsdidWallet */,
 				1E123B37B1B66EE17BAD4D68 /* SsdidWalletTests */,
+				E1F2A3B4C5D6E7F80006DD01 /* SsdidWalletUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -1481,6 +1534,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E1F2A3B4C5D6E7F80006EE01 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E1F2A3B4C5D6E7F80006BB01 /* IdentityCreationUITests.swift in Sources */,
+				E1F2A3B4C5D6E7F80006BB02 /* RecoveryFlowUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -1488,6 +1550,11 @@
 			isa = PBXTargetDependency;
 			target = B43F607F013223DC880A2AFB /* SsdidWallet */;
 			targetProxy = 077D52F2F4C872835B2D5179 /* PBXContainerItemProxy */;
+		};
+		E1F2A3B4C5D6E7F80006DD03 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B43F607F013223DC880A2AFB /* SsdidWallet */;
+			targetProxy = E1F2A3B4C5D6E7F80006DD02 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1736,6 +1803,46 @@
 			};
 			name = Release;
 		};
+		E1F2A3B4C5D6E7F80006FF01 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = my.ssdid.wallet.uitests;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = SsdidWallet;
+			};
+			name = Debug;
+		};
+		E1F2A3B4C5D6E7F80006FF02 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = my.ssdid.wallet.uitests;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = SsdidWallet;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1762,6 +1869,15 @@
 			buildConfigurations = (
 				360971F9BEF9DF0DFF850749 /* Debug */,
 				BDF6190321904AE2F76FF0F7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		E1F2A3B4C5D6E7F80006FF03 /* Build configuration list for PBXNativeTarget "SsdidWalletUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E1F2A3B4C5D6E7F80006FF01 /* Debug */,
+				E1F2A3B4C5D6E7F80006FF02 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
