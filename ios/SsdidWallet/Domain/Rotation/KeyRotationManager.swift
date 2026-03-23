@@ -144,8 +144,25 @@ final class KeyRotationManager: @unchecked Sendable {
         newIdentity.email = identity.email
         newIdentity.emailVerified = identity.emailVerified
 
-        // Save new identity with pre-rotated encrypted private key
-        try await storage.saveIdentity(newIdentity, encryptedPrivateKey: preRotatedData.encryptedPrivateKey)
+        // Re-wrap the pre-rotated private key with the new identity's wrapping key.
+        // The pre-rotated key was encrypted with "ssdid_prerot_..." alias during prepareRotation,
+        // but VaultImpl.sign() expects it under "ssdid_wrap_..." alias for the new DID.
+        let prerotAlias = "ssdid_prerot_\(stableAlias(identity.keyId))"
+        let rawPrivateKey = try keychainManager.decrypt(alias: prerotAlias, data: preRotatedData.encryptedPrivateKey)
+
+        let did = Did(value: newIdentity.did)
+        let newWrapAlias = "ssdid_wrap_\(did.methodSpecificId())"
+        try keychainManager.generateWrappingKey(alias: newWrapAlias)
+        let reWrappedKey = try keychainManager.encrypt(alias: newWrapAlias, data: rawPrivateKey)
+
+        // Zero raw key from memory
+        var mutableKey = rawPrivateKey
+        mutableKey.withUnsafeMutableBytes { ptr in
+            if let base = ptr.baseAddress { memset(base, 0, ptr.count) }
+        }
+
+        // Save new identity with re-wrapped private key
+        try await storage.saveIdentity(newIdentity, encryptedPrivateKey: reWrappedKey)
 
         // Publish to registry BEFORE deleting old data (crash-safe ordering)
         try await ssdidClient.updateDidDocument(keyId: newIdentity.keyId)
