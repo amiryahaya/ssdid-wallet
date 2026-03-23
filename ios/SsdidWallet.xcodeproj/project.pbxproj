@@ -196,6 +196,8 @@
 		D1A2B3C4E5F6A7B80005BB03 /* OfflineVerifierTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A2B3C4E5F6A7B80005AA03 /* OfflineVerifierTests.swift */; };
 		E1F2A3B4C5D6E7F80006BB01 /* IdentityCreationUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F2A3B4C5D6E7F80006AA01 /* IdentityCreationUITests.swift */; };
 		E1F2A3B4C5D6E7F80006BB02 /* RecoveryFlowUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F2A3B4C5D6E7F80006AA02 /* RecoveryFlowUITests.swift */; };
+		F1A2B3C4E5F6A7B80007BB01 /* FileBundleStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A2B3C4E5F6A7B80007AA01 /* FileBundleStore.swift */; };
+		F1A2B3C4E5F6A7B80007BB02 /* BundleFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A2B3C4E5F6A7B80007AA02 /* BundleFetcher.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -410,6 +412,8 @@
 		E1F2A3B4C5D6E7F80006AA01 /* IdentityCreationUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentityCreationUITests.swift; sourceTree = "<group>"; };
 		E1F2A3B4C5D6E7F80006AA02 /* RecoveryFlowUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryFlowUITests.swift; sourceTree = "<group>"; };
 		E1F2A3B4C5D6E7F80006AA03 /* SsdidWalletUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SsdidWalletUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F1A2B3C4E5F6A7B80007AA01 /* FileBundleStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileBundleStore.swift; sourceTree = "<group>"; };
+		F1A2B3C4E5F6A7B80007AA02 /* BundleFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleFetcher.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -860,6 +864,8 @@
 		D1A2B3C4E5F6A7B80005CC01 /* Offline */ = {
 			isa = PBXGroup;
 			children = (
+				F1A2B3C4E5F6A7B80007AA02 /* BundleFetcher.swift */,
+				F1A2B3C4E5F6A7B80007AA01 /* FileBundleStore.swift */,
 				D1A2B3C4E5F6A7B80005AA01 /* OfflineVerifier.swift */,
 				D1A2B3C4E5F6A7B80005AA02 /* VerificationBundle.swift */,
 			);
@@ -1528,6 +1534,8 @@
 				B8998384A47A46D68B2707B5 /* Verifier.swift in Sources */,
 				D1A2B3C4E5F6A7B80005BB01 /* OfflineVerifier.swift in Sources */,
 				D1A2B3C4E5F6A7B80005BB02 /* VerificationBundle.swift in Sources */,
+				F1A2B3C4E5F6A7B80007BB01 /* FileBundleStore.swift in Sources */,
+				F1A2B3C4E5F6A7B80007BB02 /* BundleFetcher.swift in Sources */,
 				8D151338E1C4FA65EB07E31E /* VpTokenBuilder.swift in Sources */,
 				21B97926CB51352CFFB9E420 /* WalletHomeScreen.swift in Sources */,
 				40AE212BDD25CD6BDCBF47B5 /* KeyRotationManager.swift in Sources */,
