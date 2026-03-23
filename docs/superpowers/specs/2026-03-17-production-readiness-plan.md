@@ -1,78 +1,93 @@
 # SSDID Wallet Production Readiness Plan
 
-Based on the SSDID Ecosystem Review (doc 17), filtered for wallet-specific items.
+**Last updated:** 2026-03-23
+**Source:** SSDID Ecosystem Review (doc 17), filtered for wallet-specific items.
 
-## Unblocked Now (no registry changes needed)
+## Status: All Critical and High Items Complete ✅
 
-### Phase A: Key Recovery (Critical)
+### Phase A: Key Recovery — ✅ DONE
 
-| Tier | What | Status | Work Needed |
-|------|------|--------|-------------|
-| Tier 1 | Offline recovery key — generate, QR export, restore | Partial — `RecoveryManager` exists | Complete UI flow, test end-to-end |
-| Tier 2 | Shamir's Secret Sharing (3-of-5 social recovery) | Not started | SSS algorithm, share distribution UI, reconstruction flow |
-| Tier 3 | Institutional guardian key in DID document | Not started | Add guardian key via DID doc UPDATE, custodian approval flow |
+| Tier | What | Status |
+|------|------|--------|
+| Tier 1 | Offline recovery key — generate, export, restore | ✅ `RecoveryManager` on both platforms, wired to UI |
+| Tier 2 | Shamir's Secret Sharing (3-of-5 social recovery) | ✅ `ShamirSecretSharing` (GF(256)) + `SocialRecoveryManager`, iOS ported from Android |
+| Tier 3 | Institutional guardian key in DID document | ✅ `InstitutionalRecoveryManager` on both platforms |
 
-### Phase B: Multi-Device Enrollment (High)
+### Phase B: Multi-Device Enrollment — ✅ DONE
 
-| What | Status | Work Needed |
-|------|--------|-------------|
-| QR pairing protocol | Shell UI exists | Implement: primary generates QR → secondary scans → keypair generation → challenge signing → primary approval → DID doc UPDATE |
-| Device management | Shell UI exists | Wire up: list devices, revoke device key |
+| What | Status |
+|------|--------|
+| QR pairing protocol | ✅ `DeviceManager` on both platforms — initiate, join, approve, revoke |
+| Device management | ✅ UI wired to real manager calls, polling for status |
 
-### Phase C: DID Validation + Test Fixes (High/Medium)
+### Phase C: DID Validation + Tests — ✅ DONE
 
-| What | Status | Work Needed |
-|------|--------|-------------|
-| `DID.validate()` / `DID.parse()` | `Did.kt`/`Did.swift` exist with generate/keyId | Add format validation: prefix, base64url ID, min entropy |
-| Fix broken iOS tests | Multiple files broken | Fix OpenId4Vp handler tests, IssuerMetadata tests, re-enable CI test step |
-| Concurrent vault access tests | None | Add tests for concurrent sign/createIdentity |
+| What | Status |
+|------|--------|
+| `DID.validate()` | ✅ Both platforms — 22-char min, 128 max, ASCII base64url, wired to 14 call sites |
+| Fix broken iOS tests | ✅ 12 test files fixed, CI test step re-enabled, Keychain probe for skips |
+| Concurrent vault tests | ✅ 3 Android tests for concurrent operations |
 
----
+### Phase D: Key Rotation — ✅ DONE
 
-## Blocked by Registry
+| What | Status |
+|------|--------|
+| Registry `nextKeyHash` support | ✅ Registry updated with KERI pre-rotation, cooldown, grace period |
+| Wallet `KeyRotationManager` | ✅ Both platforms — `prepareRotation` + `executeRotation` |
+| Wrapping key re-wrap during rotation | ✅ Fixed: decrypt prerot → re-encrypt with identity wrap alias |
+| `KeyRotationScreen` UI | ✅ Wired to real manager calls |
 
-### Needs Registry Spec: Key Rotation Ceremony (Critical)
+### Phase E: Credential Revocation — ✅ DONE (wallet side)
 
-**Registry changes needed:**
-1. Add `nextKeyHash` field to DID document schema (optional string, SHA3-256 hash of pre-rotated public key)
-2. Validate `nextKeyHash` on UPDATE: if current doc has `nextKeyHash`, the new primary key's hash must match it
-3. Add rotation grace period: both old and new keys valid for configurable window (default 1 hour)
+| What | Status |
+|------|--------|
+| `RevocationManager` in auth flow | ✅ Wired into `SsdidClient.authenticate()` on both platforms |
+| Status dots (Connected Services) | ✅ Green/yellow/red/revoked with revocation check |
+| Status list service | ✅ Separate `ssdid_status_list` service built (registry side) |
 
-**Wallet work (after registry):**
-- Add `nextKeyHash` to `DidDocument.kt` / `DidDocument.swift`
-- Implement rotation ceremony in `KeyRotationScreen`: commit hash → wait → execute rotation
-- Pre-generate rotation key pair in `VaultImpl` during identity creation
+### Phase F: Security Hardening — ✅ DONE
 
-### Needs Registry Spec: Credential Revocation (High)
-
-**Registry changes needed:**
-1. Add `/api/status/{list_id}` endpoint serving W3C Bitstring Status List v1.0
-2. Issuers (like ssdid-drive) publish status lists to registry
-3. Status list format: compressed bitstring, signed by issuer
-
-**Wallet work (after registry):**
-- Wire `RevocationManager` into consent/auth flows
-- Cache status lists locally with TTL (e.g., 24 hours)
-- Show credential status in Connected Services section (already has status dots)
-
-### Needs Registry: Rate Limiting (Critical, registry-only)
-
-No wallet changes needed. Registry must add per-IP and per-DID throttling.
+| What | Status |
+|------|--------|
+| Biometric / Auto-lock | ✅ `LockOverlay` (iOS) / `LockScreen` (Android), configurable timeout |
+| Secure Enclave key wrapping (iOS) | ✅ ECDH P-256 → HKDF → AES-256-GCM, lazy migration |
+| Certificate pinning | ✅ Real SPKI SHA-256 pins, EC header fix for iOS |
+| CSRF / state parameter | ✅ Deep link `state` param echoed in callbacks |
+| Protocol version | ✅ `protocol_version` in `ChallengeResponse` DTOs |
+| DID collision retry | ✅ Auto-retry with new DID on 409 Conflict |
 
 ---
 
-## Implementation Order
+## Remaining Items (Medium Priority — GA Hardening)
 
-```
-NOW (wallet only, no registry dependency):
-  1. Key Recovery Tier 1 (complete existing flow)
-  2. Key Recovery Tier 2 (Shamir SSS)
-  3. Key Recovery Tier 3 (institutional guardian)
-  4. Multi-Device Enrollment
-  5. DID Validation utility
-  6. Fix iOS test suite + re-enable CI tests
+| Item | Priority | Status |
+|------|----------|--------|
+| Offline credential verification | Medium | ❌ Not started (L effort, needs DID doc bundling) |
+| Wallet discovery endpoint | Low | ❌ Not started (questionable value) |
+| VaultImpl actor migration (iOS) | Medium | ❌ Deferred (needs Sendable dependencies) |
+| Fix iOS test assertions (key sizes, JWT) | Medium | ⚠️ Skipped on CI, pending device testing |
 
-AFTER REGISTRY UPDATES:
-  7. Key Rotation Ceremony
-  8. Credential Revocation Checking
-```
+---
+
+## CI/CD & Distribution
+
+| Item | Status |
+|------|--------|
+| Android CI (compile + test + lint) | ✅ Green |
+| iOS CI (compile + test) | ✅ Green (device-only tests skipped via Keychain probe) |
+| Android publish → Play Store Internal Testing | ✅ Workflow: tag `android/v*` |
+| iOS publish → App Store Connect / TestFlight | ✅ Workflow: tag `ios/v*` |
+| Beta signup API (TestFlight invitations) | ✅ Podman container, App Store Connect API |
+| Landing page beta signup form | ✅ "Join iOS Beta" section |
+| App name: "SSDID Wallet" | ✅ Both platforms, all locales |
+
+---
+
+## E2E Testing
+
+| Tool | Tests | Status |
+|------|:---:|--------|
+| Maestro (mobile) | 11 flows | UC-01 verified on iOS simulator, others need Maestro Studio tuning |
+| Playwright (desktop) | 22 tests | 19 passed, 3 skipped against live registry |
+| Integration tests (wallet↔registry) | 8 Android + 10 iOS | Passed against https://registry.ssdid.my |
+| Use case document | 108 test cases | Tracking at `docs/use-cases-and-e2e-tests.md` |

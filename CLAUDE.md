@@ -4,9 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-SSDID Wallet — a self-sovereign decentralized identity (SSI) wallet with post-quantum cryptography (PQC) support. Currently an Android reference implementation using Jetpack Compose, with planned iOS and HarmonyOS NEXT targets.
+SSDID Wallet — a self-sovereign decentralized identity (SSI) wallet with post-quantum cryptography (PQC) support. Dual-platform implementation: Android (Kotlin/Compose) and iOS (Swift/SwiftUI).
 
-**Package:** `my.ssdid.wallet`
+**App Name:** SSDID Wallet
+**Package:** `my.ssdid.wallet` (both platforms)
+**Registry:** `https://registry.ssdid.my`
 
 ## Build & Test Commands
 

@@ -1,8 +1,25 @@
 # SSDID Wallet — Use Cases & E2E Test Cases
 
-**Date:** 2026-03-20
+**Date:** 2026-03-23 (updated)
 **Platforms:** Android (Kotlin/Compose), iOS (Swift/SwiftUI)
+**App Name:** SSDID Wallet (both platforms)
+**Registry:** https://registry.ssdid.my
 **Status Legend:** ⬜ Not tested | 🟡 Partial | ✅ Passed | ❌ Failed
+
+## Recent Fixes (2026-03-20 — 2026-03-23)
+
+| Fix | Impact | Platforms |
+|-----|--------|-----------|
+| Certificate pinning SPKI hash fix | iOS release builds were rejecting all connections ("network error: cancelled") — `SecKeyCopyExternalRepresentation` strips EC SPKI header, producing wrong hash. Fixed by prepending EC P-256 header before hashing. | iOS |
+| Key rotation wrapping alias mismatch | "Rotate Now" failed with CryptoKitError — pre-rotated key encrypted with `ssdid_prerot_` but VaultImpl expected `ssdid_wrap_`. Fixed by re-wrapping during executeRotation. | Both |
+| DID 409 Conflict retry | "DID already exists" on Create Identity — previous failed attempt registered DID on registry but wallet didn't save locally. Now auto-retries with new random DID. | Both |
+| Hilt 2.53.1 → 2.56.2 | Android build failed with Kotlin metadata version mismatch (Kotlin 2.2.10 generates v2.2.0 metadata, Hilt 2.53.1 only supported v2.1.0). | Android |
+| App name "SSDID" → "SSDID Wallet" | Consistent app name across both platforms and all locales (en, ms, zh). | Both |
+| Play Store + App Store publish workflows | CI/CD: tag `android/v*` or `ios/v*` → build → publish to Play Store Internal Testing / TestFlight. | Both |
+| Beta signup API + landing page | Landing page "Join iOS Beta" form → Podman containerized API → App Store Connect → TestFlight invite. | iOS |
+| Maestro + Playwright E2E tests | 11 Maestro mobile flows + 3 Playwright desktop/web spec files. UC-01 onboarding verified on simulator. | Both |
+
+---
 
 ---
 
@@ -13,7 +30,7 @@
 
 | # | Test Case | Steps | Expected Result | Android | iOS |
 |---|-----------|-------|-----------------|:---:|:---:|
-| 1.1 | Complete onboarding carousel | Open app → swipe through 3 pages → tap "Get Started" | Navigate to Create Identity wizard | ⬜ | ⬜ |
+| 1.1 | Complete onboarding carousel | Open app → swipe through 3 pages → tap "Get Started" | Navigate to Create Identity wizard | ⬜ | ✅ |
 | 1.2 | Skip to create identity | Open app → tap "Skip" on any carousel page | Navigate to Create Identity wizard | ⬜ | ⬜ |
 | 1.3 | Restore from backup on first launch | Onboarding → tap "Restore" → select backup file → enter passphrase | Identity restored, navigate to Home | ⬜ | ⬜ |
 
@@ -27,13 +44,14 @@
 | # | Test Case | Steps | Expected Result | Android | iOS |
 |---|-----------|-------|-----------------|:---:|:---:|
 | 2.1 | Create identity with Ed25519 | Step 1: enter name + email → "Verify Email" → Step 2: enter OTP → "Verify" → Step 3: enter identity name, select Ed25519 → "Create" | Identity created, DID registered on registry, navigate to Biometric Setup | ⬜ | ⬜ |
-| 2.2 | Create identity with KAZ-Sign-192 (PQC) | Same as 2.1 but select KAZ-Sign-192 in step 3 | Identity created with PQC algorithm | ⬜ | ⬜ |
+| 2.2 | Create identity with KAZ-Sign-192 (PQC) | Same as 2.1 but select KAZ-Sign-192 in step 3 | Identity created with PQC algorithm | ⬜ | ✅ |
 | 2.3 | Email verification with wrong code | Step 2: enter wrong 6-digit code → "Verify" | Error: "Invalid verification code" | ⬜ | ⬜ |
 | 2.4 | Email resend with progressive cooldown | Step 2: tap "Resend" 3 times | Cooldown: 60s → 120s → 300s | ⬜ | ⬜ |
 | 2.5 | Back navigation between wizard steps | Step 2: tap back → Step 1 fields preserved | Email and name fields retain values | ⬜ | ⬜ |
 | 2.6 | Email change resets verification | Step 2: go back → change email → Step 2 again | Must re-verify with new code | ⬜ | ⬜ |
 | 2.7 | Invalid email format rejected | Step 1: enter "notanemail" → "Verify Email" | Button disabled or validation error | ⬜ | ⬜ |
 | 2.8 | Empty display name rejected | Step 1: leave name empty → "Verify Email" | Button disabled | ⬜ | ⬜ |
+| 2.9 | DID collision auto-retry | Create identity when previous failed attempt left orphan DID on registry | Auto-retries with new DID, succeeds transparently | ⬜ | ✅ |
 
 ---
 
@@ -187,8 +205,8 @@
 
 | # | Test Case | Steps | Expected Result | Android | iOS |
 |---|-----------|-------|-----------------|:---:|:---:|
-| 12.1 | Prepare pre-commitment | Key Rotation → "Prepare Pre-Commitment" | nextKeyHash published to registry, pre-rotation status shows ✓ | ⬜ | ⬜ |
-| 12.2 | Execute rotation | After prepare → "Rotate Now" | New key promoted, old key in grace period, registry updated | ⬜ | ⬜ |
+| 12.1 | Prepare pre-commitment | Key Rotation → "Prepare Pre-Commitment" | nextKeyHash published to registry, pre-rotation status shows ✓ | ⬜ | ✅ |
+| 12.2 | Execute rotation | After prepare → "Rotate Now" | New key promoted, old key in grace period, registry updated | ⬜ | 🟡 |
 | 12.3 | Verify old key still works (grace period) | Immediately after rotation → authenticate with service | Authentication succeeds (old key in grace period) | ⬜ | ⬜ |
 | 12.4 | Verify new key works | After rotation → authenticate | Authentication succeeds with new key | ⬜ | ⬜ |
 | 12.5 | Rotation without pre-commitment | Attempt "Rotate Now" without prepare | Error: "No pre-committed key" | ⬜ | ⬜ |
