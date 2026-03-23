@@ -95,7 +95,15 @@ class CreateIdentityViewModel @Inject constructor(
         Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
             ?: UUID.randomUUID().toString()
 
+    /** Set to true from Espresso tests to skip OTP verification */
+    var skipOtpForTesting = false
+
     fun sendVerificationCode(email: String, onSuccess: () -> Unit) {
+        if (skipOtpForTesting) {
+            _emailVerified.value = true
+            onSuccess()
+            return
+        }
         if (_isSendingCode.value || _cooldown.value > 0) return
         viewModelScope.launch {
             _isSendingCode.value = true

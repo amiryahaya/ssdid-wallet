@@ -191,6 +191,9 @@
 		FC1BF9B7CA0DDEC73B986E63 /* NonceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A500188B170DF85351E08BC /* NonceManager.swift */; };
 		FEE681E2A53DA29872E992D6 /* OpenId4VpPresentationDefinitionMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F0287F0DB334A2A6359D684 /* OpenId4VpPresentationDefinitionMatcherTests.swift */; };
 		FF80B5077EB5E9592EA9AB40 /* DcqlMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5E3FEBF6D33B0CBA2B33977 /* DcqlMatcherTests.swift */; };
+		D1A2B3C4E5F6A7B80005BB01 /* OfflineVerifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A2B3C4E5F6A7B80005AA01 /* OfflineVerifier.swift */; };
+		D1A2B3C4E5F6A7B80005BB02 /* VerificationBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A2B3C4E5F6A7B80005AA02 /* VerificationBundle.swift */; };
+		D1A2B3C4E5F6A7B80005BB03 /* OfflineVerifierTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A2B3C4E5F6A7B80005AA03 /* OfflineVerifierTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -392,6 +395,9 @@
 		F9A67835B6BAF26E99D578B1 /* Identity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Identity.swift; sourceTree = "<group>"; };
 		FA167CF225FDFA0E2F54E69C /* VaultStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultStorage.swift; sourceTree = "<group>"; };
 		FDAFB37385927F279F6A4EC0 /* TokenClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenClient.swift; sourceTree = "<group>"; };
+		D1A2B3C4E5F6A7B80005AA01 /* OfflineVerifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineVerifier.swift; sourceTree = "<group>"; };
+		D1A2B3C4E5F6A7B80005AA02 /* VerificationBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerificationBundle.swift; sourceTree = "<group>"; };
+		D1A2B3C4E5F6A7B80005AA03 /* OfflineVerifierTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineVerifierTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -824,9 +830,19 @@
 		750E53313B0F60FDE6EC7A49 /* Verifier */ = {
 			isa = PBXGroup;
 			children = (
+				D1A2B3C4E5F6A7B80005CC01 /* Offline */,
 				CCD151205BA7415914053A8C /* Verifier.swift */,
 			);
 			path = Verifier;
+			sourceTree = "<group>";
+		};
+		D1A2B3C4E5F6A7B80005CC01 /* Offline */ = {
+			isa = PBXGroup;
+			children = (
+				D1A2B3C4E5F6A7B80005AA01 /* OfflineVerifier.swift */,
+				D1A2B3C4E5F6A7B80005AA02 /* VerificationBundle.swift */,
+			);
+			path = Offline;
 			sourceTree = "<group>";
 		};
 		792BB6524E2FAD8DCEDCBADB /* Rotation */ = {
@@ -922,8 +938,17 @@
 				436A08A10A7FA318C6DD7D2C /* OpenId4Vp */,
 				A1B2C3D4E5F6A7B80001CC01 /* Recovery */,
 				A1B2C3D4E5F6A7B80004CC01 /* Rotation */,
+				D1A2B3C4E5F6A7B80005CC02 /* Verifier */,
 			);
 			path = Domain;
+			sourceTree = "<group>";
+		};
+		D1A2B3C4E5F6A7B80005CC02 /* Verifier */ = {
+			isa = PBXGroup;
+			children = (
+				D1A2B3C4E5F6A7B80005AA03 /* OfflineVerifierTests.swift */,
+			);
+			path = Verifier;
 			sourceTree = "<group>";
 		};
 		A1B2C3D4E5F6A7B80001CC01 /* Recovery */ = {
@@ -1302,6 +1327,7 @@
 				A1B2C3D4E5F6A7B80003BB01 /* DeviceManagerTests.swift in Sources */,
 				A1B2C3D4E5F6A7B80004BB01 /* KeyRotationManagerTests.swift in Sources */,
 				A1C2D3E4F5A6B7C80010AA02 /* TestAvailability.swift in Sources */,
+				D1A2B3C4E5F6A7B80005BB03 /* OfflineVerifierTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1447,6 +1473,8 @@
 				622DF2A6F59940C6292B57AA /* VerifiablePresentation.swift in Sources */,
 				093576AB1A8A29B95B44C00A /* VerificationMethod.swift in Sources */,
 				B8998384A47A46D68B2707B5 /* Verifier.swift in Sources */,
+				D1A2B3C4E5F6A7B80005BB01 /* OfflineVerifier.swift in Sources */,
+				D1A2B3C4E5F6A7B80005BB02 /* VerificationBundle.swift in Sources */,
 				8D151338E1C4FA65EB07E31E /* VpTokenBuilder.swift in Sources */,
 				21B97926CB51352CFFB9E420 /* WalletHomeScreen.swift in Sources */,
 				40AE212BDD25CD6BDCBF47B5 /* KeyRotationManager.swift in Sources */,
@@ -1564,7 +1592,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SsdidWallet.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SsdidWallet/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "SSDID Wallet";
@@ -1683,7 +1711,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SsdidWallet.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SsdidWallet/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "SSDID Wallet";

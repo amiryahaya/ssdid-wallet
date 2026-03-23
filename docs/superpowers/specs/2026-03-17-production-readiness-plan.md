@@ -1,6 +1,6 @@
 # SSDID Wallet Production Readiness Plan
 
-**Last updated:** 2026-03-23
+**Last updated:** 2026-03-24
 **Source:** SSDID Ecosystem Review (doc 17), filtered for wallet-specific items.
 
 ## Status: All Critical and High Items Complete ✅
@@ -62,7 +62,7 @@
 
 | Item | Priority | Status |
 |------|----------|--------|
-| Offline credential verification | Medium | ❌ Not started (L effort, needs DID doc bundling) |
+| Offline credential verification | Medium | ⚠️ OfflineVerifier implemented on both platforms (BundleStore, signature verify, revocation check). DID doc bundling with issued credentials still needed. |
 | Wallet discovery endpoint | Low | ❌ Not started (questionable value) |
 | VaultImpl actor migration (iOS) | Medium | ❌ Deferred (needs Sendable dependencies) |
 | Fix iOS test assertions (key sizes, JWT) | Medium | ⚠️ Skipped on CI, pending device testing |

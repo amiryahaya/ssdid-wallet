@@ -400,6 +400,15 @@ struct CreateIdentityScreen: View {
     // MARK: - Actions
 
     private func sendVerificationCode() {
+        #if DEBUG
+        // Skip OTP for UI testing — go directly to step 3
+        if ProcessInfo.processInfo.arguments.contains("--skip-otp") {
+            emailVerified = true
+            withAnimation { currentStep = 3 }
+            return
+        }
+        #endif
+
         isSendingCode = true
         errorMessage = nil
         let trimmedEmail = email.trimmingCharacters(in: .whitespaces)
