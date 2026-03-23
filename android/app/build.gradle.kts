@@ -67,7 +67,7 @@ android {
         targetSdk = 35
         versionCode = 4
         versionName = "1.0.0"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "my.ssdid.wallet.HiltTestRunner"
         ndk {
             abiFilters += listOf("arm64-v8a", "x86_64")
         }
@@ -186,6 +186,8 @@ dependencies {
     androidTestImplementation("com.google.truth:truth:1.4.4")
     androidTestImplementation(composeBom)
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.56.2")
+    kaptAndroidTest("com.google.dagger:hilt-android-compiler:2.56.2")
 }
 
 sentry {
