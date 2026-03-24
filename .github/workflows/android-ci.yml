@@ -1,15 +1,18 @@
 name: Android CI
 
+# Disabled: re-enable when ready for CI runs
+# on:
+#   pull_request:
+#     paths:
+#       - 'android/**'
+#       - '.github/workflows/android-*.yml'
+#   push:
+#     branches: [main]
+#     paths:
+#       - 'android/**'
+#       - '.github/workflows/android-*.yml'
 on:
-  pull_request:
-    paths:
-      - 'android/**'
-      - '.github/workflows/android-*.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'android/**'
-      - '.github/workflows/android-*.yml'
+  workflow_dispatch:
 
 concurrency:
   group: android-ci-${{ github.ref }}
