@@ -1,5 +1,7 @@
 package my.ssdid.wallet.ui.offline
 
+// Category: e2e, offline
+
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -67,7 +69,7 @@ class OfflineVerificationTest {
         ttlProvider = TtlProvider(FakeSettingsRepository(ttlDays = 7))
         val classicalProvider = ClassicalProvider()
         val pqcProvider = ClassicalProvider() // placeholder for interface, Ed25519 only
-        offlineVerifier = OfflineVerifier(classicalProvider, pqcProvider, bundleStore)
+        offlineVerifier = OfflineVerifier(classicalProvider, pqcProvider, bundleStore, ttlProvider)
         orchestrator = VerificationOrchestrator(fakeVerifier, offlineVerifier, bundleStore, ttlProvider)
     }
 
@@ -241,5 +243,101 @@ class OfflineVerificationTest {
 
         assertThat(result.status).isEqualTo(VerificationStatus.VERIFIED_OFFLINE)
         assertThat(result.checks.first { it.type == CheckType.EXPIRY }.status).isEqualTo(CheckStatus.PASS)
+    }
+
+    // B2: DID key rotation — credential signed with new key B, bundle has old key A → FAILED
+    @Test
+    fun keyRotation_oldBundle_newCredential_returnsFailed() = runTest {
+        // Create fresh bundle with old key (already set up in setUp)
+        val bundle = OfflineTestHelper.createBundle(issuerDid, didDocument, freshnessRatio = 0.1)
+        bundleStore.saveBundle(bundle)
+
+        // Generate a new key pair B and sign a credential with key-2 (not in DID doc)
+        val (newPubKey, newPrivKey) = OfflineTestHelper.createKeyPair()
+        val newKeyId = "$issuerDid#key-2"
+        val credential = OfflineTestHelper.createTestCredential(issuerDid, newKeyId, newPrivKey)
+        fakeVerifier.shouldThrow = IOException("no network")
+
+        val result = orchestrator.verify(credential)
+
+        // key-2 not in cached DID doc → signature lookup fails → FAILED
+        assertThat(result.status).isEqualTo(VerificationStatus.FAILED)
+        assertThat(result.source).isEqualTo(VerificationSource.OFFLINE)
+        assertThat(result.checks.first { it.type == CheckType.SIGNATURE }.status).isEqualTo(CheckStatus.FAIL)
+    }
+
+    // B3: Storage failure — FailingBundleStore throws on saveBundle, verifier returns graceful error
+    @Test
+    fun storageFailure_bundleFetchStillReturnsBundle() = runTest {
+        val failingStore = object : BundleStore {
+            override suspend fun saveBundle(bundle: VerificationBundle) {
+                throw IOException("Disk full")
+            }
+            override suspend fun getBundle(issuerDid: String): VerificationBundle? = null
+            override suspend fun deleteBundle(issuerDid: String) {}
+            override suspend fun listBundles(): List<VerificationBundle> = emptyList()
+        }
+
+        val classicalProvider = ClassicalProvider()
+        val failingOfflineVerifier = OfflineVerifier(classicalProvider, classicalProvider, failingStore, ttlProvider)
+        val failingOrchestrator = VerificationOrchestrator(fakeVerifier, failingOfflineVerifier, failingStore, ttlProvider)
+
+        val credential = OfflineTestHelper.createTestCredential(issuerDid, keyId, privateKey)
+        fakeVerifier.shouldThrow = IOException("no network")
+
+        val result = failingOrchestrator.verify(credential)
+
+        // No bundle in failing store → offline verifier returns missing bundle error → FAILED
+        assertThat(result.status).isEqualTo(VerificationStatus.FAILED)
+        assertThat(result.source).isEqualTo(VerificationSource.OFFLINE)
+    }
+
+    // B7: Status list URL mismatch → revocation UNKNOWN → DEGRADED
+    @Test
+    fun statusListUrlMismatch_returnsUnknownRevocation() = runTest {
+        val revokedIndex = 5
+        val bitstring = OfflineTestHelper.createStatusListBitstring(revokedIndices = emptySet())
+        // Status list cached with id = ".../status/1"
+        val statusListCredential = StatusListCredential(
+            context = listOf("https://www.w3.org/ns/credentials/v2"),
+            id = "https://registry.ssdid.my/status/1",
+            type = listOf("VerifiableCredential", "BitstringStatusListCredential"),
+            issuer = issuerDid,
+            credentialSubject = StatusListSubject(
+                type = "BitstringStatusList",
+                statusPurpose = "revocation",
+                encodedList = bitstring
+            ),
+            proof = Proof(
+                type = "Ed25519Signature2020",
+                created = Instant.now().toString(),
+                verificationMethod = keyId,
+                proofPurpose = "assertionMethod",
+                proofValue = "uDummy"
+            )
+        )
+        val bundle = OfflineTestHelper.createBundle(
+            issuerDid, didDocument, freshnessRatio = 0.1, statusList = statusListCredential
+        )
+        bundleStore.saveBundle(bundle)
+
+        // Credential references ".../status/2" — mismatched URL
+        val credentialStatus = CredentialStatus(
+            id = "https://registry.ssdid.my/status/2#$revokedIndex",
+            type = "BitstringStatusListEntry",
+            statusPurpose = "revocation",
+            statusListIndex = revokedIndex.toString(),
+            statusListCredential = "https://registry.ssdid.my/status/2"
+        )
+        val credential = OfflineTestHelper.createTestCredential(
+            issuerDid, keyId, privateKey, credentialStatus = credentialStatus
+        )
+        fakeVerifier.shouldThrow = IOException("no network")
+
+        val result = orchestrator.verify(credential)
+
+        // URL mismatch → UNKNOWN revocation → DEGRADED (signature valid, bundle fresh)
+        assertThat(result.status).isEqualTo(VerificationStatus.DEGRADED)
+        assertThat(result.checks.first { it.type == CheckType.REVOCATION }.status).isEqualTo(CheckStatus.UNKNOWN)
     }
 }
