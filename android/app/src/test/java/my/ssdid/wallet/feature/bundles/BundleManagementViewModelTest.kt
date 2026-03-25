@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -76,5 +77,29 @@ class BundleManagementViewModelTest {
         vm.deleteBundle("did:ssdid:test")
 
         coVerify { bundleStore.deleteBundle("did:ssdid:test") }
+    }
+
+    @Test
+    fun `refreshAll sets isRefreshing and reloads bundles`() = runTest {
+        coEvery { bundleStore.listBundles() } returns emptyList()
+        coEvery { bundleManager.refreshStaleBundles() } returns 0
+        val vm = createViewModel()
+
+        vm.refreshAll()
+
+        coVerify { bundleManager.refreshStaleBundles() }
+        assertThat(vm.isRefreshing.value).isFalse()
+    }
+
+    @Test
+    fun `addByDid shows error on prefetch failure`() = runTest {
+        coEvery { bundleStore.listBundles() } returns emptyList()
+        coEvery { bundleManager.prefetchBundle("did:ssdid:fail") } returns Result.failure(IOException("network"))
+        val vm = createViewModel()
+
+        vm.addByDid("did:ssdid:fail")
+
+        assertThat(vm.error.value).isNotNull()
+        assertThat(vm.error.value).contains("Failed")
     }
 }

@@ -2,6 +2,7 @@ package my.ssdid.wallet.domain.verifier.offline
 
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import my.ssdid.wallet.domain.model.CredentialSubject
@@ -16,6 +17,7 @@ import org.junit.Test
 import retrofit2.HttpException
 import retrofit2.Response
 import java.io.IOException
+import java.time.Duration
 import java.time.Instant
 
 class VerificationOrchestratorTest {
@@ -44,8 +46,8 @@ class VerificationOrchestratorTest {
     private val testBundle = VerificationBundle(
         issuerDid = "did:ssdid:issuer123",
         didDocument = mockk(relaxed = true),
-        fetchedAt = Instant.now().minusSeconds(3600).toString(),
-        expiresAt = Instant.now().plusSeconds(3600).toString()
+        fetchedAt = Instant.now().minus(Duration.ofHours(2)).toString(),
+        expiresAt = Instant.now().plus(Duration.ofDays(5)).toString()
     )
 
     private val freshOfflineResult = OfflineVerificationResult(
@@ -96,6 +98,12 @@ class VerificationOrchestratorTest {
 
         assertThat(result.status).isEqualTo(VerificationStatus.VERIFIED_OFFLINE)
         assertThat(result.source).isEqualTo(VerificationSource.OFFLINE)
+        assertThat(result.bundleAge).isNotNull()
+        assertThat(result.bundleAge!!.toHours()).isAtLeast(1)
+        val signatureCheck = result.checks.first { it.type == CheckType.SIGNATURE }
+        assertThat(signatureCheck.status).isEqualTo(CheckStatus.PASS)
+        val bundleFreshnessCheck = result.checks.first { it.type == CheckType.BUNDLE_FRESHNESS }
+        assertThat(bundleFreshnessCheck.status).isEqualTo(CheckStatus.PASS)
     }
 
     // Test 4: falls back to offline on HTTP 5xx
@@ -112,6 +120,10 @@ class VerificationOrchestratorTest {
 
         assertThat(result.status).isEqualTo(VerificationStatus.VERIFIED_OFFLINE)
         assertThat(result.source).isEqualTo(VerificationSource.OFFLINE)
+        val revocationCheck = result.checks.first { it.type == CheckType.REVOCATION }
+        assertThat(revocationCheck.status).isEqualTo(CheckStatus.PASS)
+        val signatureCheck = result.checks.first { it.type == CheckType.SIGNATURE }
+        assertThat(signatureCheck.status).isEqualTo(CheckStatus.PASS)
     }
 
     // Test 5: returns DEGRADED when offline has stale bundle
@@ -129,6 +141,8 @@ class VerificationOrchestratorTest {
 
         assertThat(result.status).isEqualTo(VerificationStatus.DEGRADED)
         assertThat(result.source).isEqualTo(VerificationSource.OFFLINE)
+        val bundleFreshnessCheck = result.checks.first { it.type == CheckType.BUNDLE_FRESHNESS }
+        assertThat(bundleFreshnessCheck.status).isEqualTo(CheckStatus.FAIL)
     }
 
     // Test 6: returns DEGRADED when revocation status unknown
@@ -211,5 +225,20 @@ class VerificationOrchestratorTest {
 
         assertThat(result.status).isEqualTo(VerificationStatus.FAILED)
         assertThat(result.source).isEqualTo(VerificationSource.ONLINE)
+    }
+
+    // Test 11: does not fall back on HTTP 4xx
+    @Test
+    fun `does not fall back on HTTP 4xx`() = runTest {
+        val httpException = HttpException(
+            Response.error<Any>(404, "".toResponseBody())
+        )
+        coEvery { onlineVerifier.verifyCredential(testCredential) } returns Result.failure(httpException)
+
+        val result = orchestrator.verify(testCredential)
+
+        assertThat(result.status).isEqualTo(VerificationStatus.FAILED)
+        assertThat(result.source).isEqualTo(VerificationSource.ONLINE)
+        coVerify(exactly = 0) { offlineVerifier.verifyCredential(any()) }
     }
 }
