@@ -133,9 +133,27 @@ Feature-scoped test classes, 5 per platform:
 - Assert: "Revocation" row visible
 - Assert: "Bundle Freshness" row visible
 
-**Test 3: offline badge appears when source is offline**
-- Pre-cache bundle via test helper, inject mock online verifier that fails
+**Test 3: yellow traffic light for DEGRADED result**
+- Setup: Hilt test module replaces `Verifier` with `FakeOnlineVerifier(shouldThrow: IOException)`. Pre-cache a stale bundle (fetchedAt beyond TTL) via `OfflineTestHelper.cacheBundleForIssuer(did, freshnessRatio: 1.5)` using Hilt's `@BindValue` to inject a pre-seeded `BundleStore`.
+- Navigate to credential detail → tap "Verify"
+- Assert: yellow warning icon visible
+- Assert: "Verified with limitations" text displayed
+
+**Test 4: red traffic light for FAILED result**
+- Setup: Same Hilt injection, but use expired credential (expirationDate in the past)
+- Assert: red X icon visible
+- Assert: "Verification failed" text displayed
+
+**Test 5: offline badge appears when source is offline**
+- Setup: Same Hilt injection as Test 3 but with fresh bundle
 - Assert: "Offline" chip visible next to traffic light
+
+**Test 6: pre-verification check shows message when no bundle cached (offline)**
+- Setup: Hilt injection with `FakeOnlineVerifier(shouldThrow: IOException)` and empty `BundleStore`
+- Navigate to credential detail → tap "Verify"
+- Assert: "No cached data for this issuer" message visible (or equivalent FAILED state with clear guidance)
+
+**Note on UI test dependency injection:** Tests 3-6 use Hilt's `@UninstallModules(OfflineModule::class)` + `@BindValue` to replace the real `Verifier` with `FakeOnlineVerifier` and pre-seed `BundleStore` with test bundles. This allows UI tests to exercise the full screen rendering for all traffic light states without network manipulation.
 
 ### BundleManagementTest (UC-5, UC-6)
 
@@ -149,9 +167,10 @@ Feature-scoped test classes, 5 per platform:
 - Tap Add → enter "not-a-did" → tap "Add"
 - Assert: error message containing "Invalid"
 
-**Test 3: refresh all bundles**
-- With cached bundle → tap Refresh button
+**Test 3: refresh all bundles updates freshness**
+- With cached bundle showing "Bundle aging" badge → tap Refresh button
 - Assert: progress indicator appears then disappears
+- Assert: bundle's freshness badge changes (aging → fresh/no badge) or timestamp text updates
 
 **Test 4: delete bundle via swipe**
 - Swipe bundle card → tap delete
@@ -160,6 +179,11 @@ Feature-scoped test classes, 5 per platform:
 **Test 5: empty state shown when no bundles**
 - With no cached bundles
 - Assert: empty state message visible
+
+**Test 6: scan credential to add issuer (QR flow)**
+- Tap Add → tap "Scan Credential QR"
+- Assert: QR scanner screen opens
+- Note: Full QR scan simulation requires injecting a mock camera/barcode result. If not feasible in the test environment, this test verifies the navigation to the scan screen only. The actual scan-to-cache flow is covered by the existing ScanQrScreen → deep link → extract issuer DID path.
 
 ### OfflineSettingsTest (UC-3, UC-4)
 
@@ -175,25 +199,25 @@ Feature-scoped test classes, 5 per platform:
 - Assert: Bundle TTL displays "14 days"
 
 **Test 3: freshness badge on credential card (aging)**
-- Pre-cache bundle with fetchedAt at 60% of TTL
+- Setup: Use Hilt `@BindValue` to inject a pre-seeded `BundleStore` with a bundle whose `fetchedAt` is at 60% of TTL. The `OfflineTestHelper.cacheBundleForIssuer(did, freshnessRatio: 0.6)` computes `fetchedAt = now - (0.6 * ttl)`.
 - Navigate to credentials list
-- Assert: "Bundle aging" badge visible
+- Assert: "Bundle aging" badge visible on credential card
 
 **Test 4: freshness badge on credential card (expired)**
-- Pre-cache bundle with fetchedAt beyond TTL
+- Setup: Same injection, `freshnessRatio: 1.5` (fetchedAt beyond TTL)
 - Assert: "Bundle expired" badge visible
 
 **Test 5: no badge when bundle is fresh**
-- Pre-cache bundle with fetchedAt at 10% of TTL
-- Assert: no freshness badge visible
+- Setup: Same injection, `freshnessRatio: 0.1`
+- Assert: no freshness badge visible on credential card
 
 ### BackgroundSyncTest (UC-8)
 
 **Test 1: foreground resume triggers bundle refresh**
-- Cache bundle with freshnessRatio > 0.8
+- Setup: Use Hilt `@BindValue` to inject `BundleStore` with a bundle at freshnessRatio > 0.8 (i.e., >80% of TTL consumed, meaning <20% remaining)
 - Simulate app background → foreground via ActivityScenario
 - Wait briefly for async sync
-- Assert: bundle's fetchedAt is updated (fresher than before)
+- Assert: UI-observable change — navigate to bundle management and verify the bundle's freshness badge has changed from "aging" to no badge (fresh), or the timestamp text has updated
 
 ### OfflineVerificationTest — Instrumented (UC-7, UC-9–13)
 
@@ -224,6 +248,24 @@ Feature-scoped test classes, 5 per platform:
 **Test 6: offline happy path — all checks pass (UC-7)**
 - Fresh bundle, valid credential, all checks pass
 - Assert: status == VERIFIED_OFFLINE, all 4 checks == PASS, source == OFFLINE
+
+**Test 7: verification error (not network) does NOT trigger offline fallback**
+- Fresh bundle cached for issuer
+- Mock online verifier throws `SecurityException("invalid signature")` (not IOException)
+- Call orchestrator.verify(credential)
+- Assert: status == FAILED, source == ONLINE
+- Assert: OfflineVerifier was NOT consulted (verify mock call count == 0)
+
+**Test 8: network error + fresh bundle + unknown revocation → DEGRADED**
+- Fresh bundle cached but with no status list (statusList == null)
+- Mock online verifier throws IOException
+- Assert: status == DEGRADED, revocation check == UNKNOWN, bundleFreshness check == PASS
+
+**Test 9: credential with no expiry date → VERIFIED_OFFLINE**
+- Fresh bundle, valid credential with `expirationDate = null`
+- Mock online verifier throws IOException
+- Assert: status == VERIFIED_OFFLINE (not FAILED)
+- Assert: expiry check == PASS with informational message
 
 ## iOS Test Classes (XCUITest + XCTest)
 
@@ -322,4 +364,8 @@ Both platforms share the same patterns:
 | UC-12 | Expired → FAILED | OfflineVerificationTest | OfflineVerificationTests | Instrumented |
 | UC-13 | Revoked → FAILED | OfflineVerificationTest | OfflineVerificationTests | Instrumented |
 
-**Total: 22 test methods per platform, 44 total across both platforms.**
+**Total: 27 test methods per platform, 54 total across both platforms.**
+
+Breakdown: VerificationFlowTest (6) + BundleManagementTest (6) + OfflineSettingsTest (5) + BackgroundSyncTest (1) + OfflineVerificationTest (9) = 27.
+
+Note: Pull-to-refresh (BundleManagementTest) shares the same code path as "Refresh All" button — covered by Test 3's assertion. QR scan test (BundleManagementTest Test 6) verifies navigation only; full scan-to-cache requires mock camera injection.
