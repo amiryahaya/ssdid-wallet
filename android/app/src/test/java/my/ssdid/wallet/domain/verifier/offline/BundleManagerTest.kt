@@ -2,15 +2,18 @@ package my.ssdid.wallet.domain.verifier.offline
 
 import com.google.common.truth.Truth.assertThat
 import io.mockk.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import my.ssdid.wallet.domain.model.*
 import my.ssdid.wallet.domain.revocation.StatusListCredential
 import my.ssdid.wallet.domain.revocation.StatusListFetcher
 import my.ssdid.wallet.domain.revocation.StatusListSubject
+import my.ssdid.wallet.domain.settings.SettingsRepository
+import my.ssdid.wallet.domain.settings.TtlProvider
 import my.ssdid.wallet.domain.verifier.Verifier
 import org.junit.Before
 import org.junit.Test
-import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -38,7 +41,8 @@ class BundleManagerTest {
         verifier = mockk()
         statusListFetcher = mockk()
         bundleStore = mockk(relaxed = true)
-        manager = BundleManager(verifier, statusListFetcher, bundleStore, Duration.ofHours(24))
+        val ttlProvider = TtlProvider(FakeManagerSettingsRepository(bundleTtlDays = 1))
+        manager = BundleManager(verifier, statusListFetcher, bundleStore, ttlProvider)
     }
 
     @Test
@@ -94,6 +98,7 @@ class BundleManagerTest {
 
     @Test
     fun `hasFreshBundle returns true for non-expired bundle`() = runTest {
+        // fetchedAt = now, TTL = 1 day → not expired
         val bundle = VerificationBundle(
             issuerDid = "did:ssdid:issuer", didDocument = testDidDoc,
             fetchedAt = Instant.now().toString(),
@@ -106,6 +111,7 @@ class BundleManagerTest {
 
     @Test
     fun `hasFreshBundle returns false for expired bundle`() = runTest {
+        // fetchedAt = 2 days ago, TTL = 1 day → expired
         val bundle = VerificationBundle(
             issuerDid = "did:ssdid:issuer", didDocument = testDidDoc,
             fetchedAt = Instant.now().minus(2, ChronoUnit.DAYS).toString(),
@@ -125,6 +131,7 @@ class BundleManagerTest {
 
     @Test
     fun `refreshStaleBundles refreshes expired bundles`() = runTest {
+        // fetchedAt = 2 days ago, TTL = 1 day → stale
         val staleBundle = VerificationBundle(
             issuerDid = "did:ssdid:issuer", didDocument = testDidDoc,
             fetchedAt = Instant.now().minus(2, ChronoUnit.DAYS).toString(),
@@ -138,4 +145,20 @@ class BundleManagerTest {
         assertThat(count).isEqualTo(1)
         coVerify { bundleStore.saveBundle(match { it.issuerDid == "did:ssdid:issuer" }) }
     }
+}
+
+/** Fake SettingsRepository for BundleManagerTest — returns configurable bundleTtlDays. */
+private class FakeManagerSettingsRepository(
+    private val bundleTtlDays: Int = 1
+) : SettingsRepository {
+    override fun biometricEnabled(): Flow<Boolean> = flowOf(false)
+    override suspend fun setBiometricEnabled(enabled: Boolean) = Unit
+    override fun autoLockMinutes(): Flow<Int> = flowOf(5)
+    override suspend fun setAutoLockMinutes(minutes: Int) = Unit
+    override fun defaultAlgorithm(): Flow<String> = flowOf("Ed25519")
+    override suspend fun setDefaultAlgorithm(algorithm: String) = Unit
+    override fun language(): Flow<String> = flowOf("en")
+    override suspend fun setLanguage(language: String) = Unit
+    override fun bundleTtlDays(): Flow<Int> = flowOf(bundleTtlDays)
+    override suspend fun setBundleTtlDays(days: Int) = Unit
 }

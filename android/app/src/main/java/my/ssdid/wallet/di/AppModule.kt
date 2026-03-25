@@ -60,6 +60,7 @@ import my.ssdid.wallet.domain.oid4vci.OpenId4VciTransport
 import my.ssdid.wallet.domain.oid4vci.TokenClient
 import my.ssdid.wallet.domain.transport.EmailVerifyApi
 import my.ssdid.wallet.domain.transport.NotifyApi
+import my.ssdid.wallet.domain.transport.RegistryApi
 import okhttp3.CertificatePinner
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -134,6 +135,10 @@ object AppModule {
             okHttp = okHttpClient
         )
     }
+
+    @Provides
+    @Singleton
+    fun provideRegistryApi(httpClient: SsdidHttpClient): RegistryApi = httpClient.registry
 
     @Provides
     @Singleton

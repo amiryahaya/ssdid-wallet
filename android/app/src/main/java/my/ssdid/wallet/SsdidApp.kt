@@ -8,9 +8,17 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import androidx.work.Configuration
+import androidx.work.WorkManager
 import my.ssdid.wallet.domain.notify.NotifyLifecycleObserver
 import my.ssdid.wallet.domain.notify.NotifyManager
 import my.ssdid.wallet.domain.profile.ProfileMigration
+import my.ssdid.wallet.domain.settings.TtlProvider
+import my.ssdid.wallet.domain.verifier.offline.BundleManager
+import my.ssdid.wallet.domain.verifier.offline.BundleStore
+import my.ssdid.wallet.domain.verifier.offline.sync.BundleSyncScheduler
+import my.ssdid.wallet.platform.lifecycle.AppLifecycleObserver
+import my.ssdid.wallet.platform.sync.BundleSyncWorkerFactory
 import org.unifiedpush.android.connector.UnifiedPush
 import javax.inject.Inject
 
@@ -24,13 +32,30 @@ class SsdidApp : Application() {
     @Inject lateinit var notifyManager: NotifyManager
     @Inject lateinit var notifyLifecycleObserver: NotifyLifecycleObserver
     @Inject lateinit var profileMigration: ProfileMigration
+    @Inject lateinit var syncScheduler: BundleSyncScheduler
+    @Inject lateinit var bundleStore: BundleStore
+    @Inject lateinit var bundleManager: BundleManager
+    @Inject lateinit var ttlProvider: TtlProvider
+    @Inject lateinit var bundleSyncWorkerFactory: BundleSyncWorkerFactory
 
     override fun onCreate() {
         super.onCreate()
         initSentry()
 
+        val config = Configuration.Builder()
+            .setWorkerFactory(bundleSyncWorkerFactory)
+            .build()
+        WorkManager.initialize(this, config)
+
+        syncScheduler.schedulePeriodicSync(intervalHours = 12)
+
         // Fetch pending notifications whenever the app enters the foreground.
         ProcessLifecycleOwner.get().lifecycle.addObserver(notifyLifecycleObserver)
+
+        // Trigger a foreground sync check whenever the app comes to the foreground.
+        ProcessLifecycleOwner.get().lifecycle.addObserver(
+            AppLifecycleObserver(bundleStore, bundleManager, ttlProvider)
+        )
 
         appScope.launch {
             profileMigration.migrateIfNeeded()

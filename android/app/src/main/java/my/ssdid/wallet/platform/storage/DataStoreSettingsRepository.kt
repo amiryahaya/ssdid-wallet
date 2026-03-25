@@ -18,6 +18,7 @@ class DataStoreSettingsRepository(private val context: Context) : SettingsReposi
     private val autoLockKey = intPreferencesKey("auto_lock_minutes")
     private val algorithmKey = stringPreferencesKey("default_algorithm")
     private val languageKey = stringPreferencesKey("language")
+    private val bundleTtlKey = intPreferencesKey("bundle_ttl_days")
 
     override fun biometricEnabled(): Flow<Boolean> =
         context.settingsStore.data.map { it[biometricKey] ?: true }
@@ -45,5 +46,12 @@ class DataStoreSettingsRepository(private val context: Context) : SettingsReposi
 
     override suspend fun setLanguage(language: String) {
         context.settingsStore.edit { it[languageKey] = language }
+    }
+
+    override fun bundleTtlDays(): Flow<Int> =
+        context.settingsStore.data.map { it[bundleTtlKey] ?: 7 }
+
+    override suspend fun setBundleTtlDays(days: Int) {
+        context.settingsStore.edit { it[bundleTtlKey] = days }
     }
 }

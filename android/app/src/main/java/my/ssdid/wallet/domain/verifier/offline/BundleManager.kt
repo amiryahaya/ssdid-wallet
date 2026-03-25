@@ -1,21 +1,20 @@
 package my.ssdid.wallet.domain.verifier.offline
 
-import my.ssdid.wallet.domain.model.DidDocument
-import my.ssdid.wallet.domain.revocation.StatusListCredential
 import my.ssdid.wallet.domain.revocation.StatusListFetcher
+import my.ssdid.wallet.domain.settings.TtlProvider
 import my.ssdid.wallet.domain.verifier.Verifier
-import java.time.Duration
 import java.time.Instant
 
 /**
  * Manages pre-fetching and caching of verification bundles for offline use.
  * Bundles include DID Documents and optional status list snapshots.
+ * Bundle TTL is driven by TtlProvider.
  */
 class BundleManager(
     private val verifier: Verifier,
     private val statusListFetcher: StatusListFetcher,
     private val bundleStore: BundleStore,
-    private val bundleTtl: Duration = Duration.ofHours(24)
+    private val ttlProvider: TtlProvider
 ) {
     /**
      * Pre-fetch and cache a verification bundle for an issuer.
@@ -37,7 +36,7 @@ class BundleManager(
             didDocument = didDocument,
             statusList = statusList,
             fetchedAt = now.toString(),
-            expiresAt = now.plus(bundleTtl).toString()
+            expiresAt = now.plus(ttlProvider.getTtl()).toString()
         )
         bundleStore.saveBundle(bundle)
         bundle
@@ -52,7 +51,7 @@ class BundleManager(
         var refreshed = 0
         for (bundle in bundles) {
             val isStale = try {
-                Instant.now().isAfter(Instant.parse(bundle.expiresAt))
+                ttlProvider.isExpired(bundle.fetchedAt)
             } catch (_: Exception) { true }
 
             if (isStale) {
@@ -70,7 +69,7 @@ class BundleManager(
     suspend fun hasFreshBundle(issuerDid: String): Boolean {
         val bundle = bundleStore.getBundle(issuerDid) ?: return false
         return try {
-            Instant.now().isBefore(Instant.parse(bundle.expiresAt))
+            !ttlProvider.isExpired(bundle.fetchedAt)
         } catch (_: Exception) { false }
     }
 }

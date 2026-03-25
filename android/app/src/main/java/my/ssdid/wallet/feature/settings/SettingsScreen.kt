@@ -24,13 +24,16 @@ import my.ssdid.wallet.ui.theme.*
 fun SettingsScreen(
     onBack: () -> Unit,
     onBackupExport: () -> Unit = {},
+    onBundleManagement: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val biometricEnabled by viewModel.biometricEnabled.collectAsState()
     val autoLockMinutes by viewModel.autoLockMinutes.collectAsState()
     val defaultAlgorithm by viewModel.defaultAlgorithm.collectAsState()
     val language by viewModel.language.collectAsState()
+    val bundleTtlDays by viewModel.bundleTtlDays.collectAsState()
     var showLanguageDialog by remember { mutableStateOf(false) }
+    var showTtlDialog by remember { mutableStateOf(false) }
 
     val languageDisplay = LocalizationManager.localeNames[language] ?: "English"
 
@@ -70,6 +73,10 @@ fun SettingsScreen(
 
             item { Spacer(Modifier.height(16.dp)); Text("NETWORK", style = MaterialTheme.typography.labelMedium); Spacer(Modifier.height(8.dp)) }
             item { SettingsItem("Registry URL", "registry.ssdid.my") }
+
+            item { Spacer(Modifier.height(16.dp)); Text("OFFLINE VERIFICATION", style = MaterialTheme.typography.labelMedium); Spacer(Modifier.height(8.dp)) }
+            item { SettingsItem("Bundle TTL", "$bundleTtlDays days", onClick = { showTtlDialog = true }) }
+            item { SettingsItem("Prepare for Offline", "Manage cached verification bundles", onClick = onBundleManagement) }
 
             item { Spacer(Modifier.height(16.dp)); Text("PREFERENCES", style = MaterialTheme.typography.labelMedium); Spacer(Modifier.height(8.dp)) }
             item { SettingsItem("Appearance", "Dark") }
@@ -118,6 +125,50 @@ fun SettingsScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showLanguageDialog = false }) { Text("Cancel") }
+            }
+        )
+    }
+
+    if (showTtlDialog) {
+        val ttlPresets = listOf(
+            1 to "Recommended for financial/payment credentials",
+            7 to "Recommended for government ID / age verification",
+            14 to "Good balance for most credentials",
+            30 to "Recommended for membership / loyalty cards"
+        )
+        AlertDialog(
+            onDismissRequest = { showTtlDialog = false },
+            title = { Text("Bundle TTL") },
+            text = {
+                Column {
+                    ttlPresets.forEach { (days, recommendation) ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    viewModel.setBundleTtlDays(days)
+                                    showTtlDialog = false
+                                }
+                                .padding(vertical = 8.dp)
+                        ) {
+                            RadioButton(
+                                selected = bundleTtlDays == days,
+                                onClick = {
+                                    viewModel.setBundleTtlDays(days)
+                                    showTtlDialog = false
+                                }
+                            )
+                            Column(Modifier.padding(start = 8.dp)) {
+                                Text("$days day${if (days == 1) "" else "s"}", style = MaterialTheme.typography.bodyMedium)
+                                Text(recommendation, fontSize = 11.sp, color = TextTertiary)
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showTtlDialog = false }) { Text("Cancel") }
             }
         )
     }

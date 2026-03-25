@@ -1,21 +1,18 @@
 package my.ssdid.wallet.domain.verifier.offline
 
+import my.ssdid.wallet.domain.settings.TtlProvider
 import my.ssdid.wallet.domain.transport.RegistryApi
 import java.time.Instant
-import java.time.temporal.ChronoUnit
 
 /**
  * Fetches DID documents from the registry and caches them as VerificationBundles
- * for offline credential verification. Bundles have a 7-day TTL.
+ * for offline credential verification. Bundle TTL is driven by TtlProvider.
  */
 class BundleFetcher(
     private val registryApi: RegistryApi,
-    private val bundleStore: BundleStore
+    private val bundleStore: BundleStore,
+    private val ttlProvider: TtlProvider
 ) {
-    companion object {
-        private const val BUNDLE_TTL_DAYS = 7L
-    }
-
     /**
      * Resolve an issuer's DID document and cache it as a VerificationBundle.
      * Returns null on network errors (offline verification is best-effort).
@@ -28,7 +25,7 @@ class BundleFetcher(
                 issuerDid = issuerDid,
                 didDocument = didDoc,
                 fetchedAt = now.toString(),
-                expiresAt = now.plus(BUNDLE_TTL_DAYS, ChronoUnit.DAYS).toString()
+                expiresAt = now.plus(ttlProvider.getTtl()).toString()
             )
             bundleStore.saveBundle(bundle)
             bundle
