@@ -198,6 +198,13 @@
 		E1F2A3B4C5D6E7F80006BB02 /* RecoveryFlowUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F2A3B4C5D6E7F80006AA02 /* RecoveryFlowUITests.swift */; };
 		F1A2B3C4E5F6A7B80007BB01 /* FileBundleStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A2B3C4E5F6A7B80007AA01 /* FileBundleStore.swift */; };
 		F1A2B3C4E5F6A7B80007BB02 /* BundleFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A2B3C4E5F6A7B80007AA02 /* BundleFetcher.swift */; };
+		AA01BB02CC03DD04EE05FF06 /* TtlProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01BB02CC03DD04EE05FF07 /* TtlProvider.swift */; };
+		BB11CC22DD33EE44FF550011 /* UnifiedVerificationResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB11CC22DD33EE44FF550012 /* UnifiedVerificationResult.swift */; };
+		CC22DD33EE44FF5500112233 /* VerificationOrchestrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC22DD33EE44FF5500112234 /* VerificationOrchestrator.swift */; };
+		DD33EE44FF550011223344AB /* CredentialRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD33EE44FF550011223344AC /* CredentialRepository.swift */; };
+		EE44FF550011223344ABCD01 /* FileCredentialRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE44FF550011223344ABCD02 /* FileCredentialRepository.swift */; };
+		FF550011223344ABCD01EF12 /* ConnectivityMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF550011223344ABCD01EF13 /* ConnectivityMonitor.swift */; };
+		00660012334455BCDE02F023 /* BundleSyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00660012334455BCDE02F024 /* BundleSyncManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -414,6 +421,13 @@
 		E1F2A3B4C5D6E7F80006AA03 /* SsdidWalletUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SsdidWalletUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F1A2B3C4E5F6A7B80007AA01 /* FileBundleStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileBundleStore.swift; sourceTree = "<group>"; };
 		F1A2B3C4E5F6A7B80007AA02 /* BundleFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleFetcher.swift; sourceTree = "<group>"; };
+		AA01BB02CC03DD04EE05FF07 /* TtlProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TtlProvider.swift; sourceTree = "<group>"; };
+		BB11CC22DD33EE44FF550012 /* UnifiedVerificationResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedVerificationResult.swift; sourceTree = "<group>"; };
+		CC22DD33EE44FF5500112234 /* VerificationOrchestrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerificationOrchestrator.swift; sourceTree = "<group>"; };
+		DD33EE44FF550011223344AC /* CredentialRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialRepository.swift; sourceTree = "<group>"; };
+		EE44FF550011223344ABCD02 /* FileCredentialRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileCredentialRepository.swift; sourceTree = "<group>"; };
+		FF550011223344ABCD01EF13 /* ConnectivityMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectivityMonitor.swift; sourceTree = "<group>"; };
+		00660012334455BCDE02F024 /* BundleSyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleSyncManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -600,6 +614,7 @@
 			isa = PBXGroup;
 			children = (
 				00CDDDC89BA9C750FA2E2019 /* SettingsRepository.swift */,
+				AA01BB02CC03DD04EE05FF07 /* TtlProvider.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -865,9 +880,12 @@
 			isa = PBXGroup;
 			children = (
 				F1A2B3C4E5F6A7B80007AA02 /* BundleFetcher.swift */,
+				DD33EE44FF550011223344AC /* CredentialRepository.swift */,
 				F1A2B3C4E5F6A7B80007AA01 /* FileBundleStore.swift */,
 				D1A2B3C4E5F6A7B80005AA01 /* OfflineVerifier.swift */,
+				BB11CC22DD33EE44FF550012 /* UnifiedVerificationResult.swift */,
 				D1A2B3C4E5F6A7B80005AA02 /* VerificationBundle.swift */,
+				CC22DD33EE44FF5500112234 /* VerificationOrchestrator.swift */,
 			);
 			path = Offline;
 			sourceTree = "<group>";
@@ -913,12 +931,30 @@
 				7F60A118365E165FA1CB269F /* Device */,
 				87221D49BB0FFDBC8A2A363C /* I18n */,
 				E68C186B66AC60800080A78F /* Keychain */,
+				11223344AABBCCDD00112201 /* Network */,
 				6E238E68B68990BDA14BD5DA /* Scanner */,
 				4A5DEC4BCABA097A661C6B00 /* Security */,
 				FB8022724E755FF1CE10C229 /* Sentry */,
 				EFCB4F0D7B7CA1FC6C1FD4EA /* Storage */,
+				22334455BBCCDDEE00112301 /* Sync */,
 			);
 			path = Platform;
+			sourceTree = "<group>";
+		};
+		11223344AABBCCDD00112201 /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				FF550011223344ABCD01EF13 /* ConnectivityMonitor.swift */,
+			);
+			path = Network;
+			sourceTree = "<group>";
+		};
+		22334455BBCCDDEE00112301 /* Sync */ = {
+			isa = PBXGroup;
+			children = (
+				00660012334455BCDE02F024 /* BundleSyncManager.swift */,
+			);
+			path = Sync;
 			sourceTree = "<group>";
 		};
 		87221D49BB0FFDBC8A2A363C /* I18n */ = {
@@ -1155,6 +1191,7 @@
 		EFCB4F0D7B7CA1FC6C1FD4EA /* Storage */ = {
 			isa = PBXGroup;
 			children = (
+				EE44FF550011223344ABCD02 /* FileCredentialRepository.swift */,
 				FA167CF225FDFA0E2F54E69C /* VaultStorage.swift */,
 			);
 			path = Storage;
@@ -1536,6 +1573,13 @@
 				D1A2B3C4E5F6A7B80005BB02 /* VerificationBundle.swift in Sources */,
 				F1A2B3C4E5F6A7B80007BB01 /* FileBundleStore.swift in Sources */,
 				F1A2B3C4E5F6A7B80007BB02 /* BundleFetcher.swift in Sources */,
+				AA01BB02CC03DD04EE05FF06 /* TtlProvider.swift in Sources */,
+				BB11CC22DD33EE44FF550011 /* UnifiedVerificationResult.swift in Sources */,
+				CC22DD33EE44FF5500112233 /* VerificationOrchestrator.swift in Sources */,
+				DD33EE44FF550011223344AB /* CredentialRepository.swift in Sources */,
+				EE44FF550011223344ABCD01 /* FileCredentialRepository.swift in Sources */,
+				FF550011223344ABCD01EF12 /* ConnectivityMonitor.swift in Sources */,
+				00660012334455BCDE02F023 /* BundleSyncManager.swift in Sources */,
 				8D151338E1C4FA65EB07E31E /* VpTokenBuilder.swift in Sources */,
 				21B97926CB51352CFFB9E420 /* WalletHomeScreen.swift in Sources */,
 				40AE212BDD25CD6BDCBF47B5 /* KeyRotationManager.swift in Sources */,
