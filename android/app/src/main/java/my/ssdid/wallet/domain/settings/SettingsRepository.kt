@@ -11,4 +11,6 @@ interface SettingsRepository {
     suspend fun setDefaultAlgorithm(algorithm: String)
     fun language(): Flow<String>
     suspend fun setLanguage(language: String)
+    fun bundleTtlDays(): Flow<Int>
+    suspend fun setBundleTtlDays(days: Int)
 }

@@ -12,6 +12,7 @@ class FakeSettingsRepository : SettingsRepository {
     private val autoLock = MutableStateFlow(5)
     private val algorithm = MutableStateFlow("KAZ_SIGN_192")
     private val lang = MutableStateFlow("en")
+    private val bundleTtl = MutableStateFlow(7)
 
     override fun biometricEnabled(): Flow<Boolean> = biometric
     override suspend fun setBiometricEnabled(enabled: Boolean) { biometric.value = enabled }
@@ -21,6 +22,8 @@ class FakeSettingsRepository : SettingsRepository {
     override suspend fun setDefaultAlgorithm(algorithm: String) { this.algorithm.value = algorithm }
     override fun language(): Flow<String> = lang
     override suspend fun setLanguage(language: String) { lang.value = language }
+    override fun bundleTtlDays(): Flow<Int> = bundleTtl
+    override suspend fun setBundleTtlDays(days: Int) { bundleTtl.value = days }
 }
 
 class SettingsRepositoryTest {
