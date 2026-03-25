@@ -30,8 +30,10 @@ class BundleSyncWorker(
                 }
             }
             Result.success()
-        } catch (e: Exception) {
+        } catch (e: java.io.IOException) {
             Result.retry()
+        } catch (e: Exception) {
+            Result.failure()
         }
     }
 }

@@ -12,7 +12,10 @@ class DataStoreCredentialRepository(context: Context) : CredentialRepository {
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
 
     override suspend fun saveCredential(credential: VerifiableCredential) {
-        File(dir, sanitizeFilename(credential.id)).writeText(json.encodeToString(credential))
+        val target = File(dir, sanitizeFilename(credential.id))
+        val tmp = File(dir, sanitizeFilename(credential.id) + ".tmp")
+        tmp.writeText(json.encodeToString(credential))
+        tmp.renameTo(target)
     }
 
     override suspend fun getHeldCredentials(): List<VerifiableCredential> {
@@ -30,6 +33,12 @@ class DataStoreCredentialRepository(context: Context) : CredentialRepository {
         File(dir, sanitizeFilename(credentialId)).delete()
     }
 
-    private fun sanitizeFilename(id: String): String =
-        id.replace(Regex("[^a-zA-Z0-9_-]"), "_") + ".json"
+    private fun sanitizeFilename(id: String): String {
+        val hash = java.security.MessageDigest.getInstance("SHA-256")
+            .digest(id.toByteArray())
+            .joinToString("") { "%02x".format(it) }
+            .take(16)
+        val safe = id.replace(Regex("[^a-zA-Z0-9_-]"), "_").take(48)
+        return "${safe}_${hash}.json"
+    }
 }
