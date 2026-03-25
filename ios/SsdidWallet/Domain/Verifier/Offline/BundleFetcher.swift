@@ -14,22 +14,30 @@ final class BundleFetcher {
     }
 
     /// Resolve an issuer's DID document and cache it as a VerificationBundle.
-    /// Returns nil on network errors (offline verification is best-effort).
+    /// Returns nil when the network/registry call fails. Storage errors are logged
+    /// but do not prevent the freshly-fetched bundle from being returned for
+    /// immediate use within the current session.
     func fetchAndCache(issuerDid: String) async -> VerificationBundle? {
+        let didDoc: DidDocument
         do {
-            let didDoc = try await registryApi.resolveDid(did: issuerDid)
-            let formatter = ISO8601DateFormatter()
-            let now = Date()
-            let bundle = VerificationBundle(
-                issuerDid: issuerDid,
-                didDocument: didDoc,
-                fetchedAt: formatter.string(from: now),
-                expiresAt: formatter.string(from: now.addingTimeInterval(ttlProvider.ttl))
-            )
-            try await bundleStore.saveBundle(bundle)
-            return bundle
+            didDoc = try await registryApi.resolveDid(did: issuerDid)
         } catch {
-            return nil // Network error — offline verification is best-effort
+            return nil // Network/registry error — best-effort
         }
+        let formatter = ISO8601DateFormatter()
+        let now = Date()
+        let bundle = VerificationBundle(
+            issuerDid: issuerDid,
+            didDocument: didDoc,
+            fetchedAt: formatter.string(from: now),
+            expiresAt: formatter.string(from: now.addingTimeInterval(ttlProvider.ttl))
+        )
+        do {
+            try await bundleStore.saveBundle(bundle)
+        } catch {
+            // Storage error — bundle was fetched but couldn't be persisted.
+            // Still return the bundle for immediate use this session.
+        }
+        return bundle
     }
 }

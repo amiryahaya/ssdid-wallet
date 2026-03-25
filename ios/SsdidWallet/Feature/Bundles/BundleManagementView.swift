@@ -280,13 +280,8 @@ struct BundleManagementView: View {
         let trimmed = did.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         _ = await services.bundleSyncManager.syncNow()
-        // Force-fetch the specific DID
-        let fetcher = BundleFetcher(
-            registryApi: services.httpClient.registry,
-            bundleStore: services.bundleStore,
-            ttlProvider: services.ttlProvider
-        )
-        if await fetcher.fetchAndCache(issuerDid: trimmed) == nil {
+        // Force-fetch the specific DID using the shared fetcher from ServiceContainer.
+        if await services.bundleFetcher.fetchAndCache(issuerDid: trimmed) == nil {
             await MainActor.run {
                 self.error = "Failed to fetch bundle for \(trimmed). Check the DID and network connection."
             }

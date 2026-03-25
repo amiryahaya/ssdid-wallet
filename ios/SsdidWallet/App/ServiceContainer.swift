@@ -5,6 +5,11 @@ import Foundation
 @MainActor
 final class ServiceContainer: ObservableObject {
 
+    /// Set by `SsdidWalletApp` after the container is created so that AppDelegate
+    /// can forward BGAppRefreshTask events to the live `bundleSyncManager` instance.
+    /// This is safe because registration fires after `applicationDidBecomeActive`.
+    static weak var shared: ServiceContainer?
+
     let keychainManager: KeychainManager
     let storage: VaultStorage
     let activityRepo: ActivityRepository
@@ -24,6 +29,7 @@ final class ServiceContainer: ObservableObject {
     let connectivityMonitor: ConnectivityMonitor
     let offlineVerifier: OfflineVerifier
     let verificationOrchestrator: VerificationOrchestrator
+    let bundleFetcher: BundleFetcher
     let bundleSyncManager: BundleSyncManager
 
     /// Base URL for the SSDID Notify service. Override in debug builds or via configuration.
@@ -127,6 +133,7 @@ final class ServiceContainer: ObservableObject {
             bundleStore: fileBundleStore,
             ttlProvider: ttl
         )
+        self.bundleFetcher = bundleFetcher
         let syncManager = BundleSyncManager(
             bundleStore: fileBundleStore,
             bundleFetcher: bundleFetcher,
@@ -135,9 +142,8 @@ final class ServiceContainer: ObservableObject {
         )
         self.bundleSyncManager = syncManager
 
-        // Register the background bundle-sync task as early as possible.
-        // BGTaskScheduler requires this before applicationDidBecomeActive fires.
-        syncManager.registerBackgroundTask()
+        // Schedule the initial background sync request. Registration is handled earlier
+        // in AppDelegate.didFinishLaunchingWithOptions via BundleSyncManager.registerHandler.
         syncManager.scheduleBackgroundSync()
 
         // One-time migration: copy legacy global profile VC to first identity

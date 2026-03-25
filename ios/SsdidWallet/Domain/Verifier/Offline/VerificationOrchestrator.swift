@@ -5,11 +5,6 @@ protocol BundleTtlProvider {
     var bundleTtlSeconds: TimeInterval { get }
 }
 
-/// Default TTL provider: 7-day bundle freshness window.
-struct DefaultTtlProvider: BundleTtlProvider {
-    let bundleTtlSeconds: TimeInterval = 7 * 86400
-}
-
 /// Orchestrates credential verification by attempting online first,
 /// then falling back to offline (cached bundle) verification when
 /// network errors or server failures occur.
@@ -23,7 +18,7 @@ final class VerificationOrchestrator {
         onlineVerifier: Verifier,
         offlineVerifier: OfflineVerifier,
         bundleStore: BundleStore,
-        ttlProvider: BundleTtlProvider = DefaultTtlProvider()
+        ttlProvider: BundleTtlProvider = TtlProvider()
     ) {
         self.onlineVerifier = onlineVerifier
         self.offlineVerifier = offlineVerifier
@@ -149,7 +144,7 @@ final class VerificationOrchestrator {
         offlineResult: OfflineVerificationResult,
         expiryFailed: Bool
     ) -> VerificationStatus {
-        if offlineResult.error != nil && !offlineResult.signatureValid {
+        if offlineResult.error != nil {
             // Hard error (missing bundle, serialisation failure, etc.)
             return .failed
         }
@@ -187,8 +182,11 @@ final class VerificationOrchestrator {
         if nsError.domain == NSURLErrorDomain { return true }
         if case HttpError.networkError = error { return true }
         if case HttpError.timeout = error { return true }
-        if case HttpError.requestFailed(let statusCode, _) = error,
-           (500...599).contains(statusCode) { return true }
+        if case HttpError.requestFailed(let statusCode, _) = error {
+            // Server errors and auth failures — fall back to offline rather than
+            // surfacing them as hard verification failures.
+            return (500...599).contains(statusCode) || statusCode == 401 || statusCode == 403
+        }
         return false
     }
 }

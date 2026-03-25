@@ -23,12 +23,22 @@ final class FileCredentialRepository: CredentialRepository {
     }
 
     func getHeldCredentials() async -> [VerifiableCredential] {
-        guard let files = try? FileManager.default.contentsOfDirectory(
-            at: directory, includingPropertiesForKeys: nil
-        ) else { return [] }
-        return files.compactMap { url in
-            guard let data = try? Data(contentsOf: url) else { return nil }
-            return try? decoder.decode(VerifiableCredential.self, from: data)
+        let dir = directory
+        let dec = decoder
+        return await withCheckedContinuation { continuation in
+            DispatchQueue.global(qos: .utility).async {
+                guard let files = try? FileManager.default.contentsOfDirectory(
+                    at: dir, includingPropertiesForKeys: nil
+                ) else {
+                    continuation.resume(returning: [])
+                    return
+                }
+                let credentials = files.compactMap { url -> VerifiableCredential? in
+                    guard let data = try? Data(contentsOf: url) else { return nil }
+                    return try? dec.decode(VerifiableCredential.self, from: data)
+                }
+                continuation.resume(returning: credentials)
+            }
         }
     }
 

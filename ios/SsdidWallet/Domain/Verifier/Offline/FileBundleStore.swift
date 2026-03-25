@@ -24,8 +24,16 @@ final class FileBundleStore: BundleStore {
 
     func getBundle(issuerDid: String) async -> VerificationBundle? {
         let url = fileURL(for: issuerDid)
-        guard let data = try? Data(contentsOf: url) else { return nil }
-        return try? JSONDecoder().decode(VerificationBundle.self, from: data)
+        return await withCheckedContinuation { continuation in
+            DispatchQueue.global(qos: .utility).async {
+                guard let data = try? Data(contentsOf: url),
+                      let bundle = try? JSONDecoder().decode(VerificationBundle.self, from: data) else {
+                    continuation.resume(returning: nil)
+                    return
+                }
+                continuation.resume(returning: bundle)
+            }
+        }
     }
 
     func deleteBundle(issuerDid: String) async throws {
@@ -33,10 +41,22 @@ final class FileBundleStore: BundleStore {
     }
 
     func listBundles() async throws -> [VerificationBundle] {
-        let files = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
-        return files.compactMap { url in
-            guard let data = try? Data(contentsOf: url) else { return nil }
-            return try? JSONDecoder().decode(VerificationBundle.self, from: data)
+        let dir = directory
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.global(qos: .utility).async {
+                do {
+                    let files = try FileManager.default.contentsOfDirectory(
+                        at: dir, includingPropertiesForKeys: nil
+                    )
+                    let bundles = files.compactMap { url -> VerificationBundle? in
+                        guard let data = try? Data(contentsOf: url) else { return nil }
+                        return try? JSONDecoder().decode(VerificationBundle.self, from: data)
+                    }
+                    continuation.resume(returning: bundles)
+                } catch {
+                    continuation.resume(throwing: error)
+                }
+            }
         }
     }
 }

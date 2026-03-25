@@ -11,6 +11,9 @@ final class ConnectivityMonitor: ObservableObject {
     private let queue = DispatchQueue(label: "my.ssdid.wallet.connectivity.monitor")
 
     init() {
+        // Seed from the current path so the initial state reflects real connectivity
+        // rather than assuming online until the first pathUpdateHandler fires.
+        isOnline = monitor.currentPath.status == .satisfied
         monitor.pathUpdateHandler = { [weak self] path in
             DispatchQueue.main.async {
                 self?.isOnline = path.status == .satisfied

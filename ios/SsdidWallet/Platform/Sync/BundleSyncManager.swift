@@ -28,17 +28,30 @@ final class BundleSyncManager {
 
     // MARK: - Background Task Registration
 
-    /// Register the BGAppRefreshTask handler. Must be called before the app finishes launching.
-    func registerBackgroundTask() {
+    /// Register the BGAppRefreshTask handler with a caller-supplied closure.
+    /// Must be called before `applicationDidBecomeActive` fires (i.e. from AppDelegate
+    /// `didFinishLaunchingWithOptions`). BGTaskScheduler enforces this constraint.
+    static func registerHandler(handler: @escaping (BGAppRefreshTask) -> Void) {
         BGTaskScheduler.shared.register(
-            forTaskWithIdentifier: Self.taskIdentifier,
+            forTaskWithIdentifier: taskIdentifier,
             using: nil
-        ) { [weak self] task in
-            guard let self, let refreshTask = task as? BGAppRefreshTask else {
+        ) { task in
+            guard let refreshTask = task as? BGAppRefreshTask else {
                 task.setTaskCompleted(success: false)
                 return
             }
-            self.handleBackgroundTask(refreshTask)
+            handler(refreshTask)
+        }
+    }
+
+    /// Instance-level convenience: register this instance as the background task handler.
+    func registerBackgroundTask() {
+        BundleSyncManager.registerHandler { [weak self] task in
+            guard let self else {
+                task.setTaskCompleted(success: false)
+                return
+            }
+            self.handleBackgroundTask(task)
         }
     }
 
@@ -55,6 +68,7 @@ final class BundleSyncManager {
     func syncNow() async {
         let issuerDids = await credentialRepository.getUniqueIssuerDids()
         for did in issuerDids {
+            guard !Task.isCancelled else { return }
             guard let bundle = await bundleStore.getBundle(issuerDid: did) else {
                 // No cached bundle — fetch one proactively.
                 _ = await bundleFetcher.fetchAndCache(issuerDid: did)
@@ -66,24 +80,24 @@ final class BundleSyncManager {
         }
     }
 
-    // MARK: - Private
+    // MARK: - Internal
 
-    private func handleBackgroundTask(_ task: BGAppRefreshTask) {
+    func handleBackgroundTask(_ task: BGAppRefreshTask) {
         // Schedule the next refresh before doing any work so the chain continues
         // even if this run expires early.
         scheduleBackgroundSync()
 
-        let syncTask = Task {
-            await syncNow()
-        }
+        let syncTask = Task { await syncNow() }
 
+        // Wire expiration handler before starting any awaiting so it is guaranteed
+        // to fire even if the system expires the task immediately.
         task.expirationHandler = {
             syncTask.cancel()
         }
 
         Task {
-            await syncTask.value
-            task.setTaskCompleted(success: true)
+            _ = await syncTask.result
+            task.setTaskCompleted(success: !syncTask.isCancelled)
         }
     }
 }

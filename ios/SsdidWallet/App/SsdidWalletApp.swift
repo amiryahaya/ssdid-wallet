@@ -2,6 +2,7 @@ import SwiftUI
 import SentrySwiftUI
 import UserNotifications
 import LocalAuthentication
+import BackgroundTasks
 
 // MARK: - AppDelegate Adaptor
 
@@ -28,6 +29,21 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         UNUserNotificationCenter.current().delegate = self
+
+        // BGTaskScheduler registration MUST happen before applicationDidBecomeActive.
+        // Forwarding the task to the live ServiceContainer instance is safe because
+        // ServiceContainer.shared is set immediately after the @StateObject is created
+        // (before the first scene becomes active).
+        BundleSyncManager.registerHandler { task in
+            Task { @MainActor in
+                guard let manager = ServiceContainer.shared?.bundleSyncManager else {
+                    task.setTaskCompleted(success: false)
+                    return
+                }
+                manager.handleBackgroundTask(task)
+            }
+        }
+
         return true
     }
 
@@ -78,6 +94,7 @@ struct SsdidWalletApp: App {
     @StateObject private var services = ServiceContainer()
     @State private var isLocked = false
     @State private var backgroundTimestamp: Date?
+    @State private var wasOnline: Bool = true
 
     init() {
         SentryManager.start()
@@ -95,6 +112,10 @@ struct SsdidWalletApp: App {
                             coordinator.handleDeepLink(url)
                         }
                         .task {
+                            // Expose the live container so AppDelegate can forward
+                            // BGAppRefreshTask events to the correct instance.
+                            ServiceContainer.shared = services
+
                             // Wire the delegate to the live NotifyManager before
                             // requesting permission, so the token callback is handled.
                             appDelegate.notifyManager = services.notifyManager
@@ -118,6 +139,14 @@ struct SsdidWalletApp: App {
                                     UIApplication.shared.registerForRemoteNotifications()
                                 }
                             }
+                        }
+                        .onReceive(services.connectivityMonitor.$isOnline) { isOnline in
+                            // Trigger a sync only on the false→true transition so we
+                            // refresh bundles immediately when connectivity is restored.
+                            if isOnline && !wasOnline {
+                                Task { await services.bundleSyncManager.syncNow() }
+                            }
+                            wasOnline = isOnline
                         }
                         .onChange(of: scenePhase) { _, newPhase in
                             switch newPhase {
