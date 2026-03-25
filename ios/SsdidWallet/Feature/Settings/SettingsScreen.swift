@@ -5,8 +5,10 @@ struct SettingsScreen: View {
 
     @AppStorage("ssdid_biometric_enabled") private var biometricEnabled = true
     @AppStorage("ssdid_auto_lock_minutes") private var autoLockMinutes = 5
+    @AppStorage("ssdid_bundle_ttl_days") private var bundleTtlDays = 7
     @State private var language = "en"
     @State private var showLanguageDialog = false
+    @State private var showTtlPicker = false
 
     private let languages: [(tag: String, name: String)] = [
         ("en", "English"),
@@ -67,6 +69,23 @@ struct SettingsScreen: View {
 
                     Spacer().frame(height: 16)
 
+                    // Offline Verification
+                    sectionHeader("OFFLINE VERIFICATION")
+                    settingsItem(
+                        "Bundle TTL",
+                        subtitle: ttlDisplayString
+                    ) {
+                        showTtlPicker = true
+                    }
+                    settingsItem(
+                        "Prepare for Offline",
+                        subtitle: "Manage cached verification bundles"
+                    ) {
+                        router.push(.bundleManagement)
+                    }
+
+                    Spacer().frame(height: 16)
+
                     // About
                     sectionHeader("ABOUT")
                     settingsItem("Version", subtitle: "1.0.0 (Build 1)")
@@ -79,6 +98,14 @@ struct SettingsScreen: View {
         .sheet(isPresented: $showLanguageDialog) {
             languagePicker
         }
+        .sheet(isPresented: $showTtlPicker) {
+            ttlPickerSheet
+        }
+    }
+
+    private var ttlDisplayString: String {
+        let days = bundleTtlDays > 0 ? bundleTtlDays : 7
+        return "\(days) day\(days == 1 ? "" : "s")"
     }
 
     @ViewBuilder
@@ -169,5 +196,61 @@ struct SettingsScreen: View {
             }
         }
         .presentationDetents([.medium])
+    }
+
+    // MARK: - TTL Picker Sheet
+
+    private struct TtlPreset {
+        let days: Int
+        let label: String
+        let recommendation: String
+    }
+
+    private let ttlPresets: [TtlPreset] = [
+        TtlPreset(days: 1, label: "1 Day", recommendation: "Highest security"),
+        TtlPreset(days: 7, label: "7 Days", recommendation: "Recommended"),
+        TtlPreset(days: 14, label: "14 Days", recommendation: "Balanced"),
+        TtlPreset(days: 30, label: "30 Days", recommendation: "Extended offline use")
+    ]
+
+    private var ttlPickerSheet: some View {
+        NavigationStack {
+            List {
+                ForEach(ttlPresets, id: \.days) { preset in
+                    Button {
+                        bundleTtlDays = preset.days
+                        showTtlPicker = false
+                    } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(preset.label)
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundStyle(Color.textPrimary)
+                                Text(preset.recommendation)
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(Color.textTertiary)
+                            }
+                            Spacer()
+                            if bundleTtlDays == preset.days {
+                                Image(systemName: "checkmark")
+                                    .foregroundStyle(Color.ssdidAccent)
+                            }
+                        }
+                    }
+                }
+            }
+            .scrollContentBackground(.hidden)
+            .background(Color.bgPrimary)
+            .navigationTitle("Bundle TTL")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { showTtlPicker = false }
+                        .foregroundStyle(Color.ssdidAccent)
+                }
+            }
+        }
+        .presentationDetents([.medium])
+        .presentationBackground(Color.bgPrimary)
     }
 }
