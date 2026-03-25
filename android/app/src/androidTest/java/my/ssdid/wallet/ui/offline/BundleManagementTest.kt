@@ -1,5 +1,7 @@
 package my.ssdid.wallet.ui.offline
 
+// Category: e2e
+
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -111,7 +113,16 @@ class BundleManagementTest {
         composeRule.waitForIdle()
         composeRule.onNodeWithText("Scan Credential QR").performClick()
         composeRule.waitForIdle()
-        // Assert scanner screen appeared (camera permission dialog or scanner view)
-        // The exact assertion depends on the ScanQrScreen implementation
+        // Assert scanner screen appeared: either the ScanQrScreen title is shown,
+        // a camera permission dialog appeared, or a scan viewfinder node is visible.
+        val scanScreenVisible =
+            composeRule.onAllNodesWithText("Scan QR", substring = true, ignoreCase = true)
+                .fetchSemanticsNodes().isNotEmpty() ||
+            composeRule.onAllNodesWithContentDescription("Camera preview", substring = true)
+                .fetchSemanticsNodes().isNotEmpty() ||
+            // Android permission dialog "Allow … to take pictures"
+            composeRule.onAllNodesWithText("Allow", substring = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        assertThat(scanScreenVisible).isTrue()
     }
 }
