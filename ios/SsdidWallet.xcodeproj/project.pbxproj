@@ -205,6 +205,9 @@
 		EE44FF550011223344ABCD01 /* FileCredentialRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE44FF550011223344ABCD02 /* FileCredentialRepository.swift */; };
 		FF550011223344ABCD01EF12 /* ConnectivityMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF550011223344ABCD01EF13 /* ConnectivityMonitor.swift */; };
 		00660012334455BCDE02F023 /* BundleSyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00660012334455BCDE02F024 /* BundleSyncManager.swift */; };
+		A1B2C3D4E5F6A7B8C9DA0001 /* VerificationResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9DA0002 /* VerificationResultView.swift */; };
+		A1B2C3D4E5F6A7B8C9DA0003 /* BundleManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9DA0004 /* BundleManagementView.swift */; };
+		A1B2C3D4E5F6A7B8C9DA0005 /* BundleFreshnessBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9DA0006 /* BundleFreshnessBadge.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -428,6 +431,9 @@
 		EE44FF550011223344ABCD02 /* FileCredentialRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileCredentialRepository.swift; sourceTree = "<group>"; };
 		FF550011223344ABCD01EF13 /* ConnectivityMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectivityMonitor.swift; sourceTree = "<group>"; };
 		00660012334455BCDE02F024 /* BundleSyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleSyncManager.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9DA0002 /* VerificationResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerificationResultView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9DA0004 /* BundleManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleManagementView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9DA0006 /* BundleFreshnessBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleFreshnessBadge.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -645,6 +651,7 @@
 			children = (
 				F9FFC719A624DCB707EE94FF /* Auth */,
 				D052115450475FA2A01C7DBB /* Backup */,
+				A1B2C3D4E5F6A7B8C9DA0010 /* Bundles */,
 				3F6450D316B132346C796DFE /* Credentials */,
 				737D6D84AD2F068C26998A4D /* Device */,
 				F2C23636FB7BDEFB778D124D /* History */,
@@ -660,8 +667,25 @@
 				87907F25B1EA3BBBC101EE19 /* Settings */,
 				4F87820D519A10374CFDCB11 /* Splash */,
 				2D111675C59D7C6FA5EB7557 /* Transaction */,
+				A1B2C3D4E5F6A7B8C9DA0011 /* Verification */,
 			);
 			path = Feature;
+			sourceTree = "<group>";
+		};
+		A1B2C3D4E5F6A7B8C9DA0010 /* Bundles */ = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D4E5F6A7B8C9DA0004 /* BundleManagementView.swift */,
+			);
+			path = Bundles;
+			sourceTree = "<group>";
+		};
+		A1B2C3D4E5F6A7B8C9DA0011 /* Verification */ = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D4E5F6A7B8C9DA0002 /* VerificationResultView.swift */,
+			);
+			path = Verification;
 			sourceTree = "<group>";
 		};
 		3F6450D316B132346C796DFE /* Credentials */ = {
@@ -796,6 +820,7 @@
 			isa = PBXGroup;
 			children = (
 				BEB759342B72885647D00887 /* AlgorithmBadge.swift */,
+				A1B2C3D4E5F6A7B8C9DA0006 /* BundleFreshnessBadge.swift */,
 				77A4AA06B8FF7C5FED101C29 /* DidText.swift */,
 				468C6C6FF4716060B7EA0F53 /* ErrorBanner.swift */,
 				45A68D4662AA1416242F3CD7 /* HapticManager.swift */,
@@ -1580,6 +1605,9 @@
 				EE44FF550011223344ABCD01 /* FileCredentialRepository.swift in Sources */,
 				FF550011223344ABCD01EF12 /* ConnectivityMonitor.swift in Sources */,
 				00660012334455BCDE02F023 /* BundleSyncManager.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9DA0001 /* VerificationResultView.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9DA0003 /* BundleManagementView.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9DA0005 /* BundleFreshnessBadge.swift in Sources */,
 				8D151338E1C4FA65EB07E31E /* VpTokenBuilder.swift in Sources */,
 				21B97926CB51352CFFB9E420 /* WalletHomeScreen.swift in Sources */,
 				40AE212BDD25CD6BDCBF47B5 /* KeyRotationManager.swift in Sources */,

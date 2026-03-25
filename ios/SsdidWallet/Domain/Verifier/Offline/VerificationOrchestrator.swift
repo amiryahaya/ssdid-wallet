@@ -1,12 +1,12 @@
 import Foundation
 
 /// Provides bundle TTL configuration for the orchestrator.
-protocol TtlProvider {
+protocol BundleTtlProvider {
     var bundleTtlSeconds: TimeInterval { get }
 }
 
 /// Default TTL provider: 7-day bundle freshness window.
-struct DefaultTtlProvider: TtlProvider {
+struct DefaultTtlProvider: BundleTtlProvider {
     let bundleTtlSeconds: TimeInterval = 7 * 86400
 }
 
@@ -17,13 +17,13 @@ final class VerificationOrchestrator {
     private let onlineVerifier: Verifier
     private let offlineVerifier: OfflineVerifier
     private let bundleStore: BundleStore
-    private let ttlProvider: TtlProvider
+    private let ttlProvider: BundleTtlProvider
 
     init(
         onlineVerifier: Verifier,
         offlineVerifier: OfflineVerifier,
         bundleStore: BundleStore,
-        ttlProvider: TtlProvider = DefaultTtlProvider()
+        ttlProvider: BundleTtlProvider = DefaultTtlProvider()
     ) {
         self.onlineVerifier = onlineVerifier
         self.offlineVerifier = offlineVerifier

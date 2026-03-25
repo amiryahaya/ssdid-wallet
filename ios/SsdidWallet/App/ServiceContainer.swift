@@ -18,6 +18,13 @@ final class ServiceContainer: ObservableObject {
     let ssdidClient: SsdidClient
     let notifyManager: NotifyManager
     let localNotificationStorage: LocalNotificationStorage
+    let ttlProvider: TtlProvider
+    let bundleStore: BundleStore
+    let credentialRepository: CredentialRepository
+    let connectivityMonitor: ConnectivityMonitor
+    let offlineVerifier: OfflineVerifier
+    let verificationOrchestrator: VerificationOrchestrator
+    let bundleSyncManager: BundleSyncManager
 
     /// Base URL for the SSDID Notify service. Override in debug builds or via configuration.
     static let notifyBaseURL: String = "https://notify.ssdid.my"
@@ -88,6 +95,50 @@ final class ServiceContainer: ObservableObject {
             revocationManager: revocationMgr,
             notifyManager: notifyMgr
         )
+
+        // Offline verification stack
+        let ttl = TtlProvider()
+        self.ttlProvider = ttl
+
+        let fileBundleStore = FileBundleStore()
+        self.bundleStore = fileBundleStore
+
+        let fileCredentialRepository = FileCredentialRepository()
+        self.credentialRepository = fileCredentialRepository
+
+        self.connectivityMonitor = ConnectivityMonitor()
+
+        let offlineVerifierImpl = OfflineVerifier(
+            classicalProvider: classical,
+            pqcProvider: pqc,
+            bundleStore: fileBundleStore
+        )
+        self.offlineVerifier = offlineVerifierImpl
+
+        self.verificationOrchestrator = VerificationOrchestrator(
+            onlineVerifier: verifier,
+            offlineVerifier: offlineVerifierImpl,
+            bundleStore: fileBundleStore,
+            ttlProvider: ttl
+        )
+
+        let bundleFetcher = BundleFetcher(
+            registryApi: httpClient.registry,
+            bundleStore: fileBundleStore,
+            ttlProvider: ttl
+        )
+        let syncManager = BundleSyncManager(
+            bundleStore: fileBundleStore,
+            bundleFetcher: bundleFetcher,
+            credentialRepository: fileCredentialRepository,
+            ttlProvider: ttl
+        )
+        self.bundleSyncManager = syncManager
+
+        // Register the background bundle-sync task as early as possible.
+        // BGTaskScheduler requires this before applicationDidBecomeActive fires.
+        syncManager.registerBackgroundTask()
+        syncManager.scheduleBackgroundSync()
 
         // One-time migration: copy legacy global profile VC to first identity
         let migrationVault: Vault = vaultImpl

@@ -2,7 +2,8 @@ import Foundation
 
 /// Provides the configured TTL for verification bundles, read directly
 /// from UserDefaults so it can be used synchronously from any context.
-final class TtlProvider {
+/// Conforms to `BundleTtlProvider` for use with `VerificationOrchestrator`.
+final class TtlProvider: BundleTtlProvider {
     private let userDefaults: UserDefaults
 
     private static let key = "ssdid_bundle_ttl_days"
@@ -18,10 +19,13 @@ final class TtlProvider {
         return days > 0 ? days : Self.defaultDays
     }
 
-    /// TTL expressed as a TimeInterval (seconds).
-    var ttl: TimeInterval {
+    /// TTL expressed as a TimeInterval (seconds). Satisfies `BundleTtlProvider`.
+    var bundleTtlSeconds: TimeInterval {
         TimeInterval(ttlDays) * 86400
     }
+
+    /// TTL expressed as a TimeInterval (seconds). Convenience alias.
+    var ttl: TimeInterval { bundleTtlSeconds }
 
     /// Returns true if the bundle identified by an ISO8601 `fetchedAt` timestamp has exceeded its TTL.
     func isExpired(fetchedAt: String) -> Bool {
