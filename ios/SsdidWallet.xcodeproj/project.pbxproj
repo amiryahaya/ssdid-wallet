@@ -208,6 +208,14 @@
 		A1B2C3D4E5F6A7B8C9DA0001 /* VerificationResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9DA0002 /* VerificationResultView.swift */; };
 		A1B2C3D4E5F6A7B8C9DA0003 /* BundleManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9DA0004 /* BundleManagementView.swift */; };
 		A1B2C3D4E5F6A7B8C9DA0005 /* BundleFreshnessBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9DA0006 /* BundleFreshnessBadge.swift */; };
+		OF001AA01 /* MockVerifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = OF001REF01 /* MockVerifier.swift */; };
+		OF001AA02 /* InMemoryBundleStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = OF001REF02 /* InMemoryBundleStore.swift */; };
+		OF001AA03 /* OfflineTestHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = OF001REF03 /* OfflineTestHelper.swift */; };
+		OF001AA04 /* OfflineVerificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OF001REF04 /* OfflineVerificationTests.swift */; };
+		OF002AA01 /* VerificationFlowUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OF002REF01 /* VerificationFlowUITests.swift */; };
+		OF002AA02 /* BundleManagementUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OF002REF02 /* BundleManagementUITests.swift */; };
+		OF002AA03 /* OfflineSettingsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OF002REF03 /* OfflineSettingsUITests.swift */; };
+		OF002AA04 /* BackgroundSyncUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OF002REF04 /* BackgroundSyncUITests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -421,6 +429,14 @@
 		D1A2B3C4E5F6A7B80005AA03 /* OfflineVerifierTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineVerifierTests.swift; sourceTree = "<group>"; };
 		E1F2A3B4C5D6E7F80006AA01 /* IdentityCreationUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentityCreationUITests.swift; sourceTree = "<group>"; };
 		E1F2A3B4C5D6E7F80006AA02 /* RecoveryFlowUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryFlowUITests.swift; sourceTree = "<group>"; };
+		OF001REF01 /* MockVerifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockVerifier.swift; sourceTree = "<group>"; };
+		OF001REF02 /* InMemoryBundleStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InMemoryBundleStore.swift; sourceTree = "<group>"; };
+		OF001REF03 /* OfflineTestHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineTestHelper.swift; sourceTree = "<group>"; };
+		OF001REF04 /* OfflineVerificationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineVerificationTests.swift; sourceTree = "<group>"; };
+		OF002REF01 /* VerificationFlowUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerificationFlowUITests.swift; sourceTree = "<group>"; };
+		OF002REF02 /* BundleManagementUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleManagementUITests.swift; sourceTree = "<group>"; };
+		OF002REF03 /* OfflineSettingsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineSettingsUITests.swift; sourceTree = "<group>"; };
+		OF002REF04 /* BackgroundSyncUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSyncUITests.swift; sourceTree = "<group>"; };
 		E1F2A3B4C5D6E7F80006AA03 /* SsdidWalletUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SsdidWalletUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F1A2B3C4E5F6A7B80007AA01 /* FileBundleStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileBundleStore.swift; sourceTree = "<group>"; };
 		F1A2B3C4E5F6A7B80007AA02 /* BundleFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleFetcher.swift; sourceTree = "<group>"; };
@@ -520,6 +536,7 @@
 			isa = PBXGroup;
 			children = (
 				93D7F0CB5E9158132DAB040F /* Domain */,
+				OF001GRP01 /* Offline */,
 				2A3B4C5D6E7F8A9B0C1D2E3F /* Integration */,
 				A1C2D3E4F5A6B7C80010AA03 /* TestHelpers */,
 				BB36A1F17A7E34D45AE2CF60 /* AuthorizationRequestTests.swift */,
@@ -1039,6 +1056,28 @@
 			path = Verifier;
 			sourceTree = "<group>";
 		};
+		OF001GRP01 /* Offline */ = {
+			isa = PBXGroup;
+			children = (
+				OF001REF01 /* MockVerifier.swift */,
+				OF001REF02 /* InMemoryBundleStore.swift */,
+				OF001REF03 /* OfflineTestHelper.swift */,
+				OF001REF04 /* OfflineVerificationTests.swift */,
+			);
+			path = Offline;
+			sourceTree = "<group>";
+		};
+		OF002GRP01 /* Offline */ = {
+			isa = PBXGroup;
+			children = (
+				OF002REF01 /* VerificationFlowUITests.swift */,
+				OF002REF02 /* BundleManagementUITests.swift */,
+				OF002REF03 /* OfflineSettingsUITests.swift */,
+				OF002REF04 /* BackgroundSyncUITests.swift */,
+			);
+			path = Offline;
+			sourceTree = "<group>";
+		};
 		A1B2C3D4E5F6A7B80001CC01 /* Recovery */ = {
 			isa = PBXGroup;
 			children = (
@@ -1279,6 +1318,7 @@
 			children = (
 				E1F2A3B4C5D6E7F80006AA01 /* IdentityCreationUITests.swift */,
 				E1F2A3B4C5D6E7F80006AA02 /* RecoveryFlowUITests.swift */,
+				OF002GRP01 /* Offline */,
 			);
 			path = SsdidWalletUITests;
 			sourceTree = "<group>";
@@ -1449,6 +1489,10 @@
 				A1B2C3D4E5F6A7B80004BB01 /* KeyRotationManagerTests.swift in Sources */,
 				A1C2D3E4F5A6B7C80010AA02 /* TestAvailability.swift in Sources */,
 				D1A2B3C4E5F6A7B80005BB03 /* OfflineVerifierTests.swift in Sources */,
+				OF001AA01 /* MockVerifier.swift in Sources */,
+				OF001AA02 /* InMemoryBundleStore.swift in Sources */,
+				OF001AA03 /* OfflineTestHelper.swift in Sources */,
+				OF001AA04 /* OfflineVerificationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1620,6 +1664,10 @@
 			files = (
 				E1F2A3B4C5D6E7F80006BB01 /* IdentityCreationUITests.swift in Sources */,
 				E1F2A3B4C5D6E7F80006BB02 /* RecoveryFlowUITests.swift in Sources */,
+				OF002AA01 /* VerificationFlowUITests.swift in Sources */,
+				OF002AA02 /* BundleManagementUITests.swift in Sources */,
+				OF002AA03 /* OfflineSettingsUITests.swift in Sources */,
+				OF002AA04 /* BackgroundSyncUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
