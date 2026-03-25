@@ -111,7 +111,7 @@ struct VerificationResultView: View {
             Image(systemName: "wifi.slash")
                 .font(.system(size: 11))
             Text("Offline")
-                .font(.ssdidCaption)
+                .font(.caption2)
         }
         .foregroundStyle(Color.warning)
         .padding(.horizontal, 10)
