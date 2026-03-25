@@ -13,19 +13,19 @@ import my.ssdid.wallet.domain.revocation.StatusListFetcher
 import my.ssdid.wallet.domain.settings.SettingsRepository
 import my.ssdid.wallet.domain.settings.TtlProvider
 import my.ssdid.wallet.domain.transport.RegistryApi
-import my.ssdid.wallet.domain.transport.SsdidHttpClient
 import my.ssdid.wallet.domain.verifier.Verifier
 import my.ssdid.wallet.domain.verifier.offline.BundleFetcher
 import my.ssdid.wallet.domain.verifier.offline.BundleManager
 import my.ssdid.wallet.domain.verifier.offline.BundleStore
 import my.ssdid.wallet.domain.verifier.offline.CredentialRepository
-import my.ssdid.wallet.domain.verifier.offline.DataStoreBundleStore
 import my.ssdid.wallet.domain.verifier.offline.OfflineVerifier
 import my.ssdid.wallet.domain.verifier.offline.VerificationOrchestrator
 import my.ssdid.wallet.domain.verifier.offline.sync.BundleSyncScheduler
 import my.ssdid.wallet.domain.verifier.offline.sync.ConnectivityMonitor
+import my.ssdid.wallet.platform.storage.DataStoreBundleStore
 import my.ssdid.wallet.platform.storage.DataStoreCredentialRepository
 import my.ssdid.wallet.platform.sync.AndroidConnectivityMonitor
+import my.ssdid.wallet.platform.sync.BundleSyncWorkerFactory
 import my.ssdid.wallet.platform.sync.WorkManagerBundleSyncScheduler
 import javax.inject.Named
 import javax.inject.Singleton
@@ -33,10 +33,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object OfflineModule {
-
-    @Provides
-    @Singleton
-    fun provideRegistryApi(httpClient: SsdidHttpClient): RegistryApi = httpClient.registry
 
     @Provides
     @Singleton
@@ -94,6 +90,13 @@ object OfflineModule {
     fun provideCredentialRepository(
         @ApplicationContext context: Context
     ): CredentialRepository = DataStoreCredentialRepository(context)
+
+    @Provides
+    @Singleton
+    fun provideBundleSyncWorkerFactory(
+        bundleManager: BundleManager,
+        credentialRepository: CredentialRepository
+    ): BundleSyncWorkerFactory = BundleSyncWorkerFactory(bundleManager, credentialRepository)
 
     @Provides
     @Singleton

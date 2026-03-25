@@ -1,8 +1,10 @@
-package my.ssdid.wallet.domain.verifier.offline
+package my.ssdid.wallet.platform.storage
 
 import android.content.Context
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import my.ssdid.wallet.domain.verifier.offline.BundleStore
+import my.ssdid.wallet.domain.verifier.offline.VerificationBundle
 import java.io.File
 
 /**
@@ -14,12 +16,19 @@ class DataStoreBundleStore(context: Context) : BundleStore {
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
 
     private fun fileFor(issuerDid: String): File {
-        val safe = issuerDid.replace(":", "_").replace("/", "_")
-        return File(dir, "$safe.json")
+        val hash = java.security.MessageDigest.getInstance("SHA-256")
+            .digest(issuerDid.toByteArray())
+            .joinToString("") { "%02x".format(it) }
+            .take(16)
+        val safe = issuerDid.replace(Regex("[^a-zA-Z0-9_-]"), "_").take(48)
+        return File(dir, "${safe}_${hash}.json")
     }
 
     override suspend fun saveBundle(bundle: VerificationBundle) {
-        fileFor(bundle.issuerDid).writeText(json.encodeToString(bundle))
+        val target = fileFor(bundle.issuerDid)
+        val tmp = File(target.parent, target.name + ".tmp")
+        tmp.writeText(json.encodeToString(bundle))
+        tmp.renameTo(target)
     }
 
     override suspend fun getBundle(issuerDid: String): VerificationBundle? {
