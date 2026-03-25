@@ -11,7 +11,11 @@ import kotlinx.coroutines.launch
 import my.ssdid.wallet.domain.notify.NotifyLifecycleObserver
 import my.ssdid.wallet.domain.notify.NotifyManager
 import my.ssdid.wallet.domain.profile.ProfileMigration
+import my.ssdid.wallet.domain.settings.TtlProvider
+import my.ssdid.wallet.domain.verifier.offline.BundleManager
+import my.ssdid.wallet.domain.verifier.offline.BundleStore
 import my.ssdid.wallet.domain.verifier.offline.sync.BundleSyncScheduler
+import my.ssdid.wallet.platform.lifecycle.AppLifecycleObserver
 import org.unifiedpush.android.connector.UnifiedPush
 import javax.inject.Inject
 
@@ -26,6 +30,9 @@ class SsdidApp : Application() {
     @Inject lateinit var notifyLifecycleObserver: NotifyLifecycleObserver
     @Inject lateinit var profileMigration: ProfileMigration
     @Inject lateinit var syncScheduler: BundleSyncScheduler
+    @Inject lateinit var bundleStore: BundleStore
+    @Inject lateinit var bundleManager: BundleManager
+    @Inject lateinit var ttlProvider: TtlProvider
 
     override fun onCreate() {
         super.onCreate()
@@ -35,6 +42,11 @@ class SsdidApp : Application() {
 
         // Fetch pending notifications whenever the app enters the foreground.
         ProcessLifecycleOwner.get().lifecycle.addObserver(notifyLifecycleObserver)
+
+        // Trigger a foreground sync check whenever the app comes to the foreground.
+        ProcessLifecycleOwner.get().lifecycle.addObserver(
+            AppLifecycleObserver(bundleStore, bundleManager, ttlProvider)
+        )
 
         appScope.launch {
             profileMigration.migrateIfNeeded()
