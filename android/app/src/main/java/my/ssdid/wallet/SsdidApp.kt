@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import my.ssdid.wallet.domain.notify.NotifyLifecycleObserver
 import my.ssdid.wallet.domain.notify.NotifyManager
 import my.ssdid.wallet.domain.profile.ProfileMigration
+import my.ssdid.wallet.domain.verifier.offline.sync.BundleSyncScheduler
 import org.unifiedpush.android.connector.UnifiedPush
 import javax.inject.Inject
 
@@ -24,10 +25,13 @@ class SsdidApp : Application() {
     @Inject lateinit var notifyManager: NotifyManager
     @Inject lateinit var notifyLifecycleObserver: NotifyLifecycleObserver
     @Inject lateinit var profileMigration: ProfileMigration
+    @Inject lateinit var syncScheduler: BundleSyncScheduler
 
     override fun onCreate() {
         super.onCreate()
         initSentry()
+
+        syncScheduler.schedulePeriodicSync(intervalHours = 12)
 
         // Fetch pending notifications whenever the app enters the foreground.
         ProcessLifecycleOwner.get().lifecycle.addObserver(notifyLifecycleObserver)
