@@ -19,7 +19,7 @@ final class FileBundleStore: BundleStore {
 
     func saveBundle(_ bundle: VerificationBundle) async throws {
         let data = try JSONEncoder().encode(bundle)
-        try data.write(to: fileURL(for: bundle.issuerDid))
+        try data.write(to: fileURL(for: bundle.issuerDid), options: [.atomic, .completeFileProtection])
     }
 
     func getBundle(issuerDid: String) async -> VerificationBundle? {

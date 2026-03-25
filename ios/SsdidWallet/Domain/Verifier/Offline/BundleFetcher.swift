@@ -1,16 +1,16 @@
 import Foundation
 
 /// Fetches DID documents from the registry and caches them as VerificationBundles
-/// for offline credential verification. Bundles have a 7-day TTL.
+/// for offline credential verification. The TTL is determined by TtlProvider.
 final class BundleFetcher {
     private let registryApi: RegistryApi
     private let bundleStore: BundleStore
+    private let ttlProvider: TtlProvider
 
-    private static let bundleTtlSeconds: TimeInterval = 7 * 86400 // 7 days
-
-    init(registryApi: RegistryApi, bundleStore: BundleStore) {
+    init(registryApi: RegistryApi, bundleStore: BundleStore, ttlProvider: TtlProvider = TtlProvider()) {
         self.registryApi = registryApi
         self.bundleStore = bundleStore
+        self.ttlProvider = ttlProvider
     }
 
     /// Resolve an issuer's DID document and cache it as a VerificationBundle.
@@ -24,7 +24,7 @@ final class BundleFetcher {
                 issuerDid: issuerDid,
                 didDocument: didDoc,
                 fetchedAt: formatter.string(from: now),
-                expiresAt: formatter.string(from: now.addingTimeInterval(Self.bundleTtlSeconds))
+                expiresAt: formatter.string(from: now.addingTimeInterval(ttlProvider.ttl))
             )
             try await bundleStore.saveBundle(bundle)
             return bundle

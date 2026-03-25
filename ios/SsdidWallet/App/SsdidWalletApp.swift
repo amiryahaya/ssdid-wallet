@@ -132,6 +132,11 @@ struct SsdidWalletApp: App {
                                     if biometricEnabled && elapsed > Double(effectiveMinutes * 60) {
                                         isLocked = true
                                     }
+                                    // Check bundle freshness on foreground resume.
+                                    // Only sync if bundles may have aged during the background interval.
+                                    Task {
+                                        await services.bundleSyncManager.syncNow()
+                                    }
                                 }
                                 Task {
                                     try? await services.notifyManager.fetchAndDemux()

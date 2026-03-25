@@ -151,6 +151,10 @@ struct RootView: View {
             InviteAcceptScreen(serverUrl: serverUrl, token: token, callbackUrl: callbackUrl, state: state)
         case .presentationRequest(let rawUri):
             PresentationRequestScreen(rawUri: rawUri)
+        case .verificationResult(let result):
+            VerificationResultView(result: result)
+        case .bundleManagement:
+            BundleManagementView()
         }
     }
 }

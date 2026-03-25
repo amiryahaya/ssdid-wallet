@@ -14,6 +14,9 @@ protocol SettingsRepository {
 
     func language() -> AnyPublisher<String, Never>
     func setLanguage(_ language: String)
+
+    func bundleTtlDays() -> AnyPublisher<Int, Never>
+    func setBundleTtlDays(_ days: Int)
 }
 
 /// UserDefaults-based implementation of SettingsRepository.
@@ -26,6 +29,7 @@ final class UserDefaultsSettingsRepository: SettingsRepository {
         static let autoLockMinutes = "ssdid_auto_lock_minutes"
         static let defaultAlgorithm = "ssdid_default_algorithm"
         static let language = "ssdid_language"
+        static let bundleTtlDays = "ssdid_bundle_ttl_days"
     }
 
     init(defaults: UserDefaults = .standard) {
@@ -38,7 +42,8 @@ final class UserDefaultsSettingsRepository: SettingsRepository {
             Keys.biometricEnabled: true,
             Keys.autoLockMinutes: 5,
             Keys.defaultAlgorithm: Algorithm.ED25519.rawValue,
-            Keys.language: "en"
+            Keys.language: "en",
+            Keys.bundleTtlDays: 7
         ])
     }
 
@@ -85,6 +90,17 @@ final class UserDefaultsSettingsRepository: SettingsRepository {
     func setLanguage(_ language: String) {
         defaults.set(language, forKey: Keys.language)
     }
+
+    // MARK: - Bundle TTL
+
+    func bundleTtlDays() -> AnyPublisher<Int, Never> {
+        defaults.publisher(for: \.ssdidBundleTtlDays)
+            .eraseToAnyPublisher()
+    }
+
+    func setBundleTtlDays(_ days: Int) {
+        defaults.set(days, forKey: Keys.bundleTtlDays)
+    }
 }
 
 // MARK: - UserDefaults KVO Keys
@@ -104,5 +120,9 @@ private extension UserDefaults {
 
     @objc var ssdidLanguage: String {
         string(forKey: "ssdid_language") ?? "en"
+    }
+
+    @objc var ssdidBundleTtlDays: Int {
+        integer(forKey: "ssdid_bundle_ttl_days")
     }
 }
