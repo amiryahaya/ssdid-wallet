@@ -84,8 +84,11 @@ class VerificationOrchestrator(
                 )
             )
 
-            // Expiry check — derive from error field or assume pass if no expiry error
-            val expiryFailed = offlineResult.error?.contains("expired") == true
+            // Expiry check — directly inspect the credential's expirationDate field
+            val expiryFailed = credential.expirationDate?.let {
+                try { java.time.Instant.parse(it).isBefore(java.time.Instant.now()) }
+                catch (e: Exception) { false }
+            } ?: false
             add(
                 VerificationCheck(
                     type = CheckType.EXPIRY,
