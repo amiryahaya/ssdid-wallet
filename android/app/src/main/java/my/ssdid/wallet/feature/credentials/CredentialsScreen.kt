@@ -24,22 +24,42 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import my.ssdid.wallet.domain.model.VerifiableCredential
+import my.ssdid.wallet.domain.settings.TtlProvider
 import my.ssdid.wallet.domain.vault.Vault
+import my.ssdid.wallet.domain.verifier.offline.BundleStore
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.ui.text.font.FontWeight
+import my.ssdid.wallet.ui.components.BundleFreshnessBadge
 import my.ssdid.wallet.ui.components.truncatedDid
 import my.ssdid.wallet.ui.theme.*
 import java.time.Instant
 import javax.inject.Inject
 
 @HiltViewModel
-class CredentialsViewModel @Inject constructor(private val vault: Vault) : ViewModel() {
+class CredentialsViewModel @Inject constructor(
+    private val vault: Vault,
+    private val bundleStore: BundleStore,
+    private val ttlProvider: TtlProvider
+) : ViewModel() {
     private val _credentials = MutableStateFlow<List<VerifiableCredential>>(emptyList())
     val credentials = _credentials.asStateFlow()
 
-    init { viewModelScope.launch { _credentials.value = vault.listCredentials() } }
+    private val _freshness = MutableStateFlow<Map<String, Double>>(emptyMap())
+    val freshness = _freshness.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            val creds = vault.listCredentials()
+            _credentials.value = creds
+            _freshness.value = creds.associate { vc ->
+                val bundle = bundleStore.getBundle(vc.issuer)
+                val ratio = if (bundle != null) ttlProvider.freshnessRatio(bundle.fetchedAt) else 1.0
+                vc.id to ratio
+            }
+        }
+    }
 }
 
 @Composable
@@ -49,6 +69,7 @@ fun CredentialsScreen(
     viewModel: CredentialsViewModel = hiltViewModel()
 ) {
     val credentials by viewModel.credentials.collectAsState()
+    val freshness by viewModel.freshness.collectAsState()
 
     Column(Modifier.fillMaxSize().background(BgPrimary).statusBarsPadding().navigationBarsPadding()) {
         Row(
@@ -96,6 +117,8 @@ fun CredentialsScreen(
                                             Text("SD-JWT", fontSize = 9.sp, color = Accent, fontWeight = FontWeight.SemiBold)
                                         }
                                     }
+                                    Spacer(Modifier.width(6.dp))
+                                    BundleFreshnessBadge(freshness[vc.id] ?: 1.0)
                                 }
                                 Box(Modifier.clip(RoundedCornerShape(4.dp)).background(if (isExpired) DangerDim else SuccessDim).padding(horizontal = 8.dp, vertical = 2.dp)) {
                                     Text(if (isExpired) "Expired" else "Valid", fontSize = 10.sp, color = if (isExpired) Danger else Success)

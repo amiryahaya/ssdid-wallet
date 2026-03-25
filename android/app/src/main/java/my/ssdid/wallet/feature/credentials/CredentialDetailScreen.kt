@@ -27,9 +27,12 @@ import kotlinx.coroutines.launch
 import my.ssdid.wallet.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.revocation.RevocationManager
 import my.ssdid.wallet.domain.revocation.RevocationStatus
+import my.ssdid.wallet.domain.settings.TtlProvider
 import my.ssdid.wallet.domain.vault.Vault
+import my.ssdid.wallet.domain.verifier.offline.BundleStore
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import my.ssdid.wallet.ui.components.BundleFreshnessBadge
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
 
@@ -37,6 +40,8 @@ import javax.inject.Inject
 class CredentialDetailViewModel @Inject constructor(
     private val vault: Vault,
     private val revocationManager: RevocationManager,
+    private val bundleStore: BundleStore,
+    private val ttlProvider: TtlProvider,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     val credentialId: String = savedStateHandle["credentialId"] ?: ""
@@ -47,6 +52,9 @@ class CredentialDetailViewModel @Inject constructor(
     private val _revocationStatus = MutableStateFlow<RevocationStatus?>(null)
     val revocationStatus = _revocationStatus.asStateFlow()
 
+    private val _bundleFreshness = MutableStateFlow(1.0)
+    val bundleFreshness = _bundleFreshness.asStateFlow()
+
     private val _deleted = MutableStateFlow(false)
     val deleted = _deleted.asStateFlow()
 
@@ -56,6 +64,8 @@ class CredentialDetailViewModel @Inject constructor(
             _credential.value = vc
             if (vc != null) {
                 _revocationStatus.value = revocationManager.checkRevocation(vc)
+                val bundle = bundleStore.getBundle(vc.issuer)
+                _bundleFreshness.value = if (bundle != null) ttlProvider.freshnessRatio(bundle.fetchedAt) else 1.0
             }
         }
     }
@@ -77,6 +87,7 @@ fun CredentialDetailScreen(
     val credential by viewModel.credential.collectAsState()
     val deleted by viewModel.deleted.collectAsState()
     val revocationStatus by viewModel.revocationStatus.collectAsState()
+    val bundleFreshness by viewModel.bundleFreshness.collectAsState()
     var showRawJson by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
 
@@ -147,6 +158,8 @@ fun CredentialDetailScreen(
                                             )
                                         }
                                     }
+                                    Spacer(Modifier.width(8.dp))
+                                    BundleFreshnessBadge(bundleFreshness)
                                 }
                                 val isExpired = vc.expirationDate?.let {
                                     try { Instant.now().isAfter(Instant.parse(it)) } catch (_: Exception) { false }
