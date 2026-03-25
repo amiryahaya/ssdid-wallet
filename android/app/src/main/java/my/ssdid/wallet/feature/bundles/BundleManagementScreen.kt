@@ -23,6 +23,7 @@ import my.ssdid.wallet.ui.theme.*
 @Composable
 fun BundleManagementScreen(
     onBack: () -> Unit,
+    onScanCredential: () -> Unit = {},
     viewModel: BundleManagementViewModel = hiltViewModel()
 ) {
     val bundles by viewModel.bundles.collectAsState()

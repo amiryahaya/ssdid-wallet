@@ -1,6 +1,9 @@
 package my.ssdid.wallet.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -37,6 +40,9 @@ import my.ssdid.wallet.feature.scan.ScanQrScreen
 import my.ssdid.wallet.feature.settings.SettingsScreen
 import my.ssdid.wallet.feature.notifications.NotificationsScreen
 import my.ssdid.wallet.feature.transaction.TxSigningScreen
+import my.ssdid.wallet.feature.verification.VerificationResultScreen
+import my.ssdid.wallet.feature.verification.VerificationResultViewModel
+import my.ssdid.wallet.feature.bundles.BundleManagementScreen
 
 @Composable
 fun SsdidNavGraph(navController: NavHostController, startDestination: String, onOnboardingCompleted: () -> Unit = {}) {
@@ -268,7 +274,8 @@ composable(
         composable(Screen.Settings.route) {
             SettingsScreen(
                 onBack = { navController.popBackStack() },
-                onBackupExport = { navController.navigate(Screen.BackupExport.route) }
+                onBackupExport = { navController.navigate(Screen.BackupExport.route) },
+                onBundleManagement = { navController.navigate(Screen.BundleManagement.route) }
             )
         }
 composable(Screen.TxHistory.route) {
@@ -372,6 +379,19 @@ composable(Screen.TxHistory.route) {
                 onComplete = {
                     navController.popBackStack(Screen.WalletHome.route, inclusive = false)
                 }
+            )
+        }
+        composable(Screen.VerificationResult.route) {
+            val viewModel: VerificationResultViewModel = hiltViewModel()
+            val result by viewModel.result.collectAsState()
+            result?.let { res ->
+                VerificationResultScreen(result = res, onBack = { navController.popBackStack() })
+            }
+        }
+        composable(Screen.BundleManagement.route) {
+            BundleManagementScreen(
+                onBack = { navController.popBackStack() },
+                onScanCredential = { navController.navigate(Screen.ScanQr.route) }
             )
         }
     }
