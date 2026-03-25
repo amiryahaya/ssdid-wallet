@@ -63,6 +63,27 @@ VerificationCheck
   - Signature invalid or credential expired: `FAILED`
 - Online fails with verification error (not network): return `FAILED` immediately, no fallback
 
+### Network vs Verification Error Classification
+
+The orchestrator classifies errors from the online verifier to decide whether to fall back:
+
+- **Network errors (trigger offline fallback):** `IOException`, `UnknownHostException`, `SocketTimeoutException`, `ConnectException`, and any HTTP 5xx responses from the registry
+- **Verification errors (no fallback, immediate FAILED):** signature mismatch, expired credential, revoked credential, malformed credential, unknown algorithm, missing verification method
+
+### Mapping OfflineVerificationResult to UnifiedVerificationResult
+
+The existing `OfflineVerificationResult` fields map to `UnifiedVerificationResult` as follows:
+
+| OfflineVerificationResult state | UnifiedVerificationResult status |
+|---|---|
+| `signatureValid=true`, `bundleFresh=true`, `revocationStatus=VALID` | `VERIFIED_OFFLINE` |
+| `signatureValid=true`, `bundleFresh=true`, `revocationStatus=UNKNOWN` | `DEGRADED` (missing revocation data) |
+| `signatureValid=true`, `bundleFresh=false` (any revocation status) | `DEGRADED` (stale bundle) |
+| `signatureValid=false` | `FAILED` |
+| `error != null` | `FAILED` |
+
+`bundleAge` is computed as `now - Instant.parse(bundle.fetchedAt)`.
+
 The orchestrator is a singleton. No changes to `VerifierImpl` or `OfflineVerifier` — it composes them.
 
 ## Section 2: Background Bundle Sync (Holder Side)
@@ -73,13 +94,25 @@ For credentials the user already holds, bundles auto-refresh opportunistically.
 
 - Device comes online after being offline
 - Periodic interval (configurable, default every 12 hours)
-- App foreground resume (if any bundle is within 20% of its TTL)
+- App foreground resume (if any bundle is within 20% of its TTL remaining). Note: the periodic 12h sync handles bundles in the 50-80% aging range; the foreground trigger is a last-resort catch for bundles nearing expiry.
+
+### Credential Enumeration
+
+Background sync needs a list of held credentials and their issuer DIDs. This requires a `CredentialRepository` interface:
+
+```
+CredentialRepository
+  getHeldCredentials(): List<VerifiableCredential>
+  getUniqueIssuerDids(): List<String>
+```
+
+If no credential storage exists yet, this is a **prerequisite** for background sync. The Vault stores keys but not credentials — a credential persistence layer must be implemented first (or the sync feature deferred until one exists).
 
 ### Sync Logic
 
-1. Enumerate all held credentials, extract unique issuer DIDs
+1. Call `CredentialRepository.getUniqueIssuerDids()` to enumerate issuer DIDs
 2. For each issuer, check if cached bundle is within refresh threshold
-3. Fetch fresh DID document + status list for stale bundles
+3. Fetch fresh DID document + status list via `BundleManager.prefetchBundle()` for stale bundles (not `BundleFetcher` — `BundleManager` handles both DID docs and status lists)
 4. Update `BundleStore`, log last sync timestamp
 
 ### Failure Handling
@@ -100,7 +133,7 @@ A "Prepare for Offline" screen accessible from settings or a dedicated verifier 
 
 ### Adding Issuers to Cache
 
-- **Scan credential:** Scan a QR code or receive a credential, extract the issuer DID, fetch and cache the bundle. Reuses existing credential parsing.
+- **Scan credential:** Scan a QR code or receive a credential, extract the issuer DID, fetch and cache the bundle. Reuses existing credential parsing. If the scanned content is not a parseable credential, show an error message and do not cache.
 - **Manual DID entry:** Text field accepting a `did:ssdid:*` value. Validates format, resolves against registry, caches bundle.
 
 ### Bundle Management UI
@@ -117,6 +150,15 @@ When entering a verification flow while offline, the app checks if it has a vali
 ## Section 4: User-Configurable TTL with Recommendations
 
 Accessible from Settings > Offline Verification.
+
+### TTL Ownership
+
+The user-configured TTL is the **single source of truth** for bundle freshness. A `TtlProvider` interface reads from user settings (default: 7 days). Both `BundleFetcher` and `BundleManager` must be refactored to accept a `TtlProvider` instead of using their current hardcoded values (`BundleFetcher`: 7 days, `BundleManager`: 24 hours constructor default). This is a prerequisite for implementation.
+
+```
+TtlProvider
+  getTtl(): Duration    # reads from user settings, falls back to 7-day default
+```
 
 ### TTL Configuration
 
@@ -143,7 +185,7 @@ Recommendations are guidance text, not enforced. The user's chosen TTL applies g
 
 ### Traffic Light (Top-Level)
 
-- **Green** — `VERIFIED` or `VERIFIED_OFFLINE` with fresh bundle. Message: "Credential verified" or "Credential verified offline."
+- **Green** — `VERIFIED` or `VERIFIED_OFFLINE` with fresh bundle. Message: "Credential verified" or "Credential verified offline." Note: a credential with no expiry date and a valid signature is GREEN; "No expiry set" appears as informational in the detail breakdown.
 - **Yellow** — `DEGRADED`. Stale bundle or missing revocation data. Message: "Verified with limitations — tap for details."
 - **Red** — `FAILED`. Signature invalid, credential expired, or revoked. Message: "Verification failed — tap for details."
 
@@ -197,7 +239,7 @@ Both platforms implement identical domain interfaces and produce the same `Unifi
 | `OfflineVerifier` | `domain/verifier/offline/OfflineVerifier` | Complete, tested |
 | `BundleFetcher` | `domain/verifier/offline/BundleFetcher` | Complete, tested |
 | `BundleManager` | `domain/verifier/offline/BundleManager` | Complete, tested |
-| `DataStoreBundleStore` | `domain/verifier/offline/DataStoreBundleStore` | Complete, tested |
+| `DataStoreBundleStore` | `domain/verifier/offline/DataStoreBundleStore` (Android impl of `BundleStore`) | Complete, tested |
 | `VerificationBundle` | `domain/verifier/offline/VerificationBundle` | Complete |
 | `VerifierImpl` | `domain/verifier/VerifierImpl` | Complete, tested |
 | `RevocationManager` | `domain/revocation/RevocationManager` | Complete, tested |
@@ -206,6 +248,13 @@ Both platforms implement identical domain interfaces and produce the same `Unifi
 ## Registry Impact
 
 None. Uses existing `GET /api/did/{did}` endpoint. Status list URLs are embedded in credentials and fetched directly.
+
+## Prerequisites
+
+- **CredentialRepository:** A credential persistence layer that can enumerate held credentials and their issuer DIDs. If this does not exist, it must be implemented before background sync can work.
+- **TtlProvider refactor:** `BundleFetcher` and `BundleManager` must be updated to accept a `TtlProvider` instead of hardcoded/constructor TTL values.
+- **BundleFetcher consolidation:** Consider deprecating `BundleFetcher` in favor of `BundleManager.prefetchBundle()` which handles both DID docs and status lists. If both are retained, clarify that `BundleManager` is the primary sync component and `BundleFetcher` is a lightweight fallback.
+- **iOS BundleStore:** iOS needs its own `BundleStore` implementation (e.g., file-based using `FileManager` or UserDefaults). `DataStoreBundleStore` is Android-specific.
 
 ## Out of Scope
 
