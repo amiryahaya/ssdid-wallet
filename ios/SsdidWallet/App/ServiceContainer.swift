@@ -30,6 +30,7 @@ final class ServiceContainer: ObservableObject {
     let offlineVerifier: OfflineVerifier
     let verificationOrchestrator: VerificationOrchestrator
     let bundleFetcher: BundleFetcher
+    let bundleManager: BundleManager
     let bundleSyncManager: BundleSyncManager
 
     /// Base URL for the SSDID Notify service. Override in debug builds or via configuration.
@@ -90,7 +91,22 @@ final class ServiceContainer: ObservableObject {
         )
         self.notifyManager = notifyMgr
 
-        let revocationMgr = RevocationManager(fetcher: HttpStatusListFetcher())
+        // S3: Use the same certificate-pinned session as SsdidHttpClient for status list fetching.
+        // In release builds CertificatePinningDelegate validates the server certificate chain.
+        #if DEBUG
+        let pinnedSession: URLSession = .shared
+        #else
+        let pinningDelegate = CertificatePinningDelegate()
+        let pinnedSessionConfig = URLSessionConfiguration.default
+        pinnedSessionConfig.timeoutIntervalForRequest = 30
+        let pinnedSession = URLSession(
+            configuration: pinnedSessionConfig,
+            delegate: pinningDelegate,
+            delegateQueue: nil
+        )
+        #endif
+
+        let revocationMgr = RevocationManager(fetcher: HttpStatusListFetcher(session: pinnedSession))
         self.revocationManager = revocationMgr
 
         self.ssdidClient = SsdidClient(
@@ -117,7 +133,8 @@ final class ServiceContainer: ObservableObject {
         let offlineVerifierImpl = OfflineVerifier(
             classicalProvider: classical,
             pqcProvider: pqc,
-            bundleStore: fileBundleStore
+            bundleStore: fileBundleStore,
+            ttlProvider: ttl
         )
         self.offlineVerifier = offlineVerifierImpl
 
@@ -134,9 +151,18 @@ final class ServiceContainer: ObservableObject {
             ttlProvider: ttl
         )
         self.bundleFetcher = bundleFetcher
+
+        let bundleMgr = BundleManager(
+            verifier: verifier,
+            statusListFetcher: HttpStatusListFetcher(session: pinnedSession),
+            bundleStore: fileBundleStore,
+            ttlProvider: ttl
+        )
+        self.bundleManager = bundleMgr
+
         let syncManager = BundleSyncManager(
             bundleStore: fileBundleStore,
-            bundleFetcher: bundleFetcher,
+            bundleManager: bundleMgr,
             credentialRepository: fileCredentialRepository,
             ttlProvider: ttl
         )
