@@ -275,26 +275,26 @@ Mirror Android exactly, adapted for iOS APIs:
 
 **Setup:** XCUIApplication with `["--skip-otp", "--ui-testing"]` launch arguments.
 
-**Tests 1–3:** Same scenarios as Android.
+**Tests 1–6:** Same scenarios as Android (green/yellow/red traffic light, expandable details, offline badge, pre-verification check).
 - Use `staticTexts["Credential verified"].waitForExistence(timeout: 10)`
 - Assert SF Symbol icons via `images["checkmark.circle.fill"]`
 - Assert "Offline" chip via `staticTexts["Offline"]`
 
 ### BundleManagementUITests (UC-5, UC-6)
 
-**Tests 1–5:** Same scenarios. Use `textFields`, `buttons`, `swipeLeft()`, `waitForExistence(timeout:)`.
+**Tests 1–6:** Same scenarios as Android. Use `textFields`, `buttons`, `swipeLeft()`, `waitForExistence(timeout:)`.
 
 ### OfflineSettingsUITests (UC-3, UC-4)
 
-**Tests 1–5:** Same scenarios. Adapted for SwiftUI sheets and pickers.
+**Tests 1–5:** Same scenarios as Android. Adapted for SwiftUI sheets and pickers.
 
 ### BackgroundSyncUITests (UC-8)
 
-**Test 1:** `XCUIDevice.shared.press(.home)` → reactivate app → assert bundle refreshed.
+**Test 1:** `XCUIDevice.shared.press(.home)` → reactivate app → assert bundle refreshed (UI-observable change).
 
 ### OfflineVerificationTests — XCTest (UC-7, UC-9–13)
 
-**Tests 1–6:** Same scenarios as Android instrumented tests.
+**Tests 1–9:** Same scenarios as Android instrumented tests.
 - Uses real `ClassicalProvider` (CryptoKit)
 - In-memory `BundleStore` (dictionary-backed)
 - `MockVerifier` throws `URLError(.notConnectedToInternet)` instead of `IOException`
