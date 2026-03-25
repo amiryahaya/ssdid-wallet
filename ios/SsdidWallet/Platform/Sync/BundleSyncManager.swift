@@ -1,26 +1,6 @@
 import Foundation
 import BackgroundTasks
 
-/// Determines whether a cached verification bundle has expired.
-protocol TtlProvider {
-    /// Returns true when the bundle fetched at `fetchedAt` (ISO-8601 string) is past its TTL.
-    func isExpired(fetchedAt: String) -> Bool
-}
-
-/// Default TTL: 7 days, matching BundleFetcher.bundleTtlSeconds.
-struct DefaultTtlProvider: TtlProvider {
-    private let ttl: TimeInterval
-
-    init(ttl: TimeInterval = 7 * 86400) {
-        self.ttl = ttl
-    }
-
-    func isExpired(fetchedAt: String) -> Bool {
-        guard let date = ISO8601DateFormatter().date(from: fetchedAt) else { return true }
-        return Date().timeIntervalSince(date) > ttl
-    }
-}
-
 /// Schedules and executes background refresh of verification bundles via BGAppRefreshTask.
 ///
 /// Register `BundleSyncManager.taskIdentifier` in Info.plist under
@@ -38,7 +18,7 @@ final class BundleSyncManager {
         bundleStore: BundleStore,
         bundleFetcher: BundleFetcher,
         credentialRepository: CredentialRepository,
-        ttlProvider: TtlProvider = DefaultTtlProvider()
+        ttlProvider: TtlProvider = TtlProvider()
     ) {
         self.bundleStore = bundleStore
         self.bundleFetcher = bundleFetcher
