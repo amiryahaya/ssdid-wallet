@@ -279,11 +279,11 @@ struct BundleManagementView: View {
     private func addBundle(did: String) async {
         let trimmed = did.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
-        _ = await services.bundleSyncManager.syncNow()
-        // Force-fetch the specific DID using the shared fetcher from ServiceContainer.
-        if await services.bundleFetcher.fetchAndCache(issuerDid: trimmed) == nil {
+        // Use BundleManager to resolve the DID doc and optionally fetch the status list.
+        let result = await services.bundleManager.prefetchBundle(issuerDid: trimmed)
+        if case .failure(let err) = result {
             await MainActor.run {
-                self.error = "Failed to fetch bundle for \(trimmed). Check the DID and network connection."
+                self.error = "Failed to fetch bundle for \(trimmed): \(err.localizedDescription)"
             }
         }
         await loadBundles()

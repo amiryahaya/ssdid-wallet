@@ -79,15 +79,8 @@ final class VerificationOrchestrator {
             return expDate < Date()
         }()
 
-        // Build individual checks
+        // Build individual checks in the same order as Android: SIGNATURE → EXPIRY → REVOCATION → BUNDLE_FRESHNESS
         var checks: [VerificationCheck] = []
-
-        // Expiry check
-        checks.append(VerificationCheck(
-            type: .expiry,
-            status: expiryFailed ? .fail : .pass,
-            message: expiryFailed ? "Credential has expired" : "Credential is within validity period"
-        ))
 
         // Signature check
         checks.append(VerificationCheck(
@@ -96,6 +89,13 @@ final class VerificationOrchestrator {
             message: offlineResult.signatureValid
                 ? "Signature verified using cached bundle"
                 : (offlineResult.error ?? "Signature verification failed")
+        ))
+
+        // Expiry check
+        checks.append(VerificationCheck(
+            type: .expiry,
+            status: expiryFailed ? .fail : .pass,
+            message: expiryFailed ? "Credential has expired" : "Credential is within validity period"
         ))
 
         // Revocation check
@@ -183,9 +183,8 @@ final class VerificationOrchestrator {
         if case HttpError.networkError = error { return true }
         if case HttpError.timeout = error { return true }
         if case HttpError.requestFailed(let statusCode, _) = error {
-            // Server errors and auth failures — fall back to offline rather than
-            // surfacing them as hard verification failures.
-            return (500...599).contains(statusCode) || statusCode == 401 || statusCode == 403
+            // Only server errors (5xx) trigger offline fallback.
+            return (500...599).contains(statusCode)
         }
         return false
     }

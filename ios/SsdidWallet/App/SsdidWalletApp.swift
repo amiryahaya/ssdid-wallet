@@ -162,9 +162,13 @@ struct SsdidWalletApp: App {
                                         isLocked = true
                                     }
                                     // Check bundle freshness on foreground resume.
-                                    // Only sync if bundles may have aged during the background interval.
+                                    // Only sync if any bundle is nearing expiry (>80% of TTL consumed).
                                     Task {
-                                        await services.bundleSyncManager.syncNow()
+                                        let bundles = try? await services.bundleStore.listBundles()
+                                        let needsRefresh = bundles?.contains { services.ttlProvider.freshnessRatio(fetchedAt: $0.fetchedAt) > 0.8 } ?? false
+                                        if needsRefresh {
+                                            await services.bundleSyncManager.syncNow()
+                                        }
                                     }
                                 }
                                 Task {
