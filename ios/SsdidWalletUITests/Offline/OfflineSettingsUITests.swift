@@ -70,12 +70,13 @@ final class OfflineSettingsUITests: XCTestCase {
         XCTAssertTrue(updatedSubtitle.waitForExistence(timeout: 5))
     }
 
-    // MARK: - UC-4a: Fresh bundle shows green freshness badge
+    // MARK: - UC-4a: Fresh bundle shows NO badge (EmptyView)
 
-    func testBundleManagement_freshBundle_showsGreenBadge() throws {
+    func testBundleManagement_freshBundle_showsNoBadge() throws {
         navigateToBundleManagement()
 
-        guard app.staticTexts["Offline Bundles"].waitForExistence(timeout: 5) else {
+        // BundleManagementScreen title is "Prepare for Offline"
+        guard app.staticTexts["Prepare for Offline"].waitForExistence(timeout: 5) else {
             XCTSkip("Bundle management screen not reached")
         }
 
@@ -85,10 +86,12 @@ final class OfflineSettingsUITests: XCTestCase {
             XCTSkip("No bundles available for freshness badge test")
         }
 
-        // Fresh bundles should show a green/fresh badge
-        // The BundleFreshnessBadge shows "Fresh", "Aging", or "Expired"
-        let freshBadge = app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'Fresh'")).firstMatch
-        XCTAssertTrue(freshBadge.waitForExistence(timeout: 3) || bundleList.cells.count > 0)
+        // BundleFreshnessBadge shows EmptyView (no text) when freshnessRatio < 0.5 (fresh).
+        // Assert that neither stale badge text is visible, confirming fresh = no badge.
+        let agingBadge = app.staticTexts["Bundle aging"]
+        let expiredBadge = app.staticTexts["Bundle expired"]
+        XCTAssertFalse(agingBadge.exists, "Fresh bundle should not show 'Bundle aging' badge")
+        XCTAssertFalse(expiredBadge.exists, "Fresh bundle should not show 'Bundle expired' badge")
     }
 
     // MARK: - UC-4b: Expired/stale bundle shows red/warning badge
@@ -96,7 +99,8 @@ final class OfflineSettingsUITests: XCTestCase {
     func testBundleManagement_staleBadge_isDistinguishable() throws {
         navigateToBundleManagement()
 
-        guard app.staticTexts["Offline Bundles"].waitForExistence(timeout: 5) else {
+        // BundleManagementScreen title is "Prepare for Offline"
+        guard app.staticTexts["Prepare for Offline"].waitForExistence(timeout: 5) else {
             XCTSkip("Bundle management screen not reached")
         }
 
@@ -107,29 +111,30 @@ final class OfflineSettingsUITests: XCTestCase {
                     "Seed an expired bundle (freshnessRatio > 1.0) via BundleStore to enable this test.")
         }
 
-        // The BundleFreshnessBadge component renders one of: "Fresh", "Aging", or "Expired".
-        // At least one badge text must exist in the list to confirm badge rendering works.
-        let freshPredicate = NSPredicate(format: "label == 'Fresh'")
-        let agingPredicate = NSPredicate(format: "label == 'Aging'")
-        let expiredPredicate = NSPredicate(format: "label == 'Expired'")
+        // BundleFreshnessBadge actual strings (from BundleFreshnessBadge.swift):
+        //   freshnessRatio < 0.5  → EmptyView (no text, fresh = no badge)
+        //   0.5 ≤ ratio < 1.0    → "Bundle aging"
+        //   ratio ≥ 1.0          → "Bundle expired"
+        let agingPredicate = NSPredicate(format: "label == 'Bundle aging'")
+        let expiredPredicate = NSPredicate(format: "label == 'Bundle expired'")
 
-        let hasFreshBadge = app.staticTexts.matching(freshPredicate).firstMatch.exists
         let hasAgingBadge = app.staticTexts.matching(agingPredicate).firstMatch.exists
         let hasExpiredBadge = app.staticTexts.matching(expiredPredicate).firstMatch.exists
 
-        XCTAssertTrue(hasFreshBadge || hasAgingBadge || hasExpiredBadge,
-                      "Expected a freshness badge ('Fresh', 'Aging', or 'Expired') on at least one bundle row")
+        // At least one stale badge must exist (caller seeded a stale bundle)
+        XCTAssertTrue(hasAgingBadge || hasExpiredBadge,
+                      "Expected a stale badge ('Bundle aging' or 'Bundle expired') on at least one bundle row")
 
-        // If any stale badge is shown (Aging or Expired), assert its text is distinct from Fresh
+        // Verify exact label text for whichever badge is present
         if hasAgingBadge {
             let agingBadge = app.staticTexts.matching(agingPredicate).firstMatch
-            XCTAssertEqual(agingBadge.label, "Aging",
-                           "Aging badge text should be exactly 'Aging'")
+            XCTAssertEqual(agingBadge.label, "Bundle aging",
+                           "Aging badge text should be exactly 'Bundle aging'")
         }
         if hasExpiredBadge {
             let expiredBadge = app.staticTexts.matching(expiredPredicate).firstMatch
-            XCTAssertEqual(expiredBadge.label, "Expired",
-                           "Expired badge text should be exactly 'Expired'")
+            XCTAssertEqual(expiredBadge.label, "Bundle expired",
+                           "Expired badge text should be exactly 'Bundle expired'")
         }
     }
 
