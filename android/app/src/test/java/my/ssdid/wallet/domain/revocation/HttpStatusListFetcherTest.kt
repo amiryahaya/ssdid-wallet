@@ -7,7 +7,7 @@ import org.junit.Test
 
 class HttpStatusListFetcherTest {
 
-    private val fetcher = HttpStatusListFetcher(Json { ignoreUnknownKeys = true })
+    private val fetcher = HttpStatusListFetcher(okhttp3.OkHttpClient(), Json { ignoreUnknownKeys = true })
 
     @Test
     fun `fetch rejects non-https URL`() = runTest {
