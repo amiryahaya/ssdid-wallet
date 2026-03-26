@@ -79,11 +79,7 @@ composable(
         composable(Screen.BiometricSetup.route) {
             BiometricSetupScreen(
                 onComplete = {
-                    navController.navigate(Screen.WalletHome.route) {
-                        popUpTo(Screen.BiometricSetup.route) { inclusive = true }
-                    }
-                },
-                onSkip = {
+                    onOnboardingCompleted()
                     navController.navigate(Screen.WalletHome.route) {
                         popUpTo(Screen.BiometricSetup.route) { inclusive = true }
                     }

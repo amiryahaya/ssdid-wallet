@@ -28,8 +28,7 @@ import my.ssdid.wallet.ui.theme.*
 
 @Composable
 fun BiometricSetupScreen(
-    onComplete: () -> Unit,
-    onSkip: () -> Unit
+    onComplete: () -> Unit
 ) {
     val activity = LocalContext.current as FragmentActivity
     val biometricAuth = remember { BiometricAuthenticator() }

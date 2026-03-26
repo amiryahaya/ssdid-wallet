@@ -9,7 +9,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,7 +26,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
-import my.ssdid.wallet.domain.settings.SettingsRepository
 import my.ssdid.wallet.domain.vault.VaultStorage
 import my.ssdid.wallet.feature.splash.SplashScreen
 import my.ssdid.wallet.platform.deeplink.DeepLinkHandler
@@ -36,7 +39,7 @@ import javax.inject.Inject
 class MainActivity : FragmentActivity() {
 
     @Inject lateinit var vaultStorage: VaultStorage
-    @Inject lateinit var settingsRepository: SettingsRepository
+
 
     private val pendingDeepLinks = MutableSharedFlow<Intent>(extraBufferCapacity = 1)
 
