@@ -174,7 +174,9 @@ struct SsdidWalletApp: App {
                         }
                 }
 
-                if isLocked {
+                // Only show lock if onboarding is complete — new users go
+                // directly to the onboarding flow without authentication.
+                if isLocked && coordinator.isOnboarded {
                     LockOverlay(onUnlock: { isLocked = false })
                 }
             }

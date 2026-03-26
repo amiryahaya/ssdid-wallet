@@ -63,10 +63,14 @@ class MainActivity : FragmentActivity() {
                     isOnboarded.value = vaultStorage.isOnboardingCompleted()
                 }
 
-                // Only show lock if onboarding is complete; skip for new users
-                if (locked && onboarded == true) {
+                // While loading onboarding state, show a blank themed screen
+                // to avoid a white flash before splash/lock appears
+                if (onboarded == null) {
+                    Box(Modifier.fillMaxSize().background(my.ssdid.wallet.ui.theme.BgPrimary))
+                } else if (locked && onboarded == true) {
+                    // Only show lock if onboarding is complete; skip for new users
                     LockScreen(onUnlock = { isLocked.value = false })
-                } else if (onboarded != null) {
+                } else {
                     var startDestination by remember { mutableStateOf<String?>(null) }
                     var showSplash by remember { mutableStateOf(true) }
 
