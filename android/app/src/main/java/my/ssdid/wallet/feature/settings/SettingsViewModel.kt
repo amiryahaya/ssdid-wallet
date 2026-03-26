@@ -18,9 +18,11 @@ class SettingsViewModel @Inject constructor(
     private val settings: SettingsRepository
 ) : ViewModel() {
 
+    @Deprecated("Biometric is now mandatory — always on")
     val biometricEnabled = settings.biometricEnabled()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
+    @Deprecated("Auto-lock timeout removed — locks on every resume")
     val autoLockMinutes = settings.autoLockMinutes()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 5)
 
@@ -45,13 +47,11 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun setBiometricEnabled(enabled: Boolean) {
-        viewModelScope.launch { settings.setBiometricEnabled(enabled) }
-    }
+    @Deprecated("Biometric is now mandatory")
+    fun setBiometricEnabled(enabled: Boolean) { /* no-op */ }
 
-    fun setAutoLockMinutes(minutes: Int) {
-        viewModelScope.launch { settings.setAutoLockMinutes(minutes) }
-    }
+    @Deprecated("Auto-lock timeout removed")
+    fun setAutoLockMinutes(minutes: Int) { /* no-op */ }
 
     fun setDefaultAlgorithm(algorithm: String) {
         viewModelScope.launch { settings.setDefaultAlgorithm(algorithm) }

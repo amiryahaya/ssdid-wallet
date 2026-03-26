@@ -19,7 +19,6 @@ import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -41,8 +40,7 @@ class MainActivity : FragmentActivity() {
 
     private val pendingDeepLinks = MutableSharedFlow<Intent>(extraBufferCapacity = 1)
 
-    private val isLocked = mutableStateOf(false)
-    private var backgroundTimestamp = 0L
+    private val isLocked = mutableStateOf(true)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,22 +98,10 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        backgroundTimestamp = System.currentTimeMillis()
-    }
-
     override fun onResume() {
         super.onResume()
-        if (backgroundTimestamp > 0) {
-            lifecycleScope.launch {
-                val biometricEnabled = settingsRepository.biometricEnabled().first()
-                val autoLockMinutes = settingsRepository.autoLockMinutes().first()
-                val elapsed = System.currentTimeMillis() - backgroundTimestamp
-                if (biometricEnabled && elapsed > autoLockMinutes * 60_000L) {
-                    isLocked.value = true
-                }
-            }
+        lifecycleScope.launch {
+            isLocked.value = true
         }
     }
 

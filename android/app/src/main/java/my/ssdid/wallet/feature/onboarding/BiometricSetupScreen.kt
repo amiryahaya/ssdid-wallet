@@ -1,5 +1,7 @@
 package my.ssdid.wallet.feature.onboarding
 
+import android.content.Intent
+import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -8,12 +10,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Fingerprint
+import androidx.fragment.app.FragmentActivity
+import my.ssdid.wallet.platform.biometric.BiometricAuthenticator
+import my.ssdid.wallet.platform.biometric.BiometricResult
+import my.ssdid.wallet.platform.biometric.BiometricState
 import my.ssdid.wallet.ui.theme.*
 
 @Composable
@@ -21,6 +28,11 @@ fun BiometricSetupScreen(
     onComplete: () -> Unit,
     onSkip: () -> Unit
 ) {
+    val activity = LocalContext.current as FragmentActivity
+    val biometricAuth = remember { BiometricAuthenticator() }
+    val biometricState = remember { biometricAuth.getBiometricState(activity) }
+    val canAuthWithFallback = remember { biometricAuth.canAuthenticateWithFallback(activity) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -54,8 +66,17 @@ fun BiometricSetupScreen(
 
         Spacer(Modifier.height(12.dp))
 
+        val bodyText = when (biometricState) {
+            BiometricState.AVAILABLE ->
+                "Secure your wallet with Face ID or fingerprint.\nThis adds an extra layer of protection\nfor signing transactions and accessing keys."
+            BiometricState.NOT_ENROLLED ->
+                "Your device has biometric hardware but no biometrics are enrolled.\nPlease set up fingerprint or face unlock in your device Settings, or use your device passcode."
+            BiometricState.NO_HARDWARE ->
+                "Your device does not support biometric authentication.\nYour device passcode will be used to protect the wallet."
+        }
+
         Text(
-            "Secure your wallet with Face ID or fingerprint.\nThis adds an extra layer of protection\nfor signing transactions and accessing keys.",
+            bodyText,
             style = MaterialTheme.typography.bodyLarge,
             color = TextSecondary,
             textAlign = TextAlign.Center,
@@ -111,32 +132,121 @@ fun BiometricSetupScreen(
 
         Spacer(Modifier.weight(1f))
 
-        // Enable button
-        Button(
-            onClick = onComplete,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Accent)
-        ) {
-            Text(
-                "Enable Biometric Authentication",
-                fontSize = 15.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(vertical = 4.dp)
-            )
+        when (biometricState) {
+            BiometricState.AVAILABLE -> {
+                // Primary action: enable biometric
+                Button(
+                    onClick = onComplete,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Accent)
+                ) {
+                    Text(
+                        "Enable Biometric Authentication",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                }
+            }
+            BiometricState.NOT_ENROLLED -> {
+                // Guide user to enroll, offer passcode as interim
+                Text(
+                    "Go to Settings > Security to enroll biometrics for the strongest protection.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextTertiary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 32.dp).padding(bottom = 12.dp)
+                )
+                Button(
+                    onClick = { activity.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS)) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Accent)
+                ) {
+                    Text(
+                        "Open Security Settings",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                }
+                Spacer(Modifier.height(8.dp))
+                if (canAuthWithFallback) {
+                    Button(
+                        onClick = onComplete,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = BgCard)
+                    ) {
+                        Text(
+                            "Use Device Passcode for Now",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
+                    }
+                }
+            }
+            BiometricState.NO_HARDWARE -> {
+                if (canAuthWithFallback) {
+                    // Device passcode is available — allow proceeding
+                    Text(
+                        "Authentication is mandatory. Your device passcode will protect this wallet.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextTertiary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 32.dp).padding(bottom = 12.dp)
+                    )
+                    Button(
+                        onClick = onComplete,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Accent)
+                    ) {
+                        Text(
+                            "Continue with Device Passcode",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
+                    }
+                } else {
+                    // No passcode set — must go to Settings
+                    Text(
+                        "No device passcode is set. Please set up a device passcode in Settings > Security to continue.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextTertiary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 32.dp).padding(bottom = 12.dp)
+                    )
+                    Button(
+                        onClick = { activity.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS)) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Accent)
+                    ) {
+                        Text(
+                            "Open Settings",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
+                    }
+                }
+            }
         }
 
-        // Skip button
-        TextButton(
-            onClick = onSkip,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp)
-                .padding(bottom = 32.dp)
-        ) {
-            Text("Skip for now", color = TextTertiary, fontSize = 14.sp)
-        }
+        Spacer(Modifier.height(32.dp))
     }
 }

@@ -27,8 +27,6 @@ fun SettingsScreen(
     onBundleManagement: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
-    val biometricEnabled by viewModel.biometricEnabled.collectAsState()
-    val autoLockMinutes by viewModel.autoLockMinutes.collectAsState()
     val defaultAlgorithm by viewModel.defaultAlgorithm.collectAsState()
     val language by viewModel.language.collectAsState()
     val bundleTtlDays by viewModel.bundleTtlDays.collectAsState()
@@ -58,16 +56,6 @@ fun SettingsScreen(
 
         LazyColumn(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             item { Text("SECURITY", style = MaterialTheme.typography.labelMedium); Spacer(Modifier.height(8.dp)) }
-            item {
-                SettingsItem(
-                    "Biometric Authentication",
-                    "Face ID / Fingerprint",
-                    toggle = true,
-                    checked = biometricEnabled,
-                    onToggle = { viewModel.setBiometricEnabled(it) }
-                )
-            }
-            item { SettingsItem("Auto-Lock", "After $autoLockMinutes minutes") }
             item { SettingsItem("Change Password", "Update vault password") }
             item { SettingsItem("Backup & Export", "Encrypted backup of all identities", onClick = onBackupExport) }
 

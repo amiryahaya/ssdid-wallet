@@ -7,7 +7,9 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
 import my.ssdid.wallet.domain.settings.SettingsRepository
 
 private val Context.settingsStore by preferencesDataStore(name = "ssdid_settings")
@@ -15,6 +17,16 @@ private val Context.settingsStore by preferencesDataStore(name = "ssdid_settings
 class DataStoreSettingsRepository(private val context: Context) : SettingsRepository {
 
     private val biometricKey = booleanPreferencesKey("biometric_enabled")
+
+    init {
+        // Migration: force biometric_enabled = true for existing users who had disabled it
+        runBlocking {
+            val currentValue = context.settingsStore.data.first()[biometricKey]
+            if (currentValue == false) {
+                context.settingsStore.edit { it[biometricKey] = true }
+            }
+        }
+    }
     private val autoLockKey = intPreferencesKey("auto_lock_minutes")
     private val algorithmKey = stringPreferencesKey("default_algorithm")
     private val languageKey = stringPreferencesKey("language")
