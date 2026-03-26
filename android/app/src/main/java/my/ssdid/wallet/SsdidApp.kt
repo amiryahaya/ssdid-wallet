@@ -13,7 +13,9 @@ import androidx.work.WorkManager
 import my.ssdid.wallet.domain.notify.NotifyLifecycleObserver
 import my.ssdid.wallet.domain.notify.NotifyManager
 import my.ssdid.wallet.domain.profile.ProfileMigration
+import my.ssdid.wallet.domain.settings.SettingsRepository
 import my.ssdid.wallet.domain.settings.TtlProvider
+import my.ssdid.wallet.platform.storage.DataStoreSettingsRepository
 import my.ssdid.wallet.domain.verifier.offline.BundleManager
 import my.ssdid.wallet.domain.verifier.offline.BundleStore
 import my.ssdid.wallet.domain.verifier.offline.sync.BundleSyncScheduler
@@ -33,6 +35,7 @@ class SsdidApp : Application() {
     @Inject lateinit var notifyManager: NotifyManager
     @Inject lateinit var notifyLifecycleObserver: NotifyLifecycleObserver
     @Inject lateinit var profileMigration: ProfileMigration
+    @Inject lateinit var settingsRepository: SettingsRepository
     @Inject lateinit var syncScheduler: BundleSyncScheduler
     @Inject lateinit var bundleStore: BundleStore
     @Inject lateinit var bundleManager: BundleManager
@@ -61,6 +64,12 @@ class SsdidApp : Application() {
 
         appScope.launch {
             profileMigration.migrateIfNeeded()
+        }
+
+        (settingsRepository as? DataStoreSettingsRepository)?.let { repo ->
+            appScope.launch {
+                repo.migrateToMandatoryBiometricIfNeeded()
+            }
         }
 
         appScope.launch {

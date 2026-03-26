@@ -18,6 +18,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import my.ssdid.wallet.platform.biometric.BiometricAuthenticator
 import my.ssdid.wallet.platform.biometric.BiometricResult
 import my.ssdid.wallet.platform.biometric.BiometricState
@@ -30,8 +33,21 @@ fun BiometricSetupScreen(
 ) {
     val activity = LocalContext.current as FragmentActivity
     val biometricAuth = remember { BiometricAuthenticator() }
-    val biometricState = remember { biometricAuth.getBiometricState(activity) }
-    val canAuthWithFallback = remember { biometricAuth.canAuthenticateWithFallback(activity) }
+    var biometricState by remember { mutableStateOf(biometricAuth.getBiometricState(activity)) }
+    var canAuthWithFallback by remember { mutableStateOf(biometricAuth.canAuthenticateWithFallback(activity)) }
+
+    // Refresh biometric state when the user returns from Settings (e.g. after enrolling biometrics)
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                biometricState = biometricAuth.getBiometricState(activity)
+                canAuthWithFallback = biometricAuth.canAuthenticateWithFallback(activity)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     Column(
         modifier = Modifier

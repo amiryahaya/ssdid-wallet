@@ -53,7 +53,7 @@ fun LockScreen(onUnlock: () -> Unit) {
             val shown = prefs.getBoolean("ssdid_biometric_warning_shown", false)
             if (!shown) {
                 showWarning = true
-                prefs.edit().putBoolean("ssdid_biometric_warning_shown", true).apply()
+                prefs.edit().putBoolean("ssdid_biometric_warning_shown", true).commit()
             }
         }
     }

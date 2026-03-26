@@ -23,7 +23,9 @@ class BiometricAuthenticator {
 
     fun getBiometricState(activity: FragmentActivity): BiometricState {
         val biometricManager = BiometricManager.from(activity)
-        return when (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG)) {
+        // Use BIOMETRIC_WEAK for state detection to cover all enrolled biometrics
+        // (face, fingerprint, iris). BIOMETRIC_STRONG is reserved for actual authentication.
+        return when (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK)) {
             BiometricManager.BIOMETRIC_SUCCESS -> BiometricState.AVAILABLE
             BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> BiometricState.NOT_ENROLLED
             else -> BiometricState.NO_HARDWARE
@@ -45,50 +47,15 @@ class BiometricAuthenticator {
         ) == BiometricManager.BIOMETRIC_SUCCESS
     }
 
+    /**
+     * Authenticate using BIOMETRIC_STRONG or DEVICE_CREDENTIAL as fallback.
+     * Delegates to [authenticateWithFallback] — kept for call-site compatibility.
+     */
     suspend fun authenticate(
         activity: FragmentActivity,
         title: String = "SSDID Authentication",
         subtitle: String = "Verify your identity to continue"
-    ): BiometricResult = suspendCancellableCoroutine { continuation ->
-        val executor = ContextCompat.getMainExecutor(activity)
-
-        val callback = object : BiometricPrompt.AuthenticationCallback() {
-            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                if (continuation.isActive) continuation.resume(BiometricResult.Success)
-            }
-            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                if (continuation.isActive) {
-                    if (errorCode == BiometricPrompt.ERROR_USER_CANCELED ||
-                        errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON ||
-                        errorCode == BiometricPrompt.ERROR_CANCELED) {
-                        continuation.resume(BiometricResult.Cancelled)
-                    } else {
-                        continuation.resume(BiometricResult.Error(errorCode, errString.toString()))
-                    }
-                }
-            }
-            override fun onAuthenticationFailed() {
-                // Don't resume — the system shows "try again" automatically
-            }
-        }
-
-        val biometricPrompt = BiometricPrompt(activity, executor, callback)
-
-        val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle(title)
-            .setSubtitle(subtitle)
-            .setAllowedAuthenticators(
-                BiometricManager.Authenticators.BIOMETRIC_STRONG or
-                BiometricManager.Authenticators.DEVICE_CREDENTIAL
-            )
-            .build()
-
-        biometricPrompt.authenticate(promptInfo)
-
-        continuation.invokeOnCancellation {
-            biometricPrompt.cancelAuthentication()
-        }
-    }
+    ): BiometricResult = authenticateWithFallback(activity, title, subtitle)
 
     /**
      * Authenticate using BIOMETRIC_STRONG or DEVICE_CREDENTIAL as fallback.

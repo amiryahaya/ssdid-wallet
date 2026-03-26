@@ -18,14 +18,6 @@ class SettingsViewModel @Inject constructor(
     private val settings: SettingsRepository
 ) : ViewModel() {
 
-    @Deprecated("Biometric is now mandatory — always on")
-    val biometricEnabled = settings.biometricEnabled()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
-
-    @Deprecated("Auto-lock timeout removed — locks on every resume")
-    val autoLockMinutes = settings.autoLockMinutes()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 5)
-
     val defaultAlgorithm = settings.defaultAlgorithm()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "KAZ_SIGN_192")
 
@@ -46,12 +38,6 @@ class SettingsViewModel @Inject constructor(
             }
         }
     }
-
-    @Deprecated("Biometric is now mandatory")
-    fun setBiometricEnabled(enabled: Boolean) { /* no-op */ }
-
-    @Deprecated("Auto-lock timeout removed")
-    fun setAutoLockMinutes(minutes: Int) { /* no-op */ }
 
     fun setDefaultAlgorithm(algorithm: String) {
         viewModelScope.launch { settings.setDefaultAlgorithm(algorithm) }

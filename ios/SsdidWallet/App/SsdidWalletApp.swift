@@ -187,6 +187,7 @@ struct SsdidWalletApp: App {
 struct LockOverlay: View {
     let onUnlock: () -> Void
     @State private var authFailed = false
+    private let biometricAuth = BiometricAuthenticator()
 
     var body: some View {
         ZStack {
@@ -219,7 +220,7 @@ struct LockOverlay: View {
 
     private func authenticate() {
         Task {
-            let result = await BiometricAuthenticator().authenticateWithPasscodeFallback(
+            let result = await biometricAuth.authenticateWithPasscodeFallback(
                 reason: "Unlock SSDID Wallet"
             )
             await MainActor.run {

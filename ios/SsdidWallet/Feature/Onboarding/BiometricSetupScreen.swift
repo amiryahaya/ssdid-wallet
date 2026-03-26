@@ -3,9 +3,10 @@ import SwiftUI
 struct BiometricSetupScreen: View {
     @Environment(AppRouter.self) private var router
     @EnvironmentObject var coordinator: AppCoordinator
+    @Environment(\.scenePhase) private var scenePhase
 
     private let biometricAuth = BiometricAuthenticator()
-    private var biometricState: BiometricState { biometricAuth.getBiometricState() }
+    @State private var biometricState: BiometricState = .available
 
     var body: some View {
         VStack(spacing: 0) {
@@ -80,6 +81,14 @@ struct BiometricSetupScreen: View {
             Spacer().frame(height: 32)
         }
         .background(Color.bgPrimary)
+        .onAppear {
+            biometricState = biometricAuth.getBiometricState()
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                biometricState = biometricAuth.getBiometricState()
+            }
+        }
     }
 
     @ViewBuilder

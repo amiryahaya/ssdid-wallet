@@ -41,6 +41,14 @@ class MainActivity : FragmentActivity() {
     private val pendingDeepLinks = MutableSharedFlow<Intent>(extraBufferCapacity = 1)
 
     private val isLocked = mutableStateOf(true)
+    // null = not yet determined; true/false = onboarding state loaded
+    private val isOnboarded = mutableStateOf<Boolean?>(null)
+    private var wentToBackground = false
+
+    override fun onStop() {
+        super.onStop()
+        wentToBackground = true
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,15 +56,22 @@ class MainActivity : FragmentActivity() {
         setContent {
             SsdidTheme {
                 val locked by remember { isLocked }
+                val onboarded by remember { isOnboarded }
 
-                if (locked) {
+                // Load onboarding state once on first composition
+                LaunchedEffect(Unit) {
+                    isOnboarded.value = vaultStorage.isOnboardingCompleted()
+                }
+
+                // Only show lock if onboarding is complete; skip for new users
+                if (locked && onboarded == true) {
                     LockScreen(onUnlock = { isLocked.value = false })
-                } else {
+                } else if (onboarded != null) {
                     var startDestination by remember { mutableStateOf<String?>(null) }
                     var showSplash by remember { mutableStateOf(true) }
 
                     LaunchedEffect(Unit) {
-                        startDestination = if (vaultStorage.isOnboardingCompleted()) {
+                        startDestination = if (onboarded == true) {
                             Screen.WalletHome.route
                         } else {
                             Screen.Onboarding.route
@@ -78,7 +93,10 @@ class MainActivity : FragmentActivity() {
                             navController = navController,
                             startDestination = startDestination!!,
                             onOnboardingCompleted = {
-                                lifecycleScope.launch { vaultStorage.setOnboardingCompleted() }
+                                lifecycleScope.launch {
+                                    vaultStorage.setOnboardingCompleted()
+                                    isOnboarded.value = true
+                                }
                             }
                         )
 
@@ -100,7 +118,8 @@ class MainActivity : FragmentActivity() {
 
     override fun onResume() {
         super.onResume()
-        lifecycleScope.launch {
+        if (wentToBackground) {
+            wentToBackground = false
             isLocked.value = true
         }
     }
