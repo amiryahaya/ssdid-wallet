@@ -2,12 +2,15 @@ import SwiftUI
 
 struct CredentialDetailScreen: View {
     @Environment(AppRouter.self) private var router
+    @EnvironmentObject private var services: ServiceContainer
 
     let credentialId: String
 
     @State private var credential: VerifiableCredential?
     @State private var showRawJson = false
     @State private var showDeleteDialog = false
+    @State private var isVerifying = false
+    @State private var freshnessRatio: Double = 0.0
 
     var body: some View {
         VStack(spacing: 0) {
@@ -123,6 +126,31 @@ struct CredentialDetailScreen: View {
                         }
                         .ssdidCard()
 
+                        // Bundle freshness badge
+                        BundleFreshnessBadge(freshnessRatio: freshnessRatio)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 4)
+
+                        // Verify Credential button
+                        Button {
+                            guard let vc = credential else { return }
+                            isVerifying = true
+                            Task {
+                                let result = await services.verificationOrchestrator.verify(credential: vc)
+                                await MainActor.run {
+                                    isVerifying = false
+                                    router.push(.verificationResult(result: result))
+                                }
+                            }
+                        } label: {
+                            Label(isVerifying ? "Verifying..." : "Verify Credential", systemImage: "checkmark.shield")
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 8)
+                        }
+                        .disabled(isVerifying)
+                        .foregroundStyle(Color.ssdidAccent)
+                        .font(.system(size: 14))
+
                         // Raw JSON toggle
                         Button {
                             showRawJson.toggle()
@@ -162,10 +190,28 @@ struct CredentialDetailScreen: View {
         .alert("Delete Credential", isPresented: $showDeleteDialog) {
             Button("Cancel", role: .cancel) {}
             Button("Delete", role: .destructive) {
-                router.pop()
+                Task {
+                    if let vc = credential {
+                        try? await services.vault.deleteCredential(credentialId: vc.id)
+                        try? await services.credentialRepository.deleteCredential(credentialId: vc.id)
+                    }
+                    router.pop()
+                }
             }
         } message: {
             Text("Are you sure you want to delete this credential? This action cannot be undone.")
+        }
+        .task {
+            // Load the credential from vault
+            let all = await services.vault.listCredentials()
+            credential = all.first { $0.id == credentialId }
+
+            // Compute bundle freshness for this credential's issuer
+            if let vc = credential {
+                if let bundle = await services.bundleStore.getBundle(issuerDid: vc.issuer) {
+                    freshnessRatio = services.ttlProvider.freshnessRatio(fetchedAt: bundle.fetchedAt)
+                }
+            }
         }
     }
 

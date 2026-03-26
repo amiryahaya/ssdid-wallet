@@ -50,7 +50,11 @@ struct CredentialOfferScreen: View {
                     transport: transport,
                     vcStorage: services.storage
                 )
-                let vm = CredentialOfferViewModel(handler: handler, vault: services.vault)
+                let vm = CredentialOfferViewModel(
+                    handler: handler,
+                    vault: services.vault,
+                    credentialRepository: services.credentialRepository
+                )
                 viewModel = vm
 
                 if !issuerUrl.isEmpty {

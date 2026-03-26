@@ -80,10 +80,12 @@ final class CredentialOfferViewModel {
 
     private let handler: OpenId4VciHandler
     private let vault: Vault
+    private let credentialRepository: CredentialRepository?
 
-    init(handler: OpenId4VciHandler, vault: Vault) {
+    init(handler: OpenId4VciHandler, vault: Vault, credentialRepository: CredentialRepository? = nil) {
         self.handler = handler
         self.vault = vault
+        self.credentialRepository = credentialRepository
     }
 
     // MARK: - Actions
@@ -239,7 +241,27 @@ final class CredentialOfferViewModel {
                 )
 
                 switch issuanceResult {
-                case .success:
+                case .success(let storedVc):
+                    // Mirror save to CredentialRepository so BundleSyncManager
+                    // can discover the issuer DID for background bundle sync.
+                    if let repo = credentialRepository {
+                        let now = ISO8601DateFormatter().string(from: Date())
+                        let vc = VerifiableCredential(
+                            id: storedVc.id,
+                            type: ["VerifiableCredential", storedVc.type],
+                            issuer: storedVc.issuer,
+                            issuanceDate: now,
+                            credentialSubject: CredentialSubject(id: storedVc.subject),
+                            proof: Proof(
+                                type: "SdJwtSignature2024",
+                                created: now,
+                                verificationMethod: storedVc.issuer,
+                                proofPurpose: "assertionMethod",
+                                proofValue: ""
+                            )
+                        )
+                        try? await repo.saveCredential(vc)
+                    }
                     state = .success
                 case .deferred(let transactionId, _, _):
                     state = .deferred(transactionId: transactionId)

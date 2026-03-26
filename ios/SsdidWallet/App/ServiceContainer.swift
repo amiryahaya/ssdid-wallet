@@ -29,7 +29,6 @@ final class ServiceContainer: ObservableObject {
     let connectivityMonitor: ConnectivityMonitor
     let offlineVerifier: OfflineVerifier
     let verificationOrchestrator: VerificationOrchestrator
-    let bundleFetcher: BundleFetcher
     let bundleManager: BundleManager
     let bundleSyncManager: BundleSyncManager
 
@@ -143,13 +142,6 @@ final class ServiceContainer: ObservableObject {
             offlineVerifier: offlineVerifierImpl,
             bundleStore: fileBundleStore
         )
-
-        let bundleFetcher = BundleFetcher(
-            registryApi: httpClient.registry,
-            bundleStore: fileBundleStore,
-            ttlProvider: ttl
-        )
-        self.bundleFetcher = bundleFetcher
 
         let bundleMgr = BundleManager(
             verifier: verifier,
