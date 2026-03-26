@@ -21,7 +21,7 @@ class VaultImpl(
     private val pqcProvider: CryptoProvider,
     private val keystoreManager: KeystoreManager,
     private val storage: VaultStorage,
-    private val credentialRepository: CredentialRepository
+    private val credentialRepository: CredentialRepository? = null
 ) : Vault {
 
     private fun providerFor(algorithm: Algorithm): CryptoProvider {
@@ -208,7 +208,7 @@ class VaultImpl(
 
     override suspend fun storeCredential(credential: VerifiableCredential): Result<Unit> = runCatching {
         storage.saveCredential(credential)
-        credentialRepository.saveCredential(credential)
+        credentialRepository?.saveCredential(credential)
     }
 
     override suspend fun listCredentials(): List<VerifiableCredential> = storage.listCredentials()
