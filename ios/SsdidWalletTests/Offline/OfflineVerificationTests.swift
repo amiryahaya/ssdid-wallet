@@ -390,6 +390,50 @@ final class OfflineVerificationTests: XCTestCase {
         XCTAssertEqual(expiryCheck?.status, .pass)
     }
 
+    // MARK: - B2: DID key rotation — credential signed with new key, bundle has old key → failed
+
+    func testKeyRotation_oldBundle_newCredential_returnsFailed() async throws {
+        // Key pair A: old key cached in DID Document
+        let classicalProvider = ClassicalProvider()
+        let kpA = try classicalProvider.generateKeyPair(algorithm: .ED25519)
+        let issuerDid = "did:ssdid:issuer010"
+        let keyId = "\(issuerDid)#key-1"
+
+        let didDocWithKeyA = OfflineTestHelper.createDidDocument(
+            did: issuerDid,
+            keyId: keyId,
+            publicKeyMultibase: Multibase.encode(kpA.publicKey)
+        )
+        // Fresh bundle — fetched just now, within 7-day TTL
+        let bundle = OfflineTestHelper.createBundle(
+            issuerDid: issuerDid,
+            didDocument: didDocWithKeyA,
+            freshnessRatio: 0.1
+        )
+        try await bundleStore.saveBundle(bundle)
+
+        // Key pair B: rotated key — signs the credential but is NOT in the cached DID doc
+        let kpB = try classicalProvider.generateKeyPair(algorithm: .ED25519)
+        let newKeyId = "\(issuerDid)#key-2"
+
+        let credential = try OfflineTestHelper.createTestCredential(
+            issuerDid: issuerDid,
+            keyId: newKeyId,
+            privateKey: kpB.privateKey
+        )
+
+        let mockVerifier = MockVerifier(shouldThrow: URLError(.notConnectedToInternet))
+        let orchestrator = makeOrchestrator(mockVerifier: mockVerifier)
+
+        let result = await orchestrator.verify(credential: credential)
+
+        // key-2 not in cached DID doc → signature lookup fails → FAILED
+        XCTAssertEqual(result.status, .failed)
+        XCTAssertEqual(result.source, .offline)
+        let sigCheck = result.checks.first { $0.type == .signature }
+        XCTAssertEqual(sigCheck?.status, .fail)
+    }
+
     // MARK: - Bitstring Helper
 
     /// Builds a GZIP-compressed, base64url-encoded bitstring with the given index revoked.

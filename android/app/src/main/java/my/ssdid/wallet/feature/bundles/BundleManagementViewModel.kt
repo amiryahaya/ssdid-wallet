@@ -46,27 +46,31 @@ class BundleManagementViewModel @Inject constructor(
 
     fun loadBundles() {
         viewModelScope.launch {
-            val rawBundles = bundleStore.listBundles()
-            _bundles.value = rawBundles.map { bundle ->
-                val ratio = try {
-                    ttlProvider.freshnessRatio(bundle.fetchedAt)
-                } catch (_: Exception) {
-                    1.0
+            try {
+                val rawBundles = bundleStore.listBundles()
+                _bundles.value = rawBundles.map { bundle ->
+                    val ratio = try {
+                        ttlProvider.freshnessRatio(bundle.fetchedAt)
+                    } catch (_: Exception) {
+                        1.0
+                    }
+                    val formattedDate = try {
+                        dateFormatter.format(Instant.parse(bundle.fetchedAt))
+                    } catch (_: Exception) {
+                        bundle.fetchedAt
+                    }
+                    val shortDid = bundle.issuerDid.let { did ->
+                        if (did.length > 20) did.take(12) + "..." + did.takeLast(8) else did
+                    }
+                    BundleUiItem(
+                        issuerDid = bundle.issuerDid,
+                        displayName = shortDid,
+                        fetchedAt = formattedDate,
+                        freshnessRatio = ratio
+                    )
                 }
-                val formattedDate = try {
-                    dateFormatter.format(Instant.parse(bundle.fetchedAt))
-                } catch (_: Exception) {
-                    bundle.fetchedAt
-                }
-                val shortDid = bundle.issuerDid.let { did ->
-                    if (did.length > 20) did.take(12) + "..." + did.takeLast(8) else did
-                }
-                BundleUiItem(
-                    issuerDid = bundle.issuerDid,
-                    displayName = shortDid,
-                    fetchedAt = formattedDate,
-                    freshnessRatio = ratio
-                )
+            } catch (e: Exception) {
+                _error.value = "Failed to load bundles: ${e.message}"
             }
         }
     }

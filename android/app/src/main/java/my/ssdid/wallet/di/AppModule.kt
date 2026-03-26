@@ -166,9 +166,9 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideRevocationManager(): RevocationManager {
+    fun provideRevocationManager(okHttpClient: OkHttpClient): RevocationManager {
         val json = Json { ignoreUnknownKeys = true }
-        return RevocationManager(HttpStatusListFetcher(json))
+        return RevocationManager(HttpStatusListFetcher(okHttpClient, json))
     }
 
     @Provides

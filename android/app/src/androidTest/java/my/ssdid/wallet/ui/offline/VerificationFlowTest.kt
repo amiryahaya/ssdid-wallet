@@ -1,5 +1,7 @@
 package my.ssdid.wallet.ui.offline
 
+// Category: e2e
+
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -11,6 +13,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import androidx.test.ext.junit.runners.AndroidJUnit4
 
+/**
+ * Tests 1-2: Online verification flow using real Hilt dependencies.
+ * Tests 3-6 (fake verifier / offline states) live in VerificationFlowOfflineTest.
+ */
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 class VerificationFlowTest {
@@ -54,35 +60,5 @@ class VerificationFlowTest {
         composeRule.waitForIdle()
         composeRule.onNodeWithText("Signature").assertIsDisplayed()
         composeRule.onNodeWithText("Expiry").assertIsDisplayed()
-    }
-
-    // UC-2 Test 3: Yellow traffic light for DEGRADED result
-    @Test
-    fun degradedResult_showsYellowTrafficLight() {
-        // Requires Hilt module replacement: inject FakeOnlineVerifier + stale bundle
-        // See spec: @UninstallModules(OfflineModule::class) + @BindValue
-        composeRule.onNodeWithText("Verified with limitations", substring = true).assertIsDisplayed()
-    }
-
-    // UC-2 Test 4: Red traffic light for FAILED result
-    @Test
-    fun failedResult_showsRedTrafficLight() {
-        // Requires Hilt module replacement: inject FakeOnlineVerifier + expired credential
-        composeRule.onNodeWithText("Verification failed", substring = true).assertIsDisplayed()
-    }
-
-    // Test 5: Offline badge appears when source is offline
-    @Test
-    fun offlineResult_showsOfflineBadge() {
-        // Requires Hilt module replacement: FakeOnlineVerifier + fresh bundle
-        composeRule.onNodeWithText("Offline").assertIsDisplayed()
-    }
-
-    // Test 6: Pre-verification check when no bundle cached
-    @Test
-    fun noBundleCached_showsWarningMessage() {
-        // Requires Hilt module replacement: FakeOnlineVerifier + empty BundleStore
-        // After verification attempt fails
-        composeRule.onNodeWithText("No cached data", substring = true).assertExists()
     }
 }

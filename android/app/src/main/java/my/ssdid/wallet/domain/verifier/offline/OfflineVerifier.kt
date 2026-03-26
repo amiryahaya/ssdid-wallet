@@ -5,6 +5,7 @@ import my.ssdid.wallet.domain.crypto.Multibase
 import my.ssdid.wallet.domain.model.*
 import my.ssdid.wallet.domain.revocation.BitstringParser
 import my.ssdid.wallet.domain.revocation.RevocationStatus
+import my.ssdid.wallet.domain.settings.TtlProvider
 import my.ssdid.wallet.domain.vault.VaultImpl
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -18,7 +19,8 @@ import java.time.Instant
 class OfflineVerifier(
     private val classicalProvider: CryptoProvider,
     private val pqcProvider: CryptoProvider,
-    private val bundleStore: BundleStore
+    private val bundleStore: BundleStore,
+    private val ttlProvider: TtlProvider
 ) {
     private val canonicalJson = Json {
         ignoreUnknownKeys = true
@@ -54,9 +56,7 @@ class OfflineVerifier(
                 error = "No cached bundle for issuer ${issuerDid.value}"
             )
 
-        val bundleFresh = try {
-            Instant.now().isBefore(Instant.parse(bundle.expiresAt))
-        } catch (_: Exception) { false }
+        val bundleFresh = !ttlProvider.isExpired(bundle.fetchedAt)
 
         // Verify signature using cached DID Document
         val signatureValid = try {
@@ -96,6 +96,12 @@ class OfflineVerifier(
     ): RevocationStatus {
         val status = credential.credentialStatus ?: return RevocationStatus.VALID
         val statusList = bundle.statusList ?: return RevocationStatus.UNKNOWN
+
+        // S7: Validate that the credential's statusListCredential URL matches the cached bundle's id
+        if (status.statusListCredential != statusList.id) return RevocationStatus.UNKNOWN
+
+        // S2: Require a proof on the status list credential before trusting its bitstring
+        if (statusList.proof == null) return RevocationStatus.UNKNOWN
 
         val index = status.statusListIndex.toIntOrNull() ?: return RevocationStatus.UNKNOWN
 

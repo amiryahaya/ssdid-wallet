@@ -266,6 +266,7 @@ struct VerificationResultView: View {
 
     private func formatBundleAge(_ age: TimeInterval) -> String {
         let hours = Int(age / 3600)
+        if hours < 1 { return "Less than 1 hour old" }
         if hours < 24 {
             return "\(hours) hour\(hours == 1 ? "" : "s") old"
         }

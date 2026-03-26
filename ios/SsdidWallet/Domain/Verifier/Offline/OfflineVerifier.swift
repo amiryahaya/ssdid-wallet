@@ -6,11 +6,18 @@ final class OfflineVerifier {
     private let classicalProvider: CryptoProvider
     private let pqcProvider: CryptoProvider
     private let bundleStore: BundleStore
+    private let ttlProvider: TtlProvider
 
-    init(classicalProvider: CryptoProvider, pqcProvider: CryptoProvider, bundleStore: BundleStore) {
+    init(
+        classicalProvider: CryptoProvider,
+        pqcProvider: CryptoProvider,
+        bundleStore: BundleStore,
+        ttlProvider: TtlProvider = TtlProvider()
+    ) {
         self.classicalProvider = classicalProvider
         self.pqcProvider = pqcProvider
         self.bundleStore = bundleStore
+        self.ttlProvider = ttlProvider
     }
 
     /// Verify a credential using cached bundles.
@@ -37,12 +44,7 @@ final class OfflineVerifier {
             )
         }
 
-        let bundleFresh: Bool
-        if let expiresDate = ISO8601DateFormatter().date(from: bundle.expiresAt) {
-            bundleFresh = Date() < expiresDate
-        } else {
-            bundleFresh = false
-        }
+        let bundleFresh = !ttlProvider.isExpired(fetchedAt: bundle.fetchedAt)
 
         // Verify signature using cached DID Document
         let signatureValid: Bool
@@ -101,6 +103,13 @@ final class OfflineVerifier {
     ) -> RevocationStatus {
         guard let status = credential.credentialStatus else { return .valid }
         guard let statusList = bundle.statusList else { return .unknown }
+
+        // S7: Validate that the credential's statusListCredential URL matches the cached bundle id
+        guard status.statusListCredential == statusList.id else { return .unknown }
+
+        // S2: Require a proof on the status list credential before trusting its bitstring
+        guard statusList.proof != nil else { return .unknown }
+
         guard let index = Int(status.statusListIndex) else { return .unknown }
 
         do {

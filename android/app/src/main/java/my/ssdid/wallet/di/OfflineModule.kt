@@ -27,6 +27,7 @@ import my.ssdid.wallet.platform.storage.DataStoreCredentialRepository
 import my.ssdid.wallet.platform.sync.AndroidConnectivityMonitor
 import my.ssdid.wallet.platform.sync.BundleSyncWorkerFactory
 import my.ssdid.wallet.platform.sync.WorkManagerBundleSyncScheduler
+import okhttp3.OkHttpClient
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -36,9 +37,9 @@ object OfflineModule {
 
     @Provides
     @Singleton
-    fun provideStatusListFetcher(): StatusListFetcher {
+    fun provideStatusListFetcher(okHttpClient: OkHttpClient): StatusListFetcher {
         val json = Json { ignoreUnknownKeys = true }
-        return HttpStatusListFetcher(json)
+        return HttpStatusListFetcher(okHttpClient, json)
     }
 
     @Provides
@@ -72,8 +73,9 @@ object OfflineModule {
     fun provideOfflineVerifier(
         @Named("classical") classical: CryptoProvider,
         @Named("pqc") pqc: CryptoProvider,
-        bundleStore: BundleStore
-    ): OfflineVerifier = OfflineVerifier(classical, pqc, bundleStore)
+        bundleStore: BundleStore,
+        ttlProvider: TtlProvider
+    ): OfflineVerifier = OfflineVerifier(classical, pqc, bundleStore, ttlProvider)
 
     @Provides
     @Singleton

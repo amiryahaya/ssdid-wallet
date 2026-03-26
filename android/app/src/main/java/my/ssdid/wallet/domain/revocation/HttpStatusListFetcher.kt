@@ -4,14 +4,11 @@ import kotlinx.serialization.json.Json
 import java.net.URL
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.util.concurrent.TimeUnit
 
-class HttpStatusListFetcher(private val json: Json) : StatusListFetcher {
-
-    private val client = OkHttpClient.Builder()
-        .connectTimeout(10, TimeUnit.SECONDS)
-        .readTimeout(10, TimeUnit.SECONDS)
-        .build()
+class HttpStatusListFetcher(
+    private val client: OkHttpClient,
+    private val json: Json
+) : StatusListFetcher {
 
     override suspend fun fetch(url: String): Result<StatusListCredential> = runCatching {
         require(url.isNotEmpty()) { "Status list URL must not be empty" }

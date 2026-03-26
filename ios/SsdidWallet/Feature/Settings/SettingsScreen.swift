@@ -20,6 +20,13 @@ struct SettingsScreen: View {
         languages.first(where: { $0.tag == language })?.name ?? "English"
     }
 
+    private var algorithmDisplayName: String {
+        let algorithm = UserDefaults.standard.string(forKey: "ssdid_default_algorithm") ?? "KAZ_SIGN_192"
+        return algorithm.replacingOccurrences(of: "_", with: "-")
+            .replacingOccurrences(of: "KAZ-SIGN", with: "KAZ-Sign")
+            .replacingOccurrences(of: "ED25519", with: "Ed25519")
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             // Header
@@ -65,7 +72,7 @@ struct SettingsScreen: View {
                     settingsItem("Language", subtitle: languageDisplay) {
                         showLanguageDialog = true
                     }
-                    settingsItem("Default Algorithm", subtitle: "KAZ-Sign-192")
+                    settingsItem("Default Algorithm", subtitle: algorithmDisplayName)
 
                     Spacer().frame(height: 16)
 

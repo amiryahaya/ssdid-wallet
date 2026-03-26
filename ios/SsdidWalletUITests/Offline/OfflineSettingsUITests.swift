@@ -100,8 +100,37 @@ final class OfflineSettingsUITests: XCTestCase {
             XCTSkip("Bundle management screen not reached")
         }
 
-        // Check that the bundle management screen loads without crashing
-        XCTAssertTrue(app.navigationBars.firstMatch.waitForExistence(timeout: 3))
+        let bundleList = app.tables.firstMatch
+        guard bundleList.waitForExistence(timeout: 3),
+              bundleList.cells.firstMatch.waitForExistence(timeout: 3) else {
+            XCTSkip("No bundles present — cannot verify stale badge. " +
+                    "Seed an expired bundle (freshnessRatio > 1.0) via BundleStore to enable this test.")
+        }
+
+        // The BundleFreshnessBadge component renders one of: "Fresh", "Aging", or "Expired".
+        // At least one badge text must exist in the list to confirm badge rendering works.
+        let freshPredicate = NSPredicate(format: "label == 'Fresh'")
+        let agingPredicate = NSPredicate(format: "label == 'Aging'")
+        let expiredPredicate = NSPredicate(format: "label == 'Expired'")
+
+        let hasFreshBadge = app.staticTexts.matching(freshPredicate).firstMatch.exists
+        let hasAgingBadge = app.staticTexts.matching(agingPredicate).firstMatch.exists
+        let hasExpiredBadge = app.staticTexts.matching(expiredPredicate).firstMatch.exists
+
+        XCTAssertTrue(hasFreshBadge || hasAgingBadge || hasExpiredBadge,
+                      "Expected a freshness badge ('Fresh', 'Aging', or 'Expired') on at least one bundle row")
+
+        // If any stale badge is shown (Aging or Expired), assert its text is distinct from Fresh
+        if hasAgingBadge {
+            let agingBadge = app.staticTexts.matching(agingPredicate).firstMatch
+            XCTAssertEqual(agingBadge.label, "Aging",
+                           "Aging badge text should be exactly 'Aging'")
+        }
+        if hasExpiredBadge {
+            let expiredBadge = app.staticTexts.matching(expiredPredicate).firstMatch
+            XCTAssertEqual(expiredBadge.label, "Expired",
+                           "Expired badge text should be exactly 'Expired'")
+        }
     }
 
     // MARK: - Helpers

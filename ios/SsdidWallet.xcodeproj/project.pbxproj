@@ -198,6 +198,7 @@
 		E1F2A3B4C5D6E7F80006BB02 /* RecoveryFlowUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F2A3B4C5D6E7F80006AA02 /* RecoveryFlowUITests.swift */; };
 		F1A2B3C4E5F6A7B80007BB01 /* FileBundleStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A2B3C4E5F6A7B80007AA01 /* FileBundleStore.swift */; };
 		F1A2B3C4E5F6A7B80007BB02 /* BundleFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A2B3C4E5F6A7B80007AA02 /* BundleFetcher.swift */; };
+		BM001REF01BB /* BundleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BM001REF01AA /* BundleManager.swift */; };
 		AA01BB02CC03DD04EE05FF06 /* TtlProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01BB02CC03DD04EE05FF07 /* TtlProvider.swift */; };
 		BB11CC22DD33EE44FF550011 /* UnifiedVerificationResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB11CC22DD33EE44FF550012 /* UnifiedVerificationResult.swift */; };
 		CC22DD33EE44FF5500112233 /* VerificationOrchestrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC22DD33EE44FF5500112234 /* VerificationOrchestrator.swift */; };
@@ -440,6 +441,7 @@
 		E1F2A3B4C5D6E7F80006AA03 /* SsdidWalletUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SsdidWalletUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F1A2B3C4E5F6A7B80007AA01 /* FileBundleStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileBundleStore.swift; sourceTree = "<group>"; };
 		F1A2B3C4E5F6A7B80007AA02 /* BundleFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleFetcher.swift; sourceTree = "<group>"; };
+		BM001REF01AA /* BundleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleManager.swift; sourceTree = "<group>"; };
 		AA01BB02CC03DD04EE05FF07 /* TtlProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TtlProvider.swift; sourceTree = "<group>"; };
 		BB11CC22DD33EE44FF550012 /* UnifiedVerificationResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedVerificationResult.swift; sourceTree = "<group>"; };
 		CC22DD33EE44FF5500112234 /* VerificationOrchestrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerificationOrchestrator.swift; sourceTree = "<group>"; };
@@ -922,6 +924,7 @@
 			isa = PBXGroup;
 			children = (
 				F1A2B3C4E5F6A7B80007AA02 /* BundleFetcher.swift */,
+				BM001REF01AA /* BundleManager.swift */,
 				DD33EE44FF550011223344AC /* CredentialRepository.swift */,
 				F1A2B3C4E5F6A7B80007AA01 /* FileBundleStore.swift */,
 				D1A2B3C4E5F6A7B80005AA01 /* OfflineVerifier.swift */,
@@ -1642,6 +1645,7 @@
 				D1A2B3C4E5F6A7B80005BB02 /* VerificationBundle.swift in Sources */,
 				F1A2B3C4E5F6A7B80007BB01 /* FileBundleStore.swift in Sources */,
 				F1A2B3C4E5F6A7B80007BB02 /* BundleFetcher.swift in Sources */,
+				BM001REF01BB /* BundleManager.swift in Sources */,
 				AA01BB02CC03DD04EE05FF06 /* TtlProvider.swift in Sources */,
 				BB11CC22DD33EE44FF550011 /* UnifiedVerificationResult.swift in Sources */,
 				CC22DD33EE44FF5500112233 /* VerificationOrchestrator.swift in Sources */,

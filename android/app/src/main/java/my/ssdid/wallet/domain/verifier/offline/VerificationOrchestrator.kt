@@ -23,7 +23,9 @@ class VerificationOrchestrator(
                 UnifiedVerificationResult(
                     status = VerificationStatus.VERIFIED,
                     checks = listOf(
-                        VerificationCheck(CheckType.SIGNATURE, CheckStatus.PASS, "Signature verified online")
+                        VerificationCheck(CheckType.SIGNATURE, CheckStatus.PASS, "Signature verified online"),
+                        VerificationCheck(CheckType.EXPIRY, CheckStatus.PASS, "Credential is not expired"),
+                        VerificationCheck(CheckType.REVOCATION, CheckStatus.PASS, "Revocation status confirmed online")
                     ),
                     source = VerificationSource.ONLINE
                 )
@@ -65,8 +67,14 @@ class VerificationOrchestrator(
             }
         }
 
+        val expiryFailed = credential.expirationDate?.let {
+            try { java.time.Instant.parse(it).isBefore(java.time.Instant.now()) }
+            catch (e: Exception) { false }
+        } ?: false
+
         val status = when {
             offlineResult.error != null -> VerificationStatus.FAILED
+            expiryFailed -> VerificationStatus.FAILED
             !offlineResult.signatureValid -> VerificationStatus.FAILED
             offlineResult.revocationStatus == RevocationStatus.REVOKED -> VerificationStatus.FAILED
             !offlineResult.bundleFresh -> VerificationStatus.DEGRADED
@@ -84,11 +92,7 @@ class VerificationOrchestrator(
                 )
             )
 
-            // Expiry check — directly inspect the credential's expirationDate field
-            val expiryFailed = credential.expirationDate?.let {
-                try { java.time.Instant.parse(it).isBefore(java.time.Instant.now()) }
-                catch (e: Exception) { false }
-            } ?: false
+            // Expiry check — uses the expiryFailed computed above
             add(
                 VerificationCheck(
                     type = CheckType.EXPIRY,

@@ -10,18 +10,18 @@ final class BundleSyncManager {
     static let taskIdentifier = "my.ssdid.wallet.bundleSync"
 
     private let bundleStore: BundleStore
-    private let bundleFetcher: BundleFetcher
+    private let bundleManager: BundleManager
     private let credentialRepository: CredentialRepository
     private let ttlProvider: TtlProvider
 
     init(
         bundleStore: BundleStore,
-        bundleFetcher: BundleFetcher,
+        bundleManager: BundleManager,
         credentialRepository: CredentialRepository,
         ttlProvider: TtlProvider = TtlProvider()
     ) {
         self.bundleStore = bundleStore
-        self.bundleFetcher = bundleFetcher
+        self.bundleManager = bundleManager
         self.credentialRepository = credentialRepository
         self.ttlProvider = ttlProvider
     }
@@ -71,11 +71,14 @@ final class BundleSyncManager {
             guard !Task.isCancelled else { return }
             guard let bundle = await bundleStore.getBundle(issuerDid: did) else {
                 // No cached bundle — fetch one proactively.
-                _ = await bundleFetcher.fetchAndCache(issuerDid: did)
+                _ = await bundleManager.prefetchBundle(issuerDid: did)
                 continue
             }
             if ttlProvider.isExpired(fetchedAt: bundle.fetchedAt) {
-                _ = await bundleFetcher.fetchAndCache(issuerDid: did)
+                _ = await bundleManager.prefetchBundle(
+                    issuerDid: did,
+                    statusListUrl: bundle.statusList?.id
+                )
             }
         }
     }
