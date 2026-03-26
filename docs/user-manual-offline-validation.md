@@ -9,17 +9,18 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Getting Started](#getting-started)
-3. [Verifying a Credential](#verifying-a-credential)
-4. [Understanding Verification Results](#understanding-verification-results)
-5. [Preparing for Offline Use](#preparing-for-offline-use)
-6. [Managing Cached Bundles](#managing-cached-bundles)
-7. [Configuring Bundle TTL](#configuring-bundle-ttl)
-8. [Freshness Indicators](#freshness-indicators)
-9. [Offline Verification](#offline-verification)
-10. [Background Sync](#background-sync)
-11. [Troubleshooting](#troubleshooting)
-12. [Security Considerations](#security-considerations)
+2. [Onboarding](#onboarding)
+3. [Getting Started](#getting-started)
+4. [Verifying a Credential](#verifying-a-credential)
+5. [Understanding Verification Results](#understanding-verification-results)
+6. [Preparing for Offline Use](#preparing-for-offline-use)
+7. [Managing Cached Bundles](#managing-cached-bundles)
+8. [Configuring Bundle TTL](#configuring-bundle-ttl)
+9. [Freshness Indicators](#freshness-indicators)
+10. [Offline Verification](#offline-verification)
+11. [Background Sync](#background-sync)
+12. [Troubleshooting](#troubleshooting)
+13. [Security Considerations](#security-considerations)
 
 ---
 
@@ -43,7 +44,93 @@ SSDID Wallet supports **offline credential verification** — allowing you to ve
 
 ---
 
-## 2. Getting Started
+## 2. Onboarding
+
+When you first open SSDID Wallet, you'll be guided through a setup process to create your decentralized identity. This must be completed before you can receive or verify credentials.
+
+### Step 1: Welcome Screen
+
+The onboarding screen introduces SSDID Wallet and its core capabilities: self-sovereign identity, post-quantum security, and offline verification.
+
+Tap **Get Started** to begin, or **Restore** if you're recovering an existing identity from backup.
+
+> [Screenshot: Android — Onboarding welcome screen with "Get Started" and "Restore" buttons]
+
+> [Screenshot: iOS — Onboarding welcome screen with "Get Started" and "Restore" buttons]
+
+### Step 2: Create Your Identity — Display Name
+
+Enter a display name for your identity. This is how services will identify you (e.g., "Amir's Personal ID"). You can have multiple identities later.
+
+> [Screenshot: Android — Create Identity screen, Step 1: Display Name field]
+
+> [Screenshot: iOS — Create Identity screen, Step 1: Display Name field]
+
+### Step 3: Email Verification (Optional)
+
+If you'd like to associate an email with your identity, enter it here. A verification code will be sent to confirm ownership. You can skip this step.
+
+> [Screenshot: Android — Email verification screen with code entry field]
+
+> [Screenshot: iOS — Email verification screen with code entry field]
+
+### Step 4: Choose a Signing Algorithm
+
+Select the cryptographic algorithm for your identity's signing key. The wallet supports both classical and post-quantum algorithms:
+
+| Algorithm Group | Options | Best For |
+|----------------|---------|----------|
+| **Classical** | Ed25519, ECDSA P-256, ECDSA P-384 | Broad compatibility with existing systems |
+| **KAZ-Sign** (Post-Quantum) | KAZ-Sign 128, 192, 256 | Future-proof against quantum computing |
+| **ML-DSA** (Post-Quantum) | ML-DSA-44, 65, 87 | NIST-standardized post-quantum |
+| **SLH-DSA** (Post-Quantum) | SHA2 and SHAKE variants | Stateless hash-based, conservative security |
+
+The default is **KAZ-Sign 192** — a good balance of security and performance.
+
+> [Screenshot: Android — Algorithm selection screen showing Classical and PQC groups]
+
+> [Screenshot: iOS — Algorithm selection screen showing Classical and PQC groups]
+
+### Step 5: Set Up Biometric Authentication (Optional)
+
+Enable Face ID / Touch ID (iOS) or fingerprint / face unlock (Android) to protect access to your wallet. You can skip this and set it up later in Settings.
+
+> [Screenshot: Android — Biometric setup screen with "Enable" and "Skip" buttons]
+
+> [Screenshot: iOS — Biometric setup screen with Face ID prompt]
+
+### Step 6: Wallet Home
+
+After setup, you'll see the Wallet Home screen. Your identity is created and registered with the SSDID registry. You're ready to:
+- **Receive credentials** from issuers via QR code or deep link
+- **Verify credentials** you hold
+- **Present credentials** to services that request them
+- **Prepare for offline** verification
+
+> [Screenshot: Android — Wallet Home screen showing the newly created identity]
+
+> [Screenshot: iOS — Wallet Home screen showing the newly created identity]
+
+### Receiving Your First Credential
+
+Before you can verify anything offline, you need at least one credential. Credentials are received from issuers (e.g., a university, government agency, or employer):
+
+1. The issuer sends you a **credential offer** via QR code, deep link, or notification
+2. Tap **Scan QR** on the Wallet Home screen (or open the deep link)
+3. Review the credential details — issuer name, credential type, claims
+4. Tap **Accept** to store the credential in your wallet
+
+> [Screenshot: Android — Scan QR screen]
+
+> [Screenshot: Android — Credential offer review screen with "Accept" button]
+
+> [Screenshot: iOS — Credential offer review screen with "Accept" button]
+
+Once you have a credential, the wallet automatically caches the issuer's verification bundle in the background. You're now ready for both online and offline verification.
+
+---
+
+## 3. Getting Started
 
 Offline validation works automatically once you have credentials in your wallet. No setup is required for basic use.
 
@@ -57,7 +144,7 @@ For advanced offline preparation (e.g., verifying credentials in areas without c
 
 ---
 
-## 3. Verifying a Credential
+## 4. Verifying a Credential
 
 ### Step 1: Open Credential Detail
 
@@ -104,7 +191,7 @@ Each check shows a status icon:
 
 ---
 
-## 4. Understanding Verification Results
+## 5. Understanding Verification Results
 
 ### Green — Verified
 
@@ -141,7 +228,7 @@ One or more critical checks failed:
 
 ---
 
-## 5. Preparing for Offline Use
+## 6. Preparing for Offline Use
 
 If you know you'll be in an area without internet (e.g., remote sites, underground facilities, international travel), you can pre-cache verification bundles for specific issuers.
 
@@ -178,7 +265,7 @@ If you know you'll be in an area without internet (e.g., remote sites, undergrou
 
 ---
 
-## 6. Managing Cached Bundles
+## 7. Managing Cached Bundles
 
 ### Viewing Bundles
 
@@ -209,7 +296,7 @@ If no bundles are cached, the screen shows a message:
 
 ---
 
-## 7. Configuring Bundle TTL
+## 8. Configuring Bundle TTL
 
 The **TTL (Time-To-Live)** controls how long a cached bundle is considered fresh. After the TTL expires, the bundle is considered "stale" and offline verification produces a **Degraded** (yellow) result instead of a fully confident green.
 
@@ -241,7 +328,7 @@ These recommendations appear as guidance text in the TTL picker. The setting app
 
 ---
 
-## 8. Freshness Indicators
+## 9. Freshness Indicators
 
 Freshness badges appear on your **credential cards** to give you an at-a-glance sense of how current your offline verification data is.
 
@@ -263,7 +350,7 @@ Freshness badges appear on your **credential cards** to give you an at-a-glance 
 
 ---
 
-## 9. Offline Verification
+## 10. Offline Verification
 
 When your device has no internet connection, the wallet automatically falls back to offline verification using cached bundles.
 
@@ -317,7 +404,7 @@ The result is red. Without a cached bundle, offline verification cannot proceed.
 
 ---
 
-## 10. Background Sync
+## 11. Background Sync
 
 The wallet automatically keeps your verification bundles up-to-date through background sync. You don't need to take any action — this happens silently.
 
@@ -344,7 +431,7 @@ Background sync is **best-effort**. If a network error occurs during sync:
 
 ---
 
-## 11. Troubleshooting
+## 12. Troubleshooting
 
 ### "Verification failed" for a credential I know is valid
 
@@ -381,7 +468,7 @@ The verification result always shows the **source**:
 
 ---
 
-## 12. Security Considerations
+## 13. Security Considerations
 
 ### Trust Model
 
