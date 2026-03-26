@@ -72,7 +72,7 @@ class VerificationResultViewModelTest {
     fun `verify sets result from orchestrator`() = runTest {
         coEvery { orchestrator.verify(testCredential) } returns verifiedResult
 
-        val vm = VerificationResultViewModel(orchestrator)
+        val vm = VerificationResultViewModel(orchestrator, mockk(relaxed = true))
         vm.verify(testCredential)
 
         val result = vm.result.value

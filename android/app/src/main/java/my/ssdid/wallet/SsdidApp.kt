@@ -17,6 +17,7 @@ import my.ssdid.wallet.domain.settings.TtlProvider
 import my.ssdid.wallet.domain.verifier.offline.BundleManager
 import my.ssdid.wallet.domain.verifier.offline.BundleStore
 import my.ssdid.wallet.domain.verifier.offline.sync.BundleSyncScheduler
+import my.ssdid.wallet.domain.verifier.offline.sync.ConnectivityMonitor
 import my.ssdid.wallet.platform.lifecycle.AppLifecycleObserver
 import my.ssdid.wallet.platform.sync.BundleSyncWorkerFactory
 import org.unifiedpush.android.connector.UnifiedPush
@@ -37,6 +38,7 @@ class SsdidApp : Application() {
     @Inject lateinit var bundleManager: BundleManager
     @Inject lateinit var ttlProvider: TtlProvider
     @Inject lateinit var bundleSyncWorkerFactory: BundleSyncWorkerFactory
+    @Inject lateinit var connectivityMonitor: ConnectivityMonitor
 
     override fun onCreate() {
         super.onCreate()
@@ -63,6 +65,17 @@ class SsdidApp : Application() {
 
         appScope.launch {
             notifyManager.ensureInboxRegistered()
+        }
+
+        // Trigger a bundle sync whenever connectivity is restored from offline state.
+        appScope.launch {
+            var wasOnline = connectivityMonitor.isCurrentlyOnline()
+            connectivityMonitor.isOnline.collect { isOnline ->
+                if (!wasOnline && isOnline) {
+                    syncScheduler.scheduleOnConnectivityRestore()
+                }
+                wasOnline = isOnline
+            }
         }
 
         // Register with a UnifiedPush distributor if one is available.

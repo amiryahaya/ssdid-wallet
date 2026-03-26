@@ -2,8 +2,10 @@ import SwiftUI
 
 struct CredentialsScreen: View {
     @Environment(AppRouter.self) private var router
+    @EnvironmentObject private var services: ServiceContainer
 
     @State private var credentials: [VerifiableCredential] = []
+    @State private var freshnessMap: [String: Double] = [:]
 
     var body: some View {
         VStack(spacing: 0) {
@@ -88,6 +90,9 @@ struct CredentialsScreen: View {
                                                 .foregroundStyle(Color.textSecondary)
                                         }
                                     }
+
+                                    let ratio = freshnessMap[vc.issuer] ?? 0.0
+                                    BundleFreshnessBadge(freshnessRatio: ratio)
                                 }
                                 .padding(14)
                             }
@@ -126,6 +131,19 @@ struct CredentialsScreen: View {
             }
         }
         .background(Color.bgPrimary)
+        .task {
+            credentials = await services.vault.listCredentials()
+
+            // Compute freshness ratios for all unique issuers
+            var map: [String: Double] = [:]
+            let issuers = Set(credentials.map { $0.issuer })
+            for issuerDid in issuers {
+                if let bundle = await services.bundleStore.getBundle(issuerDid: issuerDid) {
+                    map[issuerDid] = services.ttlProvider.freshnessRatio(fetchedAt: bundle.fetchedAt)
+                }
+            }
+            freshnessMap = map
+        }
     }
 
     private func isCredentialExpired(_ vc: VerifiableCredential) -> Bool {

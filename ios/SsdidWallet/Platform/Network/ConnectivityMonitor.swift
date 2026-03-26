@@ -11,6 +11,13 @@ final class ConnectivityMonitor: ObservableObject, @unchecked Sendable {
     private let queue = DispatchQueue(label: "my.ssdid.wallet.connectivity.monitor")
 
     init() {
+        // Support UI-test offline simulation: when the test harness passes
+        // --simulate-offline, stay permanently offline without starting the monitor.
+        if ProcessInfo.processInfo.arguments.contains("--simulate-offline") {
+            isOnline = false
+            return
+        }
+
         // Seed from the current path so the initial state reflects real connectivity
         // rather than assuming online until the first pathUpdateHandler fires.
         isOnline = monitor.currentPath.status == .satisfied

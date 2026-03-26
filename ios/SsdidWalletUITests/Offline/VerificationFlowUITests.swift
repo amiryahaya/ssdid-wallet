@@ -74,21 +74,34 @@ final class VerificationFlowUITests: XCTestCase {
     // MARK: - UC-1c: Verification failed shows red title
 
     func testVerificationFailed_showsRedStatus() throws {
-        // XCUITest cannot inject a fake verifier, so we cannot force a FAILED state
-        // deterministically. We navigate to the verification result screen and assert
-        // for the "Verification failed" text if the screen is reachable; otherwise we
-        // skip gracefully to avoid a false pass.
-        throw XCTSkip("Requires mock verifier injection not available in XCUITest. " +
+        // WHY SKIPPED: XCUITest runs against the real app binary and cannot inject a
+        // FakeOnlineVerifier that forces a FAILED verification result. Without mock
+        // injection there is no deterministic way to produce the "Verification failed"
+        // state without a real credential whose signature is intentionally invalid.
+        //
+        // WHEN TO UNSKIP: Once launch-argument-driven mock injection is implemented
+        // (e.g., "--mock-verifier=always-fail" handled in AppDelegate/DIContainer),
+        // remove the throw below and add `app.launchArguments += ["--mock-verifier=always-fail"]`
+        // to setUpWithError. The domain-level equivalent is covered by
+        // OfflineVerificationTest (unit/instrumented) using FakeOnlineVerifier.
+        throw XCTSkip("Requires mock verifier injection via launch arguments (not yet implemented). " +
                       "Covered by OfflineVerificationTest (unit/instrumented) with FakeOnlineVerifier.")
     }
 
     // MARK: - UC-1d: Degraded (stale bundle) shows yellow/warning
 
     func testDegradedVerification_showsWarningStatus() throws {
-        // XCUITest cannot seed a stale bundle or control network state to produce a
-        // DEGRADED verification outcome. Covered by OfflineVerificationTest instrumented
-        // tests which use InMemoryBundleStore + FakeOnlineVerifier.
-        throw XCTSkip("Requires stale bundle injection not available in XCUITest. " +
+        // WHY SKIPPED: XCUITest cannot seed an in-memory BundleStore with a stale bundle
+        // (freshnessRatio ≥ 0.5) at launch time without launch-argument-driven DI. Without
+        // a seeded stale bundle and the real credential that references its issuer DID, the
+        // DEGRADED state cannot be triggered deterministically in the full app process.
+        //
+        // WHEN TO UNSKIP: Once launch-argument-driven BundleStore seeding is implemented
+        // (e.g., "--seed-stale-bundle=<did>" handled in AppDelegate/DIContainer), remove
+        // the throw below and seed the store before navigating. The domain-level equivalent
+        // is covered by OfflineVerificationTest (instrumented) using InMemoryBundleStore +
+        // FakeOnlineVerifier.
+        throw XCTSkip("Requires stale bundle seeding via launch arguments (not yet implemented). " +
                       "Covered by OfflineVerificationTest (instrumented) with InMemoryBundleStore.")
     }
 

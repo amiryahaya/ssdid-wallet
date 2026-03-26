@@ -43,6 +43,7 @@ import my.ssdid.wallet.platform.keystore.AndroidKeystoreManager
 import my.ssdid.wallet.platform.device.AndroidDeviceInfoProvider
 import my.ssdid.wallet.domain.vault.KeystoreManager
 import my.ssdid.wallet.domain.settings.SettingsRepository
+import my.ssdid.wallet.domain.verifier.offline.CredentialRepository
 import my.ssdid.wallet.platform.storage.DataStoreSettingsRepository
 import my.ssdid.wallet.domain.oid4vp.DcqlMatcher
 import my.ssdid.wallet.domain.oid4vp.OpenId4VpHandler
@@ -146,8 +147,9 @@ object AppModule {
         @Named("classical") classical: CryptoProvider,
         @Named("pqc") pqc: CryptoProvider,
         keystoreManager: KeystoreManager,
-        storage: VaultStorage
-    ): Vault = VaultImpl(classical, pqc, keystoreManager, storage)
+        storage: VaultStorage,
+        credentialRepository: CredentialRepository
+    ): Vault = VaultImpl(classical, pqc, keystoreManager, storage, credentialRepository)
 
     @Provides
     @Singleton

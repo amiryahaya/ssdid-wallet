@@ -91,6 +91,8 @@ object EmailVerification : Screen("email_verification?email={email}") {
     object PresentationRequest : Screen("presentation_request?rawUri={rawUri}") {
         fun createRoute(rawUri: String) = "presentation_request?rawUri=${Uri.encode(rawUri)}"
     }
-    object VerificationResult : Screen("verification_result")
+    object VerificationResult : Screen("verification_result/{credentialId}") {
+        fun createRoute(credentialId: String) = "verification_result/${Uri.encode(credentialId)}"
+    }
     object BundleManagement : Screen("bundle_management")
 }

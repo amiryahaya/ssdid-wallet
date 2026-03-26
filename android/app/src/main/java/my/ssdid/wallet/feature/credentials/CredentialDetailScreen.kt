@@ -32,6 +32,7 @@ import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.domain.verifier.offline.BundleStore
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.VerifiedUser
 import my.ssdid.wallet.ui.components.BundleFreshnessBadge
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
@@ -82,6 +83,7 @@ class CredentialDetailViewModel @Inject constructor(
 fun CredentialDetailScreen(
     credentialId: String,
     onBack: () -> Unit,
+    onVerify: (String) -> Unit = {},
     viewModel: CredentialDetailViewModel = hiltViewModel()
 ) {
     val credential by viewModel.credential.collectAsState()
@@ -287,6 +289,18 @@ fun CredentialDetailScreen(
                                 lineHeight = 16.sp
                             )
                         }
+                    }
+                }
+
+                // Verify button
+                item {
+                    Button(
+                        onClick = { onVerify(credentialId) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Filled.VerifiedUser, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Verify Credential")
                     }
                 }
 
