@@ -9,7 +9,6 @@ import my.ssdid.wallet.domain.model.CredentialSubject
 import my.ssdid.wallet.domain.model.Proof
 import my.ssdid.wallet.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.revocation.RevocationStatus
-import my.ssdid.wallet.domain.settings.TtlProvider
 import my.ssdid.wallet.domain.verifier.Verifier
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Before
@@ -25,7 +24,6 @@ class VerificationOrchestratorTest {
     private lateinit var onlineVerifier: Verifier
     private lateinit var offlineVerifier: OfflineVerifier
     private lateinit var bundleStore: BundleStore
-    private lateinit var ttlProvider: TtlProvider
     private lateinit var orchestrator: VerificationOrchestrator
 
     private val testCredential = VerifiableCredential(
@@ -61,8 +59,7 @@ class VerificationOrchestratorTest {
         onlineVerifier = mockk()
         offlineVerifier = mockk()
         bundleStore = mockk()
-        ttlProvider = mockk()
-        orchestrator = VerificationOrchestrator(onlineVerifier, offlineVerifier, bundleStore, ttlProvider)
+        orchestrator = VerificationOrchestrator(onlineVerifier, offlineVerifier, bundleStore)
     }
 
     // Test 1: returns VERIFIED when online succeeds

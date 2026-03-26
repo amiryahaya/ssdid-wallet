@@ -66,4 +66,36 @@ class TtlProviderTest {
         val ratio = provider.freshnessRatio(fetchedAt)
         assertThat(ratio).isWithin(0.01).of(0.5)
     }
+
+    @Test
+    fun `freshnessRatio returns near zero for just-fetched bundle`() = runBlocking {
+        // fetched just now — age is ~0 seconds, ratio should be near 0
+        val fetchedAt = Instant.now().toString()
+        val ratio = provider.freshnessRatio(fetchedAt)
+        assertThat(ratio).isLessThan(0.01)
+    }
+
+    @Test
+    fun `freshnessRatio returns approximately 0_5 at half TTL`() = runBlocking {
+        // fetched exactly half the TTL ago (3.5 days with default 7-day TTL)
+        val halfTtlSeconds = 7 * 24 * 60 * 60L / 2
+        val fetchedAt = Instant.now().minusSeconds(halfTtlSeconds).toString()
+        val ratio = provider.freshnessRatio(fetchedAt)
+        assertThat(ratio).isWithin(0.02).of(0.5)
+    }
+
+    @Test
+    fun `freshnessRatio returns 1_0 or greater for expired bundle`() = runBlocking {
+        // fetched 8 days ago with 7-day TTL → bundle is expired, ratio ≥ 1.0
+        val expiredSeconds = 8 * 24 * 60 * 60L
+        val fetchedAt = Instant.now().minusSeconds(expiredSeconds).toString()
+        val ratio = provider.freshnessRatio(fetchedAt)
+        assertThat(ratio).isAtLeast(1.0)
+    }
+
+    @Test
+    fun `freshnessRatio returns 1_0 for unparseable fetchedAt`() = runBlocking {
+        val ratio = provider.freshnessRatio("not-a-valid-timestamp")
+        assertThat(ratio).isEqualTo(1.0)
+    }
 }

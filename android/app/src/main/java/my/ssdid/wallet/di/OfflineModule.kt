@@ -82,10 +82,9 @@ object OfflineModule {
     fun provideVerificationOrchestrator(
         verifier: Verifier,
         offlineVerifier: OfflineVerifier,
-        bundleStore: BundleStore,
-        ttlProvider: TtlProvider
+        bundleStore: BundleStore
     ): VerificationOrchestrator =
-        VerificationOrchestrator(verifier, offlineVerifier, bundleStore, ttlProvider)
+        VerificationOrchestrator(verifier, offlineVerifier, bundleStore)
 
     @Provides
     @Singleton

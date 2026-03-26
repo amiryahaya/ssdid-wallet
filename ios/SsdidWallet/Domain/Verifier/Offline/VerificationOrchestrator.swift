@@ -12,18 +12,15 @@ final class VerificationOrchestrator {
     private let onlineVerifier: Verifier
     private let offlineVerifier: OfflineVerifier
     private let bundleStore: BundleStore
-    private let ttlProvider: BundleTtlProvider
 
     init(
         onlineVerifier: Verifier,
         offlineVerifier: OfflineVerifier,
-        bundleStore: BundleStore,
-        ttlProvider: BundleTtlProvider = TtlProvider()
+        bundleStore: BundleStore
     ) {
         self.onlineVerifier = onlineVerifier
         self.offlineVerifier = offlineVerifier
         self.bundleStore = bundleStore
-        self.ttlProvider = ttlProvider
     }
 
     /// Verify a credential online, falling back to offline if a network/server error occurs.

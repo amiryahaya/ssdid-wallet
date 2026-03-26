@@ -2,7 +2,6 @@ package my.ssdid.wallet.domain.verifier.offline
 
 import my.ssdid.wallet.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.revocation.RevocationStatus
-import my.ssdid.wallet.domain.settings.TtlProvider
 import my.ssdid.wallet.domain.verifier.Verifier
 import java.io.IOException
 import java.time.Duration
@@ -11,8 +10,7 @@ import java.time.Instant
 class VerificationOrchestrator(
     private val onlineVerifier: Verifier,
     private val offlineVerifier: OfflineVerifier,
-    private val bundleStore: BundleStore,
-    private val ttlProvider: TtlProvider
+    private val bundleStore: BundleStore
 ) {
 
     suspend fun verify(credential: VerifiableCredential): UnifiedVerificationResult {

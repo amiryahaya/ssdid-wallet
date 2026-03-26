@@ -9,12 +9,11 @@ import my.ssdid.wallet.domain.verifier.offline.BundleStore
 import my.ssdid.wallet.domain.verifier.offline.VerificationBundle
 import java.io.File
 import java.security.KeyStore
-import java.util.Base64
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.Mac
+import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
-import javax.crypto.spec.SecretKeySpec
 
 /**
  * File-based BundleStore that persists verification bundles as AES-256-GCM encrypted JSON files.
@@ -23,8 +22,8 @@ import javax.crypto.spec.SecretKeySpec
  *
  * Security model:
  *  - AES-256-GCM encryption key: Android Keystore hardware-backed (alias "bundle_enc_key")
- *  - HMAC-SHA256 key: randomly generated, stored in SharedPreferences under "bundle_integrity"
- *    (protects against file-level tampering even if encryption is bypassed in rooted devices)
+ *  - HMAC-SHA256 key: Android Keystore hardware-backed (alias "bundle_mac_key")
+ *    Both keys never leave the secure hardware; protects against file-level tampering.
  */
 class DataStoreBundleStore(private val context: Context) : BundleStore {
     private val dir = File(context.filesDir, "verification_bundles").also { it.mkdirs() }
@@ -71,21 +70,22 @@ class DataStoreBundleStore(private val context: Context) : BundleStore {
 
     // ---- HMAC-SHA256 (integrity verification) ----
 
-    private val macKey: ByteArray by lazy {
-        val prefs = context.getSharedPreferences("bundle_integrity", Context.MODE_PRIVATE)
-        val existing = prefs.getString("bundle_mac_key", null)
-        if (existing != null) {
-            Base64.getDecoder().decode(existing)
-        } else {
-            val key = ByteArray(32).also { java.security.SecureRandom().nextBytes(it) }
-            prefs.edit().putString("bundle_mac_key", Base64.getEncoder().encodeToString(key)).apply()
-            key
+    private val macKey: SecretKey by lazy {
+        val ks = java.security.KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
+        ks.getKey(MAC_KEY_ALIAS, null) as? SecretKey ?: run {
+            val keyGen = KeyGenerator.getInstance(
+                KeyProperties.KEY_ALGORITHM_HMAC_SHA256, "AndroidKeyStore"
+            )
+            keyGen.init(
+                KeyGenParameterSpec.Builder(MAC_KEY_ALIAS, KeyProperties.PURPOSE_SIGN)
+                    .build()
+            )
+            keyGen.generateKey()
         }
     }
 
     private fun computeHmac(data: ByteArray): ByteArray {
-        val mac = Mac.getInstance("HmacSHA256")
-        mac.init(SecretKeySpec(macKey, "HmacSHA256"))
+        val mac = Mac.getInstance("HmacSHA256").apply { init(macKey) }
         return mac.doFinal(data)
     }
 
@@ -170,6 +170,7 @@ class DataStoreBundleStore(private val context: Context) : BundleStore {
 
     companion object {
         private const val ENC_KEY_ALIAS = "bundle_enc_key"
+        private const val MAC_KEY_ALIAS = "bundle_mac_key"
         private const val GCM_IV_LENGTH = 12
         private const val GCM_TAG_BITS = 128
     }

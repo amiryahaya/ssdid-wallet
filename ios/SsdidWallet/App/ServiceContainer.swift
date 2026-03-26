@@ -141,8 +141,7 @@ final class ServiceContainer: ObservableObject {
         self.verificationOrchestrator = VerificationOrchestrator(
             onlineVerifier: verifier,
             offlineVerifier: offlineVerifierImpl,
-            bundleStore: fileBundleStore,
-            ttlProvider: ttl
+            bundleStore: fileBundleStore
         )
 
         let bundleFetcher = BundleFetcher(

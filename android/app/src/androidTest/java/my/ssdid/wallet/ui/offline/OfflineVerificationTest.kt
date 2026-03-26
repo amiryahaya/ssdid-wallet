@@ -70,7 +70,7 @@ class OfflineVerificationTest {
         val classicalProvider = ClassicalProvider()
         val pqcProvider = ClassicalProvider() // placeholder for interface, Ed25519 only
         offlineVerifier = OfflineVerifier(classicalProvider, pqcProvider, bundleStore, ttlProvider)
-        orchestrator = VerificationOrchestrator(fakeVerifier, offlineVerifier, bundleStore, ttlProvider)
+        orchestrator = VerificationOrchestrator(fakeVerifier, offlineVerifier, bundleStore)
     }
 
     // UC-9: Network error with fresh bundle → VERIFIED_OFFLINE
@@ -184,7 +184,7 @@ class OfflineVerificationTest {
         assertThat(result.status).isEqualTo(VerificationStatus.VERIFIED_OFFLINE)
         assertThat(result.source).isEqualTo(VerificationSource.OFFLINE)
         result.checks.forEach { check ->
-            assertThat(check.status).isAnyOf(CheckStatus.PASS, CheckStatus.UNKNOWN)
+            assertThat(check.status).isEqualTo(CheckStatus.PASS)
         }
     }
 
@@ -280,7 +280,7 @@ class OfflineVerificationTest {
 
         val classicalProvider = ClassicalProvider()
         val failingOfflineVerifier = OfflineVerifier(classicalProvider, classicalProvider, failingStore, ttlProvider)
-        val failingOrchestrator = VerificationOrchestrator(fakeVerifier, failingOfflineVerifier, failingStore, ttlProvider)
+        val failingOrchestrator = VerificationOrchestrator(fakeVerifier, failingOfflineVerifier, failingStore)
 
         val credential = OfflineTestHelper.createTestCredential(issuerDid, keyId, privateKey)
         fakeVerifier.shouldThrow = IOException("no network")

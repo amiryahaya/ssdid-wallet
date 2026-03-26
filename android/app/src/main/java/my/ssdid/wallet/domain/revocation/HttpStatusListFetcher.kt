@@ -16,9 +16,10 @@ class HttpStatusListFetcher(
         require(parsed.protocol == "https") { "Status list URL must use HTTPS: $url" }
 
         val request = Request.Builder().url(url).get().build()
-        val response = client.newCall(request).execute()
-        require(response.isSuccessful) { "Failed to fetch status list: HTTP ${response.code}" }
-        val body = response.body?.string() ?: throw IllegalStateException("Empty response body")
-        json.decodeFromString<StatusListCredential>(body)
+        client.newCall(request).execute().use { response ->
+            require(response.isSuccessful) { "Failed to fetch status list: HTTP ${response.code}" }
+            val body = response.body?.string() ?: throw IllegalStateException("Empty response body")
+            json.decodeFromString<StatusListCredential>(body)
+        }
     }
 }

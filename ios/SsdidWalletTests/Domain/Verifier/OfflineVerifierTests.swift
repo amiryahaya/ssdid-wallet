@@ -243,6 +243,57 @@ final class OfflineVerifierTests: XCTestCase {
         XCTAssertEqual(result.revocationStatus, .unknown)
     }
 
+    // MARK: - D9: Direct round-trip test with real Ed25519 key pair
+
+    func testDirectRoundTrip_signatureValid_bundleFresh_revocationValid() async throws {
+        // Create a real Ed25519 key pair
+        let kp = try classicalProvider.generateKeyPair(algorithm: .ED25519)
+        let issuerDid = "did:ssdid:issuer-roundtrip"
+        let keyId = "\(issuerDid)#key-1"
+        let formatter = ISO8601DateFormatter()
+
+        // Build a DID Document containing the public key
+        let didDoc = DidDocument(
+            id: issuerDid,
+            controller: issuerDid,
+            verificationMethod: [
+                VerificationMethod(
+                    id: keyId,
+                    type: "Ed25519VerificationKey2020",
+                    controller: issuerDid,
+                    publicKeyMultibase: Multibase.encode(kp.publicKey)
+                )
+            ],
+            authentication: [keyId],
+            assertionMethod: [keyId]
+        )
+
+        // Cache a fresh bundle (fetched 1 hour ago, expires in ~6.9 days)
+        let bundle = VerificationBundle(
+            issuerDid: issuerDid,
+            didDocument: didDoc,
+            fetchedAt: formatter.string(from: Date().addingTimeInterval(-3600)),
+            expiresAt: formatter.string(from: Date().addingTimeInterval(6 * 86400))
+        )
+        bundleStore.bundles[issuerDid] = bundle
+
+        // Create a real signed credential using OfflineTestHelper
+        let credential = try OfflineTestHelper.createTestCredential(
+            issuerDid: issuerDid,
+            keyId: keyId,
+            privateKey: kp.privateKey
+        )
+
+        // Call offlineVerifier.verifyCredential() directly
+        let result = await verifier.verifyCredential(credential)
+
+        XCTAssertTrue(result.signatureValid, "Expected signatureValid == true for a real Ed25519 signature")
+        XCTAssertTrue(result.bundleFresh, "Expected bundleFresh == true for a bundle fetched 1 hour ago")
+        XCTAssertEqual(result.revocationStatus, .valid, "Expected revocationStatus == .valid when no credentialStatus")
+        XCTAssertNil(result.error, "Expected no error for a valid round-trip verification")
+        XCTAssertTrue(result.isValid, "Expected isValid == true")
+    }
+
     // MARK: - Helpers
 
     private func makeTestVc(keyId: String) -> VerifiableCredential {

@@ -187,12 +187,20 @@ final class OfflineVerificationTests: XCTestCase {
         // For testing, use a pre-built revoked bitstring (index 0 set = 0x80)
         let revokedBitstring = buildRevokedBitstring(revokedIndex: 0)
         let statusList = StatusListCredential(
+            id: "https://example.com/status/1",
             type: ["VerifiableCredential", "BitstringStatusListCredential"],
             issuer: issuerDid,
             credentialSubject: StatusListSubject(
                 type: "BitstringStatusList",
                 statusPurpose: "revocation",
                 encodedList: revokedBitstring
+            ),
+            proof: Proof(
+                type: "Ed25519Signature2020",
+                created: ISO8601DateFormatter().string(from: Date()),
+                verificationMethod: keyId,
+                proofPurpose: "assertionMethod",
+                proofValue: "zFakeProofForTest"
             )
         )
 
@@ -261,11 +269,13 @@ final class OfflineVerificationTests: XCTestCase {
 
         XCTAssertEqual(result.status, .verifiedOffline)
         XCTAssertEqual(result.source, .offline)
-        // Signature and expiry should pass
+        // All 4 checks should pass
         let sigCheck = result.checks.first { $0.type == .signature }
         XCTAssertEqual(sigCheck?.status, .pass)
         let expiryCheck = result.checks.first { $0.type == .expiry }
         XCTAssertEqual(expiryCheck?.status, .pass)
+        XCTAssertEqual(result.checks.first(where: { $0.type == .revocation })?.status, .pass)
+        XCTAssertEqual(result.checks.first(where: { $0.type == .bundleFreshness })?.status, .pass)
     }
 
     // MARK: - UC-7b: Non-network error does NOT fall back to offline
