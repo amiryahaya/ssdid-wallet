@@ -1,7 +1,6 @@
 import SwiftUI
 import SentrySwiftUI
 import UserNotifications
-import LocalAuthentication
 import BackgroundTasks
 
 // MARK: - AppDelegate Adaptor
@@ -92,7 +91,7 @@ struct SsdidWalletApp: App {
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var coordinator = AppCoordinator()
     @StateObject private var services = ServiceContainer()
-    @State private var isLocked = false
+    @State private var isLocked = true
     @State private var backgroundTimestamp: Date?
     @State private var wasOnline: Bool = true
 
@@ -153,14 +152,9 @@ struct SsdidWalletApp: App {
                             case .background:
                                 backgroundTimestamp = Date()
                             case .active:
-                                if let bgTime = backgroundTimestamp {
-                                    let biometricEnabled = UserDefaults.standard.bool(forKey: "ssdid_biometric_enabled")
-                                    let autoLockMinutes = UserDefaults.standard.integer(forKey: "ssdid_auto_lock_minutes")
-                                    let effectiveMinutes = autoLockMinutes > 0 ? autoLockMinutes : 5
-                                    let elapsed = Date().timeIntervalSince(bgTime)
-                                    if biometricEnabled && elapsed > Double(effectiveMinutes * 60) {
-                                        isLocked = true
-                                    }
+                                if backgroundTimestamp != nil {
+                                    isLocked = true
+                                    backgroundTimestamp = nil
                                     // Check bundle freshness on foreground resume.
                                     // Only sync if any bundle is nearing expiry (>80% of TTL consumed).
                                     Task {
@@ -224,21 +218,17 @@ struct LockOverlay: View {
     }
 
     private func authenticate() {
-        let context = LAContext()
-        context.localizedReason = "Unlock SSDID Wallet"
         Task {
-            do {
-                let success = try await context.evaluatePolicy(
-                    .deviceOwnerAuthenticationWithBiometrics,
-                    localizedReason: "Unlock SSDID Wallet"
-                )
-                if success {
-                    await MainActor.run { onUnlock() }
-                } else {
-                    await MainActor.run { authFailed = true }
+            let result = await BiometricAuthenticator().authenticateWithPasscodeFallback(
+                reason: "Unlock SSDID Wallet"
+            )
+            await MainActor.run {
+                switch result {
+                case .success:
+                    onUnlock()
+                case .cancelled, .error:
+                    authFailed = true
                 }
-            } catch {
-                await MainActor.run { authFailed = true }
             }
         }
     }

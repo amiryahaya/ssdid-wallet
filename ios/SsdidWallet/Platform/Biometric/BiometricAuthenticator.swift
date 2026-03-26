@@ -8,6 +8,13 @@ enum BiometricResult {
     case error(String)
 }
 
+/// State of biometric capability on the device.
+enum BiometricState {
+    case available      // Biometric enrolled and ready
+    case notEnrolled    // Hardware present, no biometric enrolled
+    case noHardware     // No biometric hardware at all
+}
+
 /// Biometric type available on the device.
 enum BiometricType {
     case none
@@ -23,6 +30,19 @@ final class BiometricAuthenticator: @unchecked Sendable {
 
     init(context: LAContext = LAContext()) {
         self.context = context
+    }
+
+    /// Returns the 3-state biometric capability of the device.
+    func getBiometricState() -> BiometricState {
+        var error: NSError?
+        let canEvaluate = context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
+        if canEvaluate { return .available }
+        guard let laError = error as? LAError else { return .noHardware }
+        switch laError.code {
+        case .biometryNotEnrolled: return .notEnrolled
+        case .biometryNotAvailable: return .noHardware
+        default: return .noHardware
+        }
     }
 
     /// Returns true if biometric authentication is available.
