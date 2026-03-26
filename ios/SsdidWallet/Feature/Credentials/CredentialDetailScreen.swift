@@ -134,9 +134,10 @@ struct CredentialDetailScreen: View {
                         // Verify Credential button
                         Button {
                             guard let vc = credential else { return }
+                            let orchestrator = services.verificationOrchestrator
                             isVerifying = true
                             Task {
-                                let result = await services.verificationOrchestrator.verify(credential: vc)
+                                let result = await orchestrator.verify(credential: vc)
                                 await MainActor.run {
                                     isVerifying = false
                                     router.push(.verificationResult(result: result))

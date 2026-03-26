@@ -8,7 +8,7 @@ protocol BundleTtlProvider {
 /// Orchestrates credential verification by attempting online first,
 /// then falling back to offline (cached bundle) verification when
 /// network errors or server failures occur.
-final class VerificationOrchestrator {
+final class VerificationOrchestrator: @unchecked Sendable {
     private let onlineVerifier: Verifier
     private let offlineVerifier: OfflineVerifier
     private let bundleStore: BundleStore
