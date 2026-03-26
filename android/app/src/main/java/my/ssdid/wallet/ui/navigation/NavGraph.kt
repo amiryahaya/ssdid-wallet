@@ -1,8 +1,14 @@
 package my.ssdid.wallet.ui.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -268,7 +274,8 @@ composable(
             val credentialId = backStackEntry.arguments?.getString("credentialId") ?: return@composable
             CredentialDetailScreen(
                 credentialId = credentialId,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onVerify = { id -> navController.navigate(Screen.VerificationResult.createRoute(id)) }
             )
         }
         composable(Screen.Settings.route) {
@@ -381,11 +388,27 @@ composable(Screen.TxHistory.route) {
                 }
             )
         }
-        composable(Screen.VerificationResult.route) {
+        composable(
+            Screen.VerificationResult.route,
+            arguments = listOf(navArgument("credentialId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val credentialId = backStackEntry.arguments?.getString("credentialId") ?: return@composable
             val viewModel: VerificationResultViewModel = hiltViewModel()
             val result by viewModel.result.collectAsState()
-            result?.let { res ->
-                VerificationResultScreen(result = res, onBack = { navController.popBackStack() })
+            val isLoading by viewModel.isLoading.collectAsState()
+
+            LaunchedEffect(credentialId) {
+                viewModel.verifyById(credentialId)
+            }
+
+            if (isLoading) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                result?.let { res ->
+                    VerificationResultScreen(result = res, onBack = { navController.popBackStack() })
+                }
             }
         }
         composable(Screen.BundleManagement.route) {

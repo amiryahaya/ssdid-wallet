@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
@@ -92,6 +93,7 @@ fun CredentialsScreen(
                 Card(
                     Modifier
                         .fillMaxWidth()
+                        .testTag("credential_card")
                         .clickable { onCredentialClick(vc.id) }
                         .semantics { contentDescription = "$credType from ${vc.issuer}" },
                     shape = RoundedCornerShape(16.dp),

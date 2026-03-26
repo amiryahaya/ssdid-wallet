@@ -12,9 +12,7 @@ import my.ssdid.wallet.domain.revocation.HttpStatusListFetcher
 import my.ssdid.wallet.domain.revocation.StatusListFetcher
 import my.ssdid.wallet.domain.settings.SettingsRepository
 import my.ssdid.wallet.domain.settings.TtlProvider
-import my.ssdid.wallet.domain.transport.RegistryApi
 import my.ssdid.wallet.domain.verifier.Verifier
-import my.ssdid.wallet.domain.verifier.offline.BundleFetcher
 import my.ssdid.wallet.domain.verifier.offline.BundleManager
 import my.ssdid.wallet.domain.verifier.offline.BundleStore
 import my.ssdid.wallet.domain.verifier.offline.CredentialRepository
@@ -50,14 +48,6 @@ object OfflineModule {
     @Singleton
     fun provideBundleStore(@ApplicationContext context: Context): BundleStore =
         DataStoreBundleStore(context)
-
-    @Provides
-    @Singleton
-    fun provideBundleFetcher(
-        registryApi: RegistryApi,
-        bundleStore: BundleStore,
-        ttlProvider: TtlProvider
-    ): BundleFetcher = BundleFetcher(registryApi, bundleStore, ttlProvider)
 
     @Provides
     @Singleton

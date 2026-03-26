@@ -46,12 +46,13 @@ class BackgroundSyncTest {
         composeRule.onNodeWithText("Prepare for Offline").performClick()
 
         // Wait until the bundle management screen header appears (proves sync path
-        // ran without crashing and the UI refreshed correctly after resume)
+        // ran without crashing and the UI refreshed correctly after resume).
+        // Title is "Prepare for Offline" as defined in BundleManagementScreen.kt.
         composeRule.waitUntil(timeoutMillis = 15_000) {
-            composeRule.onAllNodesWithText("Offline Bundles", substring = true)
+            composeRule.onAllNodesWithText("Prepare for Offline", substring = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
-        composeRule.onNodeWithText("Offline Bundles", substring = true).assertIsDisplayed()
+        composeRule.onNodeWithText("Prepare for Offline", substring = true).assertIsDisplayed()
 
         // Additionally assert there is no stale "aging" badge visible, confirming
         // that an empty/fresh store does not show stale freshness indicators
