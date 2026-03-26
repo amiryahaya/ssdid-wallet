@@ -3,7 +3,7 @@ import Foundation
 /// Manages pre-fetching and caching of verification bundles for offline use.
 /// Bundles include DID Documents and optional status list snapshots.
 /// Bundle TTL is driven by TtlProvider.
-final class BundleManager {
+final class BundleManager: @unchecked Sendable {
     private let verifier: Verifier
     private let statusListFetcher: StatusListFetcher
     private let bundleStore: BundleStore

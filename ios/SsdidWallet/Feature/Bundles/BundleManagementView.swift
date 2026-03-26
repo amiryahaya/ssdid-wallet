@@ -253,14 +253,16 @@ struct BundleManagementView: View {
     // MARK: - Data Operations
 
     private func loadBundles() async {
+        let store = services.bundleStore
+        let ttl = services.ttlProvider
         do {
-            let raw = try await services.bundleStore.listBundles()
+            let raw = try await store.listBundles()
             let items = raw.map { bundle in
                 BundleUiItem(
                     issuerDid: bundle.issuerDid,
                     displayName: shortDid(bundle.issuerDid),
                     fetchedAt: formattedDate(bundle.fetchedAt),
-                    freshnessRatio: services.ttlProvider.freshnessRatio(fetchedAt: bundle.fetchedAt)
+                    freshnessRatio: ttl.freshnessRatio(fetchedAt: bundle.fetchedAt)
                 )
             }
             await MainActor.run { bundles = items }
@@ -270,8 +272,9 @@ struct BundleManagementView: View {
     }
 
     private func refresh() async {
+        let syncManager = services.bundleSyncManager
         isRefreshing = true
-        await services.bundleSyncManager.syncNow()
+        await syncManager.syncNow()
         await loadBundles()
         isRefreshing = false
     }
@@ -279,8 +282,8 @@ struct BundleManagementView: View {
     private func addBundle(did: String) async {
         let trimmed = did.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
-        // Use BundleManager to resolve the DID doc and optionally fetch the status list.
-        let result = await services.bundleManager.prefetchBundle(issuerDid: trimmed)
+        let manager = services.bundleManager
+        let result = await manager.prefetchBundle(issuerDid: trimmed)
         if case .failure(let err) = result {
             await MainActor.run {
                 self.error = "Failed to fetch bundle for \(trimmed): \(err.localizedDescription)"
@@ -291,9 +294,10 @@ struct BundleManagementView: View {
     }
 
     private func deleteBundle(at offsets: IndexSet) async {
+        let store = services.bundleStore
         let toDelete = offsets.map { bundles[$0].issuerDid }
         for did in toDelete {
-            try? await services.bundleStore.deleteBundle(issuerDid: did)
+            try? await store.deleteBundle(issuerDid: did)
         }
         await loadBundles()
     }

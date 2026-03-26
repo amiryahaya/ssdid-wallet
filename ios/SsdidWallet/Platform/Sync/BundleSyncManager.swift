@@ -1,12 +1,12 @@
-import Foundation
-import BackgroundTasks
+@preconcurrency import Foundation
+@preconcurrency import BackgroundTasks
 
 /// Schedules and executes background refresh of verification bundles via BGAppRefreshTask.
 ///
 /// Register `BundleSyncManager.taskIdentifier` in Info.plist under
 /// `BGTaskSchedulerPermittedIdentifiers`, and call `registerBackgroundTask()` early
 /// in the app lifecycle (before the first `applicationDidBecomeActive`).
-final class BundleSyncManager {
+final class BundleSyncManager: @unchecked Sendable {
     static let taskIdentifier = "my.ssdid.wallet.bundleSync"
 
     private let bundleStore: BundleStore
@@ -90,7 +90,9 @@ final class BundleSyncManager {
         // even if this run expires early.
         scheduleBackgroundSync()
 
-        let syncTask = Task { await syncNow() }
+        let syncTask = Task { [weak self] in
+            await self?.syncNow()
+        }
 
         // Wire expiration handler before starting any awaiting so it is guaranteed
         // to fire even if the system expires the task immediately.
@@ -98,9 +100,11 @@ final class BundleSyncManager {
             syncTask.cancel()
         }
 
-        Task {
-            _ = await syncTask.result
-            task.setTaskCompleted(success: !syncTask.isCancelled)
+        nonisolated(unsafe) let bgTask = task
+        nonisolated(unsafe) let sync = syncTask
+        Task.detached {
+            _ = await sync.result
+            bgTask.setTaskCompleted(success: !sync.isCancelled)
         }
     }
 }

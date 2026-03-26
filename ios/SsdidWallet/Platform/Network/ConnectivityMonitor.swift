@@ -4,7 +4,7 @@ import Combine
 
 /// Observes network reachability using NWPathMonitor and publishes the current
 /// online/offline state as a Combine `@Published` property.
-final class ConnectivityMonitor: ObservableObject {
+final class ConnectivityMonitor: ObservableObject, @unchecked Sendable {
     @Published var isOnline: Bool = true
 
     private let monitor = NWPathMonitor()

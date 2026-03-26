@@ -1,6 +1,6 @@
-import XCTest
-import LibOQS
-@testable import SsdidWallet
+@preconcurrency import XCTest
+@preconcurrency import LibOQS
+@preconcurrency @testable import SsdidWallet
 
 /// Comprehensive wallet<->registry integration tests covering the full identity lifecycle,
 /// key rotation with pre-commitment, proof cross-check, challenge replay protection,
@@ -8,6 +8,7 @@ import LibOQS
 ///
 /// These tests run against the live SSDID registry at https://registry.ssdid.my
 /// and are skipped when the registry is unreachable.
+@MainActor
 final class WalletRegistryIntegrationTests: XCTestCase {
 
     private var registryApi: RegistryApi!
@@ -84,7 +85,7 @@ final class WalletRegistryIntegrationTests: XCTestCase {
     }
 
     /// Holds registration state for cleanup.
-    private struct RegisteredDid {
+    private struct RegisteredDid: @unchecked Sendable {
         let did: Did
         var keyId: String
         var privateKey: Data
@@ -99,7 +100,7 @@ final class WalletRegistryIntegrationTests: XCTestCase {
         algorithm: Algorithm = .ED25519,
         provider: CryptoProvider? = nil
     ) async throws -> RegisteredDid {
-        let prov = provider ?? classical
+        let prov = provider ?? classical!
         let keyPair = try prov.generateKeyPair(algorithm: algorithm)
         let did = Did.generate()
         let keyId = did.keyId(keyIndex: 1)

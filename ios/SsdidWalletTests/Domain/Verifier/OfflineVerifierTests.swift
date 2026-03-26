@@ -318,7 +318,7 @@ final class OfflineVerifierTests: XCTestCase {
 
 // MARK: - Mock Bundle Store
 
-final class MockBundleStore: BundleStore {
+final class MockBundleStore: BundleStore, @unchecked Sendable {
     var bundles: [String: VerificationBundle] = [:]
 
     func saveBundle(_ bundle: VerificationBundle) async throws {
@@ -340,7 +340,7 @@ final class MockBundleStore: BundleStore {
 
 // MARK: - Failing Bundle Store
 
-final class FailingBundleStore: BundleStore {
+final class FailingBundleStore: BundleStore, @unchecked Sendable {
     func saveBundle(_ bundle: VerificationBundle) async throws {
         throw NSError(domain: "TestDomain", code: -1, userInfo: [NSLocalizedDescriptionKey: "Disk full"])
     }
@@ -359,8 +359,9 @@ final class FailingBundleStore: BundleStore {
 // MARK: - Mock Crypto Provider
 
 final class MockCryptoProvider: CryptoProvider {
-    func generateKeyPair(algorithm: Algorithm) throws -> KeyPair {
-        KeyPair(publicKey: Data(repeating: 0, count: 32), privateKey: Data(repeating: 1, count: 64))
+    func supportsAlgorithm(_ algorithm: Algorithm) -> Bool { true }
+    func generateKeyPair(algorithm: Algorithm) throws -> KeyPairResult {
+        KeyPairResult(publicKey: Data(repeating: 0, count: 32), privateKey: Data(repeating: 1, count: 64))
     }
 
     func sign(algorithm: Algorithm, privateKey: Data, data: Data) throws -> Data {
