@@ -13,7 +13,24 @@ sealed class BiometricResult {
     object Cancelled : BiometricResult()
 }
 
+enum class BiometricState {
+    AVAILABLE,       // Biometric enrolled and ready
+    NOT_ENROLLED,    // Hardware present, no biometric enrolled
+    NO_HARDWARE      // No biometric hardware at all
+}
+
 class BiometricAuthenticator {
+
+    fun getBiometricState(activity: FragmentActivity): BiometricState {
+        val biometricManager = BiometricManager.from(activity)
+        // Use BIOMETRIC_WEAK for state detection to cover all enrolled biometrics
+        // (face, fingerprint, iris). BIOMETRIC_STRONG is reserved for actual authentication.
+        return when (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK)) {
+            BiometricManager.BIOMETRIC_SUCCESS -> BiometricState.AVAILABLE
+            BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> BiometricState.NOT_ENROLLED
+            else -> BiometricState.NO_HARDWARE
+        }
+    }
 
     fun canAuthenticate(activity: FragmentActivity): Boolean {
         val biometricManager = BiometricManager.from(activity)
@@ -30,7 +47,21 @@ class BiometricAuthenticator {
         ) == BiometricManager.BIOMETRIC_SUCCESS
     }
 
+    /**
+     * Authenticate using BIOMETRIC_STRONG or DEVICE_CREDENTIAL as fallback.
+     * Delegates to [authenticateWithFallback] — kept for call-site compatibility.
+     */
     suspend fun authenticate(
+        activity: FragmentActivity,
+        title: String = "SSDID Authentication",
+        subtitle: String = "Verify your identity to continue"
+    ): BiometricResult = authenticateWithFallback(activity, title, subtitle)
+
+    /**
+     * Authenticate using BIOMETRIC_STRONG or DEVICE_CREDENTIAL as fallback.
+     * Used when biometric is not enrolled or hardware is unavailable — falls back to passcode.
+     */
+    suspend fun authenticateWithFallback(
         activity: FragmentActivity,
         title: String = "SSDID Authentication",
         subtitle: String = "Verify your identity to continue"

@@ -18,12 +18,6 @@ class SettingsViewModel @Inject constructor(
     private val settings: SettingsRepository
 ) : ViewModel() {
 
-    val biometricEnabled = settings.biometricEnabled()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
-
-    val autoLockMinutes = settings.autoLockMinutes()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 5)
-
     val defaultAlgorithm = settings.defaultAlgorithm()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "KAZ_SIGN_192")
 
@@ -43,14 +37,6 @@ class SettingsViewModel @Inject constructor(
                 _bundleTtlDays.value = days
             }
         }
-    }
-
-    fun setBiometricEnabled(enabled: Boolean) {
-        viewModelScope.launch { settings.setBiometricEnabled(enabled) }
-    }
-
-    fun setAutoLockMinutes(minutes: Int) {
-        viewModelScope.launch { settings.setAutoLockMinutes(minutes) }
     }
 
     fun setDefaultAlgorithm(algorithm: String) {

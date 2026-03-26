@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import my.ssdid.wallet.domain.settings.SettingsRepository
 
@@ -53,5 +54,17 @@ class DataStoreSettingsRepository(private val context: Context) : SettingsReposi
 
     override suspend fun setBundleTtlDays(days: Int) {
         context.settingsStore.edit { it[bundleTtlKey] = days }
+    }
+
+    /**
+     * Migration: force biometric_enabled = true for existing users who had disabled it.
+     * Must be called from an application-scoped coroutine (e.g. SsdidApp.onCreate).
+     * Only migrates if the key exists and is currently false; skips new installs.
+     */
+    suspend fun migrateToMandatoryBiometricIfNeeded() {
+        val current = context.settingsStore.data.first()[biometricKey]
+        if (current == false) {
+            context.settingsStore.edit { it[biometricKey] = true }
+        }
     }
 }

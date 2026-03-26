@@ -3,8 +3,6 @@ import SwiftUI
 struct SettingsScreen: View {
     @Environment(AppRouter.self) private var router
 
-    @AppStorage("ssdid_biometric_enabled") private var biometricEnabled = true
-    @AppStorage("ssdid_auto_lock_minutes") private var autoLockMinutes = 5
     @AppStorage("ssdid_bundle_ttl_days") private var bundleTtlDays = 7
     @State private var language = "en"
     @State private var showLanguageDialog = false
@@ -51,8 +49,6 @@ struct SettingsScreen: View {
                 LazyVStack(alignment: .leading, spacing: 4) {
                     // Security
                     sectionHeader("SECURITY")
-                    settingsToggle("Biometric Authentication", subtitle: "Face ID / Fingerprint", isOn: $biometricEnabled)
-                    settingsItem("Auto-Lock", subtitle: "After \(autoLockMinutes) minutes")
                     settingsItem("Change Password", subtitle: "Update vault password")
                     settingsItem("Backup & Export", subtitle: "Encrypted backup of all identities") {
                         router.push(.backupExport())
@@ -149,27 +145,6 @@ struct SettingsScreen: View {
             .cornerRadius(12)
         }
         .disabled(action == nil)
-    }
-
-    @ViewBuilder
-    private func settingsToggle(_ title: String, subtitle: String, isOn: Binding<Bool>) -> some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(Color.textPrimary)
-                Text(subtitle)
-                    .font(.system(size: 12))
-                    .foregroundStyle(Color.textTertiary)
-            }
-            Spacer()
-            Toggle("", isOn: isOn)
-                .labelsHidden()
-                .tint(Color.ssdidAccent)
-        }
-        .padding(14)
-        .background(Color.bgCard)
-        .cornerRadius(12)
     }
 
     private var languagePicker: some View {

@@ -35,6 +35,7 @@ final class UserDefaultsSettingsRepository: SettingsRepository {
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         registerDefaults()
+        migrateToMandatoryBiometric()
     }
 
     private func registerDefaults() {
@@ -45,6 +46,15 @@ final class UserDefaultsSettingsRepository: SettingsRepository {
             Keys.language: "en",
             Keys.bundleTtlDays: 7
         ])
+    }
+
+    /// Migration: force biometric_enabled = true for existing users who had disabled it.
+    /// Only migrates if the key exists and is currently false; skips new installs.
+    private func migrateToMandatoryBiometric() {
+        guard defaults.object(forKey: Keys.biometricEnabled) != nil else { return }
+        if !defaults.bool(forKey: Keys.biometricEnabled) {
+            defaults.set(true, forKey: Keys.biometricEnabled)
+        }
     }
 
     // MARK: - Biometric

@@ -9,7 +9,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,11 +23,9 @@ import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
-import my.ssdid.wallet.domain.settings.SettingsRepository
 import my.ssdid.wallet.domain.vault.VaultStorage
 import my.ssdid.wallet.feature.splash.SplashScreen
 import my.ssdid.wallet.platform.deeplink.DeepLinkHandler
@@ -37,12 +39,19 @@ import javax.inject.Inject
 class MainActivity : FragmentActivity() {
 
     @Inject lateinit var vaultStorage: VaultStorage
-    @Inject lateinit var settingsRepository: SettingsRepository
+
 
     private val pendingDeepLinks = MutableSharedFlow<Intent>(extraBufferCapacity = 1)
 
-    private val isLocked = mutableStateOf(false)
-    private var backgroundTimestamp = 0L
+    private val isLocked = mutableStateOf(true)
+    // null = not yet determined; true/false = onboarding state loaded
+    private val isOnboarded = mutableStateOf<Boolean?>(null)
+    private var wentToBackground = false
+
+    override fun onStop() {
+        super.onStop()
+        wentToBackground = true
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,15 +59,26 @@ class MainActivity : FragmentActivity() {
         setContent {
             SsdidTheme {
                 val locked by remember { isLocked }
+                val onboarded by remember { isOnboarded }
 
-                if (locked) {
+                // Load onboarding state once on first composition
+                LaunchedEffect(Unit) {
+                    isOnboarded.value = vaultStorage.isOnboardingCompleted()
+                }
+
+                // While loading onboarding state, show a blank themed screen
+                // to avoid a white flash before splash/lock appears
+                if (onboarded == null) {
+                    Box(Modifier.fillMaxSize().background(my.ssdid.wallet.ui.theme.BgPrimary))
+                } else if (locked && onboarded == true) {
+                    // Only show lock if onboarding is complete; skip for new users
                     LockScreen(onUnlock = { isLocked.value = false })
                 } else {
                     var startDestination by remember { mutableStateOf<String?>(null) }
                     var showSplash by remember { mutableStateOf(true) }
 
                     LaunchedEffect(Unit) {
-                        startDestination = if (vaultStorage.isOnboardingCompleted()) {
+                        startDestination = if (onboarded == true) {
                             Screen.WalletHome.route
                         } else {
                             Screen.Onboarding.route
@@ -80,7 +100,10 @@ class MainActivity : FragmentActivity() {
                             navController = navController,
                             startDestination = startDestination!!,
                             onOnboardingCompleted = {
-                                lifecycleScope.launch { vaultStorage.setOnboardingCompleted() }
+                                lifecycleScope.launch {
+                                    vaultStorage.setOnboardingCompleted()
+                                    isOnboarded.value = true
+                                }
                             }
                         )
 
@@ -100,22 +123,11 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        backgroundTimestamp = System.currentTimeMillis()
-    }
-
     override fun onResume() {
         super.onResume()
-        if (backgroundTimestamp > 0) {
-            lifecycleScope.launch {
-                val biometricEnabled = settingsRepository.biometricEnabled().first()
-                val autoLockMinutes = settingsRepository.autoLockMinutes().first()
-                val elapsed = System.currentTimeMillis() - backgroundTimestamp
-                if (biometricEnabled && elapsed > autoLockMinutes * 60_000L) {
-                    isLocked.value = true
-                }
-            }
+        if (wentToBackground) {
+            wentToBackground = false
+            isLocked.value = true
         }
     }
 
