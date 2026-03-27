@@ -9,7 +9,7 @@ import my.ssdid.wallet.domain.transport.NotifyApi
 import my.ssdid.wallet.domain.transport.dto.CreateMailboxRequest
 import my.ssdid.wallet.domain.transport.dto.NotifyDevice
 import my.ssdid.wallet.domain.transport.dto.PendingNotification
-import my.ssdid.wallet.platform.notify.LocalNotificationStorage
+import my.ssdid.wallet.domain.notify.LocalNotificationStore
 import my.ssdid.wallet.domain.transport.dto.RegisterInboxRequest
 import my.ssdid.wallet.domain.transport.dto.UpdateDevicesRequest
 import java.security.MessageDigest
@@ -31,7 +31,7 @@ class NotifyManager(
     private val notifyApi: NotifyApi,
     private val storage: NotifyStorage,
     private val dispatcher: NotifyDispatcher,
-    private val localNotificationStorage: LocalNotificationStorage,
+    private val localNotificationStorage: LocalNotificationStore,
     private val logger: SsdidLogger = NoOpLogger()
 ) {
 

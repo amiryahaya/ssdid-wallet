@@ -285,12 +285,18 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideLocalNotificationStore(
+        impl: LocalNotificationStorage
+    ): my.ssdid.wallet.domain.notify.LocalNotificationStore = impl
+
+    @Provides
+    @Singleton
     fun provideNotifyManager(
         notifyApi: NotifyApi,
         storage: NotifyStorage,
         dispatcher: AndroidNotifyDispatcher,
-        localNotificationStorage: LocalNotificationStorage
-    ): NotifyManager = NotifyManager(notifyApi, storage, dispatcher, localNotificationStorage)
+        localNotificationStore: my.ssdid.wallet.domain.notify.LocalNotificationStore
+    ): NotifyManager = NotifyManager(notifyApi, storage, dispatcher, localNotificationStore)
 
     @Provides
     @Singleton

@@ -11,12 +11,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import my.ssdid.wallet.domain.notify.LocalNotification
+import my.ssdid.wallet.domain.notify.LocalNotificationStore
 
 internal val Context.localNotificationsStore: DataStore<Preferences> by preferencesDataStore(name = "ssdid_local_notifications")
 
 class LocalNotificationStorage(
     private val context: Context
-) {
+) : LocalNotificationStore {
     private val key = stringPreferencesKey("notifications_json")
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -34,7 +35,7 @@ class LocalNotificationStorage(
     val unreadCount: Flow<Int> =
         allNotifications.map { list -> list.count { !it.isRead } }
 
-    suspend fun save(notification: LocalNotification) {
+    override suspend fun save(notification: LocalNotification) {
         context.localNotificationsStore.edit { prefs ->
             val current = prefs[key]?.let { runCatching { json.decodeFromString<List<LocalNotification>>(it) }.getOrElse { emptyList() } } ?: emptyList()
             // Preserve isRead if notification already exists locally (avoids resurrecting read notifications on re-fetch)
@@ -45,7 +46,7 @@ class LocalNotificationStorage(
         }
     }
 
-    suspend fun markAsRead(id: String) {
+    override suspend fun markAsRead(id: String) {
         context.localNotificationsStore.edit { prefs ->
             val current = prefs[key]?.let { runCatching { json.decodeFromString<List<LocalNotification>>(it) }.getOrElse { emptyList() } } ?: return@edit
             val updated = current.map { if (it.id == id) it.copy(isRead = true) else it }
@@ -53,7 +54,7 @@ class LocalNotificationStorage(
         }
     }
 
-    suspend fun markAllAsRead() {
+    override suspend fun markAllAsRead() {
         context.localNotificationsStore.edit { prefs ->
             val current = prefs[key]?.let { runCatching { json.decodeFromString<List<LocalNotification>>(it) }.getOrElse { emptyList() } } ?: return@edit
             val updated = current.map { it.copy(isRead = true) }
@@ -61,7 +62,7 @@ class LocalNotificationStorage(
         }
     }
 
-    suspend fun delete(id: String) {
+    override suspend fun delete(id: String) {
         context.localNotificationsStore.edit { prefs ->
             val current = prefs[key]?.let { runCatching { json.decodeFromString<List<LocalNotification>>(it) }.getOrElse { emptyList() } } ?: return@edit
             val updated = current.filter { it.id != id }
