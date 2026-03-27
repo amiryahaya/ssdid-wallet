@@ -1,7 +1,6 @@
 package my.ssdid.wallet.domain.notify
 
 import android.content.Context
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -9,6 +8,8 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import my.ssdid.wallet.domain.logging.NoOpLogger
+import my.ssdid.wallet.domain.logging.SsdidLogger
 import my.ssdid.wallet.domain.vault.KeystoreManager
 import java.util.Base64
 
@@ -23,7 +24,8 @@ private val Context.notifyStore: DataStore<Preferences> by preferencesDataStore(
  */
 class NotifyStorage(
     private val context: Context,
-    private val keystoreManager: KeystoreManager
+    private val keystoreManager: KeystoreManager,
+    private val logger: SsdidLogger = NoOpLogger()
 ) {
 
     private val inboxIdKey = stringPreferencesKey("inbox_id")
@@ -40,7 +42,7 @@ class NotifyStorage(
             val ciphertext = Base64.getUrlDecoder().decode(encoded)
             keystoreManager.decrypt(KEYSTORE_ALIAS, ciphertext).toString(Charsets.UTF_8)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to decrypt inbox_secret", e)
+            logger.error(TAG, "Failed to decrypt inbox_secret", e)
             null
         }
     }
