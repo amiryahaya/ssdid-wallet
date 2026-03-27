@@ -2,15 +2,15 @@ package my.ssdid.wallet.domain.rotation
 
 import kotlinx.serialization.Serializable
 import my.ssdid.wallet.domain.SsdidClient
-import my.ssdid.wallet.domain.crypto.CryptoProvider
-import my.ssdid.wallet.domain.crypto.Multibase
+import my.ssdid.sdk.domain.crypto.CryptoProvider
+import my.ssdid.sdk.domain.crypto.Multibase
 import my.ssdid.wallet.domain.history.ActivityRepository
-import my.ssdid.wallet.domain.model.ActivityRecord
-import my.ssdid.wallet.domain.model.ActivityStatus
-import my.ssdid.wallet.domain.model.ActivityType
-import my.ssdid.wallet.domain.model.Algorithm
-import my.ssdid.wallet.domain.model.Did
-import my.ssdid.wallet.domain.model.Identity
+import my.ssdid.sdk.domain.model.ActivityRecord
+import my.ssdid.sdk.domain.model.ActivityStatus
+import my.ssdid.sdk.domain.model.ActivityType
+import my.ssdid.sdk.domain.model.Algorithm
+import my.ssdid.sdk.domain.model.Did
+import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.wallet.domain.vault.VaultStorage
 import my.ssdid.wallet.domain.vault.KeystoreManager
 import kotlinx.coroutines.sync.Mutex

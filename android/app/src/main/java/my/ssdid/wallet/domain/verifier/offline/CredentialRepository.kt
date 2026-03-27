@@ -1,6 +1,6 @@
 package my.ssdid.wallet.domain.verifier.offline
 
-import my.ssdid.wallet.domain.model.VerifiableCredential
+import my.ssdid.sdk.domain.model.VerifiableCredential
 
 interface CredentialRepository {
     suspend fun saveCredential(credential: VerifiableCredential)

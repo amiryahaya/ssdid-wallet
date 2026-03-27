@@ -13,8 +13,8 @@ import my.ssdid.wallet.domain.backup.BackupManager
 import my.ssdid.wallet.domain.credential.CredentialIssuanceManager
 import my.ssdid.wallet.domain.device.DeviceInfoProvider
 import my.ssdid.wallet.domain.device.DeviceManager
-import my.ssdid.wallet.domain.crypto.ClassicalProvider
-import my.ssdid.wallet.domain.crypto.CryptoProvider
+import my.ssdid.sdk.domain.crypto.ClassicalProvider
+import my.ssdid.sdk.domain.crypto.CryptoProvider
 import my.ssdid.wallet.domain.crypto.PqcProvider
 import my.ssdid.wallet.domain.history.ActivityRepository
 import my.ssdid.wallet.domain.profile.ProfileMigration
@@ -33,10 +33,10 @@ import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.domain.vault.VaultImpl
 import my.ssdid.wallet.domain.vault.VaultStorage
 import my.ssdid.wallet.platform.logging.SentryLogger
-import my.ssdid.wallet.domain.did.DidJwkResolver
-import my.ssdid.wallet.domain.did.DidKeyResolver
-import my.ssdid.wallet.domain.did.DidResolver
-import my.ssdid.wallet.domain.did.MultiMethodResolver
+import my.ssdid.sdk.domain.did.DidJwkResolver
+import my.ssdid.sdk.domain.did.DidKeyResolver
+import my.ssdid.sdk.domain.did.DidResolver
+import my.ssdid.sdk.domain.did.MultiMethodResolver
 import my.ssdid.wallet.domain.did.SsdidRegistryResolver
 import my.ssdid.wallet.domain.verifier.Verifier
 import my.ssdid.wallet.domain.verifier.VerifierImpl

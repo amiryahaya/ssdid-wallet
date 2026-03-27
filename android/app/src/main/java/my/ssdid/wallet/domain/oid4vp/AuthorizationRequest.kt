@@ -1,9 +1,9 @@
 package my.ssdid.wallet.domain.oid4vp
 
-import android.net.Uri
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import my.ssdid.sdk.domain.util.parseQueryParam
 
 data class AuthorizationRequest(
     val clientId: String,
@@ -20,11 +20,10 @@ data class AuthorizationRequest(
         private val json = Json { ignoreUnknownKeys = true }
 
         fun parse(uriString: String): Result<AuthorizationRequest> = runCatching {
-            val uri = Uri.parse(uriString)
-            val clientId = uri.getQueryParameter("client_id")
+            val clientId = parseQueryParam(uriString, "client_id")
                 ?: throw IllegalArgumentException("Missing required parameter: client_id")
 
-            val requestUri = uri.getQueryParameter("request_uri")
+            val requestUri = parseQueryParam(uriString, "request_uri")
 
             if (requestUri != null) {
                 require(requestUri.startsWith("https://")) {
@@ -36,11 +35,11 @@ data class AuthorizationRequest(
                 )
             }
 
-            val responseUri = uri.getQueryParameter("response_uri")
-            val nonce = uri.getQueryParameter("nonce")
-            val state = uri.getQueryParameter("state")
-            val responseType = uri.getQueryParameter("response_type")
-            val responseMode = uri.getQueryParameter("response_mode")
+            val responseUri = parseQueryParam(uriString, "response_uri")
+            val nonce = parseQueryParam(uriString, "nonce")
+            val state = parseQueryParam(uriString, "state")
+            val responseType = parseQueryParam(uriString, "response_type")
+            val responseMode = parseQueryParam(uriString, "response_mode")
 
             require(responseMode == "direct_post") {
                 "response_mode must be direct_post, got: $responseMode"
@@ -51,8 +50,8 @@ data class AuthorizationRequest(
             }
             require(nonce != null) { "Missing required parameter: nonce" }
 
-            val pdRaw = uri.getQueryParameter("presentation_definition")
-            val dcqlRaw = uri.getQueryParameter("dcql_query")
+            val pdRaw = parseQueryParam(uriString, "presentation_definition")
+            val dcqlRaw = parseQueryParam(uriString, "dcql_query")
 
             val pd = pdRaw?.let { json.parseToJsonElement(it) as? JsonObject }
             val dcql = dcqlRaw?.let { json.parseToJsonElement(it) as? JsonObject }

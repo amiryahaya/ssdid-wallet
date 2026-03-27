@@ -1,6 +1,6 @@
 package my.ssdid.wallet.domain.verifier.offline
 
-import my.ssdid.wallet.domain.model.VerifiableCredential
+import my.ssdid.sdk.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.revocation.RevocationStatus
 import my.ssdid.wallet.domain.verifier.Verifier
 import java.io.IOException

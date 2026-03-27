@@ -2,9 +2,9 @@ package my.ssdid.wallet.domain.verifier.offline
 
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
-import my.ssdid.wallet.domain.model.CredentialSubject
-import my.ssdid.wallet.domain.model.Proof
-import my.ssdid.wallet.domain.model.VerifiableCredential
+import my.ssdid.sdk.domain.model.CredentialSubject
+import my.ssdid.sdk.domain.model.Proof
+import my.ssdid.sdk.domain.model.VerifiableCredential
 import org.junit.Before
 import org.junit.Test
 

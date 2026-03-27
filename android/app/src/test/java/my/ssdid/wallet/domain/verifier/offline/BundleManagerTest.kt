@@ -5,7 +5,7 @@ import io.mockk.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import my.ssdid.wallet.domain.model.*
+import my.ssdid.sdk.domain.model.*
 import my.ssdid.wallet.domain.revocation.StatusListCredential
 import my.ssdid.wallet.domain.revocation.StatusListFetcher
 import my.ssdid.wallet.domain.revocation.StatusListSubject

@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import my.ssdid.wallet.domain.model.Identity
-import my.ssdid.wallet.domain.model.VerifiableCredential
+import my.ssdid.sdk.domain.model.Identity
+import my.ssdid.sdk.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.rotation.RotationEntry
 import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
 import my.ssdid.wallet.domain.vault.PreRotatedKeyData
@@ -25,7 +25,7 @@ import java.util.Base64
 // Private keys are stored separately in filesDir/keys/, encrypted with Android Keystore AES-256-GCM.
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "ssdid_vault")
 
-class DataStoreVaultStorage(private val context: Context) : VaultStorage {
+class DataStoreVaultStorage(private val context: Context) : VaultStorage, OnboardingStorage {
 
     private val json = Json { ignoreUnknownKeys = true }
 

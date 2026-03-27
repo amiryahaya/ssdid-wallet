@@ -29,7 +29,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.compose.ui.res.stringResource
 import my.ssdid.wallet.R
 import my.ssdid.wallet.domain.SsdidClient
-import my.ssdid.wallet.domain.model.VerifiableCredential
+import my.ssdid.sdk.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.platform.biometric.BiometricAuthenticator
 import my.ssdid.wallet.platform.biometric.BiometricResult

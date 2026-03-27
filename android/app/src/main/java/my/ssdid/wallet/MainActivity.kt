@@ -26,7 +26,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
-import my.ssdid.wallet.domain.vault.VaultStorage
+import my.ssdid.wallet.platform.storage.OnboardingStorage
 import my.ssdid.wallet.feature.splash.SplashScreen
 import my.ssdid.wallet.platform.deeplink.DeepLinkHandler
 import my.ssdid.wallet.ui.components.LockScreen
@@ -38,7 +38,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
 
-    @Inject lateinit var vaultStorage: VaultStorage
+    @Inject lateinit var onboardingStorage: OnboardingStorage
 
 
     private val pendingDeepLinks = MutableSharedFlow<Intent>(extraBufferCapacity = 1)
@@ -63,7 +63,7 @@ class MainActivity : FragmentActivity() {
 
                 // Load onboarding state once on first composition
                 LaunchedEffect(Unit) {
-                    isOnboarded.value = vaultStorage.isOnboardingCompleted()
+                    isOnboarded.value = onboardingStorage.isOnboardingCompleted()
                 }
 
                 // While loading onboarding state, show a blank themed screen
@@ -101,7 +101,7 @@ class MainActivity : FragmentActivity() {
                             startDestination = startDestination!!,
                             onOnboardingCompleted = {
                                 lifecycleScope.launch {
-                                    vaultStorage.setOnboardingCompleted()
+                                    onboardingStorage.setOnboardingCompleted()
                                     isOnboarded.value = true
                                 }
                             }

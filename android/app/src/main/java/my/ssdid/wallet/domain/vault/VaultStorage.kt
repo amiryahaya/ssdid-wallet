@@ -1,7 +1,7 @@
 package my.ssdid.wallet.domain.vault
 
-import my.ssdid.wallet.domain.model.Identity
-import my.ssdid.wallet.domain.model.VerifiableCredential
+import my.ssdid.sdk.domain.model.Identity
+import my.ssdid.sdk.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.rotation.RotationEntry
 import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
 
@@ -37,8 +37,4 @@ interface VaultStorage {
     // Rotation history
     suspend fun addRotationEntry(did: String, entry: RotationEntry)
     suspend fun getRotationHistory(did: String): List<RotationEntry>
-
-    // Onboarding state
-    suspend fun isOnboardingCompleted(): Boolean
-    suspend fun setOnboardingCompleted()
 }

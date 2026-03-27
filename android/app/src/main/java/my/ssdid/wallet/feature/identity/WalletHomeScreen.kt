@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
-import my.ssdid.wallet.domain.model.Identity
+import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.wallet.platform.notify.LocalNotificationStorage
 import my.ssdid.wallet.domain.vault.Vault
 import androidx.compose.foundation.shape.CircleShape

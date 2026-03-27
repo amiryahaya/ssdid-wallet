@@ -1,9 +1,9 @@
 package my.ssdid.wallet.domain.recovery
 
-import my.ssdid.wallet.domain.crypto.CryptoProvider
-import my.ssdid.wallet.domain.crypto.Multibase
-import my.ssdid.wallet.domain.model.Algorithm
-import my.ssdid.wallet.domain.model.Identity
+import my.ssdid.sdk.domain.crypto.CryptoProvider
+import my.ssdid.sdk.domain.crypto.Multibase
+import my.ssdid.sdk.domain.model.Algorithm
+import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.domain.vault.VaultStorage
 import my.ssdid.wallet.domain.vault.KeystoreManager

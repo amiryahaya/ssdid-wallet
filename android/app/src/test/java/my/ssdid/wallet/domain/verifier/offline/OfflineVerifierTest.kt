@@ -6,10 +6,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
-import my.ssdid.wallet.domain.crypto.ClassicalProvider
-import my.ssdid.wallet.domain.crypto.CryptoProvider
-import my.ssdid.wallet.domain.crypto.Multibase
-import my.ssdid.wallet.domain.model.*
+import my.ssdid.sdk.domain.crypto.ClassicalProvider
+import my.ssdid.sdk.domain.crypto.CryptoProvider
+import my.ssdid.sdk.domain.crypto.Multibase
+import my.ssdid.sdk.domain.model.*
 import my.ssdid.wallet.domain.revocation.RevocationStatus
 import my.ssdid.wallet.domain.revocation.StatusListCredential
 import my.ssdid.wallet.domain.revocation.StatusListSubject

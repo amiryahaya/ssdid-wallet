@@ -8,10 +8,10 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import my.ssdid.wallet.domain.SsdidClient
-import my.ssdid.wallet.domain.model.Algorithm
-import my.ssdid.wallet.domain.model.Identity
+import my.ssdid.sdk.domain.model.Algorithm
+import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.wallet.domain.recovery.RecoveryManager
-import my.ssdid.wallet.domain.vault.VaultStorage
+import my.ssdid.wallet.platform.storage.OnboardingStorage
 import my.ssdid.wallet.feature.identity.MainDispatcherRule
 import org.junit.Before
 import org.junit.Rule
@@ -26,7 +26,7 @@ class RecoveryRestoreViewModelTest {
     private lateinit var viewModel: RecoveryRestoreViewModel
     private lateinit var recoveryManager: RecoveryManager
     private lateinit var ssdidClient: SsdidClient
-    private lateinit var storage: VaultStorage
+    private lateinit var storage: OnboardingStorage
 
     private val testIdentity = Identity(
         name = "Test",

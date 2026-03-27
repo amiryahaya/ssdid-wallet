@@ -1,8 +1,8 @@
 package my.ssdid.wallet.domain
 
-import my.ssdid.wallet.domain.crypto.Multibase
+import my.ssdid.sdk.domain.crypto.Multibase
 import my.ssdid.wallet.domain.history.ActivityRepository
-import my.ssdid.wallet.domain.model.*
+import my.ssdid.sdk.domain.model.*
 import my.ssdid.wallet.domain.notify.NotifyManager
 import my.ssdid.wallet.domain.revocation.RevocationManager
 import my.ssdid.wallet.domain.revocation.RevocationStatus
@@ -18,8 +18,8 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
-import my.ssdid.wallet.domain.logging.NoOpLogger
-import my.ssdid.wallet.domain.logging.SsdidLogger
+import my.ssdid.sdk.domain.logging.NoOpLogger
+import my.ssdid.sdk.domain.logging.SsdidLogger
 import java.io.IOException
 import java.net.SocketTimeoutException
 import java.security.MessageDigest

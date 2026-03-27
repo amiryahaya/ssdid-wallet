@@ -3,8 +3,8 @@ package my.ssdid.wallet.domain.recovery.social
 import com.google.common.truth.Truth.assertThat
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
-import my.ssdid.wallet.domain.model.Algorithm
-import my.ssdid.wallet.domain.model.Identity
+import my.ssdid.sdk.domain.model.Algorithm
+import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.wallet.domain.recovery.RecoveryManager
 import org.junit.Before
 import org.junit.Test

@@ -3,7 +3,7 @@ package my.ssdid.wallet.platform.deeplink
 import android.net.Uri
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import my.ssdid.wallet.domain.model.Did
+import my.ssdid.sdk.domain.model.Did
 import my.ssdid.wallet.domain.transport.dto.ClaimRequest
 import my.ssdid.wallet.platform.security.UrlValidator
 import my.ssdid.wallet.ui.navigation.Screen

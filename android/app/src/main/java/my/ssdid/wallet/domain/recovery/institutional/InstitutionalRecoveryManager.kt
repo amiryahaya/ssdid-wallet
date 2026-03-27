@@ -1,8 +1,8 @@
 package my.ssdid.wallet.domain.recovery.institutional
 
 import kotlinx.serialization.Serializable
-import my.ssdid.wallet.domain.model.Algorithm
-import my.ssdid.wallet.domain.model.Identity
+import my.ssdid.sdk.domain.model.Algorithm
+import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.wallet.domain.recovery.RecoveryManager
 import java.time.Instant
 import java.util.Base64

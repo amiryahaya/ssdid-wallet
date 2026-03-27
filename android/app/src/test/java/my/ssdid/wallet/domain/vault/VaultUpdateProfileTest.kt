@@ -3,8 +3,8 @@ package my.ssdid.wallet.domain.vault
 import com.google.common.truth.Truth.assertThat
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
-import my.ssdid.wallet.domain.model.Algorithm
-import my.ssdid.wallet.domain.model.Identity
+import my.ssdid.sdk.domain.model.Algorithm
+import my.ssdid.sdk.domain.model.Identity
 import org.junit.Before
 import org.junit.Test
 
@@ -16,8 +16,8 @@ class VaultUpdateProfileTest {
     @Before
     fun setup() {
         storage = mockk(relaxed = true)
-        val classicalProvider = mockk<my.ssdid.wallet.domain.crypto.CryptoProvider>()
-        val pqcProvider = mockk<my.ssdid.wallet.domain.crypto.CryptoProvider>()
+        val classicalProvider = mockk<my.ssdid.sdk.domain.crypto.CryptoProvider>()
+        val pqcProvider = mockk<my.ssdid.sdk.domain.crypto.CryptoProvider>()
         val keystoreManager = mockk<KeystoreManager>()
         vault = VaultImpl(classicalProvider, pqcProvider, keystoreManager, storage)
     }

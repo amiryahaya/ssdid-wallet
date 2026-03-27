@@ -7,7 +7,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
-import my.ssdid.wallet.domain.crypto.CryptoProvider
+import my.ssdid.sdk.domain.crypto.CryptoProvider
 import my.ssdid.wallet.domain.revocation.HttpStatusListFetcher
 import my.ssdid.wallet.domain.revocation.StatusListFetcher
 import my.ssdid.wallet.domain.settings.SettingsRepository

@@ -22,8 +22,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import my.ssdid.wallet.domain.history.ActivityRepository
-import my.ssdid.wallet.domain.model.ActivityRecord
-import my.ssdid.wallet.domain.model.ActivityType
+import my.ssdid.sdk.domain.model.ActivityRecord
+import my.ssdid.sdk.domain.model.ActivityType
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check

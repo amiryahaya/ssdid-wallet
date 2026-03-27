@@ -6,11 +6,11 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.*
-import my.ssdid.wallet.domain.crypto.CryptoProvider
-import my.ssdid.wallet.domain.did.DidResolver
-import my.ssdid.wallet.domain.model.Algorithm
-import my.ssdid.wallet.domain.model.DidDocument
-import my.ssdid.wallet.domain.model.VerificationMethod
+import my.ssdid.sdk.domain.crypto.CryptoProvider
+import my.ssdid.sdk.domain.did.DidResolver
+import my.ssdid.sdk.domain.model.Algorithm
+import my.ssdid.sdk.domain.model.DidDocument
+import my.ssdid.sdk.domain.model.VerificationMethod
 import org.junit.Test
 import java.util.Base64
 

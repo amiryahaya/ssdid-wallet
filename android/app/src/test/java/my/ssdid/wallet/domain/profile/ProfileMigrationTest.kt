@@ -2,7 +2,7 @@ package my.ssdid.wallet.domain.profile
 
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
-import my.ssdid.wallet.domain.model.*
+import my.ssdid.sdk.domain.model.*
 import my.ssdid.wallet.domain.vault.Vault
 import org.junit.Before
 import org.junit.Test

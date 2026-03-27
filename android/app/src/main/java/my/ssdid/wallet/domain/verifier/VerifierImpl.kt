@@ -3,10 +3,10 @@ package my.ssdid.wallet.domain.verifier
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
-import my.ssdid.wallet.domain.crypto.CryptoProvider
-import my.ssdid.wallet.domain.crypto.Multibase
-import my.ssdid.wallet.domain.did.DidResolver
-import my.ssdid.wallet.domain.model.*
+import my.ssdid.sdk.domain.crypto.CryptoProvider
+import my.ssdid.sdk.domain.crypto.Multibase
+import my.ssdid.sdk.domain.did.DidResolver
+import my.ssdid.sdk.domain.model.*
 import my.ssdid.wallet.domain.vault.VaultImpl
 import java.time.Instant
 

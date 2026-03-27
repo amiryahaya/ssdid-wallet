@@ -1,7 +1,7 @@
 package my.ssdid.wallet.domain.crypto
 
 import com.google.common.truth.Truth.assertThat
-import my.ssdid.wallet.domain.model.Algorithm
+import my.ssdid.sdk.domain.model.Algorithm
 import org.junit.Test
 
 class PqcProviderTest {

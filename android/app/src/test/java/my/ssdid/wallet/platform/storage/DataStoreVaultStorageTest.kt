@@ -4,11 +4,11 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
-import my.ssdid.wallet.domain.model.Algorithm
-import my.ssdid.wallet.domain.model.Identity
-import my.ssdid.wallet.domain.model.CredentialSubject
-import my.ssdid.wallet.domain.model.Proof
-import my.ssdid.wallet.domain.model.VerifiableCredential
+import my.ssdid.sdk.domain.model.Algorithm
+import my.ssdid.sdk.domain.model.Identity
+import my.ssdid.sdk.domain.model.CredentialSubject
+import my.ssdid.sdk.domain.model.Proof
+import my.ssdid.sdk.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.rotation.RotationEntry
 import org.junit.Before
 import org.junit.Test

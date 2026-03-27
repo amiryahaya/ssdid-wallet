@@ -6,7 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import my.ssdid.wallet.domain.model.VerifiableCredential
+import my.ssdid.sdk.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.verifier.offline.CheckStatus
 import my.ssdid.wallet.domain.verifier.offline.CheckType
 import my.ssdid.wallet.domain.verifier.offline.CredentialRepository

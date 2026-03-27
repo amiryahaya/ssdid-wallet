@@ -3,7 +3,7 @@ package my.ssdid.wallet.platform.logging
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
-import my.ssdid.wallet.domain.logging.SsdidLogger
+import my.ssdid.sdk.domain.logging.SsdidLogger
 
 class SentryLogger : SsdidLogger {
     override fun info(category: String, message: String, data: Map<String, String>) {

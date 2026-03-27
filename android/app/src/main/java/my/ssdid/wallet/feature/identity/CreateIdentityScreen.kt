@@ -34,12 +34,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import my.ssdid.wallet.domain.SsdidClient
-import my.ssdid.wallet.domain.model.Algorithm
+import my.ssdid.sdk.domain.model.Algorithm
 import my.ssdid.wallet.domain.transport.ConfirmCodeRequest
 import my.ssdid.wallet.domain.transport.EmailVerifyApi
 import my.ssdid.wallet.domain.transport.SendCodeRequest
 import my.ssdid.wallet.domain.vault.Vault
-import my.ssdid.wallet.domain.vault.VaultStorage
+import my.ssdid.wallet.platform.storage.OnboardingStorage
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.ui.platform.LocalView
@@ -52,7 +52,7 @@ import javax.inject.Inject
 class CreateIdentityViewModel @Inject constructor(
     private val client: SsdidClient,
     private val vault: Vault,
-    private val storage: VaultStorage,
+    private val storage: OnboardingStorage,
     private val emailVerifyApi: EmailVerifyApi,
     @ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle

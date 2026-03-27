@@ -1,15 +1,15 @@
 package my.ssdid.wallet.domain.vault
 
-import my.ssdid.wallet.domain.crypto.CryptoProvider
-import my.ssdid.wallet.domain.crypto.Multibase
-import my.ssdid.wallet.domain.model.*
+import my.ssdid.sdk.domain.crypto.CryptoProvider
+import my.ssdid.sdk.domain.crypto.Multibase
+import my.ssdid.sdk.domain.model.*
 import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
 import my.ssdid.wallet.domain.verifier.offline.CredentialRepository
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
-import my.ssdid.wallet.domain.logging.NoOpLogger
-import my.ssdid.wallet.domain.logging.SsdidLogger
+import my.ssdid.sdk.domain.logging.NoOpLogger
+import my.ssdid.sdk.domain.logging.SsdidLogger
 import java.security.MessageDigest
 import java.time.Instant
 import java.time.ZoneOffset
@@ -105,12 +105,13 @@ class VaultImpl(
         val did = Did(identity.did)
 
         // Check for pre-rotated key hash
-        val nextKeyHash = if (identity.preRotatedKeyId != null) {
-            val preRotated = storage.getPreRotatedKey(identity.preRotatedKeyId)
+        val preRotKeyId = identity.preRotatedKeyId
+        val nextKeyHash = if (preRotKeyId != null) {
+            val preRotated = storage.getPreRotatedKey(preRotKeyId)
             if (preRotated != null) {
                 val sha3 = MessageDigest.getInstance("SHA3-256")
                 val hash = sha3.digest(preRotated.publicKey)
-                my.ssdid.wallet.domain.crypto.Multibase.encode(hash)
+                Multibase.encode(hash)
             } else null
         } else null
 

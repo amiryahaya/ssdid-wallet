@@ -1,7 +1,7 @@
 package my.ssdid.wallet.domain.verifier.offline
 
 import kotlinx.serialization.Serializable
-import my.ssdid.wallet.domain.model.DidDocument
+import my.ssdid.sdk.domain.model.DidDocument
 import my.ssdid.wallet.domain.revocation.StatusListCredential
 
 /**

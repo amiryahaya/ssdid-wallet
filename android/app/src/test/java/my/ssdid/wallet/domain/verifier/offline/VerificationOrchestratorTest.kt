@@ -5,9 +5,9 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import my.ssdid.wallet.domain.model.CredentialSubject
-import my.ssdid.wallet.domain.model.Proof
-import my.ssdid.wallet.domain.model.VerifiableCredential
+import my.ssdid.sdk.domain.model.CredentialSubject
+import my.ssdid.sdk.domain.model.Proof
+import my.ssdid.sdk.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.revocation.RevocationStatus
 import my.ssdid.wallet.domain.verifier.Verifier
 import okhttp3.ResponseBody.Companion.toResponseBody

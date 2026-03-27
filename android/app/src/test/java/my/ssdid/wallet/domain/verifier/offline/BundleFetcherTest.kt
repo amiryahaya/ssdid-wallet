@@ -6,8 +6,8 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import my.ssdid.wallet.domain.model.DidDocument
-import my.ssdid.wallet.domain.model.VerificationMethod
+import my.ssdid.sdk.domain.model.DidDocument
+import my.ssdid.sdk.domain.model.VerificationMethod
 import my.ssdid.wallet.domain.settings.SettingsRepository
 import my.ssdid.wallet.domain.settings.TtlProvider
 import my.ssdid.wallet.domain.transport.RegistryApi

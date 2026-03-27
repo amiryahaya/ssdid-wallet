@@ -12,6 +12,7 @@ import my.ssdid.wallet.domain.vault.VaultStorage
 import my.ssdid.wallet.platform.storage.DataStoreInstitutionalRecoveryStorage
 import my.ssdid.wallet.platform.storage.DataStoreSocialRecoveryStorage
 import my.ssdid.wallet.platform.storage.DataStoreVaultStorage
+import my.ssdid.wallet.platform.storage.OnboardingStorage
 import javax.inject.Singleton
 
 @Module
@@ -20,8 +21,16 @@ object StorageModule {
 
     @Provides
     @Singleton
-    fun provideVaultStorage(@ApplicationContext context: Context): VaultStorage =
+    fun provideDataStoreVaultStorage(@ApplicationContext context: Context): DataStoreVaultStorage =
         DataStoreVaultStorage(context)
+
+    @Provides
+    @Singleton
+    fun provideVaultStorage(dataStore: DataStoreVaultStorage): VaultStorage = dataStore
+
+    @Provides
+    @Singleton
+    fun provideOnboardingStorage(dataStore: DataStoreVaultStorage): OnboardingStorage = dataStore
 
     @Provides
     @Singleton

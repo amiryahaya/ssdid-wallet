@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
-import my.ssdid.wallet.domain.model.Did
-import my.ssdid.wallet.domain.model.Identity
+import my.ssdid.sdk.domain.model.Did
+import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.wallet.domain.transport.SsdidHttpClient
 import my.ssdid.wallet.domain.transport.dto.AcceptWithWalletRequest
 import my.ssdid.wallet.domain.transport.dto.InvitationDetailsResponse
@@ -126,7 +126,7 @@ class InviteAcceptViewModel @Inject constructor(
                         return@launch
                     }
                 val credentialJson = json.encodeToJsonElement(
-                    my.ssdid.wallet.domain.model.VerifiableCredential.serializer(),
+                    my.ssdid.sdk.domain.model.VerifiableCredential.serializer(),
                     credential
                 )
 

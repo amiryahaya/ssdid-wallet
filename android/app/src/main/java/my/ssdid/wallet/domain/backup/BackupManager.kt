@@ -3,10 +3,10 @@ package my.ssdid.wallet.domain.backup
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import my.ssdid.wallet.domain.history.ActivityRepository
-import my.ssdid.wallet.domain.model.ActivityRecord
-import my.ssdid.wallet.domain.model.ActivityStatus
-import my.ssdid.wallet.domain.model.ActivityType
-import my.ssdid.wallet.domain.model.Did
+import my.ssdid.sdk.domain.model.ActivityRecord
+import my.ssdid.sdk.domain.model.ActivityStatus
+import my.ssdid.sdk.domain.model.ActivityType
+import my.ssdid.sdk.domain.model.Did
 import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.domain.vault.KeystoreManager
 import java.security.MessageDigest
@@ -175,8 +175,8 @@ class BackupManager(
                         keystoreManager.generateWrappingKey(wrappingAlias)
                         val encryptedPrivateKey = keystoreManager.encrypt(wrappingAlias, rawPrivateKey)
 
-                        val algorithm = my.ssdid.wallet.domain.model.Algorithm.valueOf(backupIdentity.algorithm)
-                        val identity = my.ssdid.wallet.domain.model.Identity(
+                        val algorithm = my.ssdid.sdk.domain.model.Algorithm.valueOf(backupIdentity.algorithm)
+                        val identity = my.ssdid.sdk.domain.model.Identity(
                             name = backupIdentity.name,
                             did = backupIdentity.did,
                             keyId = backupIdentity.keyId,

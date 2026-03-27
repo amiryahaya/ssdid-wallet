@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import my.ssdid.wallet.domain.SsdidClient
-import my.ssdid.wallet.domain.model.Identity
+import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.wallet.domain.vault.Vault
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack

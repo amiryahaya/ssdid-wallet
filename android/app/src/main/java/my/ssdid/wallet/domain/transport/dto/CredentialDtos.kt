@@ -1,7 +1,7 @@
 package my.ssdid.wallet.domain.transport.dto
 
 import kotlinx.serialization.Serializable
-import my.ssdid.wallet.domain.model.VerifiableCredential
+import my.ssdid.sdk.domain.model.VerifiableCredential
 
 @Serializable
 data class CredentialOfferResponse(

@@ -2,7 +2,7 @@ package my.ssdid.wallet.domain.revocation
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import my.ssdid.wallet.domain.model.VerifiableCredential
+import my.ssdid.sdk.domain.model.VerifiableCredential
 import java.util.concurrent.ConcurrentHashMap
 
 enum class RevocationStatus { VALID, REVOKED, UNKNOWN }

@@ -27,10 +27,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import my.ssdid.wallet.R
 import my.ssdid.wallet.domain.SsdidClient
-import my.ssdid.wallet.domain.model.Algorithm
-import my.ssdid.wallet.domain.model.Did
+import my.ssdid.sdk.domain.model.Algorithm
+import my.ssdid.sdk.domain.model.Did
 import my.ssdid.wallet.domain.recovery.social.SocialRecoveryManager
-import my.ssdid.wallet.domain.vault.VaultStorage
+import my.ssdid.wallet.platform.storage.OnboardingStorage
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
@@ -51,7 +51,7 @@ sealed class SocialRestoreState {
 class SocialRecoveryRestoreViewModel @Inject constructor(
     private val socialRecoveryManager: SocialRecoveryManager,
     private val ssdidClient: SsdidClient,
-    private val storage: VaultStorage
+    private val storage: OnboardingStorage
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<SocialRestoreState>(SocialRestoreState.Idle)

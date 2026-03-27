@@ -1,6 +1,6 @@
 package my.ssdid.wallet.domain.history
 
-import my.ssdid.wallet.domain.model.ActivityRecord
+import my.ssdid.sdk.domain.model.ActivityRecord
 
 interface ActivityRepository {
     suspend fun addActivity(record: ActivityRecord)

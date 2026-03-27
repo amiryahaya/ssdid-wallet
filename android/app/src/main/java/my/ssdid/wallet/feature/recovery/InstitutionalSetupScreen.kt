@@ -27,7 +27,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import my.ssdid.wallet.R
-import my.ssdid.wallet.domain.model.Identity
+import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.wallet.domain.recovery.institutional.InstitutionalRecoveryManager
 import my.ssdid.wallet.domain.vault.Vault
 import androidx.compose.material.icons.Icons

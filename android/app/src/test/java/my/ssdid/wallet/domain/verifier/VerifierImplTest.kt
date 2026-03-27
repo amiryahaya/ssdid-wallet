@@ -3,10 +3,10 @@ package my.ssdid.wallet.domain.verifier
 import com.google.common.truth.Truth.assertThat
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
-import my.ssdid.wallet.domain.crypto.CryptoProvider
-import my.ssdid.wallet.domain.crypto.Multibase
-import my.ssdid.wallet.domain.did.DidResolver
-import my.ssdid.wallet.domain.model.*
+import my.ssdid.sdk.domain.crypto.CryptoProvider
+import my.ssdid.sdk.domain.crypto.Multibase
+import my.ssdid.sdk.domain.did.DidResolver
+import my.ssdid.sdk.domain.model.*
 import org.junit.Before
 import org.junit.Test
 

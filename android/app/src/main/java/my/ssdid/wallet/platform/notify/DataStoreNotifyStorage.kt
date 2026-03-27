@@ -8,8 +8,8 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import my.ssdid.wallet.domain.logging.NoOpLogger
-import my.ssdid.wallet.domain.logging.SsdidLogger
+import my.ssdid.sdk.domain.logging.NoOpLogger
+import my.ssdid.sdk.domain.logging.SsdidLogger
 import my.ssdid.wallet.domain.notify.NotifyStorage
 import my.ssdid.wallet.domain.vault.KeystoreManager
 import java.util.Base64

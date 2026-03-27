@@ -2,9 +2,9 @@ package my.ssdid.wallet.domain.history
 
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
-import my.ssdid.wallet.domain.model.ActivityRecord
-import my.ssdid.wallet.domain.model.ActivityStatus
-import my.ssdid.wallet.domain.model.ActivityType
+import my.ssdid.sdk.domain.model.ActivityRecord
+import my.ssdid.sdk.domain.model.ActivityStatus
+import my.ssdid.sdk.domain.model.ActivityType
 import org.junit.Before
 import org.junit.Test
 

@@ -1,7 +1,7 @@
 package my.ssdid.wallet.domain.vault
 
 import kotlinx.serialization.json.JsonObject
-import my.ssdid.wallet.domain.model.*
+import my.ssdid.sdk.domain.model.*
 import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
 
 interface Vault {

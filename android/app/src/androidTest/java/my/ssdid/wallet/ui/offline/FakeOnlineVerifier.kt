@@ -1,7 +1,7 @@
 package my.ssdid.wallet.ui.offline
 
-import my.ssdid.wallet.domain.model.DidDocument
-import my.ssdid.wallet.domain.model.VerifiableCredential
+import my.ssdid.sdk.domain.model.DidDocument
+import my.ssdid.sdk.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.verifier.Verifier
 import java.io.IOException
 

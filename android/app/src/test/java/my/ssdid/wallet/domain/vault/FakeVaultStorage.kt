@@ -1,7 +1,7 @@
 package my.ssdid.wallet.domain.vault
 
-import my.ssdid.wallet.domain.model.Identity
-import my.ssdid.wallet.domain.model.VerifiableCredential
+import my.ssdid.sdk.domain.model.Identity
+import my.ssdid.sdk.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.rotation.RotationEntry
 import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
 
@@ -39,8 +39,4 @@ class FakeVaultStorage : VaultStorage {
         rotationHistory.getOrPut(did) { mutableListOf() }.add(entry)
     }
     override suspend fun getRotationHistory(did: String) = rotationHistory[did] ?: emptyList()
-
-    private var onboardingCompleted = false
-    override suspend fun isOnboardingCompleted(): Boolean = onboardingCompleted
-    override suspend fun setOnboardingCompleted() { onboardingCompleted = true }
 }

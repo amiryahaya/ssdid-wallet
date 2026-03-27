@@ -2,7 +2,7 @@ package my.ssdid.wallet.domain.revocation
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import my.ssdid.wallet.domain.model.Proof
+import my.ssdid.sdk.domain.model.Proof
 
 @Serializable
 data class StatusListCredential(

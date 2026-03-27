@@ -13,10 +13,10 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import androidx.lifecycle.SavedStateHandle
 import my.ssdid.wallet.domain.SsdidClient
-import my.ssdid.wallet.domain.model.Algorithm
-import my.ssdid.wallet.domain.model.Identity
+import my.ssdid.sdk.domain.model.Algorithm
+import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.wallet.domain.vault.Vault
-import my.ssdid.wallet.domain.vault.VaultStorage
+import my.ssdid.wallet.platform.storage.OnboardingStorage
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -35,7 +35,7 @@ class CreateIdentityViewModelTest {
     private lateinit var viewModel: CreateIdentityViewModel
     private lateinit var client: SsdidClient
     private lateinit var vault: Vault
-    private lateinit var storage: VaultStorage
+    private lateinit var storage: OnboardingStorage
     private lateinit var emailApi: my.ssdid.wallet.domain.transport.EmailVerifyApi
 
     private val testIdentity = Identity(

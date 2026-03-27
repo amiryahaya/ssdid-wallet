@@ -2,7 +2,7 @@ package my.ssdid.wallet.domain.transport
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import my.ssdid.wallet.domain.model.VerifiableCredential
+import my.ssdid.sdk.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.transport.dto.RegisterStartRequest
 import my.ssdid.wallet.domain.transport.dto.RegisterStartResponse
 import my.ssdid.wallet.domain.transport.dto.RegisterVerifyRequest

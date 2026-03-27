@@ -6,7 +6,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import my.ssdid.wallet.domain.model.*
+import my.ssdid.sdk.domain.model.*
 import my.ssdid.wallet.domain.transport.IssuerApi
 import my.ssdid.wallet.domain.transport.SsdidHttpClient
 import my.ssdid.wallet.domain.transport.dto.CredentialAcceptResponse

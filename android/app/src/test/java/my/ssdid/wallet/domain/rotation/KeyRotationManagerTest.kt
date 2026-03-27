@@ -4,11 +4,11 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
 import my.ssdid.wallet.domain.SsdidClient
-import my.ssdid.wallet.domain.crypto.CryptoProvider
-import my.ssdid.wallet.domain.crypto.KeyPairResult
+import my.ssdid.sdk.domain.crypto.CryptoProvider
+import my.ssdid.sdk.domain.crypto.KeyPairResult
 import my.ssdid.wallet.domain.history.ActivityRepository
-import my.ssdid.wallet.domain.model.Algorithm
-import my.ssdid.wallet.domain.model.Identity
+import my.ssdid.sdk.domain.model.Algorithm
+import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.wallet.domain.vault.PreRotatedKeyData
 import my.ssdid.wallet.domain.vault.VaultStorage
 import my.ssdid.wallet.domain.vault.KeystoreManager

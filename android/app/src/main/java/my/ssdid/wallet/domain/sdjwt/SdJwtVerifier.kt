@@ -1,10 +1,10 @@
 package my.ssdid.wallet.domain.sdjwt
 
 import kotlinx.serialization.json.*
-import my.ssdid.wallet.domain.crypto.CryptoProvider
-import my.ssdid.wallet.domain.crypto.Multibase
-import my.ssdid.wallet.domain.did.DidResolver
-import my.ssdid.wallet.domain.model.Algorithm
+import my.ssdid.sdk.domain.crypto.CryptoProvider
+import my.ssdid.sdk.domain.crypto.Multibase
+import my.ssdid.sdk.domain.did.DidResolver
+import my.ssdid.sdk.domain.model.Algorithm
 import java.util.Base64
 
 /**

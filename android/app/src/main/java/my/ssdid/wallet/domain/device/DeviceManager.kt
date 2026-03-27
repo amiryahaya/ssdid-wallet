@@ -1,8 +1,8 @@
 package my.ssdid.wallet.domain.device
 
 import my.ssdid.wallet.domain.SsdidClient
-import my.ssdid.wallet.domain.crypto.Multibase
-import my.ssdid.wallet.domain.model.Identity
+import my.ssdid.sdk.domain.crypto.Multibase
+import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.wallet.domain.transport.SsdidHttpClient
 import my.ssdid.wallet.domain.transport.dto.PairingApproveRequest
 import my.ssdid.wallet.domain.transport.dto.PairingInitRequest

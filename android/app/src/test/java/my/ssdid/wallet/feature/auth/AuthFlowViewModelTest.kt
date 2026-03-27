@@ -12,9 +12,9 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import my.ssdid.wallet.domain.SsdidClient
-import my.ssdid.wallet.domain.model.CredentialSubject
-import my.ssdid.wallet.domain.model.Proof
-import my.ssdid.wallet.domain.model.VerifiableCredential
+import my.ssdid.sdk.domain.model.CredentialSubject
+import my.ssdid.sdk.domain.model.Proof
+import my.ssdid.sdk.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.transport.dto.AuthenticateResponse
 import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.platform.biometric.BiometricAuthenticator

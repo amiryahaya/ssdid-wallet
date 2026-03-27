@@ -6,8 +6,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import my.ssdid.wallet.domain.crypto.ClassicalProvider
-import my.ssdid.wallet.domain.model.*
+import my.ssdid.sdk.domain.crypto.ClassicalProvider
+import my.ssdid.sdk.domain.model.*
 import my.ssdid.wallet.domain.revocation.StatusListCredential
 import my.ssdid.wallet.domain.revocation.StatusListSubject
 import my.ssdid.wallet.domain.settings.SettingsRepository

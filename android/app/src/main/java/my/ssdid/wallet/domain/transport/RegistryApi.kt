@@ -1,6 +1,6 @@
 package my.ssdid.wallet.domain.transport
 
-import my.ssdid.wallet.domain.model.DidDocument
+import my.ssdid.sdk.domain.model.DidDocument
 import my.ssdid.wallet.domain.transport.dto.*
 import retrofit2.http.*
 

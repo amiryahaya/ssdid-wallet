@@ -1,9 +1,9 @@
 package my.ssdid.wallet.feature.identity
 
 import com.google.common.truth.Truth.assertThat
-import my.ssdid.wallet.domain.model.CredentialSubject
-import my.ssdid.wallet.domain.model.Proof
-import my.ssdid.wallet.domain.model.VerifiableCredential
+import my.ssdid.sdk.domain.model.CredentialSubject
+import my.ssdid.sdk.domain.model.Proof
+import my.ssdid.sdk.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.revocation.RevocationStatus
 import org.junit.Test
 import java.time.Instant

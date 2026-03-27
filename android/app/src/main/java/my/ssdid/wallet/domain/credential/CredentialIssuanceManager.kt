@@ -1,13 +1,14 @@
 package my.ssdid.wallet.domain.credential
 
-import my.ssdid.wallet.domain.crypto.Multibase
-import my.ssdid.wallet.domain.model.Identity
-import my.ssdid.wallet.domain.model.VerifiableCredential
+import my.ssdid.sdk.domain.crypto.Multibase
+import my.ssdid.sdk.domain.model.Identity
+import my.ssdid.sdk.domain.model.VerifiableCredential
 import my.ssdid.wallet.domain.transport.SsdidHttpClient
 import my.ssdid.wallet.domain.transport.dto.CredentialAcceptRequest
 import my.ssdid.wallet.domain.transport.dto.CredentialOfferResponse
 import my.ssdid.wallet.domain.vault.Vault
 
+@Deprecated("Use OpenId4VciHandler for OID4VCI flows. This class handles legacy custom issuer API flows only.")
 class CredentialIssuanceManager(
     private val vault: Vault,
     private val httpClient: SsdidHttpClient

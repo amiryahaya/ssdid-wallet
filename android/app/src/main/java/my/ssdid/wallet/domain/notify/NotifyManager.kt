@@ -2,9 +2,9 @@ package my.ssdid.wallet.domain.notify
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import my.ssdid.wallet.domain.logging.NoOpLogger
-import my.ssdid.wallet.domain.logging.SsdidLogger
-import my.ssdid.wallet.domain.model.Identity
+import my.ssdid.sdk.domain.logging.NoOpLogger
+import my.ssdid.sdk.domain.logging.SsdidLogger
+import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.wallet.domain.transport.NotifyApi
 import my.ssdid.wallet.domain.transport.dto.CreateMailboxRequest
 import my.ssdid.wallet.domain.transport.dto.NotifyDevice

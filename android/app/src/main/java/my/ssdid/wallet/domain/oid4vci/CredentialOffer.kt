@@ -1,7 +1,7 @@
 package my.ssdid.wallet.domain.oid4vci
 
-import android.net.Uri
 import kotlinx.serialization.json.*
+import my.ssdid.sdk.domain.util.parseQueryParam
 
 data class TxCodeRequirement(
     val inputMode: String,
@@ -63,9 +63,8 @@ data class CredentialOffer(
         }
 
         fun parseFromUri(uriString: String): Result<CredentialOffer> = runCatching {
-            val uri = Uri.parse(uriString)
-            val offerJson = uri.getQueryParameter("credential_offer")
-            val offerUri = uri.getQueryParameter("credential_offer_uri")
+            val offerJson = parseQueryParam(uriString, "credential_offer")
+            val offerUri = parseQueryParam(uriString, "credential_offer_uri")
 
             when {
                 offerJson != null -> parse(offerJson).getOrThrow()

@@ -13,8 +13,8 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlinx.serialization.json.JsonObject
-import my.ssdid.wallet.domain.model.Algorithm
-import my.ssdid.wallet.domain.model.Identity
+import my.ssdid.sdk.domain.model.Algorithm
+import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.wallet.domain.oid4vci.CredentialOffer
 import my.ssdid.wallet.domain.oid4vci.CredentialOfferReview
 import my.ssdid.wallet.domain.oid4vci.IssuanceResult

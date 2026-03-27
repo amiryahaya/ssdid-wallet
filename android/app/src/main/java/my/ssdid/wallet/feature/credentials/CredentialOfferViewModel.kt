@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import my.ssdid.wallet.domain.model.Identity
+import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.wallet.domain.oid4vci.CredentialOffer
 import my.ssdid.wallet.domain.oid4vci.CredentialOfferReview
 import my.ssdid.wallet.domain.oid4vci.IssuanceResult

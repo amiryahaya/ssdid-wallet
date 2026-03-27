@@ -3,10 +3,10 @@ package my.ssdid.wallet.domain.recovery
 import com.google.common.truth.Truth.assertThat
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
-import my.ssdid.wallet.domain.crypto.ClassicalProvider
-import my.ssdid.wallet.domain.crypto.CryptoProvider
-import my.ssdid.wallet.domain.model.Algorithm
-import my.ssdid.wallet.domain.model.Identity
+import my.ssdid.sdk.domain.crypto.ClassicalProvider
+import my.ssdid.sdk.domain.crypto.CryptoProvider
+import my.ssdid.sdk.domain.model.Algorithm
+import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.wallet.domain.vault.FakeVaultStorage
 import my.ssdid.wallet.domain.vault.VaultImpl
 import my.ssdid.wallet.domain.vault.KeystoreManager

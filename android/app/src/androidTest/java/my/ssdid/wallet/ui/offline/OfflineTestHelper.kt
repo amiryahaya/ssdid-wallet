@@ -1,8 +1,8 @@
 package my.ssdid.wallet.ui.offline
 
-import my.ssdid.wallet.domain.crypto.ClassicalProvider
-import my.ssdid.wallet.domain.crypto.Multibase
-import my.ssdid.wallet.domain.model.*
+import my.ssdid.sdk.domain.crypto.ClassicalProvider
+import my.ssdid.sdk.domain.crypto.Multibase
+import my.ssdid.sdk.domain.model.*
 import my.ssdid.wallet.domain.revocation.StatusListCredential
 import my.ssdid.wallet.domain.vault.VaultImpl
 import my.ssdid.wallet.domain.verifier.offline.VerificationBundle

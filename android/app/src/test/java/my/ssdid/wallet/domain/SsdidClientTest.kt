@@ -3,8 +3,8 @@ package my.ssdid.wallet.domain
 import com.google.common.truth.Truth.assertThat
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
-import my.ssdid.wallet.domain.crypto.Multibase
-import my.ssdid.wallet.domain.model.*
+import my.ssdid.sdk.domain.crypto.Multibase
+import my.ssdid.sdk.domain.model.*
 import my.ssdid.wallet.domain.history.ActivityRepository
 import my.ssdid.wallet.domain.notify.NotifyManager
 import my.ssdid.wallet.domain.revocation.RevocationManager

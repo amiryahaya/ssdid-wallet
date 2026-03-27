@@ -1,6 +1,7 @@
 package my.ssdid.wallet.domain.did
 
-import my.ssdid.wallet.domain.model.DidDocument
+import my.ssdid.sdk.domain.did.DidResolver
+import my.ssdid.sdk.domain.model.DidDocument
 import my.ssdid.wallet.domain.transport.RegistryApi
 
 class SsdidRegistryResolver(private val registryApi: RegistryApi) : DidResolver {
