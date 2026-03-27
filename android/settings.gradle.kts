@@ -18,3 +18,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "ssdid-wallet"
 include(":app")
+include(":sdk:ssdid-core")

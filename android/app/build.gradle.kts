@@ -169,6 +169,9 @@ dependencies {
     // UnifiedPush (FCM-free push delivery)
     implementation("com.github.UnifiedPush:android-connector:2.5.0")
 
+    // SDK
+    implementation(project(":sdk:ssdid-core"))
+
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
