@@ -1,4 +1,4 @@
-package my.ssdid.wallet.domain.notify
+package my.ssdid.wallet.platform.notify
 
 import android.content.Context
 import android.util.Log

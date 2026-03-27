@@ -1,4 +1,4 @@
-package my.ssdid.wallet.domain.notify
+package my.ssdid.wallet.platform.notify
 
 import android.app.Application
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -6,6 +6,7 @@ import androidx.lifecycle.LifecycleOwner
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import my.ssdid.wallet.SsdidApp
+import my.ssdid.wallet.domain.notify.NotifyManager
 import my.ssdid.wallet.domain.vault.Vault
 
 /**

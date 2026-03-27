@@ -10,6 +10,9 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import my.ssdid.wallet.domain.notify.LocalNotification
+import my.ssdid.wallet.platform.notify.LocalNotificationStorage
+import my.ssdid.wallet.platform.notify.localNotificationsStore
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)

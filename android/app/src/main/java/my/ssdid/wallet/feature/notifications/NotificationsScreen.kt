@@ -26,7 +26,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import my.ssdid.wallet.domain.notify.LocalNotification
-import my.ssdid.wallet.domain.notify.LocalNotificationStorage
+import my.ssdid.wallet.platform.notify.LocalNotificationStorage
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
 

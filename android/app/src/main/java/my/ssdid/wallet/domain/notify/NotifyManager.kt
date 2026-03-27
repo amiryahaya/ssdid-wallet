@@ -9,6 +9,7 @@ import my.ssdid.wallet.domain.transport.NotifyApi
 import my.ssdid.wallet.domain.transport.dto.CreateMailboxRequest
 import my.ssdid.wallet.domain.transport.dto.NotifyDevice
 import my.ssdid.wallet.domain.transport.dto.PendingNotification
+import my.ssdid.wallet.platform.notify.LocalNotificationStorage
 import my.ssdid.wallet.domain.transport.dto.RegisterInboxRequest
 import my.ssdid.wallet.domain.transport.dto.UpdateDevicesRequest
 import java.security.MessageDigest

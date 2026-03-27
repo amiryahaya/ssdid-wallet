@@ -29,7 +29,7 @@ import kotlinx.coroutines.launch
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import my.ssdid.wallet.domain.model.Identity
-import my.ssdid.wallet.domain.notify.LocalNotificationStorage
+import my.ssdid.wallet.platform.notify.LocalNotificationStorage
 import my.ssdid.wallet.domain.vault.Vault
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons

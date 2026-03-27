@@ -51,11 +51,12 @@ import my.ssdid.wallet.domain.oid4vp.DcqlMatcher
 import my.ssdid.wallet.domain.oid4vp.OpenId4VpHandler
 import my.ssdid.wallet.domain.oid4vp.OpenId4VpTransport
 import my.ssdid.wallet.domain.oid4vp.PresentationDefinitionMatcher
-import my.ssdid.wallet.domain.notify.AndroidNotifyDispatcher
-import my.ssdid.wallet.domain.notify.LocalNotificationStorage
-import my.ssdid.wallet.domain.notify.NotifyLifecycleObserver
 import my.ssdid.wallet.domain.notify.NotifyManager
 import my.ssdid.wallet.domain.notify.NotifyStorage
+import my.ssdid.wallet.platform.notify.AndroidNotifyDispatcher
+import my.ssdid.wallet.platform.notify.DataStoreNotifyStorage
+import my.ssdid.wallet.platform.notify.LocalNotificationStorage
+import my.ssdid.wallet.platform.notify.NotifyLifecycleObserver
 import my.ssdid.wallet.domain.oid4vci.IssuerMetadataResolver
 import my.ssdid.wallet.domain.oid4vci.NonceManager
 import my.ssdid.wallet.domain.oid4vci.OpenId4VciHandler
@@ -274,7 +275,7 @@ object AppModule {
     fun provideNotifyStorage(
         @ApplicationContext context: Context,
         keystoreManager: KeystoreManager
-    ): NotifyStorage = NotifyStorage(context, keystoreManager)
+    ): NotifyStorage = DataStoreNotifyStorage(context, keystoreManager)
 
     @Provides
     @Singleton

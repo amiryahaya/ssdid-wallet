@@ -74,7 +74,7 @@
         </provider>
         <!-- UnifiedPush receiver for push notifications -->
         <receiver
-            android:name=".domain.notify.UnifiedPushReceiver"
+            android:name=".platform.notify.UnifiedPushReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="org.unifiedpush.android.connector.MESSAGE" />
