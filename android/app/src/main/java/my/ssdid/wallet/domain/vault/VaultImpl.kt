@@ -8,9 +8,8 @@ import my.ssdid.wallet.domain.verifier.offline.CredentialRepository
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
-import io.sentry.Breadcrumb
-import io.sentry.Sentry
-import io.sentry.SentryLevel
+import my.ssdid.wallet.domain.logging.NoOpLogger
+import my.ssdid.wallet.domain.logging.SsdidLogger
 import java.security.MessageDigest
 import java.time.Instant
 import java.time.ZoneOffset
@@ -21,7 +20,8 @@ class VaultImpl(
     private val pqcProvider: CryptoProvider,
     private val keystoreManager: KeystoreManager,
     private val storage: VaultStorage,
-    private val credentialRepository: CredentialRepository? = null
+    private val credentialRepository: CredentialRepository? = null,
+    private val logger: SsdidLogger = NoOpLogger()
 ) : Vault {
 
     private fun providerFor(algorithm: Algorithm): CryptoProvider {
@@ -32,10 +32,7 @@ class VaultImpl(
         val existing = storage.listIdentities().any { it.name.equals(name, ignoreCase = true) }
         require(!existing) { "An identity with the name \"$name\" already exists" }
 
-        Sentry.addBreadcrumb(Breadcrumb().apply {
-            category = "vault"; message = "Generating key pair"; level = SentryLevel.INFO
-            data["algorithm"] = algorithm.name; data["isPostQuantum"] = algorithm.isPostQuantum.toString()
-        })
+        logger.info("vault", "Generating key pair", mapOf("algorithm" to algorithm.name, "isPostQuantum" to algorithm.isPostQuantum.toString()))
         val provider = providerFor(algorithm)
         val keyPair = provider.generateKeyPair(algorithm)
         val did = Did.generate()
@@ -143,16 +140,9 @@ class VaultImpl(
         val docHash = sha3.digest(canonicalJson(document).toByteArray(Charsets.UTF_8))
         val payload = optionsHash + docHash
 
-        Sentry.addBreadcrumb(Breadcrumb().apply {
-            category = "vault"; message = "Signing proof payload"; level = SentryLevel.INFO
-            data["proofPurpose"] = proofPurpose; data["algorithm"] = identity.algorithm.name
-            data["payloadSize"] = payload.size.toString()
-        })
+        logger.info("vault", "Signing proof payload", mapOf("proofPurpose" to proofPurpose, "algorithm" to identity.algorithm.name, "payloadSize" to payload.size.toString()))
         val signature = sign(keyId, payload).getOrThrow()
-        Sentry.addBreadcrumb(Breadcrumb().apply {
-            category = "vault"; message = "Proof signed"; level = SentryLevel.INFO
-            data["signatureSize"] = signature.size.toString()
-        })
+        logger.info("vault", "Proof signed", mapOf("signatureSize" to signature.size.toString()))
         Proof(
             type = identity.algorithm.proofType,
             created = now,

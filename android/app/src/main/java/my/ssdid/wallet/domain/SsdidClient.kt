@@ -18,9 +18,8 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
-import io.sentry.Breadcrumb
-import io.sentry.Sentry
-import io.sentry.SentryLevel
+import my.ssdid.wallet.domain.logging.NoOpLogger
+import my.ssdid.wallet.domain.logging.SsdidLogger
 import java.io.IOException
 import java.net.SocketTimeoutException
 import java.security.MessageDigest
@@ -34,7 +33,8 @@ class SsdidClient(
     private val httpClient: SsdidHttpClient,
     private val activityRepo: ActivityRepository,
     private val revocationManager: RevocationManager,
-    private val notifyManager: NotifyManager
+    private val notifyManager: NotifyManager,
+    private val logger: SsdidLogger = NoOpLogger()
 ) {
     private val wireJson = Json {
         ignoreUnknownKeys = true
@@ -84,33 +84,22 @@ class SsdidClient(
      *  If registry registration fails, the locally created identity is deleted
      *  so that retrying does not create orphaned duplicates. */
     suspend fun initIdentity(name: String, algorithm: Algorithm): Result<Identity> {
-        Sentry.addBreadcrumb(Breadcrumb().apply {
-            category = "identity"; message = "Creating identity"; level = SentryLevel.INFO
-            data["algorithm"] = algorithm.name
-        })
+        logger.info("identity", "Creating identity", mapOf("algorithm" to algorithm.name))
         val identity = vault.createIdentity(name, algorithm).getOrElse { return Result.failure(it) }
 
         return try {
-            Sentry.addBreadcrumb(Breadcrumb().apply {
-                category = "identity"; message = "Building DID document"; level = SentryLevel.INFO
-                data["keyId"] = identity.keyId
-            })
+            logger.info("identity", "Building DID document", mapOf("keyId" to identity.keyId))
             val didDoc = vault.buildDidDocument(identity.keyId).getOrThrow()
             val didDocJsonObject = didDoc.toJsonObject()
 
-            Sentry.addBreadcrumb(Breadcrumb().apply {
-                category = "identity"; message = "Creating proof"; level = SentryLevel.INFO
-                data["proofPurpose"] = "assertionMethod"
-            })
+            logger.info("identity", "Creating proof", mapOf("proofPurpose" to "assertionMethod"))
             val proof = vault.createProof(
                 identity.keyId,
                 didDocJsonObject,
                 "assertionMethod"
             ).getOrThrow()
 
-            Sentry.addBreadcrumb(Breadcrumb().apply {
-                category = "identity"; message = "Registering DID with registry"; level = SentryLevel.INFO
-            })
+            logger.info("identity", "Registering DID with registry")
             try {
                 httpClient.registry.registerDid(RegisterDidRequest(didDoc, proof))
             } catch (e: retrofit2.HttpException) {
@@ -147,33 +136,22 @@ class SsdidClient(
     suspend fun deactivateDid(keyId: String): Result<Unit> = runCatching {
         val identity = vault.getIdentity(keyId)
             ?: throw IllegalArgumentException("Identity not found: $keyId")
-        Sentry.addBreadcrumb(Breadcrumb().apply {
-            category = "identity"; message = "Deactivating DID"; level = SentryLevel.WARNING
-            data["algorithm"] = identity.algorithm.name
-        })
+        logger.warning("identity", "Deactivating DID", mapOf("algorithm" to identity.algorithm.name))
         val deactivateData = buildJsonObject {
             put("action", "deactivate")
             put("did", identity.did)
         }
 
-        Sentry.addBreadcrumb(Breadcrumb().apply {
-            category = "identity"; message = "Requesting deactivation challenge"; level = SentryLevel.INFO
-        })
+        logger.info("identity", "Requesting deactivation challenge")
         val challengeResp = httpClient.registry.createChallenge(identity.did)
 
-        Sentry.addBreadcrumb(Breadcrumb().apply {
-            category = "identity"; message = "Creating deactivation proof"; level = SentryLevel.INFO
-        })
+        logger.info("identity", "Creating deactivation proof")
         val proof = vault.createProof(keyId, deactivateData, "capabilityInvocation", challengeResp.challenge, challengeResp.domain).getOrThrow()
 
-        Sentry.addBreadcrumb(Breadcrumb().apply {
-            category = "identity"; message = "Sending deactivation to registry"; level = SentryLevel.INFO
-        })
+        logger.info("identity", "Sending deactivation to registry")
         httpClient.registry.deactivateDid(identity.did, DeactivateDidRequest(proof))
 
-        Sentry.addBreadcrumb(Breadcrumb().apply {
-            category = "identity"; message = "Deleting local identity"; level = SentryLevel.INFO
-        })
+        logger.info("identity", "Deleting local identity")
         notifyManager.deleteMailbox(identity)
         vault.deleteIdentity(keyId).getOrThrow()
         notifyManager.updateKnownIdentities(vault.listIdentities())
@@ -182,10 +160,7 @@ class SsdidClient(
 
     /** Flow 2: Register with a service (mutual auth) */
     suspend fun registerWithService(identity: Identity, serverUrl: String): Result<VerifiableCredential> = runCatching {
-        Sentry.addBreadcrumb(Breadcrumb().apply {
-            category = "service"; message = "Registering with service"; level = SentryLevel.INFO
-            data["serverUrl"] = serverUrl
-        })
+        logger.info("service", "Registering with service", mapOf("serverUrl" to serverUrl))
         val serverApi = httpClient.serverApi(serverUrl)
 
         // Step 1: Start registration — send our DID
@@ -225,10 +200,7 @@ class SsdidClient(
 
     /** Flow 3: Authenticate with a service */
     suspend fun authenticate(credential: VerifiableCredential, serverUrl: String): Result<AuthenticateResponse> = runCatching {
-        Sentry.addBreadcrumb(Breadcrumb().apply {
-            category = "auth"; message = "Authenticating with service"; level = SentryLevel.INFO
-            data["serverUrl"] = serverUrl
-        })
+        logger.info("auth", "Authenticating with service", mapOf("serverUrl" to serverUrl))
         // Check revocation status before presenting credential
         val revocationStatus = revocationManager.checkRevocation(credential)
         if (revocationStatus == RevocationStatus.REVOKED) {
@@ -269,10 +241,7 @@ class SsdidClient(
         transaction: Map<String, String>,
         serverUrl: String
     ): Result<TxSubmitResponse> = runCatching {
-        Sentry.addBreadcrumb(Breadcrumb().apply {
-            category = "transaction"; message = "Signing transaction"; level = SentryLevel.INFO
-            data["serverUrl"] = serverUrl; data["algorithm"] = identity.algorithm.name
-        })
+        logger.info("transaction", "Signing transaction", mapOf("serverUrl" to serverUrl, "algorithm" to identity.algorithm.name))
         val serverApi = httpClient.serverApi(serverUrl)
 
         // Step 1: Request fresh challenge

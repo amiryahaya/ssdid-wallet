@@ -31,6 +31,7 @@ import kotlinx.serialization.json.Json
 import my.ssdid.wallet.domain.vault.Vault
 import my.ssdid.wallet.domain.vault.VaultImpl
 import my.ssdid.wallet.domain.vault.VaultStorage
+import my.ssdid.wallet.platform.logging.SentryLogger
 import my.ssdid.wallet.domain.did.DidJwkResolver
 import my.ssdid.wallet.domain.did.DidKeyResolver
 import my.ssdid.wallet.domain.did.DidResolver
@@ -149,7 +150,7 @@ object AppModule {
         keystoreManager: KeystoreManager,
         storage: VaultStorage,
         credentialRepository: CredentialRepository
-    ): Vault = VaultImpl(classical, pqc, keystoreManager, storage, credentialRepository)
+    ): Vault = VaultImpl(classical, pqc, keystoreManager, storage, credentialRepository, SentryLogger())
 
     @Provides
     @Singleton
@@ -182,7 +183,7 @@ object AppModule {
         activityRepo: ActivityRepository,
         revocationManager: RevocationManager,
         notifyManager: NotifyManager
-    ): SsdidClient = SsdidClient(vault, verifier, httpClient, activityRepo, revocationManager, notifyManager)
+    ): SsdidClient = SsdidClient(vault, verifier, httpClient, activityRepo, revocationManager, notifyManager, SentryLogger())
 
     @Provides
     @Singleton
