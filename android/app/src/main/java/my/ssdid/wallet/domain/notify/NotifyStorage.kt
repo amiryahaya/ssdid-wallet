@@ -7,13 +7,10 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import my.ssdid.wallet.domain.vault.KeystoreManager
 import java.util.Base64
-import javax.inject.Inject
-import javax.inject.Singleton
 
 private val Context.notifyStore: DataStore<Preferences> by preferencesDataStore(name = "ssdid_notify")
 
@@ -24,9 +21,8 @@ private val Context.notifyStore: DataStore<Preferences> by preferencesDataStore(
  * The inbox_secret is sensitive — it is encrypted with an Android Keystore AES-256-GCM key
  * before being stored in DataStore (same pattern as vault private keys).
  */
-@Singleton
-class NotifyStorage @Inject constructor(
-    @ApplicationContext private val context: Context,
+class NotifyStorage(
+    private val context: Context,
     private val keystoreManager: KeystoreManager
 ) {
 

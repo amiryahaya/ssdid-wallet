@@ -14,7 +14,7 @@ import java.util.UUID
 class DeviceManager(
     private val vault: Vault,
     private val httpClient: SsdidHttpClient,
-    private val ssdidClient: dagger.Lazy<SsdidClient>,
+    private val ssdidClient: () -> SsdidClient,
     private val deviceInfo: DeviceInfoProvider
 ) {
     suspend fun initiatePairing(identity: Identity): Result<PairingData> = runCatching {
@@ -72,7 +72,7 @@ class DeviceManager(
             )
         )
         // Sync DID Document with registry after approval adds the new device key
-        ssdidClient.get().updateDidDocument(identity.keyId).getOrThrow()
+        ssdidClient().updateDidDocument(identity.keyId).getOrThrow()
     }
 
     suspend fun listDevices(identity: Identity): Result<List<DeviceInfo>> = runCatching {
@@ -109,7 +109,7 @@ class DeviceManager(
         require(targetKeyId != identity.keyId) { "Cannot revoke primary device key" }
         // Rebuild and publish DID Document — vault only stores the primary key,
         // so the rebuilt document excludes the revoked secondary device key
-        ssdidClient.get().updateDidDocument(identity.keyId).getOrThrow()
+        ssdidClient().updateDidDocument(identity.keyId).getOrThrow()
     }
 }
 

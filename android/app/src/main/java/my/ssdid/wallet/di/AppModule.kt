@@ -17,6 +17,7 @@ import my.ssdid.wallet.domain.crypto.ClassicalProvider
 import my.ssdid.wallet.domain.crypto.CryptoProvider
 import my.ssdid.wallet.domain.crypto.PqcProvider
 import my.ssdid.wallet.domain.history.ActivityRepository
+import my.ssdid.wallet.domain.profile.ProfileMigration
 import my.ssdid.wallet.domain.recovery.RecoveryManager
 import my.ssdid.wallet.domain.recovery.social.SocialRecoveryManager
 import my.ssdid.wallet.domain.recovery.social.SocialRecoveryStorage
@@ -218,7 +219,7 @@ object AppModule {
         keystoreManager: KeystoreManager,
         activityRepo: ActivityRepository,
         ssdidClient: dagger.Lazy<SsdidClient>
-    ): KeyRotationManager = KeyRotationManager(storage, classical, pqc, keystoreManager, activityRepo, ssdidClient)
+    ): KeyRotationManager = KeyRotationManager(storage, classical, pqc, keystoreManager, activityRepo, { ssdidClient.get() })
 
     @Provides
     @Singleton
@@ -227,6 +228,10 @@ object AppModule {
         keystoreManager: KeystoreManager,
         activityRepo: ActivityRepository
     ): BackupManager = BackupManager(vault, keystoreManager, activityRepo)
+
+    @Provides
+    @Singleton
+    fun provideProfileMigration(vault: Vault): ProfileMigration = ProfileMigration(vault)
 
     @Provides
     @Singleton
@@ -246,7 +251,7 @@ object AppModule {
         httpClient: SsdidHttpClient,
         ssdidClient: dagger.Lazy<SsdidClient>,
         deviceInfoProvider: DeviceInfoProvider
-    ): DeviceManager = DeviceManager(vault, httpClient, ssdidClient, deviceInfoProvider)
+    ): DeviceManager = DeviceManager(vault, httpClient, { ssdidClient.get() }, deviceInfoProvider)
 
     @Provides
     @Singleton

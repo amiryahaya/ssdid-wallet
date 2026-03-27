@@ -6,19 +6,15 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import javax.inject.Inject
-import javax.inject.Singleton
 
 internal val Context.localNotificationsStore: DataStore<Preferences> by preferencesDataStore(name = "ssdid_local_notifications")
 
-@Singleton
-class LocalNotificationStorage @Inject constructor(
-    @ApplicationContext private val context: Context
+class LocalNotificationStorage(
+    private val context: Context
 ) {
     private val key = stringPreferencesKey("notifications_json")
     private val json = Json { ignoreUnknownKeys = true }

@@ -22,10 +22,6 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Base64
 import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Named
-import javax.inject.Singleton
-
 @Serializable
 data class RotationStatus(
     val hasPreCommitment: Boolean,
@@ -41,14 +37,13 @@ data class RotationEntry(
     val newKeyIdFragment: String
 )
 
-@Singleton
-class KeyRotationManager @Inject constructor(
+class KeyRotationManager(
     private val storage: VaultStorage,
-    @Named("classical") private val classicalProvider: CryptoProvider,
-    @Named("pqc") private val pqcProvider: CryptoProvider,
+    private val classicalProvider: CryptoProvider,
+    private val pqcProvider: CryptoProvider,
     private val keystoreManager: KeystoreManager,
     private val activityRepo: ActivityRepository,
-    private val ssdidClient: dagger.Lazy<SsdidClient>
+    private val ssdidClient: () -> SsdidClient
 ) {
     private val rotationLocks = ConcurrentHashMap<String, Mutex>()
 
@@ -93,7 +88,7 @@ class KeyRotationManager @Inject constructor(
             storage.saveIdentity(updatedIdentity, existingEncKey)
 
             // Publish pre-commitment to registry
-            ssdidClient.get().updateDidDocument(identity.keyId).getOrThrow()
+            ssdidClient().updateDidDocument(identity.keyId).getOrThrow()
 
             nextKeyHash
         }
@@ -149,7 +144,7 @@ class KeyRotationManager @Inject constructor(
         )
 
         // Publish new key to registry BEFORE deleting old key (crash-safe ordering)
-        ssdidClient.get().updateDidDocument(newIdentity.keyId).getOrThrow()
+        ssdidClient().updateDidDocument(newIdentity.keyId).getOrThrow()
 
         // Clean up: delete old identity's private key and pre-rotated key (safe to lose on crash)
         storage.deleteIdentity(identity.keyId)

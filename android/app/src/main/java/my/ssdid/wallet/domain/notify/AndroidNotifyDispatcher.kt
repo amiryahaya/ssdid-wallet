@@ -7,15 +7,12 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import my.ssdid.wallet.R
 import my.ssdid.wallet.domain.transport.dto.PendingNotification
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Dispatches demultiplexed notifications as Android system notifications.
  * Each notification is tagged with its identity name for user context.
  */
-@Singleton
-class AndroidNotifyDispatcher @Inject constructor(
+class AndroidNotifyDispatcher(
     private val context: Context
 ) : NotifyDispatcher {
 

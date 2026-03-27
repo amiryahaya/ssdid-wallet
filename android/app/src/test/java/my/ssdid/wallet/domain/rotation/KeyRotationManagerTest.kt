@@ -23,9 +23,7 @@ class KeyRotationManagerTest {
     private val keystoreManager = mockk<KeystoreManager>(relaxed = true)
     private val activityRepo = mockk<ActivityRepository>(relaxed = true)
     private val ssdidClient = mockk<SsdidClient>(relaxed = true)
-    private val lazySsdidClient = mockk<dagger.Lazy<SsdidClient>> {
-        every { get() } returns ssdidClient
-    }
+    private val ssdidClientProvider: () -> SsdidClient = { ssdidClient }
 
     private lateinit var manager: KeyRotationManager
 
@@ -41,7 +39,7 @@ class KeyRotationManagerTest {
     @Before
     fun setup() {
         coEvery { ssdidClient.updateDidDocument(any()) } returns Result.success(Unit)
-        manager = KeyRotationManager(storage, classicalProvider, pqcProvider, keystoreManager, activityRepo, lazySsdidClient)
+        manager = KeyRotationManager(storage, classicalProvider, pqcProvider, keystoreManager, activityRepo, ssdidClientProvider)
     }
 
     @Test

@@ -1,8 +1,9 @@
 package my.ssdid.wallet.domain.notify
 
-import android.util.Log
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import my.ssdid.wallet.domain.logging.NoOpLogger
+import my.ssdid.wallet.domain.logging.SsdidLogger
 import my.ssdid.wallet.domain.model.Identity
 import my.ssdid.wallet.domain.transport.NotifyApi
 import my.ssdid.wallet.domain.transport.dto.CreateMailboxRequest
@@ -12,8 +13,6 @@ import my.ssdid.wallet.domain.transport.dto.RegisterInboxRequest
 import my.ssdid.wallet.domain.transport.dto.UpdateDevicesRequest
 import java.security.MessageDigest
 import java.util.Base64
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.jvm.Volatile
 
 /**
@@ -27,12 +26,12 @@ import kotlin.jvm.Volatile
  * The mailbox_id is deterministic: "mbx_" + first 16 chars of Base64url(SHA-256(did.utf8)).
  * This allows recreating it without stored state.
  */
-@Singleton
-class NotifyManager @Inject constructor(
+class NotifyManager(
     private val notifyApi: NotifyApi,
     private val storage: NotifyStorage,
     private val dispatcher: NotifyDispatcher,
-    private val localNotificationStorage: LocalNotificationStorage
+    private val localNotificationStorage: LocalNotificationStorage,
+    private val logger: SsdidLogger = NoOpLogger()
 ) {
 
     private val registrationMutex = Mutex()
@@ -108,10 +107,10 @@ class NotifyManager @Inject constructor(
             // Register with an empty devices list; tokens are updated via updateDeviceToken.
             val response = notifyApi.registerInbox(RegisterInboxRequest(devices = emptyList()))
             storage.saveInboxCredentials(response.inboxId, response.inboxSecret)
-            Log.i(TAG, "Inbox registered: ${response.inboxId}")
+            logger.info(TAG, "Inbox registered: ${response.inboxId}")
             response.inboxId
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to register inbox", e)
+            logger.error(TAG, "Failed to register inbox", e)
             null
         }
     }
@@ -132,9 +131,9 @@ class NotifyManager @Inject constructor(
                     devices = listOf(NotifyDevice(platform = platform, token = token))
                 )
             )
-            Log.i(TAG, "Device token updated for inbox $inboxId")
+            logger.info(TAG, "Device token updated for inbox $inboxId")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to update device token", e)
+            logger.error(TAG, "Failed to update device token", e)
         }
     }
 
@@ -153,9 +152,9 @@ class NotifyManager @Inject constructor(
                 bearerSecret = bearer,
                 request = CreateMailboxRequest(inboxId = inboxId, mailboxId = mailboxId)
             )
-            Log.i(TAG, "Mailbox created: $mailboxId for ${identity.did}")
+            logger.info(TAG, "Mailbox created: $mailboxId for ${identity.did}")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to create mailbox for ${identity.did}", e)
+            logger.error(TAG, "Failed to create mailbox for ${identity.did}", e)
         }
     }
 
@@ -167,9 +166,9 @@ class NotifyManager @Inject constructor(
         val mailboxId = mailboxIdFor(identity)
         try {
             notifyApi.deleteMailbox(bearerSecret = bearer, mailboxId = mailboxId)
-            Log.i(TAG, "Mailbox deleted: $mailboxId for ${identity.did}")
+            logger.info(TAG, "Mailbox deleted: $mailboxId for ${identity.did}")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to delete mailbox for ${identity.did}", e)
+            logger.error(TAG, "Failed to delete mailbox for ${identity.did}", e)
         }
     }
 
@@ -184,7 +183,7 @@ class NotifyManager @Inject constructor(
         return try {
             notifyApi.fetchPending(bearerSecret = bearer).notifications
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to fetch pending notifications", e)
+            logger.error(TAG, "Failed to fetch pending notifications", e)
             emptyList()
         }
     }
@@ -197,7 +196,7 @@ class NotifyManager @Inject constructor(
         try {
             notifyApi.ackPending(bearerSecret = bearer, notificationId = notificationId)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to ack notification $notificationId", e)
+            logger.error(TAG, "Failed to ack notification $notificationId", e)
         }
     }
 
@@ -217,6 +216,10 @@ class NotifyManager @Inject constructor(
      * Format: "mbx_" + first 16 chars of Base64url-nopad(SHA-256(did.utf8))
      * (yields ~96 bits of entropy, sufficient for correlation resistance).
      */
+    private companion object {
+        private const val TAG = "NotifyManager"
+    }
+
     internal fun mailboxIdFor(identity: Identity): String {
         val digest = MessageDigest.getInstance("SHA-256")
             .digest(identity.did.toByteArray(Charsets.UTF_8))
@@ -224,7 +227,4 @@ class NotifyManager @Inject constructor(
         return "mbx_${encoded.take(16)}"
     }
 
-    companion object {
-        private const val TAG = "NotifyManager"
-    }
 }

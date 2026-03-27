@@ -11,16 +11,11 @@ import java.security.MessageDigest
 import java.time.Instant
 import java.util.Base64
 import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Named
-import javax.inject.Singleton
-
-@Singleton
-class RecoveryManager @Inject constructor(
+class RecoveryManager(
     private val vault: Vault,
     private val storage: VaultStorage,
-    @Named("classical") private val classicalProvider: CryptoProvider,
-    @Named("pqc") private val pqcProvider: CryptoProvider,
+    private val classicalProvider: CryptoProvider,
+    private val pqcProvider: CryptoProvider,
     private val keystoreManager: KeystoreManager
 ) {
     private fun providerFor(algorithm: Algorithm): CryptoProvider =
