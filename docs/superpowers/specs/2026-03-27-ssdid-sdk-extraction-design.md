@@ -15,6 +15,10 @@ Extract the SSDID Wallet's domain and platform layers into a standalone SDK (`ss
 - **Platform implementations:** Ship sensible defaults (AndroidKeystore, Keychain, DataStore, etc.) with overridable interfaces
 - **PQC:** Separate optional module (`ssdid-pqc`) to avoid bundling native binaries for consumers who don't need post-quantum support
 - **Documentation:** User manual, API reference (Dokka/DocC), and sample apps
+- **Min platform versions:** Android `minSdk = 26` (Android 8.0), iOS 15+
+- **Error model:** Sealed `SsdidError` hierarchy (no mixed Result/exception patterns)
+- **Threading:** All SDK suspend functions are main-safe; SDK dispatches to IO internally
+- **Logging:** Pluggable `SsdidLogger` interface (no Sentry/android.util.Log dependency)
 
 ## Approach
 
@@ -99,10 +103,13 @@ val sdk = SsdidSdk.builder(context)
 // Android — with overrides and PQC
 val sdk = SsdidSdk.builder(context)
     .registryUrl("https://registry.ssdid.my")
+    .notifyUrl("https://notify.ssdid.my")
+    .emailVerifyUrl("https://email.ssdid.my")
     .keystoreManager(myCustomKeystoreManager)
     .vaultStorage(myCustomStorage)
     .addCryptoProvider(PqcProvider())
-    .certificatePinning(enabled = true)
+    .certificatePinning(enabled = true, pins = listOf(...))
+    .logger(myLogger)
     .build()
 ```
 
@@ -126,6 +133,7 @@ let sdk = SsdidSdk.Builder()
 | `sdk.identity` | `create(name, algorithm)`, `list()`, `get(did)`, `delete(did)`, `buildDidDocument(keyId)`, `updateDidDocument(keyId)` |
 | `sdk.vault` | `sign(keyId, data)`, `createProof(keyId, document, proofPurpose, challenge, domain)` |
 | `sdk.credentials` | `store(credential)`, `list()`, `getForDid(did)`, `delete(id)` |
+| `sdk.flows` | `registerWithService(identity, serviceUrl)`, `authenticate(identity, serviceUrl, challenge)`, `signTransaction(identity, serviceUrl, txBody)` |
 | `sdk.issuance` | `handleOffer(offerUri): IssuanceResult` |
 | `sdk.presentation` | `handleRequest(requestUri): PresentationReviewResult`, `submit(reviewResult, selectedCredentials)` |
 | `sdk.sdJwt` | `parse(compactSdJwt)`, `store(sdJwtVc)`, `list()` |
@@ -138,6 +146,7 @@ let sdk = SsdidSdk.Builder()
 | `sdk.backup` | `export(identities, credentials, password)`, `import(backupData, password)` |
 | `sdk.device` | `register(identity)`, `deregister(identity)` |
 | `sdk.notifications` | `createInbox(identity)`, `fetch()`, `dismiss(notificationId)` |
+| `sdk.revocation` | `checkStatus(credential): RevocationStatus` |
 | `sdk.history` | `log(record)`, `list(did)` |
 
 ### Overridable Interfaces
@@ -153,6 +162,7 @@ let sdk = SsdidSdk.Builder()
 | `NotifyDispatcher` | `AndroidNotifyDispatcher` | `IOSNotifyDispatcher` | Push notification delivery |
 | `ActivityRepository` | In-memory default | In-memory default | Audit logging |
 | `SettingsRepository` | `DataStoreSettingsRepository` | `UserDefaultsSettings` | Persistent settings |
+| `SsdidLogger` | No-op default | No-op default | Pluggable logging/telemetry |
 
 ## Documentation & Sample Code
 
@@ -232,11 +242,24 @@ ssdid-pqc
 
 ### Incremental Migration Phases
 
+0. **Phase 0: Decouple domain from Android/Hilt/Sentry.** Before any code moves:
+   - Remove Sentry imports from `SsdidClient.kt` and `VaultImpl.kt`; replace with `SsdidLogger` interface calls
+   - Strip `javax.inject.*` / `dagger.*` annotations from all domain files (~10 files)
+   - Move domain files with `android.*` imports (`AndroidNotifyDispatcher`, `NotifyStorage`, `NotifyLifecycleObserver`, `LocalNotificationStorage`, `UnifiedPushReceiver`) to `platform/`
+   - Remove `VaultStorage.isOnboardingCompleted()` / `setOnboardingCompleted()` (wallet-specific, not SDK concern)
+   - Move `ActivityModule.kt` (Hilt module) out of `domain/` to wallet's `di/`
+   - Clarify `CredentialIssuanceManager` vs `OpenId4VciHandler` — consolidate or mark one as deprecated
+   - Keep `UnifiedPushReceiver` and `NotifyLifecycleObserver` in wallet (they reference `SsdidApp`); expose callback hooks in SDK
 1. **Phase 1:** Create `sdk/android/ssdid-core`, move `domain/` package. Wallet adds `implementation(project(":sdk:android:ssdid-core"))`. Update imports from `my.ssdid.wallet.domain.*` to `my.ssdid.sdk.*`.
-2. **Phase 2:** Move `platform/` default implementations into `ssdid-core`. Wallet DI shrinks to `SsdidSdk.builder(context).build()`.
+2. **Phase 2:** Move `platform/` default implementations into `ssdid-core`. Wallet DI shrinks to `SsdidSdk.builder(context).build()`. Ship `consumer-rules.pro` for kotlinx-serialization + Retrofit keep rules.
 3. **Phase 3:** Extract PQC into `ssdid-pqc` module.
-4. **Phase 4:** Repeat for iOS — create `SsdidCore` SPM package, move Swift domain + platform code.
-5. **Phase 5:** Publish to GitHub Packages. Wallet switches from `project()` to published artifact dependency.
+4. **Phase 4:** iOS extraction:
+   - Create `SsdidCore` SPM package, move Swift domain + platform code
+   - Audit Domain/ for UIKit imports and remove (same treatment as Android Phase 0)
+   - Verify `ServiceContainer` coupling is abstracted via SDK builder
+   - Set minimum deployment target: iOS 15+
+   - Ensure Swift concurrency contracts match Android (all public methods are async, main-safe)
+5. **Phase 5:** Publish to GitHub Packages. Wallet switches from `project()` to published artifact dependency. Add GPG signing for Maven artifacts.
 
 ### What Stays in the Wallet App
 
@@ -245,6 +268,59 @@ ssdid-pqc
 - App-level lifecycle (biometric lock, onboarding)
 - Deep link routing (delegates to `sdk.issuance` / `sdk.presentation`)
 - Push notification receiver (forwards to `sdk.notifications`)
+
+## Error Model
+
+The SDK standardizes on `Result<T>` for all public methods — no thrown exceptions leak to consumers. Errors use a sealed hierarchy:
+
+```kotlin
+sealed class SsdidError : Exception() {
+    // Network
+    data class NetworkError(val cause: Throwable) : SsdidError()
+    data class Timeout(val url: String) : SsdidError()
+    data class ServerError(val statusCode: Int, val body: String?) : SsdidError()
+
+    // Crypto
+    data class UnsupportedAlgorithm(val algorithm: String) : SsdidError()
+    data class SigningFailed(val reason: String) : SsdidError()
+    data class VerificationFailed(val reason: String) : SsdidError()
+
+    // Storage
+    data class StorageError(val cause: Throwable) : SsdidError()
+    data class IdentityNotFound(val did: String) : SsdidError()
+    data class CredentialNotFound(val id: String) : SsdidError()
+
+    // DID
+    data class DidResolutionFailed(val did: String, val reason: String) : SsdidError()
+
+    // Issuance / Presentation
+    data class IssuanceFailed(val reason: String) : SsdidError()
+    data class PresentationFailed(val reason: String) : SsdidError()
+    data class NoMatchingCredentials(val requestId: String) : SsdidError()
+
+    // Recovery / Rotation
+    data class RecoveryFailed(val reason: String) : SsdidError()
+    data class RotationFailed(val reason: String) : SsdidError()
+}
+```
+
+iOS mirrors this as a Swift enum with associated values.
+
+## Threading Contract
+
+- All public SDK methods are `suspend` (Kotlin) / `async` (Swift)
+- SDK is **main-safe**: all IO, network, and crypto work dispatches internally to background threads
+- Consumers can call SDK methods from any dispatcher/thread
+- Callbacks (e.g., `NotifyDispatcher`, `SsdidLogger`) are invoked on the caller's dispatcher — SDK does not force a thread
+
+## ProGuard / R8
+
+The SDK ships `consumer-rules.pro` that keeps:
+- All `@Serializable` model classes (kotlinx-serialization)
+- Retrofit API interfaces
+- SDK public API surface
+
+Consumers enabling R8/ProGuard get these rules applied automatically.
 
 ## Versioning & Publishing
 
@@ -319,3 +395,10 @@ On tag (sdk-v*):
 
 - Kotlin Binary Compatibility Validator detects breaking changes
 - CI fails if public API changes without explicit `.api` file update
+
+## Testing Strategy
+
+- **SDK unit tests:** Existing domain tests (`android/app/src/test/java/my/ssdid/wallet/domain/`) move into `sdk/android/ssdid-core/src/test/`. Tests for crypto, vault, DID, OID4VCI/VP, recovery, rotation, revocation, and models all belong in the SDK.
+- **Wallet integration tests:** Tests exercising feature/UI logic stay in the wallet app.
+- **SDK test fixtures:** Ship test doubles (`FakeVaultStorage`, `FakeCryptoProvider`, `InMemoryBundleStore`) as a `ssdid-core-testing` artifact so consumers can write their own tests without mocking SDK internals.
+- **Sample app smoke tests:** CI builds all sample apps to catch API breakage.
