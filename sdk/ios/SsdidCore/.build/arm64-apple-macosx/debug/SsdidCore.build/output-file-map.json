@@ -1,0 +1,733 @@
+{
+  "": {
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/master.swiftdeps"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Backup/BackupManager.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/BackupManager.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/BackupManager.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/BackupManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/BackupManager.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/BackupManager.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Crypto/ClassicalProvider.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ClassicalProvider.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ClassicalProvider.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ClassicalProvider~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ClassicalProvider.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ClassicalProvider.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Crypto/CryptoProvider.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CryptoProvider.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CryptoProvider.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CryptoProvider~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CryptoProvider.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CryptoProvider.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Crypto/Multibase.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Multibase.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Multibase.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Multibase~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Multibase.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Multibase.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Crypto/SHA3.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SHA3.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SHA3.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SHA3~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SHA3.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SHA3.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Device/DeviceManager.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DeviceManager.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DeviceManager.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DeviceManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DeviceManager.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DeviceManager.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Did/DidJwkResolver.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DidJwkResolver.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DidJwkResolver.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DidJwkResolver~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DidJwkResolver.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DidJwkResolver.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Did/DidKeyResolver.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DidKeyResolver.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DidKeyResolver.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DidKeyResolver~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DidKeyResolver.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DidKeyResolver.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Did/DidResolutionError.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DidResolutionError.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DidResolutionError.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DidResolutionError~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DidResolutionError.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DidResolutionError.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Did/DidResolver.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DidResolver.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DidResolver.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DidResolver~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DidResolver.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DidResolver.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Did/MultiMethodResolver.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/MultiMethodResolver.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/MultiMethodResolver.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/MultiMethodResolver~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/MultiMethodResolver.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/MultiMethodResolver.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Did/Multicodec.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Multicodec.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Multicodec.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Multicodec~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Multicodec.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Multicodec.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Did/SsdidRegistryResolver.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidRegistryResolver.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidRegistryResolver.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidRegistryResolver~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidRegistryResolver.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidRegistryResolver.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/History/ActivityRepository.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ActivityRepository.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ActivityRepository.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ActivityRepository~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ActivityRepository.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ActivityRepository.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Logging/SsdidLogger.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidLogger.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidLogger.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidLogger~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidLogger.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidLogger.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Model/ActivityRecord.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ActivityRecord.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ActivityRecord.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ActivityRecord~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ActivityRecord.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ActivityRecord.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Model/ActivityStatus.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ActivityStatus.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ActivityStatus.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ActivityStatus~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ActivityStatus.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ActivityStatus.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Model/ActivityType.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ActivityType.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ActivityType.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ActivityType~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ActivityType.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ActivityType.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Model/Algorithm.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Algorithm.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Algorithm.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Algorithm~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Algorithm.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Algorithm.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Model/AnyCodable.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/AnyCodable.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/AnyCodable.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/AnyCodable~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/AnyCodable.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/AnyCodable.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Model/CredentialStatus.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialStatus.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialStatus.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialStatus~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialStatus.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialStatus.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Model/CredentialSubject.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialSubject.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialSubject.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialSubject~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialSubject.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialSubject.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Model/Did.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Did.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Did.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Did~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Did.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Did.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Model/DidDocument.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DidDocument.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DidDocument.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DidDocument~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DidDocument.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DidDocument.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Model/Identity.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Identity.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Identity.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Identity~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Identity.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Identity.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Model/Proof.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Proof.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Proof.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Proof~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Proof.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Proof.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Model/VerifiableCredential.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VerifiableCredential.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VerifiableCredential.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VerifiableCredential~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VerifiableCredential.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VerifiableCredential.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Model/VerifiablePresentation.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VerifiablePresentation.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VerifiablePresentation.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VerifiablePresentation~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VerifiablePresentation.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VerifiablePresentation.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Model/VerificationMethod.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VerificationMethod.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VerificationMethod.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VerificationMethod~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VerificationMethod.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VerificationMethod.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Notify/LocalNotification.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/LocalNotification.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/LocalNotification.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/LocalNotification~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/LocalNotification.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/LocalNotification.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Notify/LocalNotificationStorage.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/LocalNotificationStorage.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/LocalNotificationStorage.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/LocalNotificationStorage~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/LocalNotificationStorage.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/LocalNotificationStorage.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Notify/NotifyManager.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/NotifyManager.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/NotifyManager.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/NotifyManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/NotifyManager.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/NotifyManager.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/OpenId4Vci/CredentialOffer.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialOffer.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialOffer.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialOffer~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialOffer.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialOffer.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/OpenId4Vci/IssuerMetadata.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/IssuerMetadata.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/IssuerMetadata.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/IssuerMetadata~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/IssuerMetadata.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/IssuerMetadata.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/OpenId4Vci/IssuerMetadataResolver.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/IssuerMetadataResolver.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/IssuerMetadataResolver.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/IssuerMetadataResolver~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/IssuerMetadataResolver.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/IssuerMetadataResolver.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/OpenId4Vci/NonceManager.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/NonceManager.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/NonceManager.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/NonceManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/NonceManager.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/NonceManager.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/OpenId4Vci/OpenId4VciHandler.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OpenId4VciHandler.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OpenId4VciHandler.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OpenId4VciHandler~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OpenId4VciHandler.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OpenId4VciHandler.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/OpenId4Vci/OpenId4VciTransport.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OpenId4VciTransport.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OpenId4VciTransport.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OpenId4VciTransport~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OpenId4VciTransport.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OpenId4VciTransport.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/OpenId4Vci/ProofJwtBuilder.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ProofJwtBuilder.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ProofJwtBuilder.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ProofJwtBuilder~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ProofJwtBuilder.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ProofJwtBuilder.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/OpenId4Vci/TokenClient.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/TokenClient.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/TokenClient.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/TokenClient~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/TokenClient.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/TokenClient.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/OpenId4Vp/AuthorizationRequest.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/AuthorizationRequest.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/AuthorizationRequest.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/AuthorizationRequest~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/AuthorizationRequest.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/AuthorizationRequest.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/OpenId4Vp/CredentialQuery.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialQuery.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialQuery.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialQuery~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialQuery.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialQuery.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/OpenId4Vp/DcqlMatcher.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DcqlMatcher.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DcqlMatcher.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DcqlMatcher~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DcqlMatcher.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DcqlMatcher.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/OpenId4Vp/OpenId4VpError.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OpenId4VpError.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OpenId4VpError.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OpenId4VpError~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OpenId4VpError.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OpenId4VpError.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/OpenId4Vp/OpenId4VpHandler.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OpenId4VpHandler.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OpenId4VpHandler.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OpenId4VpHandler~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OpenId4VpHandler.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OpenId4VpHandler.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/OpenId4Vp/OpenId4VpTransport.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OpenId4VpTransport.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OpenId4VpTransport.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OpenId4VpTransport~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OpenId4VpTransport.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OpenId4VpTransport.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/OpenId4Vp/PresentationDefinitionMatcher.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/PresentationDefinitionMatcher.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/PresentationDefinitionMatcher.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/PresentationDefinitionMatcher~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/PresentationDefinitionMatcher.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/PresentationDefinitionMatcher.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/OpenId4Vp/PresentationSubmission.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/PresentationSubmission.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/PresentationSubmission.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/PresentationSubmission~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/PresentationSubmission.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/PresentationSubmission.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/OpenId4Vp/VpTokenBuilder.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VpTokenBuilder.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VpTokenBuilder.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VpTokenBuilder~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VpTokenBuilder.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VpTokenBuilder.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Recovery/Institutional/InstitutionalRecoveryManager.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/InstitutionalRecoveryManager.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/InstitutionalRecoveryManager.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/InstitutionalRecoveryManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/InstitutionalRecoveryManager.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/InstitutionalRecoveryManager.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Recovery/RecoveryManager.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/RecoveryManager.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/RecoveryManager.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/RecoveryManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/RecoveryManager.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/RecoveryManager.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Recovery/Social/ShamirSecretSharing.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ShamirSecretSharing.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ShamirSecretSharing.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ShamirSecretSharing~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ShamirSecretSharing.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ShamirSecretSharing.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Recovery/Social/SocialRecoveryManager.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SocialRecoveryManager.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SocialRecoveryManager.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SocialRecoveryManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SocialRecoveryManager.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SocialRecoveryManager.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Revocation/BitstringParser.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/BitstringParser.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/BitstringParser.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/BitstringParser~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/BitstringParser.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/BitstringParser.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Revocation/HttpStatusListFetcher.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/HttpStatusListFetcher.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/HttpStatusListFetcher.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/HttpStatusListFetcher~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/HttpStatusListFetcher.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/HttpStatusListFetcher.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Revocation/RevocationManager.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/RevocationManager.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/RevocationManager.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/RevocationManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/RevocationManager.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/RevocationManager.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Revocation/RevocationStatus.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/RevocationStatus.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/RevocationStatus.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/RevocationStatus~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/RevocationStatus.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/RevocationStatus.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Revocation/StatusListCredential.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/StatusListCredential.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/StatusListCredential.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/StatusListCredential~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/StatusListCredential.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/StatusListCredential.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Rotation/KeyRotationManager.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/KeyRotationManager.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/KeyRotationManager.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/KeyRotationManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/KeyRotationManager.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/KeyRotationManager.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/SdJwt/Base64URL.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Base64URL.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Base64URL.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Base64URL~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Base64URL.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Base64URL.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/SdJwt/Disclosure.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Disclosure.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Disclosure.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Disclosure~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Disclosure.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Disclosure.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/SdJwt/KeyBindingJwt.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/KeyBindingJwt.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/KeyBindingJwt.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/KeyBindingJwt~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/KeyBindingJwt.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/KeyBindingJwt.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/SdJwt/SdJwtError.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SdJwtError.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SdJwtError.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SdJwtError~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SdJwtError.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SdJwtError.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/SdJwt/SdJwtIssuer.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SdJwtIssuer.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SdJwtIssuer.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SdJwtIssuer~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SdJwtIssuer.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SdJwtIssuer.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/SdJwt/SdJwtParser.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SdJwtParser.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SdJwtParser.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SdJwtParser~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SdJwtParser.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SdJwtParser.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/SdJwt/SdJwtVc.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SdJwtVc.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SdJwtVc.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SdJwtVc~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SdJwtVc.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SdJwtVc.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/SdJwt/StoredSdJwtVc.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/StoredSdJwtVc.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/StoredSdJwtVc.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/StoredSdJwtVc~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/StoredSdJwtVc.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/StoredSdJwtVc.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Settings/SettingsRepository.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SettingsRepository.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SettingsRepository.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SettingsRepository~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SettingsRepository.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SettingsRepository.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Settings/TtlProvider.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/TtlProvider.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/TtlProvider.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/TtlProvider~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/TtlProvider.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/TtlProvider.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/SsdidClient.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidClient.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidClient.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidClient~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidClient.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidClient.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Transport/DTO/AuthDtos.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/AuthDtos.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/AuthDtos.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/AuthDtos~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/AuthDtos.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/AuthDtos.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Transport/DTO/CredentialDtos.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialDtos.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialDtos.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialDtos~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialDtos.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialDtos.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Transport/DTO/DeviceDtos.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DeviceDtos.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DeviceDtos.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DeviceDtos~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DeviceDtos.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DeviceDtos.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Transport/DTO/InviteDtos.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/InviteDtos.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/InviteDtos.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/InviteDtos~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/InviteDtos.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/InviteDtos.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Transport/DTO/NotifyDto.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/NotifyDto.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/NotifyDto.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/NotifyDto~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/NotifyDto.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/NotifyDto.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Transport/DTO/RegistryDtos.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/RegistryDtos.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/RegistryDtos.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/RegistryDtos~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/RegistryDtos.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/RegistryDtos.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Transport/DTO/ServerDtos.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ServerDtos.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ServerDtos.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ServerDtos~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ServerDtos.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ServerDtos.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Transport/DriveApi.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DriveApi.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DriveApi.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DriveApi~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DriveApi.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DriveApi.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Transport/EmailApi.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/EmailApi.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/EmailApi.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/EmailApi~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/EmailApi.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/EmailApi.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Transport/NotifyApi.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/NotifyApi.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/NotifyApi.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/NotifyApi~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/NotifyApi.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/NotifyApi.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Transport/RegistryApi.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/RegistryApi.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/RegistryApi.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/RegistryApi~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/RegistryApi.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/RegistryApi.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Transport/ServerApi.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ServerApi.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ServerApi.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ServerApi~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ServerApi.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ServerApi.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Transport/SsdidHttpClient.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidHttpClient.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidHttpClient.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidHttpClient~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidHttpClient.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidHttpClient.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Vault/JsonUtils.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/JsonUtils.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/JsonUtils.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/JsonUtils~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/JsonUtils.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/JsonUtils.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Vault/Vault.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Vault.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Vault.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Vault~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Vault.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Vault.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Vault/VaultImpl.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VaultImpl.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VaultImpl.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VaultImpl~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VaultImpl.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VaultImpl.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Verifier/Offline/BundleFetcher.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/BundleFetcher.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/BundleFetcher.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/BundleFetcher~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/BundleFetcher.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/BundleFetcher.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Verifier/Offline/BundleManager.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/BundleManager.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/BundleManager.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/BundleManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/BundleManager.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/BundleManager.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Verifier/Offline/CredentialRepository.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialRepository.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialRepository.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialRepository~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialRepository.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/CredentialRepository.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Verifier/Offline/FileBundleStore.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/FileBundleStore.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/FileBundleStore.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/FileBundleStore~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/FileBundleStore.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/FileBundleStore.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Verifier/Offline/OfflineVerifier.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OfflineVerifier.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OfflineVerifier.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OfflineVerifier~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OfflineVerifier.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/OfflineVerifier.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Verifier/Offline/UnifiedVerificationResult.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/UnifiedVerificationResult.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/UnifiedVerificationResult.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/UnifiedVerificationResult~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/UnifiedVerificationResult.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/UnifiedVerificationResult.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Verifier/Offline/VerificationBundle.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VerificationBundle.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VerificationBundle.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VerificationBundle~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VerificationBundle.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VerificationBundle.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Verifier/Offline/VerificationOrchestrator.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VerificationOrchestrator.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VerificationOrchestrator.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VerificationOrchestrator~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VerificationOrchestrator.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VerificationOrchestrator.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Domain/Verifier/Verifier.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Verifier.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Verifier.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Verifier~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Verifier.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/Verifier.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Platform/BundleSyncManager.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/BundleSyncManager.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/BundleSyncManager.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/BundleSyncManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/BundleSyncManager.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/BundleSyncManager.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Platform/ConnectivityMonitor.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ConnectivityMonitor.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ConnectivityMonitor.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ConnectivityMonitor~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ConnectivityMonitor.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/ConnectivityMonitor.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Platform/DeviceInfoProvider.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DeviceInfoProvider.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DeviceInfoProvider.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DeviceInfoProvider~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DeviceInfoProvider.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/DeviceInfoProvider.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Platform/FileCredentialRepository.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/FileCredentialRepository.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/FileCredentialRepository.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/FileCredentialRepository~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/FileCredentialRepository.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/FileCredentialRepository.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Platform/KeychainManager.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/KeychainManager.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/KeychainManager.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/KeychainManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/KeychainManager.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/KeychainManager.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Platform/UrlValidator.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/UrlValidator.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/UrlValidator.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/UrlValidator~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/UrlValidator.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/UrlValidator.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/Platform/VaultStorage.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VaultStorage.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VaultStorage.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VaultStorage~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VaultStorage.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/VaultStorage.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/SsdidError.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidError.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidError.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidError~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidError.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidError.dia"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/Sources/SsdidCore/SsdidSdk.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidSdk.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidSdk.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidSdk~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidSdk.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCore.build/SsdidSdk.dia"
+  }
+}

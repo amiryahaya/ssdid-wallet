@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCorePackageTests.build/master.swiftdeps"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCorePackageTests.derived/runner.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCorePackageTests.build/runner.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCorePackageTests.build/runner.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCorePackageTests.build/runner~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCorePackageTests.build/runner.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidCore/.build/arm64-apple-macosx/debug/SsdidCorePackageTests.build/runner.dia"
+  }
+}
