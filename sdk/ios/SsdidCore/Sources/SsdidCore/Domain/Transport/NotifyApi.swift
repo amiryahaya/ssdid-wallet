@@ -2,12 +2,12 @@ import Foundation
 
 /// API client for the SSDID Notify push notification relay service.
 /// Mirrors the pattern of ServerApi and RegistryApi — takes SsdidHttpClient and a base URL.
-final class NotifyApi: @unchecked Sendable {
+public final class NotifyApi: @unchecked Sendable {
 
     private let client: SsdidHttpClient
     private let baseURL: String
 
-    init(client: SsdidHttpClient, baseURL: String) {
+    public     init(client: SsdidHttpClient, baseURL: String) {
         self.client = client
         self.baseURL = baseURL
     }
@@ -17,7 +17,7 @@ final class NotifyApi: @unchecked Sendable {
     /// POST /api/v1/inbox/register
     /// Registers a new inbox with the given APNs devices.
     /// Returns the inbox_id and inbox_secret that must be stored securely.
-    func registerInbox(request: InboxRegisterRequest) async throws -> InboxRegisterResponse {
+    public     func registerInbox(request: InboxRegisterRequest) async throws -> InboxRegisterResponse {
         return try await client.post(
             url: "\(baseURL)/api/v1/inbox/register",
             body: request,
@@ -27,7 +27,7 @@ final class NotifyApi: @unchecked Sendable {
 
     /// PUT /api/v1/inbox/devices
     /// Updates the device tokens associated with the inbox.
-    func updateDevices(inboxSecret: String, request: InboxUpdateDevicesRequest) async throws {
+    public     func updateDevices(inboxSecret: String, request: InboxUpdateDevicesRequest) async throws {
         try await client.authorizedRequestVoid(
             method: "PUT",
             url: "\(baseURL)/api/v1/inbox/devices",
@@ -40,7 +40,7 @@ final class NotifyApi: @unchecked Sendable {
 
     /// POST /api/v1/mailbox/create
     /// Creates a per-identity mailbox for correlation-free notifications.
-    func createMailbox(inboxSecret: String, request: MailboxCreateRequest) async throws {
+    public     func createMailbox(inboxSecret: String, request: MailboxCreateRequest) async throws {
         try await client.authorizedRequestVoid(
             method: "POST",
             url: "\(baseURL)/api/v1/mailbox/create",
@@ -51,7 +51,7 @@ final class NotifyApi: @unchecked Sendable {
 
     /// DELETE /api/v1/mailbox/{mailbox_id}
     /// Deletes a mailbox when an identity is deactivated.
-    func deleteMailbox(inboxSecret: String, mailboxId: String) async throws {
+    public     func deleteMailbox(inboxSecret: String, mailboxId: String) async throws {
         let encodedMailboxId = mailboxId.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? mailboxId
         try await client.authorizedRequestVoid(
             method: "DELETE",
@@ -65,7 +65,7 @@ final class NotifyApi: @unchecked Sendable {
 
     /// GET /api/v1/pending
     /// Fetches all pending notifications for the inbox.
-    func fetchPending(inboxSecret: String) async throws -> PendingNotificationsResponse {
+    public     func fetchPending(inboxSecret: String) async throws -> PendingNotificationsResponse {
         return try await client.authorizedGet(
             url: "\(baseURL)/api/v1/pending",
             authToken: inboxSecret,
@@ -75,7 +75,7 @@ final class NotifyApi: @unchecked Sendable {
 
     /// DELETE /api/v1/pending/{notification_id}
     /// Acknowledges (deletes) a notification after processing.
-    func ackNotification(inboxSecret: String, notificationId: String) async throws {
+    public     func ackNotification(inboxSecret: String, notificationId: String) async throws {
         let encodedNotificationId = notificationId.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? notificationId
         try await client.authorizedRequestVoid(
             method: "DELETE",

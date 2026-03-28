@@ -1,28 +1,28 @@
 import Foundation
 
 /// Handles HTTP transport for OpenID4VCI flows using URLSession.
-final class OpenId4VciTransport: @unchecked Sendable {
+public final class OpenId4VciTransport: @unchecked Sendable {
 
     private let session: URLSession
 
-    init(session: URLSession = .shared) {
+    public     init(session: URLSession = .shared) {
         self.session = session
     }
 
     /// Fetches issuer metadata from the well-known endpoint.
-    func fetchIssuerMetadata(issuerUrl: String) async throws -> String {
+    public     func fetchIssuerMetadata(issuerUrl: String) async throws -> String {
         let url = "\(issuerUrl.trimmingTrailingSlash())/.well-known/openid-credential-issuer"
         return try await get(url)
     }
 
     /// Fetches OAuth authorization server metadata from the well-known endpoint.
-    func fetchAuthServerMetadata(authServerUrl: String) async throws -> String {
+    public     func fetchAuthServerMetadata(authServerUrl: String) async throws -> String {
         let url = "\(authServerUrl.trimmingTrailingSlash())/.well-known/oauth-authorization-server"
         return try await get(url)
     }
 
     /// Posts a token request with form-encoded body.
-    func postTokenRequest(tokenEndpoint: String, params: [(String, String)]) async throws -> String {
+    public     func postTokenRequest(tokenEndpoint: String, params: [(String, String)]) async throws -> String {
         guard let url = URL(string: tokenEndpoint) else {
             throw OpenId4VciError.transportError("Invalid URL: \(tokenEndpoint)")
         }
@@ -41,7 +41,7 @@ final class OpenId4VciTransport: @unchecked Sendable {
     }
 
     /// Posts a credential request with JSON body and Bearer token authorization.
-    func postCredentialRequest(
+    public     func postCredentialRequest(
         credentialEndpoint: String,
         accessToken: String,
         requestBody: String
@@ -59,7 +59,7 @@ final class OpenId4VciTransport: @unchecked Sendable {
     }
 
     /// Posts a deferred credential request.
-    func postDeferredRequest(
+    public     func postDeferredRequest(
         deferredEndpoint: String,
         accessToken: String,
         transactionId: String
@@ -80,7 +80,7 @@ final class OpenId4VciTransport: @unchecked Sendable {
     }
 
     /// Fetches a credential offer from a URI.
-    func fetchCredentialOffer(offerUri: String) async throws -> String {
+    public     func fetchCredentialOffer(offerUri: String) async throws -> String {
         return try await get(offerUri)
     }
 

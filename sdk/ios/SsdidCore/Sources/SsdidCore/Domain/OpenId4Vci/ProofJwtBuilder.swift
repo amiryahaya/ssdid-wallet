@@ -4,7 +4,7 @@ import Foundation
 ///
 /// The proof JWT demonstrates that the wallet controls the key material
 /// associated with the DID, as required by the OID4VCI specification.
-enum ProofJwtBuilder {
+public enum ProofJwtBuilder {
 
     /// Builds a proof JWT with the OpenID4VCI proof type.
     ///
@@ -17,7 +17,7 @@ enum ProofJwtBuilder {
     ///   - signer: Function that signs the input bytes with the holder's private key.
     ///   - issuedAt: Unix timestamp for the iat claim.
     /// - Returns: Compact JWS string (header.payload.signature).
-    static func build(
+    public static func build(
         algorithm: String,
         keyId: String,
         walletDid: String,

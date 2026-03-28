@@ -1,4 +1,5 @@
 import SwiftUI
+import SsdidCore
 
 struct InviteAcceptScreen: View {
     @Environment(AppRouter.self) private var router

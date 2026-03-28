@@ -1,19 +1,19 @@
 import Foundation
 
 /// Drive API client for SSDID Drive registration, verification, and authentication.
-final class DriveApi: @unchecked Sendable {
+public final class DriveApi: @unchecked Sendable {
 
     private let client: SsdidHttpClient
     private let baseURL: String
 
-    init(client: SsdidHttpClient, baseURL: String) {
+    public     init(client: SsdidHttpClient, baseURL: String) {
         self.client = client
         self.baseURL = baseURL
     }
 
     // MARK: - Registration
 
-    func register(request: RegisterStartRequest) async throws -> RegisterStartResponse {
+    public     func register(request: RegisterStartRequest) async throws -> RegisterStartResponse {
         return try await client.post(
             url: "\(baseURL)/api/auth/ssdid/register",
             body: request,
@@ -21,7 +21,7 @@ final class DriveApi: @unchecked Sendable {
         )
     }
 
-    func registerVerify(request: RegisterVerifyRequest) async throws -> RegisterVerifyResponse {
+    public     func registerVerify(request: RegisterVerifyRequest) async throws -> RegisterVerifyResponse {
         return try await client.post(
             url: "\(baseURL)/api/auth/ssdid/register/verify",
             body: request,
@@ -31,7 +31,7 @@ final class DriveApi: @unchecked Sendable {
 
     // MARK: - Authentication
 
-    func authenticate(request: DriveAuthenticateRequest) async throws -> DriveAuthenticateResponse {
+    public     func authenticate(request: DriveAuthenticateRequest) async throws -> DriveAuthenticateResponse {
         return try await client.post(
             url: "\(baseURL)/api/auth/ssdid/authenticate",
             body: request,
@@ -41,7 +41,7 @@ final class DriveApi: @unchecked Sendable {
 
     // MARK: - Invitations
 
-    func getInvitationByToken(_ token: String) async throws -> InvitationDetailsResponse {
+    public     func getInvitationByToken(_ token: String) async throws -> InvitationDetailsResponse {
         guard let encodedToken = token.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else {
             throw HttpError.invalidURL("Invalid token")
         }
@@ -51,7 +51,7 @@ final class DriveApi: @unchecked Sendable {
         )
     }
 
-    func acceptWithWallet(token: String, request: AcceptWithWalletRequest) async throws -> AcceptWithWalletResponse {
+    public     func acceptWithWallet(token: String, request: AcceptWithWalletRequest) async throws -> AcceptWithWalletResponse {
         guard let encodedToken = token.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else {
             throw HttpError.invalidURL("Invalid token")
         }

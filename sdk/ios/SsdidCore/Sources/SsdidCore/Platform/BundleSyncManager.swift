@@ -8,15 +8,15 @@
 /// Register `BundleSyncManager.taskIdentifier` in Info.plist under
 /// `BGTaskSchedulerPermittedIdentifiers`, and call `registerBackgroundTask()` early
 /// in the app lifecycle (before the first `applicationDidBecomeActive`).
-final class BundleSyncManager: @unchecked Sendable {
-    static let taskIdentifier = "my.ssdid.wallet.bundleSync"
+public final class BundleSyncManager: @unchecked Sendable {
+    public static let taskIdentifier = "my.ssdid.wallet.bundleSync"
 
     private let bundleStore: BundleStore
     private let bundleManager: BundleManager
     private let credentialRepository: CredentialRepository
     private let ttlProvider: TtlProvider
 
-    init(
+    public     init(
         bundleStore: BundleStore,
         bundleManager: BundleManager,
         credentialRepository: CredentialRepository,
@@ -34,7 +34,7 @@ final class BundleSyncManager: @unchecked Sendable {
     /// Register the BGAppRefreshTask handler with a caller-supplied closure.
     /// Must be called before `applicationDidBecomeActive` fires (i.e. from AppDelegate
     /// `didFinishLaunchingWithOptions`). BGTaskScheduler enforces this constraint.
-    static func registerHandler(handler: @escaping (BGAppRefreshTask) -> Void) {
+    public static func registerHandler(handler: @escaping (BGAppRefreshTask) -> Void) {
         BGTaskScheduler.shared.register(
             forTaskWithIdentifier: taskIdentifier,
             using: nil
@@ -48,7 +48,7 @@ final class BundleSyncManager: @unchecked Sendable {
     }
 
     /// Instance-level convenience: register this instance as the background task handler.
-    func registerBackgroundTask() {
+    public     func registerBackgroundTask() {
         BundleSyncManager.registerHandler { [weak self] task in
             guard let self else {
                 task.setTaskCompleted(success: false)
@@ -59,19 +59,19 @@ final class BundleSyncManager: @unchecked Sendable {
     }
 
     /// Submit a BGAppRefreshTaskRequest to run approximately 12 hours from now.
-    func scheduleBackgroundSync() {
+    public     func scheduleBackgroundSync() {
         let request = BGAppRefreshTaskRequest(identifier: Self.taskIdentifier)
         request.earliestBeginDate = Date(timeIntervalSinceNow: 12 * 3600)
         try? BGTaskScheduler.shared.submit(request)
     }
     #else
-    func scheduleBackgroundSync() {}
+    public     func scheduleBackgroundSync() {}
     #endif
 
     // MARK: - Sync Logic
 
     /// Refresh all bundles whose TTL has expired, based on the issuer DIDs of held credentials.
-    func syncNow() async {
+    public     func syncNow() async {
         let issuerDids = await credentialRepository.getUniqueIssuerDids()
         for did in issuerDids {
             guard !Task.isCancelled else { return }
@@ -92,7 +92,7 @@ final class BundleSyncManager: @unchecked Sendable {
     // MARK: - Internal
 
     #if os(iOS)
-    func handleBackgroundTask(_ task: BGAppRefreshTask) {
+    public     func handleBackgroundTask(_ task: BGAppRefreshTask) {
         // Schedule the next refresh before doing any work so the chain continues
         // even if this run expires early.
         scheduleBackgroundSync()

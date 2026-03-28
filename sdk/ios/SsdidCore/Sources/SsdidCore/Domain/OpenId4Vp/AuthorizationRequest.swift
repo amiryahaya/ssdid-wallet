@@ -23,7 +23,7 @@ public struct AuthorizationRequest: Equatable {
     }
 
     /// Parses an authorization request from a URI string (query-parameter form).
-    static func parse(_ uriString: String) throws -> AuthorizationRequest {
+    public static func parse(_ uriString: String) throws -> AuthorizationRequest {
         guard let components = URLComponents(string: uriString) else {
             throw OpenId4VpError.invalidRequest("Cannot parse URI: \(uriString)")
         }
@@ -105,7 +105,7 @@ public struct AuthorizationRequest: Equatable {
     }
 
     /// Parses an authorization request from a JSON string (request object form).
-    static func parseJson(_ jsonString: String) throws -> AuthorizationRequest {
+    public static func parseJson(_ jsonString: String) throws -> AuthorizationRequest {
         guard let data = jsonString.data(using: .utf8),
               let obj = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             throw OpenId4VpError.invalidRequest("Invalid JSON")

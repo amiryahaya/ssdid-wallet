@@ -61,13 +61,67 @@ public final class SsdidSdk: @unchecked Sendable {
     /// Activity history log.
     public let history: HistoryApi
 
-    // MARK: - Internal Services (kept for backward compatibility)
+    // MARK: - Internal Services (exposed for first-party wallet migration)
 
     /// The HTTP client used for all network operations.
-    let httpClient: SsdidHttpClient
+    public let internalHttpClient: SsdidHttpClient
 
     /// Bundle sync manager for background refresh.
-    let bundleSyncManager: BundleSyncManager
+    public let internalBundleSyncManager: BundleSyncManager
+
+    /// The vault implementation.
+    public let internalVault: Vault
+
+    /// The SSDID client orchestrator.
+    public let internalSsdidClient: SsdidClient
+
+    /// Keychain manager for key wrapping.
+    public let internalKeychainManager: KeychainManager
+
+    /// Vault storage for persistence.
+    public let internalStorage: VaultStorage
+
+    /// Classical crypto provider.
+    public let internalClassicalProvider: CryptoProvider
+
+    /// PQC crypto provider.
+    public let internalPqcProvider: CryptoProvider
+
+    /// Backup manager.
+    public let internalBackupManager: BackupManager
+
+    /// Revocation manager.
+    public let internalRevocationManager: RevocationManager
+
+    /// Notify manager.
+    public let internalNotifyManager: NotifyManager
+
+    /// Local notification storage.
+    public let internalLocalNotificationStorage: LocalNotificationStorage
+
+    /// TTL provider.
+    public let internalTtlProvider: TtlProvider
+
+    /// Bundle store.
+    public let internalBundleStore: BundleStore
+
+    /// Credential repository.
+    public let internalCredentialRepository: CredentialRepository
+
+    /// Connectivity monitor.
+    public let internalConnectivityMonitor: ConnectivityMonitor
+
+    /// Offline verifier.
+    public let internalOfflineVerifier: OfflineVerifier
+
+    /// Verification orchestrator.
+    public let internalVerificationOrchestrator: VerificationOrchestrator
+
+    /// Bundle manager.
+    public let internalBundleManager: BundleManager
+
+    /// Activity repository.
+    public let internalActivityRepo: ActivityRepository
 
     /// The logger instance.
     public let logger: SsdidLogger
@@ -91,7 +145,25 @@ public final class SsdidSdk: @unchecked Sendable {
         history: HistoryApi,
         httpClient: SsdidHttpClient,
         bundleSyncManager: BundleSyncManager,
-        logger: SsdidLogger
+        logger: SsdidLogger,
+        internalVault: Vault,
+        internalSsdidClient: SsdidClient,
+        internalKeychainManager: KeychainManager,
+        internalStorage: VaultStorage,
+        internalClassicalProvider: CryptoProvider,
+        internalPqcProvider: CryptoProvider,
+        internalBackupManager: BackupManager,
+        internalRevocationManager: RevocationManager,
+        internalNotifyManager: NotifyManager,
+        internalLocalNotificationStorage: LocalNotificationStorage,
+        internalTtlProvider: TtlProvider,
+        internalBundleStore: BundleStore,
+        internalCredentialRepository: CredentialRepository,
+        internalConnectivityMonitor: ConnectivityMonitor,
+        internalOfflineVerifier: OfflineVerifier,
+        internalVerificationOrchestrator: VerificationOrchestrator,
+        internalBundleManager: BundleManager,
+        internalActivityRepo: ActivityRepository
     ) {
         self.identity = identity
         self.vault = vault
@@ -109,9 +181,27 @@ public final class SsdidSdk: @unchecked Sendable {
         self.notifications = notifications
         self.revocation = revocation
         self.history = history
-        self.httpClient = httpClient
-        self.bundleSyncManager = bundleSyncManager
+        self.internalHttpClient = httpClient
+        self.internalBundleSyncManager = bundleSyncManager
         self.logger = logger
+        self.internalVault = internalVault
+        self.internalSsdidClient = internalSsdidClient
+        self.internalKeychainManager = internalKeychainManager
+        self.internalStorage = internalStorage
+        self.internalClassicalProvider = internalClassicalProvider
+        self.internalPqcProvider = internalPqcProvider
+        self.internalBackupManager = internalBackupManager
+        self.internalRevocationManager = internalRevocationManager
+        self.internalNotifyManager = internalNotifyManager
+        self.internalLocalNotificationStorage = internalLocalNotificationStorage
+        self.internalTtlProvider = internalTtlProvider
+        self.internalBundleStore = internalBundleStore
+        self.internalCredentialRepository = internalCredentialRepository
+        self.internalConnectivityMonitor = internalConnectivityMonitor
+        self.internalOfflineVerifier = internalOfflineVerifier
+        self.internalVerificationOrchestrator = internalVerificationOrchestrator
+        self.internalBundleManager = internalBundleManager
+        self.internalActivityRepo = internalActivityRepo
     }
 
     // MARK: - Builder
@@ -342,6 +432,8 @@ public final class SsdidSdk: @unchecked Sendable {
             let revocationApi = RevocationApi(manager: revocationMgr)
             let historyApi = HistoryApi(repo: activityRepo)
 
+            let connectivityMon = ConnectivityMonitor()
+
             return SsdidSdk(
                 identity: identityApi,
                 vault: vaultApi,
@@ -361,7 +453,25 @@ public final class SsdidSdk: @unchecked Sendable {
                 history: historyApi,
                 httpClient: httpClient,
                 bundleSyncManager: syncMgr,
-                logger: _logger
+                logger: _logger,
+                internalVault: vaultImpl,
+                internalSsdidClient: ssdidClient,
+                internalKeychainManager: keychain,
+                internalStorage: storage,
+                internalClassicalProvider: classical,
+                internalPqcProvider: pqc,
+                internalBackupManager: backupMgr,
+                internalRevocationManager: revocationMgr,
+                internalNotifyManager: notifyMgr,
+                internalLocalNotificationStorage: localNotifStorage,
+                internalTtlProvider: ttl,
+                internalBundleStore: fileBundleStore,
+                internalCredentialRepository: fileCredentialRepo,
+                internalConnectivityMonitor: connectivityMon,
+                internalOfflineVerifier: offlineVerifierImpl,
+                internalVerificationOrchestrator: verificationOrc,
+                internalBundleManager: bundleMgr,
+                internalActivityRepo: activityRepo
             )
         }
     }

@@ -3,14 +3,14 @@ import Security
 
 /// Shamir's Secret Sharing over GF(256) using the irreducible polynomial x^8 + x^4 + x^3 + x + 1.
 /// Splits a byte array secret into N shares with threshold K (any K shares can reconstruct).
-enum ShamirSecretSharing {
+public enum ShamirSecretSharing {
 
-    struct Share: Equatable {
-        let index: Int
-        let data: Data
+    public struct Share: Equatable {
+        public let index: Int
+        public let data: Data
     }
 
-    enum ShamirError: Error {
+    public enum ShamirError: Error {
         case emptySecret
         case thresholdTooLow(Int)
         case insufficientShares(total: Int, threshold: Int)
@@ -27,7 +27,7 @@ enum ShamirSecretSharing {
     ///   - secret: The secret bytes to split
     ///   - k: Minimum shares needed (threshold), must be >= 2
     ///   - n: Total shares to generate, must be >= k and <= 255
-    static func split(secret: Data, threshold k: Int, shares n: Int) throws -> [Share] {
+    public static func split(secret: Data, threshold k: Int, shares n: Int) throws -> [Share] {
         guard !secret.isEmpty else { throw ShamirError.emptySecret }
         guard k >= 2 else { throw ShamirError.thresholdTooLow(k) }
         guard n >= k else { throw ShamirError.insufficientShares(total: n, threshold: k) }
@@ -65,7 +65,7 @@ enum ShamirSecretSharing {
 
     /// Reconstruct the secret from `k` or more shares.
     /// - Parameter shares: At least `k` shares (the threshold used during split)
-    static func combine(shares: [Share]) throws -> Data {
+    public static func combine(shares: [Share]) throws -> Data {
         guard shares.count >= 2 else {
             throw ShamirError.needAtLeastTwoShares(shares.count)
         }
@@ -111,7 +111,7 @@ enum ShamirSecretSharing {
         return UInt8(result & 0xFF)
     }
 
-    static func gfMul(_ a: Int, _ b: Int) -> Int {
+    public static func gfMul(_ a: Int, _ b: Int) -> Int {
         var aa = a
         var bb = b
         var result = 0
@@ -124,7 +124,7 @@ enum ShamirSecretSharing {
         return result
     }
 
-    static func gfInverse(_ a: Int) -> Int {
+    public static func gfInverse(_ a: Int) -> Int {
         precondition(a != 0, "Cannot invert zero in GF(256)")
         // a^254 = a^(-1) in GF(256) by Fermat's little theorem
         var result = a

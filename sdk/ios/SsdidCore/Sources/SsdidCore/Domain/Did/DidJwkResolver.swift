@@ -1,7 +1,7 @@
 import Foundation
 
-final class DidJwkResolver: DidResolver {
-    func resolve(did: String) async throws -> DidDocument {
+public final class DidJwkResolver: DidResolver {
+    public     func resolve(did: String) async throws -> DidDocument {
         guard did.hasPrefix("did:jwk:") else {
             throw DidResolutionError.unsupportedMethod(did)
         }

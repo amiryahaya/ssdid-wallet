@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Identity: Codable, Identifiable {
+public struct Identity: Codable, Identifiable, Sendable {
     public let name: String
     public let did: String
     public let keyId: String

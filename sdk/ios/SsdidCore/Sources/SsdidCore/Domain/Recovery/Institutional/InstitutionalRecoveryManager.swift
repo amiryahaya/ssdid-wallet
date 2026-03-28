@@ -2,12 +2,12 @@ import Foundation
 
 // MARK: - Models
 
-struct OrgRecoveryConfig: Codable, Equatable {
-    let userDid: String
-    let orgDid: String
-    let orgName: String
-    let encryptedRecoveryKey: String
-    let enrolledAt: String
+public struct OrgRecoveryConfig: Codable, Equatable {
+    public let userDid: String
+    public let orgDid: String
+    public let orgName: String
+    public let encryptedRecoveryKey: String
+    public let enrolledAt: String
 }
 
 // MARK: - InstitutionalRecoveryManager
@@ -16,12 +16,12 @@ struct OrgRecoveryConfig: Codable, Equatable {
 /// An organization enrolls as a recovery custodian by providing their DID.
 /// During recovery, the organization signs a recovery authorization that
 /// proves the user's identity claim, allowing key restoration.
-final class InstitutionalRecoveryManager: @unchecked Sendable {
+public final class InstitutionalRecoveryManager: @unchecked Sendable {
 
     private let recoveryManager: RecoveryManager
     private let defaults: UserDefaults
 
-    init(
+    public init(
         recoveryManager: RecoveryManager,
         defaults: UserDefaults = .standard
     ) {
@@ -41,7 +41,7 @@ final class InstitutionalRecoveryManager: @unchecked Sendable {
     ///   - orgName: Display name for the organization
     ///   - encryptedRecoveryKey: Recovery key encrypted to the org's public key
     /// - Returns: The stored organization recovery configuration
-    func enrollOrganization(
+    public func enrollOrganization(
         identity: Identity,
         orgDid: String,
         orgName: String,
@@ -84,7 +84,7 @@ final class InstitutionalRecoveryManager: @unchecked Sendable {
     ///   - recoveryKeyBase64: The recovery private key (provided by org after verification)
     ///   - name: Name for the restored identity
     ///   - algorithm: Algorithm for new key generation
-    func recoverWithOrgAssistance(
+    public func recoverWithOrgAssistance(
         did: String,
         recoveryKeyBase64: String,
         name: String,
@@ -104,12 +104,12 @@ final class InstitutionalRecoveryManager: @unchecked Sendable {
     }
 
     /// Check if institutional recovery is configured for a DID.
-    func hasOrgRecovery(did: String) -> Bool {
+    public func hasOrgRecovery(did: String) -> Bool {
         return getConfig(did: did) != nil
     }
 
     /// Get organization recovery configuration.
-    func getConfig(did: String) -> OrgRecoveryConfig? {
+    public func getConfig(did: String) -> OrgRecoveryConfig? {
         let key = Self.storageKey(for: did)
         guard let data = defaults.data(forKey: key) else { return nil }
         return try? JSONDecoder().decode(OrgRecoveryConfig.self, from: data)
@@ -131,12 +131,12 @@ final class InstitutionalRecoveryManager: @unchecked Sendable {
 
 // MARK: - Errors
 
-enum InstitutionalRecoveryError: Error, LocalizedError {
+public enum InstitutionalRecoveryError: Error, LocalizedError {
     case invalidOrgDid(String)
     case missingRecoveryKey
     case notConfigured(String)
 
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .invalidOrgDid(let did):
             return "Invalid organization DID: \(did)"

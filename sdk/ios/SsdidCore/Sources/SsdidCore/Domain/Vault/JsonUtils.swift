@@ -2,10 +2,10 @@ import Foundation
 
 /// Shared utility for deterministic (canonical) JSON serialization.
 /// Keys are sorted alphabetically at every nesting level, no whitespace.
-enum JsonUtils {
+public enum JsonUtils {
     /// Produces deterministic JSON by recursively sorting dictionary keys.
     /// Matches the registry's canonical_json implementation.
-    static func canonicalJson(_ value: Any) -> String {
+    public static func canonicalJson(_ value: Any) -> String {
         if let dict = value as? [String: Any] {
             let members = dict.keys.sorted().map { key -> String in
                 let escapedKey = escapeJsonString(key)
@@ -36,7 +36,7 @@ enum JsonUtils {
         }
     }
 
-    static func escapeJsonString(_ s: String) -> String {
+    public static func escapeJsonString(_ s: String) -> String {
         var result = ""
         result.reserveCapacity(s.count)
         for ch in s.unicodeScalars {

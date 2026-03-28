@@ -5,24 +5,24 @@ import CryptoKit
 /// Each credential gets its own file in the app's documents directory under `held_credentials/`.
 /// The filename is derived from a sanitised credential ID and a SHA-256 hash prefix,
 /// following the same convention used on Android.
-final class FileCredentialRepository: CredentialRepository {
+public final class FileCredentialRepository: CredentialRepository {
     private let directory: URL
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
 
-    init() {
+    public     init() {
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         directory = docs.appendingPathComponent("held_credentials", isDirectory: true)
         try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
     }
 
-    func saveCredential(_ credential: VerifiableCredential) async throws {
+    public     func saveCredential(_ credential: VerifiableCredential) async throws {
         let data = try encoder.encode(credential)
         let url = fileUrl(for: credential.id)
         try data.write(to: url, options: [.atomic, .completeFileProtection])
     }
 
-    func getHeldCredentials() async -> [VerifiableCredential] {
+    public     func getHeldCredentials() async -> [VerifiableCredential] {
         let dir = directory
         let dec = decoder
         return await withCheckedContinuation { continuation in
@@ -42,12 +42,12 @@ final class FileCredentialRepository: CredentialRepository {
         }
     }
 
-    func getUniqueIssuerDids() async -> [String] {
+    public     func getUniqueIssuerDids() async -> [String] {
         let credentials = await getHeldCredentials()
         return Array(Set(credentials.map { $0.issuer }))
     }
 
-    func deleteCredential(credentialId: String) async throws {
+    public     func deleteCredential(credentialId: String) async throws {
         try FileManager.default.removeItem(at: fileUrl(for: credentialId))
     }
 

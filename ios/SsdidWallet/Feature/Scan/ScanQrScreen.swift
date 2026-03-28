@@ -1,5 +1,6 @@
 import SwiftUI
 import AVFoundation
+import SsdidCore
 
 struct ScanQrScreen: View {
     @Environment(AppRouter.self) private var router

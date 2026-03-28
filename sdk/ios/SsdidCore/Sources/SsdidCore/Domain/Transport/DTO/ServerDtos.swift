@@ -2,9 +2,14 @@ import Foundation
 
 /// Request/response DTOs for server (service) interactions.
 
-struct RegisterStartRequest: Codable {
-    let did: String
-    let keyId: String
+public struct RegisterStartRequest: Codable {
+    public     let did: String
+    public     let keyId: String
+
+    public init(did: String, keyId: String) {
+        self.did = did
+        self.keyId = keyId
+    }
 
     enum CodingKeys: String, CodingKey {
         case did
@@ -12,11 +17,18 @@ struct RegisterStartRequest: Codable {
     }
 }
 
-struct RegisterStartResponse: Codable {
-    let challenge: String
-    let serverDid: String
-    let serverKeyId: String
-    let serverSignature: String
+public struct RegisterStartResponse: Codable {
+    public     let challenge: String
+    public     let serverDid: String
+    public     let serverKeyId: String
+    public     let serverSignature: String
+
+    public init(challenge: String, serverDid: String, serverKeyId: String, serverSignature: String) {
+        self.challenge = challenge
+        self.serverDid = serverDid
+        self.serverKeyId = serverKeyId
+        self.serverSignature = serverSignature
+    }
 
     enum CodingKeys: String, CodingKey {
         case challenge
@@ -26,12 +38,20 @@ struct RegisterStartResponse: Codable {
     }
 }
 
-struct RegisterVerifyRequest: Codable {
-    let did: String
-    let keyId: String
-    let signedChallenge: String
-    let inviteToken: String?
-    let sharedClaims: [String: String]?
+public struct RegisterVerifyRequest: Codable {
+    public     let did: String
+    public     let keyId: String
+    public     let signedChallenge: String
+    public     let inviteToken: String?
+    public     let sharedClaims: [String: String]?
+
+    public init(did: String, keyId: String, signedChallenge: String, inviteToken: String? = nil, sharedClaims: [String: String]? = nil) {
+        self.did = did
+        self.keyId = keyId
+        self.signedChallenge = signedChallenge
+        self.inviteToken = inviteToken
+        self.sharedClaims = sharedClaims
+    }
 
     enum CodingKeys: String, CodingKey {
         case did
@@ -42,12 +62,20 @@ struct RegisterVerifyRequest: Codable {
     }
 }
 
-struct RegisterVerifyResponse: Codable {
-    let credential: VerifiableCredential
+public struct RegisterVerifyResponse: Codable {
+    public     let credential: VerifiableCredential
+
+    public init(credential: VerifiableCredential) {
+        self.credential = credential
+    }
 }
 
-struct AuthenticateRequest: Codable {
-    let credential: VerifiableCredential
+public struct AuthenticateRequest: Codable {
+    public     let credential: VerifiableCredential
+
+    public init(credential: VerifiableCredential) {
+        self.credential = credential
+    }
 }
 
 public struct AuthenticateResponse: Codable {
@@ -57,6 +85,15 @@ public struct AuthenticateResponse: Codable {
     public var serverSignature: String? = nil
     public var status: String? = nil
     public var did: String? = nil
+
+    public init(sessionToken: String, serverDid: String, serverKeyId: String, serverSignature: String? = nil, status: String? = nil, did: String? = nil) {
+        self.sessionToken = sessionToken
+        self.serverDid = serverDid
+        self.serverKeyId = serverKeyId
+        self.serverSignature = serverSignature
+        self.status = status
+        self.did = did
+    }
 
     enum CodingKeys: String, CodingKey {
         case sessionToken = "session_token"
@@ -68,26 +105,44 @@ public struct AuthenticateResponse: Codable {
     }
 }
 
-struct TxChallengeRequest: Codable {
-    let sessionToken: String
+public struct TxChallengeRequest: Codable {
+    public     let sessionToken: String
+
+    public init(sessionToken: String) {
+        self.sessionToken = sessionToken
+    }
 
     enum CodingKeys: String, CodingKey {
         case sessionToken = "session_token"
     }
 }
 
-struct TxChallengeResponse: Codable {
-    let challenge: String
-    var transaction: [String: String] = [:]
-    var did: String? = nil
+public struct TxChallengeResponse: Codable {
+    public     let challenge: String
+    public     var transaction: [String: String] = [:]
+    public     var did: String? = nil
+
+    public init(challenge: String, transaction: [String: String] = [:], did: String? = nil) {
+        self.challenge = challenge
+        self.transaction = transaction
+        self.did = did
+    }
 }
 
-struct TxSubmitRequest: Codable {
-    let sessionToken: String
-    let did: String
-    let keyId: String
-    let signedChallenge: String
-    let transaction: [String: String]
+public struct TxSubmitRequest: Codable {
+    public     let sessionToken: String
+    public     let did: String
+    public     let keyId: String
+    public     let signedChallenge: String
+    public     let transaction: [String: String]
+
+    public init(sessionToken: String, did: String, keyId: String, signedChallenge: String, transaction: [String: String]) {
+        self.sessionToken = sessionToken
+        self.did = did
+        self.keyId = keyId
+        self.signedChallenge = signedChallenge
+        self.transaction = transaction
+    }
 
     enum CodingKeys: String, CodingKey {
         case sessionToken = "session_token"
@@ -101,6 +156,11 @@ struct TxSubmitRequest: Codable {
 public struct TxSubmitResponse: Codable {
     public let transactionId: String
     public let status: String
+
+    public init(transactionId: String, status: String) {
+        self.transactionId = transactionId
+        self.status = status
+    }
 
     enum CodingKeys: String, CodingKey {
         case transactionId = "transaction_id"

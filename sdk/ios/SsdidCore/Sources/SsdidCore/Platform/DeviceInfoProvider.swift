@@ -4,10 +4,10 @@ import UIKit
 #endif
 
 /// Provides device information for pairing, logging, and server interactions.
-final class DeviceInfoProvider {
+public final class DeviceInfoProvider {
 
     /// Returns the device model name (e.g., "iPhone 15 Pro").
-    var modelName: String {
+    public     var modelName: String {
         var systemInfo = utsname()
         uname(&systemInfo)
         let machineMirror = Mirror(reflecting: systemInfo.machine)
@@ -19,7 +19,7 @@ final class DeviceInfoProvider {
     }
 
     /// Returns the device name set by the user (e.g., "John's iPhone").
-    var deviceName: String {
+    public     var deviceName: String {
         #if canImport(UIKit)
         UIDevice.current.name
         #else
@@ -28,7 +28,7 @@ final class DeviceInfoProvider {
     }
 
     /// Returns the iOS version string (e.g., "17.4.1").
-    var systemVersion: String {
+    public     var systemVersion: String {
         #if canImport(UIKit)
         UIDevice.current.systemVersion
         #else
@@ -37,23 +37,23 @@ final class DeviceInfoProvider {
     }
 
     /// Returns the platform identifier for server communications.
-    var platform: String {
+    public     var platform: String {
         "iOS"
     }
 
     /// Returns the app version string (e.g., "1.0.0").
-    var appVersion: String {
+    public     var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"
     }
 
     /// Returns the app build number (e.g., "42").
-    var buildNumber: String {
+    public     var buildNumber: String {
         Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "unknown"
     }
 
     /// Returns a unique device identifier (persisted in UserDefaults).
     /// This is NOT the UDID/IDFV; it is a randomly generated identifier for pairing.
-    var deviceId: String {
+    public     var deviceId: String {
         let key = "ssdid_device_id"
         if let existing = UserDefaults.standard.string(forKey: key) {
             return existing
@@ -64,7 +64,7 @@ final class DeviceInfoProvider {
     }
 
     /// Returns a user-agent string for HTTP requests.
-    var userAgent: String {
+    public     var userAgent: String {
         "SsdidWallet-iOS/\(appVersion) (\(modelName); iOS \(systemVersion))"
     }
 

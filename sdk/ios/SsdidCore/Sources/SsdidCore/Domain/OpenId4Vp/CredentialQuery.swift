@@ -1,32 +1,32 @@
 import Foundation
 
-struct CredentialQuery {
-    let descriptors: [CredentialQueryDescriptor]
+public struct CredentialQuery {
+    public let descriptors: [CredentialQueryDescriptor]
 }
 
-struct CredentialQueryDescriptor {
-    let id: String
-    let format: String
-    let vctFilter: String?
-    let requiredClaims: [String]
-    let optionalClaims: [String]
+public struct CredentialQueryDescriptor {
+    public let id: String
+    public let format: String
+    public let vctFilter: String?
+    public let requiredClaims: [String]
+    public let optionalClaims: [String]
 }
 
-struct MatchResult {
-    let descriptorId: String
-    let credentialId: String
-    let credentialType: String
-    let availableClaims: [String: ClaimInfo]
-    let source: CredentialSource
+public struct MatchResult {
+    public let descriptorId: String
+    public let credentialId: String
+    public let credentialType: String
+    public let availableClaims: [String: ClaimInfo]
+    public let source: CredentialSource
 }
 
-struct ClaimInfo {
-    let name: String
-    let required: Bool
-    let available: Bool
+public struct ClaimInfo {
+    public let name: String
+    public let required: Bool
+    public let available: Bool
 }
 
-enum CredentialSource {
+public enum CredentialSource {
     case sdJwtVc
     case identity
 }

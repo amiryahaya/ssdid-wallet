@@ -1,6 +1,6 @@
 import Foundation
 
-public enum Algorithm: String, Codable, CaseIterable, Identifiable {
+public enum Algorithm: String, Codable, CaseIterable, Identifiable, Sendable {
     // Classical
     case ED25519
     case ECDSA_P256

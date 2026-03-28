@@ -1,19 +1,19 @@
 import Foundation
 
 /// Provides bundle TTL configuration for the orchestrator.
-protocol BundleTtlProvider {
+public protocol BundleTtlProvider {
     var bundleTtlSeconds: TimeInterval { get }
 }
 
 /// Orchestrates credential verification by attempting online first,
 /// then falling back to offline (cached bundle) verification when
 /// network errors or server failures occur.
-final class VerificationOrchestrator: @unchecked Sendable {
+public final class VerificationOrchestrator: @unchecked Sendable {
     private let onlineVerifier: Verifier
     private let offlineVerifier: OfflineVerifier
     private let bundleStore: BundleStore
 
-    init(
+    public     init(
         onlineVerifier: Verifier,
         offlineVerifier: OfflineVerifier,
         bundleStore: BundleStore
@@ -24,7 +24,7 @@ final class VerificationOrchestrator: @unchecked Sendable {
     }
 
     /// Verify a credential online, falling back to offline if a network/server error occurs.
-    func verify(credential: VerifiableCredential) async -> UnifiedVerificationResult {
+    public     func verify(credential: VerifiableCredential) async -> UnifiedVerificationResult {
         do {
             let verified = try await onlineVerifier.verifyCredential(credential: credential)
             if verified {

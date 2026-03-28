@@ -2,10 +2,10 @@ import Foundation
 
 /// Request/response DTOs for device pairing operations.
 
-struct PairingInitRequest: Codable {
-    let did: String
-    let challenge: String
-    let primaryKeyId: String
+public struct PairingInitRequest: Codable {
+    public let did: String
+    public let challenge: String
+    public let primaryKeyId: String
 
     enum CodingKeys: String, CodingKey {
         case did, challenge
@@ -13,20 +13,20 @@ struct PairingInitRequest: Codable {
     }
 }
 
-struct PairingInitResponse: Codable {
-    let pairingId: String
+public struct PairingInitResponse: Codable {
+    public let pairingId: String
 
     enum CodingKeys: String, CodingKey {
         case pairingId = "pairing_id"
     }
 }
 
-struct PairingJoinRequest: Codable {
-    let pairingId: String
-    let publicKey: String
-    let signedChallenge: String
-    let deviceName: String
-    let platform: String
+public struct PairingJoinRequest: Codable {
+    public let pairingId: String
+    public let publicKey: String
+    public let signedChallenge: String
+    public let deviceName: String
+    public let platform: String
 
     enum CodingKeys: String, CodingKey {
         case pairingId = "pairing_id"
@@ -37,14 +37,14 @@ struct PairingJoinRequest: Codable {
     }
 }
 
-struct PairingJoinResponse: Codable {
-    let status: String
+public struct PairingJoinResponse: Codable {
+    public let status: String
 }
 
-struct PairingApproveRequest: Codable {
-    let did: String
-    let keyId: String
-    let signedApproval: String
+public struct PairingApproveRequest: Codable {
+    public let did: String
+    public let keyId: String
+    public let signedApproval: String
 
     enum CodingKeys: String, CodingKey {
         case did

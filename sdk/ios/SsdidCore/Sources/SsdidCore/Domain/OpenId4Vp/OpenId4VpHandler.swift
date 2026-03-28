@@ -12,19 +12,19 @@ public struct PresentationReviewResult {
 }
 
 /// Protocol for listing stored SD-JWT VCs, implemented by VaultStorage.
-protocol SdJwtVcStore {
+public protocol SdJwtVcStore {
     func listSdJwtVcs() async -> [StoredSdJwtVc]
 }
 
 /// Orchestrates the OpenID4VP presentation flow.
-final class OpenId4VpHandler: @unchecked Sendable {
+public final class OpenId4VpHandler: @unchecked Sendable {
 
     private let transport: OpenId4VpTransport
     private let peMatcher: PresentationDefinitionMatcher
     private let dcqlMatcher: DcqlMatcher
     private let vcStore: SdJwtVcStore
 
-    init(
+    public     init(
         transport: OpenId4VpTransport,
         peMatcher: PresentationDefinitionMatcher = PresentationDefinitionMatcher(),
         dcqlMatcher: DcqlMatcher = DcqlMatcher(),
@@ -38,7 +38,7 @@ final class OpenId4VpHandler: @unchecked Sendable {
 
     /// Processes an authorization request URI: parses, resolves request_uri if present,
     /// matches credentials, and returns matches for user review.
-    func processRequest(uri: String) async throws -> PresentationReviewResult {
+    public     func processRequest(uri: String) async throws -> PresentationReviewResult {
         let parsed = try AuthorizationRequest.parse(uri)
 
         let authRequest: AuthorizationRequest
@@ -75,7 +75,7 @@ final class OpenId4VpHandler: @unchecked Sendable {
     }
 
     /// Submits a VP presentation after user consent.
-    func submitPresentation(
+    public     func submitPresentation(
         authRequest: AuthorizationRequest,
         matchResult: VpMatchResult,
         selectedClaims: [String],

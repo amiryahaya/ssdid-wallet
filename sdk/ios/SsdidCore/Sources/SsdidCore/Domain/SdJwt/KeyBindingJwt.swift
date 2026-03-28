@@ -1,8 +1,8 @@
 import Foundation
 import CryptoKit
 
-enum KeyBindingJwt {
-    static func create(
+public enum KeyBindingJwt {
+    public static func create(
         sdJwtWithDisclosures: String,
         audience: String,
         nonce: String,

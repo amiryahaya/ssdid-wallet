@@ -1,16 +1,16 @@
 import Foundation
 import CryptoKit
 
-class SdJwtIssuer {
-    let signer: (Data) -> Data
-    let algorithm: String
+public class SdJwtIssuer {
+    public     let signer: (Data) -> Data
+    public     let algorithm: String
 
-    init(signer: @escaping (Data) -> Data, algorithm: String) {
+    public     init(signer: @escaping (Data) -> Data, algorithm: String) {
         self.signer = signer
         self.algorithm = algorithm
     }
 
-    func issue(
+    public     func issue(
         issuer: String,
         subject: String,
         type: [String],

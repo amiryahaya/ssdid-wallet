@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import SsdidCore
 
 struct EmailVerificationScreen: View {
     @Environment(AppRouter.self) private var router

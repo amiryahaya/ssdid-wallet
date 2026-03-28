@@ -1,7 +1,11 @@
 import Foundation
+import SsdidCore
 
 /// Lightweight dependency container for app-wide services.
 /// Instantiated once at app launch and injected via SwiftUI environment.
+///
+/// Uses ``SsdidSdk.Builder`` for all domain/platform wiring and exposes
+/// service accessors for backward compatibility with existing Feature screens.
 @MainActor
 final class ServiceContainer: ObservableObject {
 
@@ -10,161 +14,54 @@ final class ServiceContainer: ObservableObject {
     /// This is safe because registration fires after `applicationDidBecomeActive`.
     static weak var shared: ServiceContainer?
 
-    let keychainManager: KeychainManager
-    let storage: VaultStorage
-    let activityRepo: ActivityRepository
-    let vault: Vault
-    let classicalProvider: CryptoProvider
-    let pqcProvider: CryptoProvider
-    let backupManager: BackupManager
+    /// The fully wired SDK instance.
+    let sdk: SsdidSdk
+
+    /// Wallet-specific: biometric authentication gate.
     let biometricAuthenticator: BiometricAuthenticator
-    let httpClient: SsdidHttpClient
-    let revocationManager: RevocationManager
-    let ssdidClient: SsdidClient
-    let notifyManager: NotifyManager
-    let localNotificationStorage: LocalNotificationStorage
-    let ttlProvider: TtlProvider
-    let bundleStore: BundleStore
-    let credentialRepository: CredentialRepository
-    let connectivityMonitor: ConnectivityMonitor
-    let offlineVerifier: OfflineVerifier
-    let verificationOrchestrator: VerificationOrchestrator
-    let bundleManager: BundleManager
-    let bundleSyncManager: BundleSyncManager
+
+    // MARK: - Backward-Compatible Service Accessors
+
+    var keychainManager: KeychainManager { sdk.internalKeychainManager }
+    var storage: VaultStorage { sdk.internalStorage }
+    var activityRepo: ActivityRepository { sdk.internalActivityRepo }
+    var vault: Vault { sdk.internalVault }
+    var classicalProvider: CryptoProvider { sdk.internalClassicalProvider }
+    var pqcProvider: CryptoProvider { sdk.internalPqcProvider }
+    var backupManager: BackupManager { sdk.internalBackupManager }
+    var httpClient: SsdidHttpClient { sdk.internalHttpClient }
+    var revocationManager: RevocationManager { sdk.internalRevocationManager }
+    var ssdidClient: SsdidClient { sdk.internalSsdidClient }
+    var notifyManager: NotifyManager { sdk.internalNotifyManager }
+    var localNotificationStorage: LocalNotificationStorage { sdk.internalLocalNotificationStorage }
+    var ttlProvider: TtlProvider { sdk.internalTtlProvider }
+    var bundleStore: BundleStore { sdk.internalBundleStore }
+    var credentialRepository: CredentialRepository { sdk.internalCredentialRepository }
+    var connectivityMonitor: ConnectivityMonitor { sdk.internalConnectivityMonitor }
+    var offlineVerifier: OfflineVerifier { sdk.internalOfflineVerifier }
+    var verificationOrchestrator: VerificationOrchestrator { sdk.internalVerificationOrchestrator }
+    var bundleManager: BundleManager { sdk.internalBundleManager }
+    var bundleSyncManager: BundleSyncManager { sdk.internalBundleSyncManager }
 
     /// Base URL for the SSDID Notify service. Override in debug builds or via configuration.
     static let notifyBaseURL: String = "https://notify.ssdid.my"
 
     init() {
-        let keychain = KeychainManager()
-        let fileStorage = FileVaultStorage()
-        let activityRepository = UserDefaultsActivityRepository()
+        let sdk = SsdidSdk.Builder()
+            .registryUrl("https://registry.ssdid.my")
+            .notifyUrl(Self.notifyBaseURL)
+            .pqcProvider(PqcProvider())
+            .build()
 
-        self.keychainManager = keychain
-        self.storage = fileStorage
-        self.activityRepo = activityRepository
+        self.sdk = sdk
         self.biometricAuthenticator = BiometricAuthenticator()
-
-        let classical = ClassicalProvider()
-        let pqc = PqcProvider()
-
-        self.classicalProvider = classical
-        self.pqcProvider = pqc
-
-        let vaultImpl = VaultImpl(
-            classicalProvider: classical,
-            pqcProvider: pqc,
-            keychainManager: keychain,
-            storage: fileStorage
-        )
-
-        self.vault = vaultImpl
-        self.backupManager = BackupManager(
-            vault: vaultImpl,
-            storage: fileStorage,
-            keychainManager: keychain,
-            activityRepo: activityRepository
-        )
-
-        self.httpClient = SsdidHttpClient()
-        let httpClient = self.httpClient
-        let ssdidRegistryResolver = SsdidRegistryResolver(registryApi: httpClient.registry)
-        let didResolver = MultiMethodResolver(
-            ssdidResolver: ssdidRegistryResolver,
-            keyResolver: DidKeyResolver(),
-            jwkResolver: DidJwkResolver()
-        )
-        let verifier = VerifierImpl(
-            didResolver: didResolver,
-            classicalProvider: classical,
-            pqcProvider: pqc
-        )
-
-        let localNotifStorage = LocalNotificationStorage()
-        self.localNotificationStorage = localNotifStorage
-
-        let notifyMgr = NotifyManager(
-            api: httpClient.notifyApi(baseURL: Self.notifyBaseURL),
-            keychainManager: keychain,
-            localNotificationStorage: localNotifStorage
-        )
-        self.notifyManager = notifyMgr
-
-        // S3: Use the same certificate-pinned session as SsdidHttpClient for status list fetching.
-        // In release builds CertificatePinningDelegate validates the server certificate chain.
-        #if DEBUG
-        let pinnedSession: URLSession = .shared
-        #else
-        let pinningDelegate = CertificatePinningDelegate()
-        let pinnedSessionConfig = URLSessionConfiguration.default
-        pinnedSessionConfig.timeoutIntervalForRequest = 30
-        let pinnedSession = URLSession(
-            configuration: pinnedSessionConfig,
-            delegate: pinningDelegate,
-            delegateQueue: nil
-        )
-        #endif
-
-        let revocationMgr = RevocationManager(fetcher: HttpStatusListFetcher(session: pinnedSession))
-        self.revocationManager = revocationMgr
-
-        self.ssdidClient = SsdidClient(
-            vault: vaultImpl,
-            verifier: verifier,
-            httpClient: httpClient,
-            activityRepo: activityRepository,
-            revocationManager: revocationMgr,
-            notifyManager: notifyMgr
-        )
-
-        // Offline verification stack
-        let ttl = TtlProvider()
-        self.ttlProvider = ttl
-
-        let fileBundleStore = FileBundleStore()
-        self.bundleStore = fileBundleStore
-
-        let fileCredentialRepository = FileCredentialRepository()
-        self.credentialRepository = fileCredentialRepository
-
-        self.connectivityMonitor = ConnectivityMonitor()
-
-        let offlineVerifierImpl = OfflineVerifier(
-            classicalProvider: classical,
-            pqcProvider: pqc,
-            bundleStore: fileBundleStore,
-            ttlProvider: ttl
-        )
-        self.offlineVerifier = offlineVerifierImpl
-
-        self.verificationOrchestrator = VerificationOrchestrator(
-            onlineVerifier: verifier,
-            offlineVerifier: offlineVerifierImpl,
-            bundleStore: fileBundleStore
-        )
-
-        let bundleMgr = BundleManager(
-            verifier: verifier,
-            statusListFetcher: HttpStatusListFetcher(session: pinnedSession),
-            bundleStore: fileBundleStore,
-            ttlProvider: ttl
-        )
-        self.bundleManager = bundleMgr
-
-        let syncManager = BundleSyncManager(
-            bundleStore: fileBundleStore,
-            bundleManager: bundleMgr,
-            credentialRepository: fileCredentialRepository,
-            ttlProvider: ttl
-        )
-        self.bundleSyncManager = syncManager
 
         // Schedule the initial background sync request. Registration is handled earlier
         // in AppDelegate.didFinishLaunchingWithOptions via BundleSyncManager.registerHandler.
-        syncManager.scheduleBackgroundSync()
+        sdk.internalBundleSyncManager.scheduleBackgroundSync()
 
         // One-time migration: copy legacy global profile VC to first identity
-        let migrationVault: Vault = vaultImpl
+        let migrationVault: Vault = sdk.internalVault
         Task.detached(priority: .utility) {
             await ProfileMigration.migrateIfNeeded(vault: migrationVault)
         }

@@ -2,16 +2,16 @@ import Foundation
 
 /// Request/response DTOs for authentication flows.
 
-struct ClaimRequest: Codable {
-    let key: String
-    var required: Bool = false
+public struct ClaimRequest: Codable {
+    public let key: String
+    public var required: Bool = false
 }
 
-struct AuthChallengeResponse: Codable {
-    let challenge: String
-    let serverName: String
-    let serverDid: String
-    let serverKeyId: String
+public struct AuthChallengeResponse: Codable {
+    public let challenge: String
+    public let serverName: String
+    public let serverDid: String
+    public let serverKeyId: String
 
     enum CodingKeys: String, CodingKey {
         case challenge
@@ -21,13 +21,13 @@ struct AuthChallengeResponse: Codable {
     }
 }
 
-struct AuthVerifyRequest: Codable {
-    let did: String
-    let keyId: String
-    let signedChallenge: String
-    let sharedClaims: [String: String]
-    let amr: [String]
-    var sessionId: String? = nil
+public struct AuthVerifyRequest: Codable {
+    public let did: String
+    public let keyId: String
+    public let signedChallenge: String
+    public let sharedClaims: [String: String]
+    public let amr: [String]
+    public var sessionId: String? = nil
 
     enum CodingKeys: String, CodingKey {
         case did
@@ -39,11 +39,11 @@ struct AuthVerifyRequest: Codable {
     }
 }
 
-struct AuthVerifyResponse: Codable {
-    let sessionToken: String
-    let serverDid: String
-    let serverKeyId: String
-    let serverSignature: String
+public struct AuthVerifyResponse: Codable {
+    public let sessionToken: String
+    public let serverDid: String
+    public let serverKeyId: String
+    public let serverSignature: String
 
     enum CodingKeys: String, CodingKey {
         case sessionToken = "session_token"

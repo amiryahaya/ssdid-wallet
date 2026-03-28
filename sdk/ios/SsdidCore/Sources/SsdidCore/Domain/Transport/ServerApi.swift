@@ -1,19 +1,19 @@
 import Foundation
 
 /// Service/Server API client for registration, authentication, and transaction signing.
-final class ServerApi: @unchecked Sendable {
+public final class ServerApi: @unchecked Sendable {
 
     private let client: SsdidHttpClient
     private let baseURL: String
 
-    init(client: SsdidHttpClient, baseURL: String) {
+    public     init(client: SsdidHttpClient, baseURL: String) {
         self.client = client
         self.baseURL = baseURL
     }
 
     // MARK: - Registration
 
-    func registerStart(request: RegisterStartRequest) async throws -> RegisterStartResponse {
+    public     func registerStart(request: RegisterStartRequest) async throws -> RegisterStartResponse {
         return try await client.post(
             url: "\(baseURL)/api/register",
             body: request,
@@ -21,7 +21,7 @@ final class ServerApi: @unchecked Sendable {
         )
     }
 
-    func registerVerify(request: RegisterVerifyRequest) async throws -> RegisterVerifyResponse {
+    public     func registerVerify(request: RegisterVerifyRequest) async throws -> RegisterVerifyResponse {
         return try await client.post(
             url: "\(baseURL)/api/register/verify",
             body: request,
@@ -31,7 +31,7 @@ final class ServerApi: @unchecked Sendable {
 
     // MARK: - Authentication
 
-    func authenticate(request: AuthenticateRequest) async throws -> AuthenticateResponse {
+    public     func authenticate(request: AuthenticateRequest) async throws -> AuthenticateResponse {
         return try await client.post(
             url: "\(baseURL)/api/authenticate",
             body: request,
@@ -39,14 +39,14 @@ final class ServerApi: @unchecked Sendable {
         )
     }
 
-    func getAuthChallenge() async throws -> AuthChallengeResponse {
+    public     func getAuthChallenge() async throws -> AuthChallengeResponse {
         return try await client.get(
             url: "\(baseURL)/api/auth/challenge",
             responseType: AuthChallengeResponse.self
         )
     }
 
-    func verifyAuth(request: AuthVerifyRequest) async throws -> AuthVerifyResponse {
+    public     func verifyAuth(request: AuthVerifyRequest) async throws -> AuthVerifyResponse {
         return try await client.post(
             url: "\(baseURL)/api/auth/verify",
             body: request,
@@ -56,7 +56,7 @@ final class ServerApi: @unchecked Sendable {
 
     // MARK: - Transaction
 
-    func requestChallenge(request: TxChallengeRequest) async throws -> TxChallengeResponse {
+    public     func requestChallenge(request: TxChallengeRequest) async throws -> TxChallengeResponse {
         return try await client.post(
             url: "\(baseURL)/api/transaction/challenge",
             body: request,
@@ -64,7 +64,7 @@ final class ServerApi: @unchecked Sendable {
         )
     }
 
-    func submitTransaction(request: TxSubmitRequest) async throws -> TxSubmitResponse {
+    public     func submitTransaction(request: TxSubmitRequest) async throws -> TxSubmitResponse {
         return try await client.post(
             url: "\(baseURL)/api/transaction/submit",
             body: request,

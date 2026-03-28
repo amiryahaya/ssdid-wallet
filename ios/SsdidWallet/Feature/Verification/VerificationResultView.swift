@@ -1,4 +1,5 @@
 import SwiftUI
+import SsdidCore
 
 struct VerificationResultView: View {
     let result: UnifiedVerificationResult

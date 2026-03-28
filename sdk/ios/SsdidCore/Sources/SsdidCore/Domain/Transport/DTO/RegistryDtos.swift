@@ -2,9 +2,9 @@ import Foundation
 
 /// Request/response DTOs for Registry API interactions.
 
-struct RegisterDidRequest: Codable {
-    let didDocument: DidDocument
-    let proof: Proof
+public struct RegisterDidRequest: Codable {
+    public let didDocument: DidDocument
+    public let proof: Proof
 
     enum CodingKeys: String, CodingKey {
         case didDocument = "did_document"
@@ -12,14 +12,14 @@ struct RegisterDidRequest: Codable {
     }
 }
 
-struct RegisterDidResponse: Codable {
-    let did: String
-    let status: String
+public struct RegisterDidResponse: Codable {
+    public let did: String
+    public let status: String
 }
 
-struct UpdateDidRequest: Codable {
-    let didDocument: DidDocument
-    let proof: Proof
+public struct UpdateDidRequest: Codable {
+    public let didDocument: DidDocument
+    public let proof: Proof
 
     enum CodingKeys: String, CodingKey {
         case didDocument = "did_document"
@@ -27,15 +27,15 @@ struct UpdateDidRequest: Codable {
     }
 }
 
-struct DeactivateDidRequest: Codable {
-    let proof: Proof
+public struct DeactivateDidRequest: Codable {
+    public let proof: Proof
 }
 
-struct ChallengeResponse: Codable {
-    let challenge: String
-    var expiresAt: String? = nil
-    var domain: String? = nil
-    var protocolVersion: String? = nil
+public struct ChallengeResponse: Codable {
+    public let challenge: String
+    public var expiresAt: String? = nil
+    public var domain: String? = nil
+    public var protocolVersion: String? = nil
 
     enum CodingKeys: String, CodingKey {
         case challenge
@@ -45,13 +45,13 @@ struct ChallengeResponse: Codable {
     }
 }
 
-struct RegistryInfoResponse: Codable {
-    let name: String
-    let version: String
-    let didMethod: String
-    var supportedAlgorithms: [String] = []
-    var supportedProofTypes: [String] = []
-    var policies: RegistryPolicies? = nil
+public struct RegistryInfoResponse: Codable {
+    public let name: String
+    public let version: String
+    public let didMethod: String
+    public var supportedAlgorithms: [String] = []
+    public var supportedProofTypes: [String] = []
+    public var policies: RegistryPolicies? = nil
 
     enum CodingKeys: String, CodingKey {
         case name, version
@@ -62,8 +62,8 @@ struct RegistryInfoResponse: Codable {
     }
 }
 
-struct RegistryPolicies: Codable {
-    var proofMaxAgeSeconds: Int? = nil
+public struct RegistryPolicies: Codable {
+    public var proofMaxAgeSeconds: Int? = nil
 
     enum CodingKeys: String, CodingKey {
         case proofMaxAgeSeconds = "proof_max_age_seconds"

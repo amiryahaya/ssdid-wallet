@@ -2,7 +2,7 @@ import Foundation
 import CryptoKit
 
 /// Manages encrypted backup creation and restoration using PBKDF2 + AES-256-GCM.
-final class BackupManager: @unchecked Sendable {
+public final class BackupManager: @unchecked Sendable {
 
     private let vault: Vault
     private let storage: VaultStorage
@@ -14,7 +14,7 @@ final class BackupManager: @unchecked Sendable {
     private static let nonceLength = 12
     private static let keyLengthBytes = 32
 
-    init(
+    public init(
         vault: Vault,
         storage: VaultStorage,
         keychainManager: KeychainManager,
@@ -30,7 +30,7 @@ final class BackupManager: @unchecked Sendable {
 
     /// Creates an encrypted backup of all identities.
     /// Returns the backup package as JSON-encoded bytes.
-    func createBackup(passphrase: String) async throws -> Data {
+    public func createBackup(passphrase: String) async throws -> Data {
         let identities = await vault.listIdentities()
         guard !identities.isEmpty else {
             throw BackupError.noIdentities
@@ -123,7 +123,7 @@ final class BackupManager: @unchecked Sendable {
 
     /// Restores identities from an encrypted backup.
     /// Returns the number of identities restored.
-    func restoreBackup(backupData: Data, passphrase: String) async throws -> Int {
+    public func restoreBackup(backupData: Data, passphrase: String) async throws -> Int {
         let package = try JSONDecoder().decode(BackupPackage.self, from: backupData)
 
         let salt = try Data.fromBase64URL(package.salt)
@@ -243,15 +243,15 @@ final class BackupManager: @unchecked Sendable {
 
 // MARK: - Backup Data Models
 
-struct BackupPackage: Codable {
-    var version: Int = 1
-    let salt: String
-    let nonce: String
-    let ciphertext: String
-    let algorithms: [String]
-    let dids: [String]
-    let createdAt: String
-    let hmac: String
+public struct BackupPackage: Codable {
+    public var version: Int = 1
+    public let salt: String
+    public let nonce: String
+    public let ciphertext: String
+    public let algorithms: [String]
+    public let dids: [String]
+    public let createdAt: String
+    public let hmac: String
 
     enum CodingKeys: String, CodingKey {
         case version, salt, nonce, ciphertext, algorithms, dids
@@ -260,18 +260,18 @@ struct BackupPackage: Codable {
     }
 }
 
-struct BackupPayload: Codable {
-    let identities: [BackupIdentity]
+public struct BackupPayload: Codable {
+    public let identities: [BackupIdentity]
 }
 
-struct BackupIdentity: Codable {
-    let keyId: String
-    let did: String
-    let name: String
-    let algorithm: String
-    let privateKey: String
-    let publicKey: String
-    let createdAt: String
+public struct BackupIdentity: Codable {
+    public let keyId: String
+    public let did: String
+    public let name: String
+    public let algorithm: String
+    public let privateKey: String
+    public let publicKey: String
+    public let createdAt: String
 
     enum CodingKeys: String, CodingKey {
         case keyId = "key_id"
@@ -313,7 +313,7 @@ private extension Data {
             .replacingOccurrences(of: "=", with: "")
     }
 
-    static func fromBase64URL(_ string: String) throws -> Data {
+    public static func fromBase64URL(_ string: String) throws -> Data {
         var base64 = string
             .replacingOccurrences(of: "-", with: "+")
             .replacingOccurrences(of: "_", with: "/")

@@ -3,7 +3,7 @@ import CryptoKit
 
 /// Central orchestrator for SSDID Wallet operations.
 /// Coordinates between Vault, HTTP client, Verifier, and Activity logging.
-final class SsdidClient: @unchecked Sendable {
+public final class SsdidClient: @unchecked Sendable {
 
     private nonisolated(unsafe) static let iso8601 = ISO8601DateFormatter()
 
@@ -14,7 +14,7 @@ final class SsdidClient: @unchecked Sendable {
     private let revocationManager: RevocationManager
     private let notifyManager: NotifyManager?
 
-    init(
+    public     init(
         vault: Vault,
         verifier: Verifier,
         httpClient: SsdidHttpClient,
@@ -57,7 +57,7 @@ final class SsdidClient: @unchecked Sendable {
 
     /// Creates a new identity, builds a DID Document, and registers it with the Registry.
     /// Rolls back the local identity if registry registration fails.
-    func initIdentity(name: String, algorithm: Algorithm) async throws -> Identity {
+    public     func initIdentity(name: String, algorithm: Algorithm) async throws -> Identity {
         let identity = try await vault.createIdentity(name: name, algorithm: algorithm)
 
         do {
@@ -100,7 +100,7 @@ final class SsdidClient: @unchecked Sendable {
     // MARK: - Update DID Document
 
     /// Updates the DID Document on the Registry (used by rotation and recovery).
-    func updateDidDocument(keyId: String) async throws {
+    public     func updateDidDocument(keyId: String) async throws {
         guard let identity = await vault.getIdentity(keyId: keyId) else {
             throw VaultError.identityNotFound(keyId)
         }
@@ -125,7 +125,7 @@ final class SsdidClient: @unchecked Sendable {
     // MARK: - Deactivate DID
 
     /// Deactivates a DID -- irreversible.
-    func deactivateDid(keyId: String) async throws {
+    public     func deactivateDid(keyId: String) async throws {
         guard let identity = await vault.getIdentity(keyId: keyId) else {
             throw VaultError.identityNotFound(keyId)
         }
@@ -157,7 +157,7 @@ final class SsdidClient: @unchecked Sendable {
 
     /// Registers with a service using mutual authentication.
     /// Returns the verifiable credential received from the service.
-    func registerWithService(identity: Identity, serverUrl: String) async throws -> VerifiableCredential {
+    public     func registerWithService(identity: Identity, serverUrl: String) async throws -> VerifiableCredential {
         let serverApi = httpClient.serverApi(baseURL: serverUrl)
 
         // Step 1: Start registration
@@ -203,7 +203,7 @@ final class SsdidClient: @unchecked Sendable {
     // MARK: - Flow 3: Authenticate with Service
 
     /// Authenticates with a service by presenting a credential.
-    func authenticate(credential: VerifiableCredential, serverUrl: String) async throws -> AuthenticateResponse {
+    public     func authenticate(credential: VerifiableCredential, serverUrl: String) async throws -> AuthenticateResponse {
         let revocationStatus = await revocationManager.checkRevocation(credential)
         if revocationStatus == .revoked {
             throw SsdidClientError.credentialRevoked
@@ -234,7 +234,7 @@ final class SsdidClient: @unchecked Sendable {
     // MARK: - Fetch Transaction Details
 
     /// Fetches transaction details from server for display before signing.
-    func fetchTransactionDetails(sessionToken: String, serverUrl: String) async throws -> [String: String] {
+    public     func fetchTransactionDetails(sessionToken: String, serverUrl: String) async throws -> [String: String] {
         let serverApi = httpClient.serverApi(baseURL: serverUrl)
         let resp = try await serverApi.requestChallenge(request: TxChallengeRequest(sessionToken: sessionToken))
         return resp.transaction
@@ -243,7 +243,7 @@ final class SsdidClient: @unchecked Sendable {
     // MARK: - Flow 4: Sign Transaction
 
     /// Signs a transaction with challenge-response and transaction binding.
-    func signTransaction(
+    public     func signTransaction(
         sessionToken: String,
         identity: Identity,
         transaction: [String: String],
@@ -286,7 +286,7 @@ final class SsdidClient: @unchecked Sendable {
     // MARK: - Verification
 
     /// Verifies a multibase-encoded challenge response against a DID's public key.
-    func verifyChallengeResponse(did: String, keyId: String, challenge: String, signedChallenge: String) async throws -> Bool {
+    public     func verifyChallengeResponse(did: String, keyId: String, challenge: String, signedChallenge: String) async throws -> Bool {
         return try await verifier.verifyChallengeResponse(did: did, keyId: keyId, challenge: challenge, signedChallenge: signedChallenge)
     }
 

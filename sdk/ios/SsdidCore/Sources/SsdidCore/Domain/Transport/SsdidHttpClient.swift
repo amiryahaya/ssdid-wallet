@@ -26,7 +26,7 @@ public enum HttpError: Error, LocalizedError {
 }
 
 /// Result wrapper for network operations.
-enum NetworkResult<T> {
+public enum NetworkResult<T> {
     case success(T)
     case httpError(statusCode: Int, message: String?)
     case networkError(Error)
@@ -37,7 +37,7 @@ enum NetworkResult<T> {
 
 /// URLSession delegate that implements SSL certificate pinning for SSDID hosts.
 /// Validates server certificates against known pins for production builds.
-final class CertificatePinningDelegate: NSObject, URLSessionDelegate {
+public final class CertificatePinningDelegate: NSObject, URLSessionDelegate {
     private let pinnedHosts: Set<String> = ["registry.ssdid.my", "notify.ssdid.my"]
 
     // Certificate SPKI SHA-256 pins for registry and notification services.
@@ -48,7 +48,7 @@ final class CertificatePinningDelegate: NSObject, URLSessionDelegate {
         "y7xVm0TVJNahMr2sZydE2jQH8SquXV9yLF9seROHHHU="   // intermediate CA (previous, kept for rotation)
     ]
 
-    func urlSession(
+    public     func urlSession(
         _ session: URLSession,
         didReceive challenge: URLAuthenticationChallenge,
         completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void
@@ -139,26 +139,26 @@ final class CertificatePinningDelegate: NSObject, URLSessionDelegate {
 }
 
 /// URLSession-based HTTP client for SSDID Registry, Server, and Drive APIs.
-final class SsdidHttpClient: @unchecked Sendable {
+public final class SsdidHttpClient: @unchecked Sendable {
 
-    let registryBaseURL: String
+    public     let registryBaseURL: String
     private let session: URLSession
 
     /// Shared JSON encoder — no global key strategy.
     /// All DTOs use explicit CodingKeys for snake_case mapping.
     /// W3C models (DidDocument, Proof, VerificationMethod) use camelCase.
-    let encoder: JSONEncoder = {
+    public     let encoder: JSONEncoder = {
         let encoder = JSONEncoder()
         return encoder
     }()
 
     /// Shared JSON decoder — no global key strategy.
-    let decoder: JSONDecoder = {
+    public     let decoder: JSONDecoder = {
         let decoder = JSONDecoder()
         return decoder
     }()
 
-    init(registryURL: String = "https://registry.ssdid.my", session: URLSession = .shared) {
+    public     init(registryURL: String = "https://registry.ssdid.my", session: URLSession = .shared) {
         self.registryBaseURL = registryURL.hasSuffix("/") ? String(registryURL.dropLast()) : registryURL
 
         #if !DEBUG
@@ -175,25 +175,25 @@ final class SsdidHttpClient: @unchecked Sendable {
 
     // MARK: - API Accessors
 
-    lazy var registry: RegistryApi = RegistryApi(client: self, baseURL: registryBaseURL)
-    lazy var email: EmailApi = EmailApi(client: self)
+    public lazy var registry: RegistryApi = RegistryApi(client: self, baseURL: registryBaseURL)
+    public lazy var email: EmailApi = EmailApi(client: self)
 
-    func serverApi(baseURL: String) -> ServerApi {
+    public     func serverApi(baseURL: String) -> ServerApi {
         ServerApi(client: self, baseURL: normalizeURL(baseURL))
     }
 
-    func driveApi(baseURL: String) -> DriveApi {
+    public     func driveApi(baseURL: String) -> DriveApi {
         DriveApi(client: self, baseURL: normalizeURL(baseURL))
     }
 
-    func notifyApi(baseURL: String) -> NotifyApi {
+    public     func notifyApi(baseURL: String) -> NotifyApi {
         NotifyApi(client: self, baseURL: normalizeURL(baseURL))
     }
 
     // MARK: - Generic Request
 
     /// Performs an HTTP request and decodes the response.
-    func request<RequestBody: Encodable, ResponseBody: Decodable>(
+    public     func request<RequestBody: Encodable, ResponseBody: Decodable>(
         method: String,
         url: String,
         body: RequestBody? = nil as Empty?,
@@ -214,7 +214,7 @@ final class SsdidHttpClient: @unchecked Sendable {
     }
 
     /// Performs an HTTP request with no response body expected.
-    func requestVoid<RequestBody: Encodable>(
+    public     func requestVoid<RequestBody: Encodable>(
         method: String,
         url: String,
         body: RequestBody? = nil as Empty?
@@ -227,7 +227,7 @@ final class SsdidHttpClient: @unchecked Sendable {
     }
 
     /// Performs a GET request with no body.
-    func get<ResponseBody: Decodable>(
+    public     func get<ResponseBody: Decodable>(
         url: String,
         responseType: ResponseBody.Type
     ) async throws -> ResponseBody {
@@ -235,7 +235,7 @@ final class SsdidHttpClient: @unchecked Sendable {
     }
 
     /// Performs a POST request.
-    func post<RequestBody: Encodable, ResponseBody: Decodable>(
+    public     func post<RequestBody: Encodable, ResponseBody: Decodable>(
         url: String,
         body: RequestBody,
         responseType: ResponseBody.Type
@@ -246,7 +246,7 @@ final class SsdidHttpClient: @unchecked Sendable {
     // MARK: - Authorized Requests
 
     /// Performs an authorized HTTP request with a Bearer token and decodes the response.
-    func authorizedRequest<RequestBody: Encodable, ResponseBody: Decodable>(
+    public     func authorizedRequest<RequestBody: Encodable, ResponseBody: Decodable>(
         method: String,
         url: String,
         authToken: String,
@@ -268,7 +268,7 @@ final class SsdidHttpClient: @unchecked Sendable {
     }
 
     /// Performs an authorized HTTP request with a Bearer token and no response body expected.
-    func authorizedRequestVoid<RequestBody: Encodable>(
+    public     func authorizedRequestVoid<RequestBody: Encodable>(
         method: String,
         url: String,
         authToken: String,
@@ -282,7 +282,7 @@ final class SsdidHttpClient: @unchecked Sendable {
     }
 
     /// Performs an authorized GET request with a Bearer token.
-    func authorizedGet<ResponseBody: Decodable>(
+    public     func authorizedGet<ResponseBody: Decodable>(
         url: String,
         authToken: String,
         responseType: ResponseBody.Type
@@ -297,7 +297,7 @@ final class SsdidHttpClient: @unchecked Sendable {
     }
 
     /// Performs an authorized POST request with a Bearer token.
-    func authorizedPost<RequestBody: Encodable, ResponseBody: Decodable>(
+    public     func authorizedPost<RequestBody: Encodable, ResponseBody: Decodable>(
         url: String,
         authToken: String,
         body: RequestBody,
@@ -362,4 +362,4 @@ final class SsdidHttpClient: @unchecked Sendable {
 }
 
 /// Empty type for requests with no body.
-struct Empty: Codable {}
+public struct Empty: Codable {}

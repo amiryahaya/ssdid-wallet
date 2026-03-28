@@ -1,28 +1,28 @@
 import Foundation
 
 /// Response from a token endpoint exchange.
-struct TokenResponse: CustomStringConvertible {
-    let accessToken: String
-    let tokenType: String
-    let cNonce: String?
-    let cNonceExpiresIn: Int?
+public struct TokenResponse: CustomStringConvertible {
+    public let accessToken: String
+    public let tokenType: String
+    public let cNonce: String?
+    public let cNonceExpiresIn: Int?
 
-    var description: String {
+    public var description: String {
         "TokenResponse(accessToken=REDACTED, tokenType=\(tokenType), cNonce=\(cNonce != nil ? "present" : "nil"))"
     }
 }
 
 /// Handles OAuth 2.0 token exchange for OpenID4VCI flows.
-final class TokenClient: @unchecked Sendable {
+public final class TokenClient: @unchecked Sendable {
 
     private let session: URLSession
 
-    init(session: URLSession = .shared) {
+    public init(session: URLSession = .shared) {
         self.session = session
     }
 
     /// Exchanges a pre-authorized code for an access token.
-    func exchangePreAuthorizedCode(
+    public func exchangePreAuthorizedCode(
         tokenEndpoint: String,
         preAuthorizedCode: String,
         txCode: String? = nil
@@ -38,7 +38,7 @@ final class TokenClient: @unchecked Sendable {
     }
 
     /// Exchanges an authorization code for an access token.
-    func exchangeAuthorizationCode(
+    public func exchangeAuthorizationCode(
         tokenEndpoint: String,
         code: String,
         codeVerifier: String,

@@ -2,12 +2,12 @@ import Foundation
 
 /// Fetches DID documents from the registry and caches them as VerificationBundles
 /// for offline credential verification. The TTL is determined by TtlProvider.
-final class BundleFetcher {
+public final class BundleFetcher {
     private let registryApi: RegistryApi
     private let bundleStore: BundleStore
     private let ttlProvider: TtlProvider
 
-    init(registryApi: RegistryApi, bundleStore: BundleStore, ttlProvider: TtlProvider = TtlProvider()) {
+    public     init(registryApi: RegistryApi, bundleStore: BundleStore, ttlProvider: TtlProvider = TtlProvider()) {
         self.registryApi = registryApi
         self.bundleStore = bundleStore
         self.ttlProvider = ttlProvider
@@ -17,7 +17,7 @@ final class BundleFetcher {
     /// Returns nil when the network/registry call fails. Storage errors are logged
     /// but do not prevent the freshly-fetched bundle from being returned for
     /// immediate use within the current session.
-    func fetchAndCache(issuerDid: String) async -> VerificationBundle? {
+    public     func fetchAndCache(issuerDid: String) async -> VerificationBundle? {
         let didDoc: DidDocument
         do {
             didDoc = try await registryApi.resolveDid(did: issuerDid)

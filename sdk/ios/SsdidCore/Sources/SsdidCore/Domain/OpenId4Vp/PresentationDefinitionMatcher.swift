@@ -16,9 +16,11 @@ public struct VpMatchResult {
 }
 
 /// Matches stored SD-JWT VCs against a Presentation Exchange presentation_definition.
-final class PresentationDefinitionMatcher {
+public final class PresentationDefinitionMatcher {
 
-    func match(
+    public init() {}
+
+    public     func match(
         pd: [String: Any],
         credentials: [StoredSdJwtVc]
     ) -> [VpMatchResult] {

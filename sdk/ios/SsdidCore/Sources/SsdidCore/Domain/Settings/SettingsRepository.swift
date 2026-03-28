@@ -2,7 +2,7 @@ import Foundation
 import Combine
 
 /// Protocol for managing application settings.
-protocol SettingsRepository {
+public protocol SettingsRepository {
     func biometricEnabled() -> AnyPublisher<Bool, Never>
     func setBiometricEnabled(_ enabled: Bool)
 
@@ -20,7 +20,7 @@ protocol SettingsRepository {
 }
 
 /// UserDefaults-based implementation of SettingsRepository.
-final class UserDefaultsSettingsRepository: SettingsRepository {
+public final class UserDefaultsSettingsRepository: SettingsRepository {
 
     private let defaults: UserDefaults
 
@@ -32,7 +32,7 @@ final class UserDefaultsSettingsRepository: SettingsRepository {
         static let bundleTtlDays = "ssdid_bundle_ttl_days"
     }
 
-    init(defaults: UserDefaults = .standard) {
+    public     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         registerDefaults()
         migrateToMandatoryBiometric()
@@ -59,56 +59,56 @@ final class UserDefaultsSettingsRepository: SettingsRepository {
 
     // MARK: - Biometric
 
-    func biometricEnabled() -> AnyPublisher<Bool, Never> {
+    public     func biometricEnabled() -> AnyPublisher<Bool, Never> {
         defaults.publisher(for: \.ssdidBiometricEnabled)
             .eraseToAnyPublisher()
     }
 
-    func setBiometricEnabled(_ enabled: Bool) {
+    public     func setBiometricEnabled(_ enabled: Bool) {
         defaults.set(enabled, forKey: Keys.biometricEnabled)
     }
 
     // MARK: - Auto Lock
 
-    func autoLockMinutes() -> AnyPublisher<Int, Never> {
+    public     func autoLockMinutes() -> AnyPublisher<Int, Never> {
         defaults.publisher(for: \.ssdidAutoLockMinutes)
             .eraseToAnyPublisher()
     }
 
-    func setAutoLockMinutes(_ minutes: Int) {
+    public     func setAutoLockMinutes(_ minutes: Int) {
         defaults.set(minutes, forKey: Keys.autoLockMinutes)
     }
 
     // MARK: - Default Algorithm
 
-    func defaultAlgorithm() -> AnyPublisher<String, Never> {
+    public     func defaultAlgorithm() -> AnyPublisher<String, Never> {
         defaults.publisher(for: \.ssdidDefaultAlgorithm)
             .eraseToAnyPublisher()
     }
 
-    func setDefaultAlgorithm(_ algorithm: String) {
+    public     func setDefaultAlgorithm(_ algorithm: String) {
         defaults.set(algorithm, forKey: Keys.defaultAlgorithm)
     }
 
     // MARK: - Language
 
-    func language() -> AnyPublisher<String, Never> {
+    public     func language() -> AnyPublisher<String, Never> {
         defaults.publisher(for: \.ssdidLanguage)
             .eraseToAnyPublisher()
     }
 
-    func setLanguage(_ language: String) {
+    public     func setLanguage(_ language: String) {
         defaults.set(language, forKey: Keys.language)
     }
 
     // MARK: - Bundle TTL
 
-    func bundleTtlDays() -> AnyPublisher<Int, Never> {
+    public     func bundleTtlDays() -> AnyPublisher<Int, Never> {
         defaults.publisher(for: \.ssdidBundleTtlDays)
             .eraseToAnyPublisher()
     }
 
-    func setBundleTtlDays(_ days: Int) {
+    public     func setBundleTtlDays(_ days: Int) {
         defaults.set(days, forKey: Keys.bundleTtlDays)
     }
 }

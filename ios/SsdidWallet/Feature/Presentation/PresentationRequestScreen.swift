@@ -1,4 +1,5 @@
 import SwiftUI
+import SsdidCore
 
 /// Adapts any VaultStorage to the SdJwtVcStore protocol required by OpenId4VpHandler.
 private struct VaultStorageSdJwtVcAdapter: SdJwtVcStore {

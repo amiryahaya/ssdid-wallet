@@ -3,9 +3,9 @@ import CryptoKit
 
 /// CryptoProvider implementation for classical (non-PQC) algorithms
 /// using Apple CryptoKit: Ed25519, ECDSA P-256, ECDSA P-384.
-final class ClassicalProvider: CryptoProvider {
+public final class ClassicalProvider: CryptoProvider {
 
-    func supportsAlgorithm(_ algorithm: Algorithm) -> Bool {
+    public     func supportsAlgorithm(_ algorithm: Algorithm) -> Bool {
         switch algorithm {
         case .ED25519, .ECDSA_P256, .ECDSA_P384:
             return true
@@ -14,7 +14,7 @@ final class ClassicalProvider: CryptoProvider {
         }
     }
 
-    func generateKeyPair(algorithm: Algorithm) throws -> KeyPairResult {
+    public     func generateKeyPair(algorithm: Algorithm) throws -> KeyPairResult {
         switch algorithm {
         case .ED25519:
             let privateKey = Curve25519.Signing.PrivateKey()
@@ -42,7 +42,7 @@ final class ClassicalProvider: CryptoProvider {
         }
     }
 
-    func sign(algorithm: Algorithm, privateKey: Data, data: Data) throws -> Data {
+    public     func sign(algorithm: Algorithm, privateKey: Data, data: Data) throws -> Data {
         switch algorithm {
         case .ED25519:
             let key = try Curve25519.Signing.PrivateKey(rawRepresentation: privateKey)
@@ -64,7 +64,7 @@ final class ClassicalProvider: CryptoProvider {
         }
     }
 
-    func verify(algorithm: Algorithm, publicKey: Data, signature: Data, data: Data) throws -> Bool {
+    public     func verify(algorithm: Algorithm, publicKey: Data, signature: Data, data: Data) throws -> Bool {
         switch algorithm {
         case .ED25519:
             let key = try Curve25519.Signing.PublicKey(rawRepresentation: publicKey)

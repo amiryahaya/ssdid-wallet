@@ -51,12 +51,12 @@ public enum IssuanceResult {
 }
 
 /// Protocol for storing SD-JWT VCs, to be implemented by vault storage.
-protocol SdJwtVcStorage {
+public protocol SdJwtVcStorage {
     func saveSdJwtVc(_ sdJwtVc: StoredSdJwtVc) async throws
 }
 
 /// Orchestrates the OpenID4VCI credential issuance flow.
-final class OpenId4VciHandler: @unchecked Sendable {
+public final class OpenId4VciHandler: @unchecked Sendable {
 
     private let metadataResolver: IssuerMetadataResolver
     private let tokenClient: TokenClient
@@ -64,7 +64,7 @@ final class OpenId4VciHandler: @unchecked Sendable {
     private let transport: OpenId4VciTransport
     private let vcStorage: SdJwtVcStorage
 
-    init(
+    public     init(
         metadataResolver: IssuerMetadataResolver,
         tokenClient: TokenClient,
         nonceManager: NonceManager,
@@ -79,7 +79,7 @@ final class OpenId4VciHandler: @unchecked Sendable {
     }
 
     /// Processes a credential offer URI: parses, resolves metadata, and returns review data.
-    func processOffer(uri: String) async throws -> CredentialOfferReview {
+    public     func processOffer(uri: String) async throws -> CredentialOfferReview {
         let offer = try CredentialOffer.parseFromUri(uri)
         let metadata = try await metadataResolver.resolve(issuerUrl: offer.credentialIssuer)
 
@@ -91,7 +91,7 @@ final class OpenId4VciHandler: @unchecked Sendable {
     }
 
     /// Processes a credential offer from a raw JSON string: parses, resolves metadata, and returns review data.
-    func processOfferJson(json: String) async throws -> CredentialOfferReview {
+    public     func processOfferJson(json: String) async throws -> CredentialOfferReview {
         let offer = try CredentialOffer.parse(json)
         let metadata = try await metadataResolver.resolve(issuerUrl: offer.credentialIssuer)
 
@@ -103,7 +103,7 @@ final class OpenId4VciHandler: @unchecked Sendable {
     }
 
     /// Accepts a credential offer and performs the issuance flow.
-    func acceptOffer(
+    public     func acceptOffer(
         offer: CredentialOffer,
         metadata: IssuerMetadata,
         selectedConfigId: String,

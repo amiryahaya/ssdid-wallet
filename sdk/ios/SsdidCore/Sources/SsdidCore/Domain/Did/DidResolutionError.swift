@@ -1,6 +1,6 @@
 import Foundation
 
-enum DidResolutionError: Error, LocalizedError {
+public enum DidResolutionError: Error, LocalizedError {
     case unsupportedMethod(String)
     case invalidMultibase
     case dataTooShort
@@ -8,7 +8,7 @@ enum DidResolutionError: Error, LocalizedError {
     case invalidJwk
     case invalidDid(String)
 
-    var errorDescription: String? {
+    public     var errorDescription: String? {
         switch self {
         case .unsupportedMethod(let did): return "Unsupported DID method: \(did)"
         case .invalidMultibase: return "Expected multibase 'z' (base58btc) prefix"

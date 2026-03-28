@@ -4,7 +4,7 @@ import Foundation
 ///
 /// Given a stored SD-JWT VC, selected claims, and verifier parameters,
 /// builds a presentation token: issuerJwt~disclosure1~...~disclosureN~kbJwt
-enum VpTokenBuilder {
+public enum VpTokenBuilder {
 
     /// Builds a VP token from a stored SD-JWT VC with selective disclosure.
     ///
@@ -17,7 +17,7 @@ enum VpTokenBuilder {
     ///   - signer: Function that signs data with the holder's private key
     ///   - issuedAt: Unix timestamp for the KB-JWT (defaults to current time)
     /// - Returns: The assembled VP token string
-    static func build(
+    public static func build(
         storedSdJwtVc: StoredSdJwtVc,
         selectedClaims: [String],
         audience: String,

@@ -1,4 +1,5 @@
 import Foundation
+import SsdidCore
 
 /// One-time migration: copies global profile VC data to the first identity.
 enum ProfileMigration {

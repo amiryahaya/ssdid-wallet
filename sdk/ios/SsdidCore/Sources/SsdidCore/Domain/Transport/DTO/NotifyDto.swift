@@ -4,20 +4,20 @@ import Foundation
 
 // MARK: - Device
 
-struct NotifyDevice: Codable {
-    let platform: String
-    let token: String
+public struct NotifyDevice: Codable {
+    public let platform: String
+    public let token: String
 }
 
 // MARK: - Inbox
 
-struct InboxRegisterRequest: Codable {
-    let devices: [NotifyDevice]
+public struct InboxRegisterRequest: Codable {
+    public let devices: [NotifyDevice]
 }
 
-struct InboxRegisterResponse: Codable {
-    let inboxId: String
-    let inboxSecret: String
+public struct InboxRegisterResponse: Codable {
+    public let inboxId: String
+    public let inboxSecret: String
 
     enum CodingKeys: String, CodingKey {
         case inboxId = "inbox_id"
@@ -25,15 +25,15 @@ struct InboxRegisterResponse: Codable {
     }
 }
 
-struct InboxUpdateDevicesRequest: Codable {
-    let devices: [NotifyDevice]
+public struct InboxUpdateDevicesRequest: Codable {
+    public let devices: [NotifyDevice]
 }
 
 // MARK: - Mailbox
 
-struct MailboxCreateRequest: Codable {
-    let inboxId: String
-    let mailboxId: String
+public struct MailboxCreateRequest: Codable {
+    public let inboxId: String
+    public let mailboxId: String
 
     enum CodingKeys: String, CodingKey {
         case inboxId = "inbox_id"
@@ -43,12 +43,12 @@ struct MailboxCreateRequest: Codable {
 
 // MARK: - Pending Notifications
 
-struct NotifyNotification: Codable {
-    let notificationId: String
-    let mailboxId: String
-    let payload: String
-    let priority: String?
-    let receivedAt: String?
+public struct NotifyNotification: Codable {
+    public let notificationId: String
+    public let mailboxId: String
+    public let payload: String
+    public let priority: String?
+    public let receivedAt: String?
 
     enum CodingKeys: String, CodingKey {
         case notificationId = "notification_id"
@@ -59,6 +59,6 @@ struct NotifyNotification: Codable {
     }
 }
 
-struct PendingNotificationsResponse: Codable {
-    let notifications: [NotifyNotification]
+public struct PendingNotificationsResponse: Codable {
+    public let notifications: [NotifyNotification]
 }

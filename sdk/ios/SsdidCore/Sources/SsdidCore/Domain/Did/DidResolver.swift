@@ -1,5 +1,5 @@
 import Foundation
 
-protocol DidResolver {
+public protocol DidResolver {
     func resolve(did: String) async throws -> DidDocument
 }

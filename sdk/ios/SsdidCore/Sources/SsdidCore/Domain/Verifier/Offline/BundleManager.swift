@@ -3,13 +3,13 @@ import Foundation
 /// Manages pre-fetching and caching of verification bundles for offline use.
 /// Bundles include DID Documents and optional status list snapshots.
 /// Bundle TTL is driven by TtlProvider.
-final class BundleManager: @unchecked Sendable {
+public final class BundleManager: @unchecked Sendable {
     private let verifier: Verifier
     private let statusListFetcher: StatusListFetcher
     private let bundleStore: BundleStore
     private let ttlProvider: TtlProvider
 
-    init(
+    public     init(
         verifier: Verifier,
         statusListFetcher: StatusListFetcher,
         bundleStore: BundleStore,
@@ -23,7 +23,7 @@ final class BundleManager: @unchecked Sendable {
 
     /// Pre-fetch and cache a verification bundle for an issuer.
     /// Resolves the DID Document online and optionally fetches the status list.
-    func prefetchBundle(issuerDid: String, statusListUrl: String? = nil) async -> Result<VerificationBundle, Error> {
+    public     func prefetchBundle(issuerDid: String, statusListUrl: String? = nil) async -> Result<VerificationBundle, Error> {
         do {
             let didDocument = try await verifier.resolveDid(did: issuerDid)
             let now = Date()
@@ -50,7 +50,7 @@ final class BundleManager: @unchecked Sendable {
 
     /// Refresh all cached bundles that are stale or about to expire.
     /// Returns count of successfully refreshed bundles.
-    func refreshStaleBundles() async -> Int {
+    public     func refreshStaleBundles() async -> Int {
         guard let bundles = try? await bundleStore.listBundles() else { return 0 }
         var refreshed = 0
         for bundle in bundles {
@@ -65,7 +65,7 @@ final class BundleManager: @unchecked Sendable {
     }
 
     /// Check if a bundle exists and is still fresh for the given issuer.
-    func hasFreshBundle(issuerDid: String) async -> Bool {
+    public     func hasFreshBundle(issuerDid: String) async -> Bool {
         guard let bundle = await bundleStore.getBundle(issuerDid: issuerDid) else { return false }
         return !ttlProvider.isExpired(fetchedAt: bundle.fetchedAt)
     }

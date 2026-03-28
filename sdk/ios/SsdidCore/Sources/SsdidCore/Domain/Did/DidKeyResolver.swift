@@ -1,7 +1,7 @@
 import Foundation
 
-final class DidKeyResolver: DidResolver {
-    func resolve(did: String) async throws -> DidDocument {
+public final class DidKeyResolver: DidResolver {
+    public     func resolve(did: String) async throws -> DidDocument {
         guard did.hasPrefix("did:key:") else {
             throw DidResolutionError.unsupportedMethod(did)
         }

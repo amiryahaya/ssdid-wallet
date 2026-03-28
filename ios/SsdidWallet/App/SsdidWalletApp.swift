@@ -1,5 +1,6 @@
 import SwiftUI
 import SentrySwiftUI
+import SsdidCore
 import UserNotifications
 import BackgroundTasks
 

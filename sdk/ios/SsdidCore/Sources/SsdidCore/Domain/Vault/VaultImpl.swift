@@ -9,7 +9,7 @@ import CryptoKit
 /// VaultStorage) are not Sendable. Actor migration requires making all dependencies
 /// Sendable first. The TOCTOU window on createIdentity name uniqueness is documented;
 /// in practice concurrent identity creation is extremely rare.
-final class VaultImpl: Vault, @unchecked Sendable {
+public final class VaultImpl: Vault, @unchecked Sendable {
 
     private nonisolated(unsafe) static let iso8601 = ISO8601DateFormatter()
 
@@ -20,7 +20,7 @@ final class VaultImpl: Vault, @unchecked Sendable {
     private let migrationLock = NSLock()
     private var migratingAliases = Set<String>()
 
-    init(
+    public     init(
         classicalProvider: CryptoProvider,
         pqcProvider: CryptoProvider,
         keychainManager: KeychainManager,
@@ -38,7 +38,7 @@ final class VaultImpl: Vault, @unchecked Sendable {
 
     // MARK: - Identity Management
 
-    func createIdentity(name: String, algorithm: Algorithm) async throws -> Identity {
+    public     func createIdentity(name: String, algorithm: Algorithm) async throws -> Identity {
         let existing = await storage.listIdentities()
         if existing.contains(where: { $0.name.lowercased() == name.lowercased() }) {
             throw VaultError.identityNameExists(name)
@@ -69,15 +69,15 @@ final class VaultImpl: Vault, @unchecked Sendable {
         return identity
     }
 
-    func getIdentity(keyId: String) async -> Identity? {
+    public     func getIdentity(keyId: String) async -> Identity? {
         return await storage.getIdentity(keyId: keyId)
     }
 
-    func listIdentities() async -> [Identity] {
+    public     func listIdentities() async -> [Identity] {
         return await storage.listIdentities()
     }
 
-    func deleteIdentity(keyId: String) async throws {
+    public     func deleteIdentity(keyId: String) async throws {
         guard let identity = await storage.getIdentity(keyId: keyId) else {
             throw VaultError.identityNotFound(keyId)
         }
@@ -86,7 +86,7 @@ final class VaultImpl: Vault, @unchecked Sendable {
         try await storage.deleteIdentity(keyId: keyId)
     }
 
-    func updateIdentityProfile(keyId: String, profileName: String?, email: String?, emailVerified: Bool?) async throws {
+    public     func updateIdentityProfile(keyId: String, profileName: String?, email: String?, emailVerified: Bool?) async throws {
         guard var identity = await storage.getIdentity(keyId: keyId) else {
             throw VaultError.identityNotFound(keyId)
         }
@@ -106,7 +106,7 @@ final class VaultImpl: Vault, @unchecked Sendable {
 
     // MARK: - Signing
 
-    func sign(keyId: String, data: Data) async throws -> Data {
+    public     func sign(keyId: String, data: Data) async throws -> Data {
         guard let identity = await storage.getIdentity(keyId: keyId) else {
             throw VaultError.identityNotFound(keyId)
         }
@@ -210,7 +210,7 @@ final class VaultImpl: Vault, @unchecked Sendable {
 
     // MARK: - DID Document
 
-    func buildDidDocument(keyId: String) async throws -> DidDocument {
+    public     func buildDidDocument(keyId: String) async throws -> DidDocument {
         guard let identity = await storage.getIdentity(keyId: keyId) else {
             throw VaultError.identityNotFound(keyId)
         }
@@ -237,7 +237,7 @@ final class VaultImpl: Vault, @unchecked Sendable {
 
     // MARK: - Proof Creation
 
-    func createProof(
+    public     func createProof(
         keyId: String,
         document: [String: Any],
         proofPurpose: String,
@@ -283,25 +283,25 @@ final class VaultImpl: Vault, @unchecked Sendable {
 
     // MARK: - Credentials
 
-    func storeCredential(_ credential: VerifiableCredential) async throws {
+    public     func storeCredential(_ credential: VerifiableCredential) async throws {
         try await storage.saveCredential(credential)
     }
 
-    func listCredentials() async -> [VerifiableCredential] {
+    public     func listCredentials() async -> [VerifiableCredential] {
         return await storage.listCredentials()
     }
 
-    func getCredentialForDid(_ did: String) async -> VerifiableCredential? {
+    public     func getCredentialForDid(_ did: String) async -> VerifiableCredential? {
         let credentials = await storage.listCredentials()
         return credentials.first { $0.credentialSubject.id == did }
     }
 
-    func getCredentialsForDid(_ did: String) async -> [VerifiableCredential] {
+    public     func getCredentialsForDid(_ did: String) async -> [VerifiableCredential] {
         let credentials = await storage.listCredentials()
         return credentials.filter { $0.credentialSubject.id == did }
     }
 
-    func deleteCredential(credentialId: String) async throws {
+    public     func deleteCredential(credentialId: String) async throws {
         try await storage.deleteCredential(credentialId: credentialId)
     }
 
@@ -309,14 +309,14 @@ final class VaultImpl: Vault, @unchecked Sendable {
 
     /// Produces deterministic JSON by recursively sorting dictionary keys.
     /// Delegates to shared JsonUtils implementation.
-    static func canonicalJson(_ value: Any) -> String {
+    public static func canonicalJson(_ value: Any) -> String {
         JsonUtils.canonicalJson(value)
     }
 }
 
 // Allow calling canonicalJson as instance method forwarding to static
 extension VaultImpl {
-    func canonicalJson(_ value: Any) -> String {
+    public     func canonicalJson(_ value: Any) -> String {
         JsonUtils.canonicalJson(value)
     }
 }

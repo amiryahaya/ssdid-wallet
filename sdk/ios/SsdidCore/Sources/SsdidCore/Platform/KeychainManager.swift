@@ -4,7 +4,7 @@ import CryptoKit
 import LocalAuthentication
 
 /// Errors specific to Keychain operations.
-enum KeychainError: Error, LocalizedError {
+public enum KeychainError: Error, LocalizedError {
     case keyGenerationFailed(OSStatus)
     case keyNotFound(String)
     case encryptionFailed(String)
@@ -15,7 +15,7 @@ enum KeychainError: Error, LocalizedError {
     case biometricAuthFailed(String)
     case secureEnclaveUnavailable
 
-    var errorDescription: String? {
+    public     var errorDescription: String? {
         switch self {
         case .keyGenerationFailed(let status):
             return "Keychain key generation failed: \(status)"
@@ -42,7 +42,7 @@ enum KeychainError: Error, LocalizedError {
 /// iOS Keychain wrapper for key wrapping operations.
 /// Uses AES-256-GCM with Keychain-stored symmetric keys.
 /// Keys are stored with kSecAttrAccessibleWhenUnlockedThisDeviceOnly for security.
-protocol KeychainManagerProtocol {
+public protocol KeychainManagerProtocol {
     func generateWrappingKey(alias: String) throws
     func encrypt(alias: String, data: Data) throws -> Data
     func decrypt(alias: String, data: Data) throws -> Data
@@ -57,7 +57,7 @@ protocol KeychainManagerProtocol {
 /// Concrete Keychain manager using iOS Keychain Services.
 /// Uses Secure Enclave ECDH key derivation when available, with legacy AES-256
 /// software key fallback for simulators and older devices.
-final class KeychainManager: KeychainManagerProtocol {
+public final class KeychainManager: KeychainManagerProtocol {
 
     private static let seMasterTag = "my.ssdid.wallet.se_master"
     private static let ephemeralPrefix = "my.ssdid.wallet.eph_"
@@ -70,13 +70,13 @@ final class KeychainManager: KeychainManagerProtocol {
     ///
     /// - Important: Defaults to `false` in DEBUG builds, `true` in release builds.
     ///   Configured via ``SsdidSdk/Builder/requireBiometric(_:)``.
-    let requireBiometric: Bool
+    public     let requireBiometric: Bool
 
     /// Cached SE master key to avoid repeated Keychain lookups.
     private let masterKeyLock = NSLock()
     private var _seMasterKey: SecureEnclave.P256.KeyAgreement.PrivateKey?
 
-    init(servicePrefix: String = "my.ssdid.wallet", requireBiometric: Bool = false) {
+    public     init(servicePrefix: String = "my.ssdid.wallet", requireBiometric: Bool = false) {
         self.servicePrefix = servicePrefix
         self.requireBiometric = requireBiometric
     }
@@ -200,7 +200,7 @@ final class KeychainManager: KeychainManagerProtocol {
         "\(Self.ephemeralPrefix)\(alias)"
     }
 
-    func hasEphemeralKey(alias: String) -> Bool {
+    public     func hasEphemeralKey(alias: String) -> Bool {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: ephemeralServiceKey(alias: alias),
@@ -260,7 +260,7 @@ final class KeychainManager: KeychainManagerProtocol {
     /// On devices with Secure Enclave, creates an ephemeral P-256 key pair and stores
     /// the public key. The wrapping key is derived on-the-fly via ECDH + HKDF.
     /// Falls back to legacy random AES-256 on simulators / devices without SE.
-    func generateWrappingKey(alias: String) throws {
+    public     func generateWrappingKey(alias: String) throws {
         if SecureEnclave.isAvailable {
             // Ensure SE master key exists
             _ = try ensureSEMasterKey()
@@ -284,7 +284,7 @@ final class KeychainManager: KeychainManagerProtocol {
     /// Encrypts data using the wrapping key for the given alias.
     /// Uses SE-derived key if an ephemeral key exists, otherwise falls back to legacy.
     /// Returns nonce (12 bytes) + ciphertext + tag (16 bytes).
-    func encrypt(alias: String, data: Data) throws -> Data {
+    public     func encrypt(alias: String, data: Data) throws -> Data {
         let key: SymmetricKey
         if hasEphemeralKey(alias: alias) {
             key = try deriveKey(alias: alias)
@@ -305,7 +305,7 @@ final class KeychainManager: KeychainManagerProtocol {
     /// Decrypts data using the wrapping key for the given alias.
     /// Uses SE-derived key if an ephemeral key exists, otherwise falls back to legacy.
     /// Expects nonce (12 bytes) + ciphertext + tag (16 bytes).
-    func decrypt(alias: String, data: Data) throws -> Data {
+    public     func decrypt(alias: String, data: Data) throws -> Data {
         let key: SymmetricKey
         if hasEphemeralKey(alias: alias) {
             key = try deriveKey(alias: alias)
@@ -321,7 +321,7 @@ final class KeychainManager: KeychainManagerProtocol {
     // MARK: - Delete
 
     /// Deletes both ephemeral and legacy keys for the given alias.
-    func deleteKey(alias: String) {
+    public     func deleteKey(alias: String) {
         deleteEphemeralPublicKey(alias: alias)
         deleteLegacyKey(alias: alias)
     }
@@ -330,7 +330,7 @@ final class KeychainManager: KeychainManagerProtocol {
 
     /// Saves a secret string value in the Keychain under the given alias.
     /// If an entry with the same alias already exists, it is overwritten.
-    func saveSecret(alias: String, value: String) throws {
+    public     func saveSecret(alias: String, value: String) throws {
         guard let data = value.data(using: .utf8) else {
             throw KeychainError.encryptionFailed("Could not encode secret as UTF-8")
         }
@@ -367,7 +367,7 @@ final class KeychainManager: KeychainManagerProtocol {
 
     /// Loads a secret string value from the Keychain for the given alias.
     /// Returns nil if no value is stored under the alias.
-    func loadSecret(alias: String) throws -> String? {
+    public     func loadSecret(alias: String) throws -> String? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: serviceKey(alias: alias),
@@ -394,7 +394,7 @@ final class KeychainManager: KeychainManagerProtocol {
     }
 
     /// Deletes a secret value from the Keychain for the given alias.
-    func deleteSecret(alias: String) {
+    public     func deleteSecret(alias: String) {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: serviceKey(alias: alias),
@@ -406,14 +406,14 @@ final class KeychainManager: KeychainManagerProtocol {
     // MARK: - Has Key
 
     /// Returns true if either an ephemeral (SE) key or a legacy key exists for the alias.
-    func hasKey(alias: String) -> Bool {
+    public     func hasKey(alias: String) -> Bool {
         hasEphemeralKey(alias: alias) || hasLegacyKey(alias: alias)
     }
 
     // MARK: - Legacy Helpers
 
     /// Checks whether a legacy (software AES-256) key exists for the alias.
-    func hasLegacyKey(alias: String) -> Bool {
+    public     func hasLegacyKey(alias: String) -> Bool {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: serviceKey(alias: alias),
@@ -469,7 +469,7 @@ final class KeychainManager: KeychainManagerProtocol {
     }
 
     /// Decrypts data using a legacy (software AES-256) key for migration purposes.
-    func decryptLegacy(alias: String, data: Data) throws -> Data {
+    public     func decryptLegacy(alias: String, data: Data) throws -> Data {
         let keyData = try loadKey(alias: alias)
         let key = SymmetricKey(data: keyData)
         let sealedBox = try AES.GCM.SealedBox(combined: data)
@@ -477,7 +477,7 @@ final class KeychainManager: KeychainManagerProtocol {
     }
 
     /// Deletes only the legacy (software) key for the given alias.
-    func deleteLegacyKey(alias: String) {
+    public     func deleteLegacyKey(alias: String) {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: serviceKey(alias: alias),

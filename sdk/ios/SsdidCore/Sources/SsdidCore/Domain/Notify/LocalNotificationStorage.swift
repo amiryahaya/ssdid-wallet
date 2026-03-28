@@ -3,20 +3,20 @@ import Foundation
 /// Persists in-app notifications to a JSON file via FileManager.
 /// Published properties drive SwiftUI reactivity.
 @MainActor
-final class LocalNotificationStorage: ObservableObject {
+public final class LocalNotificationStorage: ObservableObject {
 
-    @Published private(set) var notifications: [LocalNotification] = []
+    @Published public private(set) var notifications: [LocalNotification] = []
 
-    var unreadCount: Int {
+    public     var unreadCount: Int {
         notifications.filter { !$0.isRead }.count
     }
 
     /// Maximum stored notifications. Oldest are evicted on save.
-    static let maxNotifications = 500
+    public static let maxNotifications = 500
 
     private let fileURL: URL
 
-    init() {
+    public     init() {
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         self.fileURL = docs.appendingPathComponent("local_notifications.json")
         // Defer disk read off the main actor to avoid blocking app launch.
@@ -29,7 +29,7 @@ final class LocalNotificationStorage: ObservableObject {
         }
     }
 
-    func save(_ notification: LocalNotification) {
+    public     func save(_ notification: LocalNotification) {
         // Preserve isRead if notification already exists locally (avoids resurrecting read notifications on re-fetch)
         let existing = notifications.first { $0.id == notification.id }
         let merged = existing != nil ? LocalNotification(
@@ -50,20 +50,20 @@ final class LocalNotificationStorage: ObservableObject {
         persist()
     }
 
-    func markAsRead(_ id: String) {
+    public     func markAsRead(_ id: String) {
         guard let index = notifications.firstIndex(where: { $0.id == id }) else { return }
         notifications[index].isRead = true
         persist()
     }
 
-    func markAllAsRead() {
+    public     func markAllAsRead() {
         for i in notifications.indices {
             notifications[i].isRead = true
         }
         persist()
     }
 
-    func delete(_ id: String) {
+    public     func delete(_ id: String) {
         notifications.removeAll { $0.id == id }
         persist()
     }

@@ -1,18 +1,18 @@
 import Foundation
 
-protocol StatusListFetcher: Sendable {
+public protocol StatusListFetcher: Sendable {
     func fetch(url: String) async throws -> StatusListCredential
 }
 
-actor RevocationManager {
+public actor RevocationManager {
     private let fetcher: StatusListFetcher
     private var cache: [String: StatusListCredential] = [:]
 
-    init(fetcher: StatusListFetcher) {
+    public     init(fetcher: StatusListFetcher) {
         self.fetcher = fetcher
     }
 
-    func checkRevocation(_ credential: VerifiableCredential) async -> RevocationStatus {
+    public     func checkRevocation(_ credential: VerifiableCredential) async -> RevocationStatus {
         guard let status = credential.credentialStatus else {
             return .valid
         }
@@ -46,7 +46,7 @@ actor RevocationManager {
         }
     }
 
-    func invalidateCache() {
+    public     func invalidateCache() {
         cache.removeAll()
     }
 }

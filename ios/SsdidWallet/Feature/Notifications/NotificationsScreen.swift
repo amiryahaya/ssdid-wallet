@@ -1,4 +1,5 @@
 import SwiftUI
+import SsdidCore
 
 struct NotificationsScreen: View {
     @Environment(AppRouter.self) private var router

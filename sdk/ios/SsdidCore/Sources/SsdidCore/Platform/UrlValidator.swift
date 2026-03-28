@@ -1,14 +1,14 @@
 import Foundation
 
 /// Errors for URL validation.
-enum UrlValidationError: Error, LocalizedError {
+public enum UrlValidationError: Error, LocalizedError {
     case invalidURL(String)
     case httpNotAllowed
     case privateIPNotAllowed(String)
     case nonStandardPort(Int)
     case emptyHost
 
-    var errorDescription: String? {
+    public     var errorDescription: String? {
         switch self {
         case .invalidURL(let url):
             return "Invalid URL: \(url)"
@@ -25,13 +25,15 @@ enum UrlValidationError: Error, LocalizedError {
 }
 
 /// Validates URLs for safety: HTTPS only, no private IPs, standard ports.
-final class UrlValidator {
+public final class UrlValidator {
+
+    public init() {}
 
     /// Standard allowed ports for HTTPS.
     private let allowedPorts: Set<Int> = [443, 8443]
 
     /// Validates that a URL string is safe to connect to.
-    func validate(urlString: String) throws {
+    public     func validate(urlString: String) throws {
         guard let url = URL(string: urlString),
               let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
             throw UrlValidationError.invalidURL(urlString)
@@ -66,7 +68,7 @@ final class UrlValidator {
     }
 
     /// Returns true if the host string appears to be a private/reserved IP address.
-    func isPrivateIP(_ host: String) -> Bool {
+    public     func isPrivateIP(_ host: String) -> Bool {
         // Loopback
         if host == "localhost" || host == "127.0.0.1" || host == "::1" {
             return true

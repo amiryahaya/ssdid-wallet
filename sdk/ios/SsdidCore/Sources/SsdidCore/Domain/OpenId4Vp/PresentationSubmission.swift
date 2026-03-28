@@ -1,10 +1,10 @@
 import Foundation
 
 /// Describes how VP tokens map to input descriptors in a presentation definition.
-struct PresentationSubmission: Codable {
-    let id: String
-    let definitionId: String
-    let descriptorMap: [DescriptorMapEntry]
+public struct PresentationSubmission: Codable {
+    public let id: String
+    public let definitionId: String
+    public let descriptorMap: [DescriptorMapEntry]
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -13,7 +13,7 @@ struct PresentationSubmission: Codable {
     }
 
     /// Serializes this submission to a JSON string.
-    func toJson() throws -> String {
+    public func toJson() throws -> String {
         let encoder = JSONEncoder()
         let data = try encoder.encode(self)
         guard let json = String(data: data, encoding: .utf8) else {
@@ -23,7 +23,7 @@ struct PresentationSubmission: Codable {
     }
 
     /// Creates a PresentationSubmission for SD-JWT VCs.
-    static func create(
+    public static func create(
         definitionId: String,
         descriptorIds: [String]
     ) -> PresentationSubmission {
@@ -38,8 +38,8 @@ struct PresentationSubmission: Codable {
 }
 
 /// A single entry in the descriptor_map of a PresentationSubmission.
-struct DescriptorMapEntry: Codable {
-    let id: String
-    let format: String
-    let path: String
+public struct DescriptorMapEntry: Codable {
+    public let id: String
+    public let format: String
+    public let path: String
 }

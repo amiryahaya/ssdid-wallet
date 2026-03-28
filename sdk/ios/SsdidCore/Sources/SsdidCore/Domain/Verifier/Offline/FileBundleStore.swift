@@ -8,11 +8,11 @@ import Security
 ///
 /// Files are written with `.completeFileProtection` so they are encrypted by iOS at rest
 /// when the device is locked. The HMAC additionally detects any tampering with the files.
-final class FileBundleStore: BundleStore {
+public final class FileBundleStore: BundleStore {
     private let directory: URL
     private let macKey: SymmetricKey
 
-    init() {
+    public     init() {
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         directory = docs.appendingPathComponent("verification_bundles", isDirectory: true)
         try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
@@ -82,7 +82,7 @@ final class FileBundleStore: BundleStore {
 
     // MARK: - BundleStore implementation
 
-    func saveBundle(_ bundle: VerificationBundle) async throws {
+    public     func saveBundle(_ bundle: VerificationBundle) async throws {
         let data = try JSONEncoder().encode(bundle)
         let mac = computeHmac(for: data)
         let url = fileURL(for: bundle.issuerDid)
@@ -92,7 +92,7 @@ final class FileBundleStore: BundleStore {
         try mac.write(to: macUrl, options: [.atomic, .completeFileProtection])
     }
 
-    func getBundle(issuerDid: String) async -> VerificationBundle? {
+    public     func getBundle(issuerDid: String) async -> VerificationBundle? {
         let url = fileURL(for: issuerDid)
         let macUrl = macURL(for: url)
         return await withCheckedContinuation { continuation in
@@ -117,13 +117,13 @@ final class FileBundleStore: BundleStore {
         }
     }
 
-    func deleteBundle(issuerDid: String) async throws {
+    public     func deleteBundle(issuerDid: String) async throws {
         let url = fileURL(for: issuerDid)
         try? FileManager.default.removeItem(at: url)
         try? FileManager.default.removeItem(at: macURL(for: url))
     }
 
-    func listBundles() async throws -> [VerificationBundle] {
+    public     func listBundles() async throws -> [VerificationBundle] {
         let dir = directory
         return try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.global(qos: .utility).async { [weak self] in

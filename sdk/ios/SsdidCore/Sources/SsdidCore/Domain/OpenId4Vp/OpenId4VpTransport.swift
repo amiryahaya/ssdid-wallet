@@ -1,16 +1,16 @@
 import Foundation
 
 /// Handles HTTP transport for OpenID4VP flows using URLSession.
-final class OpenId4VpTransport: @unchecked Sendable {
+public final class OpenId4VpTransport: @unchecked Sendable {
 
     private let session: URLSession
 
-    init(session: URLSession = .shared) {
+    public     init(session: URLSession = .shared) {
         self.session = session
     }
 
     /// Fetches a request object from the given URI.
-    func fetchRequestObject(requestUri: String) async throws -> String {
+    public     func fetchRequestObject(requestUri: String) async throws -> String {
         guard let url = URL(string: requestUri) else {
             throw OpenId4VpError.transportError("Invalid request_uri: \(requestUri)")
         }
@@ -27,7 +27,7 @@ final class OpenId4VpTransport: @unchecked Sendable {
     }
 
     /// Posts a VP response with form-encoded body to the response_uri.
-    func postVpResponse(
+    public     func postVpResponse(
         responseUri: String,
         vpToken: String,
         presentationSubmission: String,
@@ -44,7 +44,7 @@ final class OpenId4VpTransport: @unchecked Sendable {
     }
 
     /// Posts an error response to the response_uri.
-    func postError(responseUri: String, error: String, state: String?) async throws {
+    public     func postError(responseUri: String, error: String, state: String?) async throws {
         var params = ["error": error]
         if let state = state {
             params["state"] = state

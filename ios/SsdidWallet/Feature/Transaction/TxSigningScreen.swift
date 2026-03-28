@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import SsdidCore
 
 struct TxSigningScreen: View {
     @Environment(AppRouter.self) private var router

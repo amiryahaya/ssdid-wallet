@@ -53,7 +53,7 @@ public enum RotationError: Error, LocalizedError {
 }
 
 /// Protocol for objects that can publish DID document updates to the registry.
-protocol DidDocumentUpdater {
+public protocol DidDocumentUpdater {
     func updateDidDocument(keyId: String) async throws
 }
 
@@ -66,7 +66,7 @@ extension SsdidClient: DidDocumentUpdater {}
 /// The rotation flow has two phases:
 /// 1. **Prepare**: Generate next keypair, publish pre-commitment hash.
 /// 2. **Execute**: Promote pre-committed key to active, publish update, clean up old key.
-final class KeyRotationManager: @unchecked Sendable {
+public final class KeyRotationManager: @unchecked Sendable {
 
     private let vault: Vault
     private let storage: VaultStorage
@@ -74,7 +74,7 @@ final class KeyRotationManager: @unchecked Sendable {
     private let keychainManager: KeychainManagerProtocol
     private let ssdidClient: DidDocumentUpdater
 
-    init(
+    public     init(
         vault: Vault,
         storage: VaultStorage,
         cryptoProvider: CryptoProvider,
@@ -93,7 +93,7 @@ final class KeyRotationManager: @unchecked Sendable {
     /// Generates a next keypair, computes a SHA3-256 pre-commitment hash,
     /// encrypts and stores the pre-rotated key, and publishes the commitment.
     /// Returns the multibase-encoded hash string.
-    func prepareRotation(identity: Identity) async throws -> String {
+    public     func prepareRotation(identity: Identity) async throws -> String {
         let nextKeyPair = try cryptoProvider.generateKeyPair(algorithm: identity.algorithm)
 
         // SHA3-256 hash of next public key, multibase base64url encoded
@@ -131,7 +131,7 @@ final class KeyRotationManager: @unchecked Sendable {
 
     /// Promotes the pre-committed key to active, publishes to registry,
     /// then cleans up old key material. Crash-safe: publishes before deleting.
-    func executeRotation(identity: Identity) async throws -> Identity {
+    public     func executeRotation(identity: Identity) async throws -> Identity {
         guard identity.preRotatedKeyId != nil else {
             throw RotationError.noPreCommitment
         }
@@ -200,7 +200,7 @@ final class KeyRotationManager: @unchecked Sendable {
     // MARK: - Rotation Status
 
     /// Returns the current rotation status for the given identity.
-    func getRotationStatus(identity: Identity) async -> RotationStatus {
+    public     func getRotationStatus(identity: Identity) async -> RotationStatus {
         // Fetch the latest identity from storage (may have been updated by prepareRotation)
         let currentIdentity = await storage.getIdentity(keyId: identity.keyId) ?? identity
         let hasPreCommitment = currentIdentity.preRotatedKeyId != nil

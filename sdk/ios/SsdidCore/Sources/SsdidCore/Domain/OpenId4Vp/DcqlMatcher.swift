@@ -1,9 +1,11 @@
 import Foundation
 
 /// Matches stored SD-JWT VCs against a DCQL (Digital Credentials Query Language) query.
-final class DcqlMatcher {
+public final class DcqlMatcher {
 
-    func match(
+    public init() {}
+
+    public     func match(
         dcql: [String: Any],
         credentials: [StoredSdJwtVc]
     ) -> [VpMatchResult] {

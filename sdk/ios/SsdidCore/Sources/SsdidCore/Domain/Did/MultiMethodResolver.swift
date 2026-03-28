@@ -1,17 +1,17 @@
 import Foundation
 
-final class MultiMethodResolver: DidResolver {
+public final class MultiMethodResolver: DidResolver {
     private let ssdidResolver: SsdidRegistryResolver
     private let keyResolver: DidKeyResolver
     private let jwkResolver: DidJwkResolver
 
-    init(ssdidResolver: SsdidRegistryResolver, keyResolver: DidKeyResolver, jwkResolver: DidJwkResolver) {
+    public     init(ssdidResolver: SsdidRegistryResolver, keyResolver: DidKeyResolver, jwkResolver: DidJwkResolver) {
         self.ssdidResolver = ssdidResolver
         self.keyResolver = keyResolver
         self.jwkResolver = jwkResolver
     }
 
-    func resolve(did: String) async throws -> DidDocument {
+    public     func resolve(did: String) async throws -> DidDocument {
         let parts = did.split(separator: ":", maxSplits: 3)
         guard parts.count >= 3, parts[0] == "did" else {
             throw DidResolutionError.invalidDid(did)

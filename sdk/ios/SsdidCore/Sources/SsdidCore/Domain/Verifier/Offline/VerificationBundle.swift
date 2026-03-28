@@ -19,7 +19,7 @@ public struct VerificationBundle: Codable {
 }
 
 /// Storage for verification bundles.
-protocol BundleStore: Sendable {
+public protocol BundleStore: Sendable {
     func saveBundle(_ bundle: VerificationBundle) async throws
     func getBundle(issuerDid: String) async -> VerificationBundle?
     func deleteBundle(issuerDid: String) async throws

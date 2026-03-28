@@ -2,20 +2,20 @@ import Foundation
 
 // MARK: - Models
 
-struct Guardian: Codable, Equatable {
-    let id: String
-    let name: String
-    let did: String
-    let shareIndex: Int
-    let enrolledAt: String
+public struct Guardian: Codable, Equatable {
+    public let id: String
+    public let name: String
+    public let did: String
+    public let shareIndex: Int
+    public let enrolledAt: String
 }
 
-struct SocialRecoveryConfig: Codable, Equatable {
-    let did: String
-    let threshold: Int
-    let totalShares: Int
-    let guardians: [Guardian]
-    let createdAt: String
+public struct SocialRecoveryConfig: Codable, Equatable {
+    public let did: String
+    public let threshold: Int
+    public let totalShares: Int
+    public let guardians: [Guardian]
+    public let createdAt: String
 }
 
 // MARK: - SocialRecoveryManager
@@ -23,13 +23,13 @@ struct SocialRecoveryConfig: Codable, Equatable {
 /// Manages social recovery using Shamir's Secret Sharing.
 /// Splits the recovery private key into shares distributed to trusted guardians.
 /// Any K-of-N guardians can reconstruct the recovery key for restoration.
-final class SocialRecoveryManager: @unchecked Sendable {
+public final class SocialRecoveryManager: @unchecked Sendable {
 
     private let recoveryManager: RecoveryManager
     private let vault: Vault
     private let defaults: UserDefaults
 
-    init(
+    public init(
         recoveryManager: RecoveryManager,
         vault: Vault,
         defaults: UserDefaults = .standard
@@ -50,7 +50,7 @@ final class SocialRecoveryManager: @unchecked Sendable {
     ///   - guardianNames: Names and DIDs of guardians [(name, did)]
     ///   - threshold: Minimum shares needed to recover (K)
     /// - Returns: Map of guardian ID to their Base64URL-encoded share
-    func setupSocialRecovery(
+    public func setupSocialRecovery(
         identity: Identity,
         guardianNames: [(name: String, did: String)],
         threshold: Int
@@ -117,7 +117,7 @@ final class SocialRecoveryManager: @unchecked Sendable {
     ///   - collectedShares: Map of share index to Base64URL-encoded share data
     ///   - name: Name for the restored identity
     ///   - algorithm: Algorithm to use for new key generation
-    func recoverWithShares(
+    public func recoverWithShares(
         did: String,
         collectedShares: [Int: String],
         name: String,
@@ -156,14 +156,14 @@ final class SocialRecoveryManager: @unchecked Sendable {
     }
 
     /// Get social recovery configuration for a DID.
-    func getConfig(did: String) -> SocialRecoveryConfig? {
+    public func getConfig(did: String) -> SocialRecoveryConfig? {
         let key = Self.storageKey(for: did)
         guard let data = defaults.data(forKey: key) else { return nil }
         return try? JSONDecoder().decode(SocialRecoveryConfig.self, from: data)
     }
 
     /// Check if social recovery is configured for a DID.
-    func hasSocialRecovery(did: String) -> Bool {
+    public func hasSocialRecovery(did: String) -> Bool {
         return getConfig(did: did) != nil
     }
 
@@ -183,7 +183,7 @@ final class SocialRecoveryManager: @unchecked Sendable {
 
 // MARK: - Errors
 
-enum SocialRecoveryError: Error, LocalizedError {
+public enum SocialRecoveryError: Error, LocalizedError {
     case thresholdTooLow
     case insufficientGuardians(needed: Int, got: Int)
     case tooManyGuardians
@@ -191,7 +191,7 @@ enum SocialRecoveryError: Error, LocalizedError {
     case insufficientShares(needed: Int, got: Int)
     case invalidShareData
 
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .thresholdTooLow:
             return "Threshold must be at least 2"

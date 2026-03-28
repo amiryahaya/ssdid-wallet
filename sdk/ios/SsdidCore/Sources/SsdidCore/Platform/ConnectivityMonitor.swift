@@ -4,13 +4,13 @@ import Combine
 
 /// Observes network reachability using NWPathMonitor and publishes the current
 /// online/offline state as a Combine `@Published` property.
-final class ConnectivityMonitor: ObservableObject, @unchecked Sendable {
-    @Published var isOnline: Bool = true
+public final class ConnectivityMonitor: ObservableObject, @unchecked Sendable {
+    @Published public var isOnline: Bool = true
 
     private let monitor = NWPathMonitor()
     private let queue = DispatchQueue(label: "my.ssdid.wallet.connectivity.monitor")
 
-    init() {
+    public     init() {
         // Support UI-test offline simulation: when the test harness passes
         // --simulate-offline, stay permanently offline without starting the monitor.
         if ProcessInfo.processInfo.arguments.contains("--simulate-offline") {
@@ -34,7 +34,7 @@ final class ConnectivityMonitor: ObservableObject, @unchecked Sendable {
     }
 
     /// Synchronous convenience accessor for the current connectivity state.
-    func isCurrentlyOnline() -> Bool {
+    public     func isCurrentlyOnline() -> Bool {
         return isOnline
     }
 }

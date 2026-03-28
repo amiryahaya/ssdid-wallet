@@ -1,16 +1,16 @@
 import Foundation
 
 /// Protocol for fetching JSON from URLs, enabling test injection.
-protocol MetadataFetcher: Sendable {
+public protocol MetadataFetcher: Sendable {
     func fetchJson(url: String) async throws -> [String: Any]
 }
 
 /// Default fetcher using URLSession.
 private final class URLSessionMetadataFetcher: MetadataFetcher, @unchecked Sendable {
     private let session: URLSession
-    init(session: URLSession) { self.session = session }
+    public     init(session: URLSession) { self.session = session }
 
-    func fetchJson(url urlString: String) async throws -> [String: Any] {
+    public     func fetchJson(url urlString: String) async throws -> [String: Any] {
         guard let url = URL(string: urlString) else {
             throw OpenId4VciError.transportError("Invalid metadata URL")
         }
@@ -28,23 +28,23 @@ private final class URLSessionMetadataFetcher: MetadataFetcher, @unchecked Senda
 }
 
 /// Resolves and caches issuer metadata from well-known endpoints.
-actor IssuerMetadataResolver {
+public actor IssuerMetadataResolver {
 
     private let fetcher: MetadataFetcher
     private var cache: [String: IssuerMetadata] = [:]
     private var inFlight: [String: Task<IssuerMetadata, Error>] = [:]
 
-    init(session: URLSession = .shared) {
+    public     init(session: URLSession = .shared) {
         self.fetcher = URLSessionMetadataFetcher(session: session)
     }
 
-    init(fetcher: MetadataFetcher) {
+    public     init(fetcher: MetadataFetcher) {
         self.fetcher = fetcher
     }
 
     /// Resolves issuer metadata for the given issuer URL, using a cache.
     /// Uses in-flight deduplication to prevent cache stampede.
-    func resolve(issuerUrl: String) async throws -> IssuerMetadata {
+    public     func resolve(issuerUrl: String) async throws -> IssuerMetadata {
         if let cached = cache[issuerUrl] {
             return cached
         }
@@ -109,7 +109,7 @@ actor IssuerMetadataResolver {
     }
 
     /// Clears the metadata cache.
-    func clearCache() {
+    public     func clearCache() {
         cache.removeAll()
         inFlight.removeAll()
     }

@@ -1,4 +1,5 @@
 import Foundation
+import SsdidCore
 
 /// Represents a parsed deep link action from an ssdid:// URL.
 enum DeepLinkAction: Equatable {

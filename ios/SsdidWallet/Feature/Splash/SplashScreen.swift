@@ -1,4 +1,5 @@
 import SwiftUI
+import SsdidCore
 
 struct SplashScreen: View {
     @State private var iconScale: CGFloat = 0.8

@@ -1,19 +1,19 @@
 import Foundation
 
 /// Registry API client for DID operations and device pairing.
-final class RegistryApi: @unchecked Sendable {
+public final class RegistryApi: @unchecked Sendable {
 
     private let client: SsdidHttpClient
     private let baseURL: String
 
-    init(client: SsdidHttpClient, baseURL: String) {
+    public     init(client: SsdidHttpClient, baseURL: String) {
         self.client = client
         self.baseURL = baseURL
     }
 
     // MARK: - Registry Info
 
-    func getRegistryInfo() async throws -> RegistryInfoResponse {
+    public     func getRegistryInfo() async throws -> RegistryInfoResponse {
         return try await client.get(
             url: "\(baseURL)/api/registry/info",
             responseType: RegistryInfoResponse.self
@@ -22,7 +22,7 @@ final class RegistryApi: @unchecked Sendable {
 
     // MARK: - DID Operations
 
-    func registerDid(request: RegisterDidRequest) async throws -> RegisterDidResponse {
+    public     func registerDid(request: RegisterDidRequest) async throws -> RegisterDidResponse {
         return try await client.post(
             url: "\(baseURL)/api/did",
             body: request,
@@ -30,7 +30,7 @@ final class RegistryApi: @unchecked Sendable {
         )
     }
 
-    func resolveDid(did: String) async throws -> DidDocument {
+    public     func resolveDid(did: String) async throws -> DidDocument {
         let encodedDid = did.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? did
         return try await client.get(
             url: "\(baseURL)/api/did/\(encodedDid)",
@@ -38,7 +38,7 @@ final class RegistryApi: @unchecked Sendable {
         )
     }
 
-    func updateDid(did: String, request: UpdateDidRequest) async throws -> RegisterDidResponse {
+    public     func updateDid(did: String, request: UpdateDidRequest) async throws -> RegisterDidResponse {
         let encodedDid = did.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? did
         return try await client.request(
             method: "PUT",
@@ -48,7 +48,7 @@ final class RegistryApi: @unchecked Sendable {
         )
     }
 
-    func deactivateDid(did: String, request: DeactivateDidRequest) async throws {
+    public     func deactivateDid(did: String, request: DeactivateDidRequest) async throws {
         let encodedDid = did.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? did
         try await client.requestVoid(
             method: "DELETE",
@@ -57,7 +57,7 @@ final class RegistryApi: @unchecked Sendable {
         )
     }
 
-    func createChallenge(did: String) async throws -> ChallengeResponse {
+    public     func createChallenge(did: String) async throws -> ChallengeResponse {
         let encodedDid = did.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? did
         return try await client.post(
             url: "\(baseURL)/api/did/\(encodedDid)/challenge",
@@ -68,7 +68,7 @@ final class RegistryApi: @unchecked Sendable {
 
     // MARK: - Device Pairing
 
-    func initPairing(did: String, request: PairingInitRequest) async throws -> PairingInitResponse {
+    public     func initPairing(did: String, request: PairingInitRequest) async throws -> PairingInitResponse {
         let encodedDid = did.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? did
         return try await client.post(
             url: "\(baseURL)/api/did/\(encodedDid)/pair",
@@ -77,7 +77,7 @@ final class RegistryApi: @unchecked Sendable {
         )
     }
 
-    func joinPairing(did: String, pairingId: String, request: PairingJoinRequest) async throws -> PairingJoinResponse {
+    public     func joinPairing(did: String, pairingId: String, request: PairingJoinRequest) async throws -> PairingJoinResponse {
         let encodedDid = did.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? did
         return try await client.post(
             url: "\(baseURL)/api/did/\(encodedDid)/pair/\(pairingId)/join",
@@ -86,7 +86,7 @@ final class RegistryApi: @unchecked Sendable {
         )
     }
 
-    func getPairingStatus(did: String, pairingId: String) async throws -> PairingStatusResponse {
+    public     func getPairingStatus(did: String, pairingId: String) async throws -> PairingStatusResponse {
         let encodedDid = did.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? did
         return try await client.get(
             url: "\(baseURL)/api/did/\(encodedDid)/pair/\(pairingId)",
@@ -94,7 +94,7 @@ final class RegistryApi: @unchecked Sendable {
         )
     }
 
-    func approvePairing(did: String, pairingId: String, request: PairingApproveRequest) async throws {
+    public     func approvePairing(did: String, pairingId: String, request: PairingApproveRequest) async throws {
         let encodedDid = did.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? did
         try await client.requestVoid(
             method: "POST",

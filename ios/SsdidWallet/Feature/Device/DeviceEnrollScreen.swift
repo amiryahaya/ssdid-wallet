@@ -1,4 +1,5 @@
 import SwiftUI
+import SsdidCore
 
 struct DeviceEnrollScreen: View {
     @Environment(AppRouter.self) private var router

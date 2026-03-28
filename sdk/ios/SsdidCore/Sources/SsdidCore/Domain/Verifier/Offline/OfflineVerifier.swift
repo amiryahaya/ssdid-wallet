@@ -2,13 +2,13 @@ import Foundation
 
 /// Verifies credentials offline using cached verification bundles.
 /// Falls back gracefully when bundles are stale or missing.
-final class OfflineVerifier {
+public final class OfflineVerifier {
     private let classicalProvider: CryptoProvider
     private let pqcProvider: CryptoProvider
     private let bundleStore: BundleStore
     private let ttlProvider: TtlProvider
 
-    init(
+    public     init(
         classicalProvider: CryptoProvider,
         pqcProvider: CryptoProvider,
         bundleStore: BundleStore,
@@ -21,7 +21,7 @@ final class OfflineVerifier {
     }
 
     /// Verify a credential using cached bundles.
-    func verifyCredential(_ credential: VerifiableCredential) async -> OfflineVerificationResult {
+    public     func verifyCredential(_ credential: VerifiableCredential) async -> OfflineVerificationResult {
         // Check expiration
         if let exp = credential.expirationDate,
            let expDate = ISO8601DateFormatter().date(from: exp),

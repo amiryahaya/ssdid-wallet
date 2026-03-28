@@ -1,4 +1,5 @@
 import Foundation
+import SsdidCore
 
 /// ViewModel for the OpenID4VP presentation request flow.
 @MainActor

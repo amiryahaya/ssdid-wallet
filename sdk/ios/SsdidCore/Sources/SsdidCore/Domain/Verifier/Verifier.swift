@@ -17,24 +17,24 @@ public protocol Verifier {
 
 /// Concrete Verifier implementation that resolves DIDs via the Registry
 /// and verifies signatures using the appropriate CryptoProvider.
-final class VerifierImpl: Verifier {
+public final class VerifierImpl: Verifier {
 
     private let didResolver: DidResolver
     private let classicalProvider: CryptoProvider
     private let pqcProvider: CryptoProvider
 
-    init(didResolver: DidResolver, classicalProvider: CryptoProvider, pqcProvider: CryptoProvider) {
+    public     init(didResolver: DidResolver, classicalProvider: CryptoProvider, pqcProvider: CryptoProvider) {
         self.didResolver = didResolver
         self.classicalProvider = classicalProvider
         self.pqcProvider = pqcProvider
     }
 
-    func resolveDid(did: String) async throws -> DidDocument {
+    public     func resolveDid(did: String) async throws -> DidDocument {
         _ = try Did.validate(did)
         return try await didResolver.resolve(did: did)
     }
 
-    func verifySignature(did: String, keyId: String, signature: Data, data: Data) async throws -> Bool {
+    public     func verifySignature(did: String, keyId: String, signature: Data, data: Data) async throws -> Bool {
         _ = try Did.validate(did)
         let doc = try await resolveDid(did: did)
         guard let vm = doc.verificationMethod.first(where: { $0.id == keyId }) else {
@@ -47,7 +47,7 @@ final class VerifierImpl: Verifier {
         return try provider.verify(algorithm: algorithm, publicKey: publicKey, signature: signature, data: data)
     }
 
-    func verifyChallengeResponse(did: String, keyId: String, challenge: String, signedChallenge: String) async throws -> Bool {
+    public     func verifyChallengeResponse(did: String, keyId: String, challenge: String, signedChallenge: String) async throws -> Bool {
         let signature = try Multibase.decode(signedChallenge)
         return try await verifySignature(
             did: did,
@@ -57,7 +57,7 @@ final class VerifierImpl: Verifier {
         )
     }
 
-    func verifyCredential(credential: VerifiableCredential) async throws -> Bool {
+    public     func verifyCredential(credential: VerifiableCredential) async throws -> Bool {
         let formatter = ISO8601DateFormatter()
 
         // Check not-before (nbf): credential must not be used before issuance date

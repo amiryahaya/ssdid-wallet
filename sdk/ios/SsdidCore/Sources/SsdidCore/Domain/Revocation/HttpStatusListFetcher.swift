@@ -1,14 +1,14 @@
 import Foundation
 
-final class HttpStatusListFetcher: StatusListFetcher {
+public final class HttpStatusListFetcher: StatusListFetcher {
     private let session: URLSession
     private let decoder = JSONDecoder()
 
-    init(session: URLSession = .shared) {
+    public     init(session: URLSession = .shared) {
         self.session = session
     }
 
-    func fetch(url: String) async throws -> StatusListCredential {
+    public     func fetch(url: String) async throws -> StatusListCredential {
         guard !url.isEmpty else {
             throw RevocationError.fetchFailed("Status list URL must not be empty")
         }

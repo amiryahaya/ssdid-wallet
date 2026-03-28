@@ -9,18 +9,18 @@ public protocol ActivityRepository {
 }
 
 /// UserDefaults-based implementation of ActivityRepository.
-final class UserDefaultsActivityRepository: ActivityRepository {
+public final class UserDefaultsActivityRepository: ActivityRepository {
 
     private static let storageKey = "ssdid_activity_records"
     private let defaults: UserDefaults
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
 
-    init(defaults: UserDefaults = .standard) {
+    public     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
     }
 
-    func addActivity(_ record: ActivityRecord) async throws {
+    public     func addActivity(_ record: ActivityRecord) async throws {
         var records = await listActivities()
         records.insert(record, at: 0) // Most recent first
 
@@ -33,19 +33,19 @@ final class UserDefaultsActivityRepository: ActivityRepository {
         defaults.set(data, forKey: Self.storageKey)
     }
 
-    func listActivities() async -> [ActivityRecord] {
+    public     func listActivities() async -> [ActivityRecord] {
         guard let data = defaults.data(forKey: Self.storageKey) else {
             return []
         }
         return (try? decoder.decode([ActivityRecord].self, from: data)) ?? []
     }
 
-    func listActivitiesForDid(_ did: String) async -> [ActivityRecord] {
+    public     func listActivitiesForDid(_ did: String) async -> [ActivityRecord] {
         let all = await listActivities()
         return all.filter { $0.did == did }
     }
 
-    func clearAll() async throws {
+    public     func clearAll() async throws {
         defaults.removeObject(forKey: Self.storageKey)
     }
 }

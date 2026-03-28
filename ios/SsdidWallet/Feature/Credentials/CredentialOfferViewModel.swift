@@ -1,4 +1,5 @@
 import Foundation
+import SsdidCore
 
 /// ViewModel for the OpenID4VCI credential offer flow.
 ///

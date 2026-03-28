@@ -1,19 +1,19 @@
 import Foundation
 
 public struct StatusListCredential: Codable {
-    let context: [String]
-    let id: String?
-    let type: [String]
-    let issuer: String
-    let credentialSubject: StatusListSubject
-    let proof: Proof?
+    public let context: [String]
+    public let id: String?
+    public let type: [String]
+    public let issuer: String
+    public let credentialSubject: StatusListSubject
+    public let proof: Proof?
 
     enum CodingKeys: String, CodingKey {
         case context = "@context"
         case id, type, issuer, credentialSubject, proof
     }
 
-    init(
+    public init(
         context: [String] = [],
         id: String? = nil,
         type: [String],
@@ -31,7 +31,7 @@ public struct StatusListCredential: Codable {
 }
 
 public struct StatusListSubject: Codable {
-    let type: String
-    let statusPurpose: String
-    let encodedList: String
+    public let type: String
+    public let statusPurpose: String
+    public let encodedList: String
 }

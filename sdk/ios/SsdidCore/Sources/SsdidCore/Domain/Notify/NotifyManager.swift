@@ -8,7 +8,7 @@ import UserNotifications
 /// Inbox credentials (inbox_id / inbox_secret) are stored in the Keychain.
 /// Non-sensitive metadata (inbox_id) is also mirrored in UserDefaults for quick reads.
 @MainActor
-final class NotifyManager {
+public final class NotifyManager {
 
     // MARK: - Keychain aliases
 
@@ -32,11 +32,11 @@ final class NotifyManager {
 
     /// Closure that returns the current list of identities.
     /// Set by the app layer (ServiceContainer or SsdidWalletApp) to enable demux.
-    var identityProvider: (() async -> [Identity])?
+    public     var identityProvider: (() async -> [Identity])?
 
     // MARK: - Init
 
-    init(api: NotifyApi, keychainManager: KeychainManager, localNotificationStorage: LocalNotificationStorage) {
+    public     init(api: NotifyApi, keychainManager: KeychainManager, localNotificationStorage: LocalNotificationStorage) {
         self.api = api
         self.keychainManager = keychainManager
         self.localNotificationStorage = localNotificationStorage
@@ -49,7 +49,7 @@ final class NotifyManager {
     /// On first launch this registers a new inbox (without a device token — APNs
     /// registration happens separately). On subsequent launches it returns immediately
     /// because the credentials are already stored in the Keychain.
-    func ensureInboxRegistered() async throws {
+    public     func ensureInboxRegistered() async throws {
         guard !isRegistering else { return }
         isRegistering = true
         defer { isRegistering = false }
@@ -71,7 +71,7 @@ final class NotifyManager {
 
     /// Converts the raw APNs device token to a hex string and registers (or updates)
     /// it with the Notify service. Safe to call every time the app receives a new token.
-    func registerAPNsToken(_ tokenData: Data) async throws {
+    public     func registerAPNsToken(_ tokenData: Data) async throws {
         guard let inboxSecret = try keychainManager.loadSecret(alias: Self.inboxSecretAlias) else {
             // Inbox not yet registered; token will be registered after ensureInboxRegistered.
             return
@@ -93,7 +93,7 @@ final class NotifyManager {
     /// The mailbox_id is deterministic: `"mbx_"` followed by the first 16 characters of
     /// the URL-safe base64 (no padding) encoding of SHA-256(did), providing
     /// correlation resistance while remaining stable across reinstalls.
-    func createMailbox(for identity: Identity) async throws {
+    public     func createMailbox(for identity: Identity) async throws {
         guard let inboxSecret = try keychainManager.loadSecret(alias: Self.inboxSecretAlias) else {
             throw NotifyError.inboxNotRegistered
         }
@@ -110,7 +110,7 @@ final class NotifyManager {
 
     /// Deletes the mailbox associated with the given identity.
     /// Call this when an identity is deactivated or removed.
-    func deleteMailbox(for identity: Identity) async throws {
+    public     func deleteMailbox(for identity: Identity) async throws {
         guard let inboxSecret = try keychainManager.loadSecret(alias: Self.inboxSecretAlias) else {
             throw NotifyError.inboxNotRegistered
         }
@@ -124,7 +124,7 @@ final class NotifyManager {
 
     /// Fetches all pending notifications from the Notify service.
     /// Call this on reconnect or when the app returns to foreground.
-    func fetchPending() async throws -> [NotifyNotification] {
+    public     func fetchPending() async throws -> [NotifyNotification] {
         guard let inboxSecret = try keychainManager.loadSecret(alias: Self.inboxSecretAlias) else {
             throw NotifyError.inboxNotRegistered
         }
@@ -135,7 +135,7 @@ final class NotifyManager {
 
     /// Acknowledges a notification by deleting it from the Notify service.
     /// Call this after the notification has been fully processed.
-    func ackPending(notificationId: String) async throws {
+    public     func ackPending(notificationId: String) async throws {
         guard let inboxSecret = try keychainManager.loadSecret(alias: Self.inboxSecretAlias) else {
             throw NotifyError.inboxNotRegistered
         }
@@ -147,7 +147,7 @@ final class NotifyManager {
 
     /// Fetches all pending notifications, resolves each to its owning identity,
     /// posts a local notification with identity context, and acknowledges.
-    func fetchAndDemux() async throws {
+    public     func fetchAndDemux() async throws {
         let pending = try await fetchPending()
         guard !pending.isEmpty else { return }
 

@@ -23,7 +23,7 @@ public struct CredentialOffer {
     public let issuerState: String?
 
     /// Parses a credential offer from a JSON string.
-    static func parse(_ jsonString: String) throws -> CredentialOffer {
+    public static func parse(_ jsonString: String) throws -> CredentialOffer {
         guard let data = jsonString.data(using: .utf8),
               let obj = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             throw OpenId4VciError.invalidOffer("Invalid JSON")
@@ -76,7 +76,7 @@ public struct CredentialOffer {
     }
 
     /// Parses a credential offer from a URI containing credential_offer or credential_offer_uri query parameter.
-    static func parseFromUri(_ uriString: String) throws -> CredentialOffer {
+    public static func parseFromUri(_ uriString: String) throws -> CredentialOffer {
         guard let components = URLComponents(string: uriString) else {
             throw OpenId4VciError.invalidOffer("Invalid URI: \(uriString)")
         }

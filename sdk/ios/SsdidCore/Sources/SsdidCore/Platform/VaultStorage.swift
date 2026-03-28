@@ -1,13 +1,13 @@
 import Foundation
 
 /// Data structure for pre-rotated key material.
-struct PreRotatedKeyData {
-    let encryptedPrivateKey: Data
-    let publicKey: Data
+public struct PreRotatedKeyData {
+    public let encryptedPrivateKey: Data
+    public let publicKey: Data
 }
 
 /// Protocol for persistent vault storage operations.
-protocol VaultStorage: SdJwtVcStorage {
+public protocol VaultStorage: SdJwtVcStorage {
     func saveIdentity(_ identity: Identity, encryptedPrivateKey: Data) async throws
     func getIdentity(keyId: String) async -> Identity?
     func listIdentities() async -> [Identity]
@@ -44,7 +44,7 @@ protocol VaultStorage: SdJwtVcStorage {
 /// File-based + UserDefaults implementation of VaultStorage.
 /// Identities and credentials are stored in UserDefaults as JSON.
 /// Encrypted private keys are stored as files in the app's documents directory.
-final class FileVaultStorage: VaultStorage {
+public final class FileVaultStorage: VaultStorage {
 
     private let defaults: UserDefaults
     private let fileManager: FileManager
@@ -58,14 +58,14 @@ final class FileVaultStorage: VaultStorage {
         static let onboarding = "ssdid_onboarding_completed"
     }
 
-    init(defaults: UserDefaults = .standard, fileManager: FileManager = .default) {
+    public init(defaults: UserDefaults = .standard, fileManager: FileManager = .default) {
         self.defaults = defaults
         self.fileManager = fileManager
     }
 
     // MARK: - Identities
 
-    func saveIdentity(_ identity: Identity, encryptedPrivateKey: Data) async throws {
+    public func saveIdentity(_ identity: Identity, encryptedPrivateKey: Data) async throws {
         var identities = await listIdentities()
 
         // Replace if existing, otherwise append
@@ -83,17 +83,17 @@ final class FileVaultStorage: VaultStorage {
         try encryptedPrivateKey.write(to: keyPath, options: [.atomic, .completeFileProtection])
     }
 
-    func getIdentity(keyId: String) async -> Identity? {
+    public func getIdentity(keyId: String) async -> Identity? {
         let identities = await listIdentities()
         return identities.first { $0.keyId == keyId }
     }
 
-    func listIdentities() async -> [Identity] {
+    public func listIdentities() async -> [Identity] {
         guard let data = defaults.data(forKey: Keys.identities) else { return [] }
         return (try? decoder.decode([Identity].self, from: data)) ?? []
     }
 
-    func deleteIdentity(keyId: String) async throws {
+    public func deleteIdentity(keyId: String) async throws {
         var identities = await listIdentities()
         identities.removeAll { $0.keyId == keyId }
         let data = try encoder.encode(identities)
@@ -104,14 +104,14 @@ final class FileVaultStorage: VaultStorage {
         try? fileManager.removeItem(at: keyPath)
     }
 
-    func getEncryptedPrivateKey(keyId: String) async -> Data? {
+    public func getEncryptedPrivateKey(keyId: String) async -> Data? {
         guard let keyPath = try? privateKeyFilePath(keyId: keyId) else { return nil }
         return try? Data(contentsOf: keyPath)
     }
 
     // MARK: - Credentials
 
-    func saveCredential(_ credential: VerifiableCredential) async throws {
+    public func saveCredential(_ credential: VerifiableCredential) async throws {
         var credentials = await listCredentials()
 
         // Replace if existing, otherwise append
@@ -125,12 +125,12 @@ final class FileVaultStorage: VaultStorage {
         defaults.set(data, forKey: Keys.credentials)
     }
 
-    func listCredentials() async -> [VerifiableCredential] {
+    public func listCredentials() async -> [VerifiableCredential] {
         guard let data = defaults.data(forKey: Keys.credentials) else { return [] }
         return (try? decoder.decode([VerifiableCredential].self, from: data)) ?? []
     }
 
-    func deleteCredential(credentialId: String) async throws {
+    public func deleteCredential(credentialId: String) async throws {
         var credentials = await listCredentials()
         credentials.removeAll { $0.id == credentialId }
         let data = try encoder.encode(credentials)
@@ -139,7 +139,7 @@ final class FileVaultStorage: VaultStorage {
 
     // MARK: - SD-JWT VCs
 
-    func saveSdJwtVc(_ sdJwtVc: StoredSdJwtVc) async throws {
+    public func saveSdJwtVc(_ sdJwtVc: StoredSdJwtVc) async throws {
         var vcs = await listSdJwtVcs()
 
         if let index = vcs.firstIndex(where: { $0.id == sdJwtVc.id }) {
@@ -152,12 +152,12 @@ final class FileVaultStorage: VaultStorage {
         defaults.set(data, forKey: Keys.sdJwtVcs)
     }
 
-    func listSdJwtVcs() async -> [StoredSdJwtVc] {
+    public func listSdJwtVcs() async -> [StoredSdJwtVc] {
         guard let data = defaults.data(forKey: Keys.sdJwtVcs) else { return [] }
         return (try? decoder.decode([StoredSdJwtVc].self, from: data)) ?? []
     }
 
-    func deleteSdJwtVc(id: String) async throws {
+    public func deleteSdJwtVc(id: String) async throws {
         var vcs = await listSdJwtVcs()
         vcs.removeAll { $0.id == id }
         let data = try encoder.encode(vcs)
@@ -166,26 +166,26 @@ final class FileVaultStorage: VaultStorage {
 
     // MARK: - Recovery Keys
 
-    func saveRecoveryPublicKey(keyId: String, encryptedPublicKey: Data) async throws {
+    public func saveRecoveryPublicKey(keyId: String, encryptedPublicKey: Data) async throws {
         let path = try recoveryKeyFilePath(keyId: keyId)
         try encryptedPublicKey.write(to: path, options: [.atomic, .completeFileProtection])
     }
 
-    func getRecoveryPublicKey(keyId: String) async -> Data? {
+    public func getRecoveryPublicKey(keyId: String) async -> Data? {
         guard let path = try? recoveryKeyFilePath(keyId: keyId) else { return nil }
         return try? Data(contentsOf: path)
     }
 
     // MARK: - Pre-Rotated Keys
 
-    func savePreRotatedKey(keyId: String, encryptedPrivateKey: Data, publicKey: Data) async throws {
+    public func savePreRotatedKey(keyId: String, encryptedPrivateKey: Data, publicKey: Data) async throws {
         let privPath = try preRotatedPrivateKeyFilePath(keyId: keyId)
         let pubPath = try preRotatedPublicKeyFilePath(keyId: keyId)
         try encryptedPrivateKey.write(to: privPath, options: [.atomic, .completeFileProtection])
         try publicKey.write(to: pubPath, options: [.atomic, .completeFileProtection])
     }
 
-    func getPreRotatedKey(keyId: String) async -> PreRotatedKeyData? {
+    public func getPreRotatedKey(keyId: String) async -> PreRotatedKeyData? {
         guard let privPath = try? preRotatedPrivateKeyFilePath(keyId: keyId),
               let pubPath = try? preRotatedPublicKeyFilePath(keyId: keyId),
               let encPriv = try? Data(contentsOf: privPath),
@@ -195,7 +195,7 @@ final class FileVaultStorage: VaultStorage {
         return PreRotatedKeyData(encryptedPrivateKey: encPriv, publicKey: pub)
     }
 
-    func deletePreRotatedKey(keyId: String) async throws {
+    public func deletePreRotatedKey(keyId: String) async throws {
         if let privPath = try? preRotatedPrivateKeyFilePath(keyId: keyId) {
             try? fileManager.removeItem(at: privPath)
         }
@@ -210,25 +210,25 @@ final class FileVaultStorage: VaultStorage {
         "ssdid_rotation_history_\(did)"
     }
 
-    func addRotationEntry(did: String, entry: RotationEntry) async throws {
+    public func addRotationEntry(did: String, entry: RotationEntry) async throws {
         var history = await getRotationHistory(did: did)
         history.append(entry)
         let data = try encoder.encode(history)
         defaults.set(data, forKey: rotationHistoryKey(did: did))
     }
 
-    func getRotationHistory(did: String) async -> [RotationEntry] {
+    public func getRotationHistory(did: String) async -> [RotationEntry] {
         guard let data = defaults.data(forKey: rotationHistoryKey(did: did)) else { return [] }
         return (try? decoder.decode([RotationEntry].self, from: data)) ?? []
     }
 
     // MARK: - Onboarding
 
-    func isOnboardingCompleted() async -> Bool {
+    public func isOnboardingCompleted() async -> Bool {
         defaults.bool(forKey: Keys.onboarding)
     }
 
-    func setOnboardingCompleted() async throws {
+    public func setOnboardingCompleted() async throws {
         defaults.set(true, forKey: Keys.onboarding)
     }
 

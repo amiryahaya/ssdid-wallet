@@ -2,7 +2,7 @@ import Foundation
 import CryptoKit
 
 /// Manages recovery key generation, storage, and identity restoration.
-final class RecoveryManager: @unchecked Sendable {
+public final class RecoveryManager: @unchecked Sendable {
 
     private let vault: Vault
     private let storage: VaultStorage
@@ -10,7 +10,7 @@ final class RecoveryManager: @unchecked Sendable {
     private let pqcProvider: CryptoProvider
     private let keychainManager: KeychainManagerProtocol
 
-    init(
+    public     init(
         vault: Vault,
         storage: VaultStorage,
         classicalProvider: CryptoProvider,
@@ -31,7 +31,7 @@ final class RecoveryManager: @unchecked Sendable {
     /// Generates a recovery key pair for the given identity.
     /// Returns the recovery private key bytes -- the caller must export/store offline.
     /// The recovery public key is stored in the vault for future DID Document updates.
-    func generateRecoveryKey(identity: Identity) async throws -> Data {
+    public     func generateRecoveryKey(identity: Identity) async throws -> Data {
         let cryptoProvider = provider(for: identity.algorithm)
         let recoveryKeyPair = try cryptoProvider.generateKeyPair(algorithm: identity.algorithm)
         let recoveryKeyId = "\(identity.keyId)-recovery"
@@ -69,7 +69,7 @@ final class RecoveryManager: @unchecked Sendable {
     }
 
     /// Checks if an identity has a recovery key configured.
-    func hasRecoveryKey(keyId: String) async -> Bool {
+    public     func hasRecoveryKey(keyId: String) async -> Bool {
         guard let identity = await storage.getIdentity(keyId: keyId) else { return false }
         return identity.hasRecoveryKey
     }
@@ -77,7 +77,7 @@ final class RecoveryManager: @unchecked Sendable {
     /// Restores an identity using an offline recovery private key.
     /// Generates a new primary key pair and stores locally.
     /// Caller should subsequently publish the updated DID Document via SsdidClient.
-    func restoreWithRecoveryKey(
+    public     func restoreWithRecoveryKey(
         did: String,
         recoveryPrivateKeyBase64: String,
         name: String,

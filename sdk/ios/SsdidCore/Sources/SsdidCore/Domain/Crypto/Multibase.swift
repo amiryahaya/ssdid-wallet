@@ -2,7 +2,7 @@ import Foundation
 
 /// Multibase encoding/decoding supporting Base64URL (u prefix) and Base58BTC (z prefix).
 /// Default encoding uses Base64URL no-padding (u prefix).
-enum Multibase {
+public enum Multibase {
 
     enum MultibaseError: Error, LocalizedError {
         case emptyInput
@@ -24,7 +24,7 @@ enum Multibase {
     // MARK: - Encode
 
     /// Encodes data using Base64URL no-padding with `u` prefix (default).
-    static func encode(_ data: Data) -> String {
+    public static func encode(_ data: Data) -> String {
         let base64url = data.base64EncodedString()
             .replacingOccurrences(of: "+", with: "-")
             .replacingOccurrences(of: "/", with: "_")
@@ -33,14 +33,14 @@ enum Multibase {
     }
 
     /// Encodes data using Base58BTC with `z` prefix.
-    static func encodeBase58(_ data: Data) -> String {
+    public static func encodeBase58(_ data: Data) -> String {
         return "z\(Base58.encode(data))"
     }
 
     // MARK: - Decode
 
     /// Decodes a multibase-encoded string. Supports `u` (Base64URL) and `z` (Base58BTC).
-    static func decode(_ encoded: String) throws -> Data {
+    public static func decode(_ encoded: String) throws -> Data {
         guard let prefix = encoded.first else {
             throw MultibaseError.emptyInput
         }
@@ -88,14 +88,14 @@ enum Multibase {
 // MARK: - Base58 (Bitcoin alphabet)
 
 /// Minimal Base58 implementation using the Bitcoin alphabet.
-enum Base58 {
+public enum Base58 {
 
     private static let alphabet = Array("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")
 
     private static let baseCount = UInt(alphabet.count) // 58
 
     /// Encodes raw bytes to a Base58 string.
-    static func encode(_ data: Data) -> String {
+    public static func encode(_ data: Data) -> String {
         let bytes = [UInt8](data)
 
         // Count leading zeros
@@ -133,7 +133,7 @@ enum Base58 {
     }
 
     /// Decodes a Base58 string to raw bytes. Returns nil on invalid input.
-    static func decode(_ string: String) -> Data? {
+    public static func decode(_ string: String) -> Data? {
         let chars = Array(string)
 
         // Count leading '1's

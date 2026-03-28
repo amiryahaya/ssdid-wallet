@@ -1,8 +1,8 @@
 import Foundation
 import zlib
 
-enum BitstringParser {
-    static func isRevoked(encodedList: String, index: Int) throws -> Bool {
+public enum BitstringParser {
+    public static func isRevoked(encodedList: String, index: Int) throws -> Bool {
         guard index >= 0 else {
             throw RevocationError.invalidIndex(index)
         }
@@ -27,12 +27,12 @@ enum BitstringParser {
     }
 }
 
-enum RevocationError: Error, LocalizedError {
+public enum RevocationError: Error, LocalizedError {
     case invalidIndex(Int)
     case decodingFailed(String)
     case fetchFailed(String)
 
-    var errorDescription: String? {
+    public     var errorDescription: String? {
         switch self {
         case .invalidIndex(let idx):
             return "Status list index out of range: \(idx)"

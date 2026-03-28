@@ -25,7 +25,7 @@ public struct Disclosure: Equatable {
         return data.base64URLEncodedString()
     }
 
-    func hash(algorithm: String = "sha-256") throws -> String {
+    public     func hash(algorithm: String = "sha-256") throws -> String {
         guard algorithm == "sha-256" else {
             throw SdJwtError.unsupportedAlgorithm(algorithm)
         }

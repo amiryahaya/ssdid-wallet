@@ -2,7 +2,7 @@ import Foundation
 
 /// Email verification API client for `wallet.ssdid.my`.
 /// Uses its own encoder/decoder (camelCase) instead of SsdidHttpClient's (snake_case).
-final class EmailApi: @unchecked Sendable {
+public final class EmailApi: @unchecked Sendable {
 
     private let baseURL: String
     private let session: URLSession
@@ -17,19 +17,19 @@ final class EmailApi: @unchecked Sendable {
         return d
     }()
 
-    init(baseURL: String = "https://wallet.ssdid.my", session: URLSession = .shared) {
+    public init(baseURL: String = "https://wallet.ssdid.my", session: URLSession = .shared) {
         self.baseURL = baseURL.hasSuffix("/") ? String(baseURL.dropLast()) : baseURL
         self.session = session
     }
 
     /// Convenience init that ignores the shared client (kept for call-site compatibility).
-    init(client: SsdidHttpClient, baseURL: String = "https://wallet.ssdid.my") {
+    public init(client: SsdidHttpClient, baseURL: String = "https://wallet.ssdid.my") {
         self.baseURL = baseURL.hasSuffix("/") ? String(baseURL.dropLast()) : baseURL
         self.session = .shared
     }
 
     /// Send a verification code to the given email address.
-    func sendCode(email: String, deviceId: String) async throws -> SendCodeResponse {
+    public func sendCode(email: String, deviceId: String) async throws -> SendCodeResponse {
         return try await post(
             url: "\(baseURL)/api/email/verify/send",
             body: SendCodeRequest(email: email, deviceId: deviceId),
@@ -38,7 +38,7 @@ final class EmailApi: @unchecked Sendable {
     }
 
     /// Confirm the verification code.
-    func confirmCode(email: String, code: String, deviceId: String) async throws -> ConfirmCodeResponse {
+    public func confirmCode(email: String, code: String, deviceId: String) async throws -> ConfirmCodeResponse {
         return try await post(
             url: "\(baseURL)/api/email/verify/confirm",
             body: ConfirmCodeRequest(email: email, code: code, deviceId: deviceId),
@@ -86,21 +86,21 @@ final class EmailApi: @unchecked Sendable {
 
 // MARK: - Request / Response Models
 
-struct SendCodeRequest: Encodable {
-    let email: String
-    let deviceId: String
+public struct SendCodeRequest: Encodable {
+    public let email: String
+    public let deviceId: String
 }
 
-struct SendCodeResponse: Decodable {
-    let expiresIn: Int
+public struct SendCodeResponse: Decodable {
+    public let expiresIn: Int
 }
 
-struct ConfirmCodeRequest: Encodable {
-    let email: String
-    let code: String
-    let deviceId: String
+public struct ConfirmCodeRequest: Encodable {
+    public let email: String
+    public let code: String
+    public let deviceId: String
 }
 
-struct ConfirmCodeResponse: Decodable {
-    let verified: Bool
+public struct ConfirmCodeResponse: Decodable {
+    public let verified: Bool
 }
