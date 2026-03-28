@@ -26,7 +26,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
-import my.ssdid.wallet.platform.storage.OnboardingStorage
+import my.ssdid.sdk.platform.storage.OnboardingStorage
 import my.ssdid.wallet.feature.splash.SplashScreen
 import my.ssdid.wallet.platform.deeplink.DeepLinkHandler
 import my.ssdid.wallet.ui.components.LockScreen

@@ -1,4 +1,4 @@
-package my.ssdid.wallet.platform.sync
+package my.ssdid.sdk.platform.sync
 
 import android.content.Context
 import androidx.work.CoroutineWorker

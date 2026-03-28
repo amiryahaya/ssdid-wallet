@@ -1,18 +1,21 @@
 package my.ssdid.wallet.di
 
-import dagger.Binds
+import android.content.Context
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import my.ssdid.sdk.domain.history.ActivityRepository
-import my.ssdid.wallet.platform.storage.ActivityRepositoryImpl
+import my.ssdid.sdk.platform.storage.ActivityRepositoryImpl
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class ActivityModule {
+object ActivityModule {
 
-    @Binds
+    @Provides
     @Singleton
-    abstract fun bindActivityRepository(impl: ActivityRepositoryImpl): ActivityRepository
+    fun provideActivityRepository(@ApplicationContext context: Context): ActivityRepository =
+        ActivityRepositoryImpl(context)
 }

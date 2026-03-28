@@ -41,12 +41,12 @@ import my.ssdid.sdk.domain.did.SsdidRegistryResolver
 import my.ssdid.sdk.domain.verifier.Verifier
 import my.ssdid.sdk.domain.verifier.VerifierImpl
 import my.ssdid.wallet.platform.biometric.BiometricAuthenticator
-import my.ssdid.wallet.platform.keystore.AndroidKeystoreManager
-import my.ssdid.wallet.platform.device.AndroidDeviceInfoProvider
+import my.ssdid.sdk.platform.keystore.AndroidKeystoreManager
+import my.ssdid.sdk.platform.device.AndroidDeviceInfoProvider
 import my.ssdid.sdk.domain.vault.KeystoreManager
 import my.ssdid.sdk.domain.settings.SettingsRepository
 import my.ssdid.sdk.domain.verifier.offline.CredentialRepository
-import my.ssdid.wallet.platform.storage.DataStoreSettingsRepository
+import my.ssdid.sdk.platform.storage.DataStoreSettingsRepository
 import my.ssdid.sdk.domain.oid4vp.DcqlMatcher
 import my.ssdid.sdk.domain.oid4vp.OpenId4VpHandler
 import my.ssdid.sdk.domain.oid4vp.OpenId4VpTransport
@@ -54,8 +54,8 @@ import my.ssdid.sdk.domain.oid4vp.PresentationDefinitionMatcher
 import my.ssdid.sdk.domain.notify.NotifyManager
 import my.ssdid.sdk.domain.notify.NotifyStorage
 import my.ssdid.wallet.platform.notify.AndroidNotifyDispatcher
-import my.ssdid.wallet.platform.notify.DataStoreNotifyStorage
-import my.ssdid.wallet.platform.notify.LocalNotificationStorage
+import my.ssdid.sdk.platform.notify.DataStoreNotifyStorage
+import my.ssdid.sdk.platform.notify.LocalNotificationStorage
 import my.ssdid.wallet.platform.notify.NotifyLifecycleObserver
 import my.ssdid.sdk.domain.oid4vci.IssuerMetadataResolver
 import my.ssdid.sdk.domain.oid4vci.NonceManager

@@ -9,10 +9,10 @@ import dagger.hilt.components.SingletonComponent
 import my.ssdid.sdk.domain.recovery.institutional.InstitutionalRecoveryStorage
 import my.ssdid.sdk.domain.recovery.social.SocialRecoveryStorage
 import my.ssdid.sdk.domain.vault.VaultStorage
-import my.ssdid.wallet.platform.storage.DataStoreInstitutionalRecoveryStorage
-import my.ssdid.wallet.platform.storage.DataStoreSocialRecoveryStorage
-import my.ssdid.wallet.platform.storage.DataStoreVaultStorage
-import my.ssdid.wallet.platform.storage.OnboardingStorage
+import my.ssdid.sdk.platform.storage.DataStoreInstitutionalRecoveryStorage
+import my.ssdid.sdk.platform.storage.DataStoreSocialRecoveryStorage
+import my.ssdid.sdk.platform.storage.DataStoreVaultStorage
+import my.ssdid.sdk.platform.storage.OnboardingStorage
 import javax.inject.Singleton
 
 @Module

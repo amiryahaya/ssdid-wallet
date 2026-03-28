@@ -11,7 +11,7 @@ import my.ssdid.sdk.domain.SsdidClient
 import my.ssdid.sdk.domain.model.Algorithm
 import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.sdk.domain.recovery.social.SocialRecoveryManager
-import my.ssdid.wallet.platform.storage.OnboardingStorage
+import my.ssdid.sdk.platform.storage.OnboardingStorage
 import my.ssdid.wallet.feature.identity.MainDispatcherRule
 import org.junit.Before
 import org.junit.Rule

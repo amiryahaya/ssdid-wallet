@@ -2,6 +2,7 @@ package my.ssdid.wallet.platform.storage
 
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.runBlocking
+import my.ssdid.sdk.platform.storage.OnboardingStorage
 import org.junit.Test
 
 class OnboardingStateTest {

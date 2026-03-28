@@ -1,4 +1,4 @@
-package my.ssdid.wallet.platform.storage
+package my.ssdid.sdk.platform.storage
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -6,21 +6,17 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import my.ssdid.sdk.domain.recovery.social.SocialRecoveryConfig
 import my.ssdid.sdk.domain.recovery.social.SocialRecoveryStorage
-import javax.inject.Inject
-import javax.inject.Singleton
 
 private val Context.socialRecoveryStore: DataStore<Preferences> by preferencesDataStore(name = "ssdid_social_recovery")
 
-@Singleton
-class DataStoreSocialRecoveryStorage @Inject constructor(
-    @ApplicationContext private val context: Context
+class DataStoreSocialRecoveryStorage(
+    private val context: Context
 ) : SocialRecoveryStorage {
 
     private val json = Json { ignoreUnknownKeys = true }

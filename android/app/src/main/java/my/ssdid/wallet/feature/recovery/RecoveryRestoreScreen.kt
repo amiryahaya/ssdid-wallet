@@ -31,7 +31,7 @@ import my.ssdid.sdk.domain.SsdidClient
 import my.ssdid.sdk.domain.model.Algorithm
 import my.ssdid.sdk.domain.model.Did
 import my.ssdid.sdk.domain.recovery.RecoveryManager
-import my.ssdid.wallet.platform.storage.OnboardingStorage
+import my.ssdid.sdk.platform.storage.OnboardingStorage
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight

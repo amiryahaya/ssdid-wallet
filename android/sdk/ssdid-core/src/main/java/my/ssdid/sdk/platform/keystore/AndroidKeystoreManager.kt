@@ -1,4 +1,4 @@
-package my.ssdid.wallet.platform.keystore
+package my.ssdid.sdk.platform.keystore
 
 import android.os.Build
 import my.ssdid.sdk.domain.vault.KeystoreManager

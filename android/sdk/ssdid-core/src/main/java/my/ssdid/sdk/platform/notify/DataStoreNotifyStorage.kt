@@ -1,4 +1,4 @@
-package my.ssdid.wallet.platform.notify
+package my.ssdid.sdk.platform.notify
 
 import android.content.Context
 import androidx.datastore.core.DataStore

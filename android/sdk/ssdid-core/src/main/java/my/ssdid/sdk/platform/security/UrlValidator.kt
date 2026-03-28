@@ -1,4 +1,4 @@
-package my.ssdid.wallet.platform.security
+package my.ssdid.sdk.platform.security
 
 import android.net.Uri
 

@@ -10,7 +10,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import my.ssdid.sdk.domain.transport.dto.ClaimRequest
-import my.ssdid.wallet.platform.security.UrlValidator
+import my.ssdid.sdk.platform.security.UrlValidator
 
 @Serializable
 data class QrPayload(

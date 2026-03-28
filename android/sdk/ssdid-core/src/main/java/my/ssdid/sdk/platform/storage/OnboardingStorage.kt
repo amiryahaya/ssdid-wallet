@@ -1,4 +1,4 @@
-package my.ssdid.wallet.platform.storage
+package my.ssdid.sdk.platform.storage
 
 interface OnboardingStorage {
     suspend fun isOnboardingCompleted(): Boolean

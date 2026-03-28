@@ -22,7 +22,7 @@ import my.ssdid.sdk.domain.vault.Vault
 import my.ssdid.sdk.domain.verifier.Verifier
 import my.ssdid.wallet.platform.biometric.BiometricAuthenticator
 import my.ssdid.wallet.platform.biometric.BiometricResult
-import my.ssdid.wallet.platform.security.UrlValidator
+import my.ssdid.sdk.platform.security.UrlValidator
 import javax.inject.Inject
 
 sealed class DriveLoginState {

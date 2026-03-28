@@ -1,4 +1,4 @@
-package my.ssdid.wallet.platform.notify
+package my.ssdid.sdk.platform.notify
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
@@ -11,8 +11,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import my.ssdid.sdk.domain.notify.LocalNotification
-import my.ssdid.wallet.platform.notify.LocalNotificationStorage
-import my.ssdid.wallet.platform.notify.localNotificationsStore
+import my.ssdid.sdk.platform.notify.LocalNotificationStorage
+import my.ssdid.sdk.platform.notify.localNotificationsStore
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)

@@ -20,11 +20,11 @@ import my.ssdid.sdk.domain.verifier.offline.OfflineVerifier
 import my.ssdid.sdk.domain.verifier.offline.VerificationOrchestrator
 import my.ssdid.sdk.domain.verifier.offline.sync.BundleSyncScheduler
 import my.ssdid.sdk.domain.verifier.offline.sync.ConnectivityMonitor
-import my.ssdid.wallet.platform.storage.DataStoreBundleStore
-import my.ssdid.wallet.platform.storage.DataStoreCredentialRepository
-import my.ssdid.wallet.platform.sync.AndroidConnectivityMonitor
-import my.ssdid.wallet.platform.sync.BundleSyncWorkerFactory
-import my.ssdid.wallet.platform.sync.WorkManagerBundleSyncScheduler
+import my.ssdid.sdk.platform.storage.DataStoreBundleStore
+import my.ssdid.sdk.platform.storage.DataStoreCredentialRepository
+import my.ssdid.sdk.platform.sync.AndroidConnectivityMonitor
+import my.ssdid.sdk.platform.sync.BundleSyncWorkerFactory
+import my.ssdid.sdk.platform.sync.WorkManagerBundleSyncScheduler
 import okhttp3.OkHttpClient
 import javax.inject.Named
 import javax.inject.Singleton

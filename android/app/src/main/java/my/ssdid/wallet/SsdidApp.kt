@@ -15,13 +15,13 @@ import my.ssdid.sdk.domain.notify.NotifyManager
 import my.ssdid.wallet.domain.profile.ProfileMigration
 import my.ssdid.sdk.domain.settings.SettingsRepository
 import my.ssdid.sdk.domain.settings.TtlProvider
-import my.ssdid.wallet.platform.storage.DataStoreSettingsRepository
+import my.ssdid.sdk.platform.storage.DataStoreSettingsRepository
 import my.ssdid.sdk.domain.verifier.offline.BundleManager
 import my.ssdid.sdk.domain.verifier.offline.BundleStore
 import my.ssdid.sdk.domain.verifier.offline.sync.BundleSyncScheduler
 import my.ssdid.sdk.domain.verifier.offline.sync.ConnectivityMonitor
 import my.ssdid.wallet.platform.lifecycle.AppLifecycleObserver
-import my.ssdid.wallet.platform.sync.BundleSyncWorkerFactory
+import my.ssdid.sdk.platform.sync.BundleSyncWorkerFactory
 import org.unifiedpush.android.connector.UnifiedPush
 import javax.inject.Inject
 
