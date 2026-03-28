@@ -1,6 +1,6 @@
 import Foundation
 
-enum Algorithm: String, Codable, CaseIterable, Identifiable {
+public enum Algorithm: String, Codable, CaseIterable, Identifiable {
     // Classical
     case ED25519
     case ECDSA_P256
@@ -32,9 +32,9 @@ enum Algorithm: String, Codable, CaseIterable, Identifiable {
     case SLH_DSA_SHAKE_256S
     case SLH_DSA_SHAKE_256F
 
-    var id: String { rawValue }
+    public var id: String { rawValue }
 
-    var w3cType: String {
+    public var w3cType: String {
         switch self {
         case .ED25519:           return "Ed25519VerificationKey2020"
         case .ECDSA_P256:        return "EcdsaSecp256r1VerificationKey2019"
@@ -60,7 +60,7 @@ enum Algorithm: String, Codable, CaseIterable, Identifiable {
         }
     }
 
-    var proofType: String {
+    public var proofType: String {
         switch self {
         case .ED25519:           return "Ed25519Signature2020"
         case .ECDSA_P256:        return "EcdsaSecp256r1Signature2019"
@@ -86,7 +86,7 @@ enum Algorithm: String, Codable, CaseIterable, Identifiable {
         }
     }
 
-    var isPostQuantum: Bool {
+    public var isPostQuantum: Bool {
         switch self {
         case .ED25519, .ECDSA_P256, .ECDSA_P384:
             return false
@@ -95,7 +95,7 @@ enum Algorithm: String, Codable, CaseIterable, Identifiable {
         }
     }
 
-    var kazSignLevel: Int? {
+    public var kazSignLevel: Int? {
         switch self {
         case .KAZ_SIGN_128: return 128
         case .KAZ_SIGN_192: return 192
@@ -104,20 +104,20 @@ enum Algorithm: String, Codable, CaseIterable, Identifiable {
         }
     }
 
-    var isKazSign: Bool { kazSignLevel != nil }
-    var isMlDsa: Bool { rawValue.hasPrefix("ML_DSA") }
-    var isSlhDsa: Bool { rawValue.hasPrefix("SLH_DSA") }
+    public var isKazSign: Bool { kazSignLevel != nil }
+    public var isMlDsa: Bool { rawValue.hasPrefix("ML_DSA") }
+    public var isSlhDsa: Bool { rawValue.hasPrefix("SLH_DSA") }
 
     /// Reverse lookup from W3C verification method type.
     /// For KAZ-Sign (shared w3cType), returns KAZ_SIGN_128 as default;
     /// the actual level is detected from key size at runtime.
-    static func fromW3cType(_ type: String) -> Algorithm? {
+    public static func fromW3cType(_ type: String) -> Algorithm? {
         allCases.first { $0.w3cType == type }
     }
 
     /// Disambiguate KAZ-Sign security level from public key size.
     /// KAZ-Sign v2.0 public key sizes: 128->54B, 192->88B, 256->118B
-    static func kazSignFromKeySize(_ keySize: Int) -> Algorithm? {
+    public static func kazSignFromKeySize(_ keySize: Int) -> Algorithm? {
         switch keySize {
         case 54:  return .KAZ_SIGN_128
         case 88:  return .KAZ_SIGN_192

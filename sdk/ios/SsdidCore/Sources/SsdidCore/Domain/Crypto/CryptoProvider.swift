@@ -1,14 +1,14 @@
 import Foundation
 
 /// Error types for cryptographic operations.
-enum CryptoError: Error, LocalizedError {
+public enum CryptoError: Error, LocalizedError {
     case unsupportedAlgorithm(Algorithm)
     case keyGenerationFailed(String)
     case signingFailed(String)
     case verificationFailed(String)
     case invalidKeyFormat(String)
 
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .unsupportedAlgorithm(let algo):
             return "Unsupported algorithm: \(algo.rawValue)"
@@ -25,15 +25,20 @@ enum CryptoError: Error, LocalizedError {
 }
 
 /// Result of a key pair generation operation.
-struct KeyPairResult {
-    let publicKey: Data
-    let privateKey: Data
+public struct KeyPairResult {
+    public let publicKey: Data
+    public let privateKey: Data
+
+    public init(publicKey: Data, privateKey: Data) {
+        self.publicKey = publicKey
+        self.privateKey = privateKey
+    }
 }
 
 /// Protocol for cryptographic operations.
 /// Implementations provide key generation, signing, and verification
 /// for a set of supported algorithms.
-protocol CryptoProvider {
+public protocol CryptoProvider {
     /// Returns true if this provider supports the given algorithm.
     func supportsAlgorithm(_ algorithm: Algorithm) -> Bool
 
