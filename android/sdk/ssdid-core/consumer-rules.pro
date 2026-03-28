@@ -10,8 +10,12 @@
     *** Companion;
 }
 
-# Retrofit API interfaces
--keep,allowobfuscation interface my.ssdid.sdk.domain.transport.*Api
+# Retrofit API interfaces (keep method names for reflection)
+-keep interface my.ssdid.sdk.domain.transport.*Api { *; }
 
 # OkHttp
 -dontwarn okhttp3.internal.platform.**
+
+# BouncyCastle — reflection-heavy provider registration
+-keep class org.bouncycastle.** { *; }
+-dontwarn org.bouncycastle.**

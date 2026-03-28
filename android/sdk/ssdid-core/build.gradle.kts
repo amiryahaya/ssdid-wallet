@@ -40,8 +40,8 @@ dependencies {
     // Biometric (default authenticator)
     implementation("androidx.biometric:biometric:1.2.0-alpha05")
 
-    // Coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+    // Coroutines (api — SDK interfaces use suspend functions)
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
 
     // Testing
     testImplementation("junit:junit:4.13.2")
