@@ -1,6 +1,7 @@
 package my.ssdid.sdk.domain.oid4vci
 
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import java.util.Base64
 
@@ -9,7 +10,7 @@ class ProofJwtBuilderTest {
     private val signer: (ByteArray) -> ByteArray = { data -> data.copyOf(64) }
 
     @Test
-    fun buildProofJwtStructure() {
+    fun buildProofJwtStructure() = runBlocking {
         val jwt = ProofJwtBuilder.build(
             algorithm = "EdDSA",
             keyId = "did:ssdid:holder1#key-1",
@@ -40,7 +41,7 @@ class ProofJwtBuilderTest {
     }
 
     @Test
-    fun proofJwtContainsCorrectFields() {
+    fun proofJwtContainsCorrectFields() = runBlocking {
         val jwt = ProofJwtBuilder.build(
             algorithm = "ES256",
             keyId = "did:ssdid:h#k-1",
@@ -54,7 +55,7 @@ class ProofJwtBuilderTest {
     }
 
     @Test
-    fun signatureUsesHeaderDotPayloadAsInput() {
+    fun signatureUsesHeaderDotPayloadAsInput() = runBlocking {
         var capturedInput: ByteArray? = null
         val capturingSigner: (ByteArray) -> ByteArray = { data ->
             capturedInput = data

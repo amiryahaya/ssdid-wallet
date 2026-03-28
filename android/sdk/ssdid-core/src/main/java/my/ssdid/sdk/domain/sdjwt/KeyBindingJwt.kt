@@ -22,12 +22,12 @@ object KeyBindingJwt {
      * @param signer Function that signs data with the holder's private key
      * @param issuedAt Unix timestamp
      */
-    fun create(
+    suspend fun create(
         sdJwtWithDisclosures: String,
         audience: String,
         nonce: String,
         algorithm: String,
-        signer: (ByteArray) -> ByteArray,
+        signer: suspend (ByteArray) -> ByteArray,
         issuedAt: Long = System.currentTimeMillis() / 1000
     ): String {
         // Compute sd_hash = Base64url(SHA-256(SD-JWT + disclosures))

@@ -53,7 +53,7 @@ class OpenId4VpHandler(
         matchResult: MatchResult,
         selectedClaims: List<String>,
         algorithm: String,
-        signer: (ByteArray) -> ByteArray
+        signer: suspend (ByteArray) -> ByteArray
     ): Result<Unit> = runCatching {
         val responseUri = authRequest.responseUri
             ?: throw IllegalStateException("No response_uri in authorization request")

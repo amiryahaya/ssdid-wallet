@@ -26,13 +26,13 @@ class LocalNotificationStorage(
         const val MAX_NOTIFICATIONS = 500
     }
 
-    val allNotifications: Flow<List<LocalNotification>> =
+    override val allNotifications: Flow<List<LocalNotification>> =
         context.localNotificationsStore.data.map { prefs ->
             val raw = prefs[key] ?: return@map emptyList()
             runCatching { json.decodeFromString<List<LocalNotification>>(raw) }.getOrElse { emptyList() }
         }
 
-    val unreadCount: Flow<Int> =
+    override val unreadCount: Flow<Int> =
         allNotifications.map { list -> list.count { !it.isRead } }
 
     override suspend fun save(notification: LocalNotification) {

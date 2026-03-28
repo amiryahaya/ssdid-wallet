@@ -29,7 +29,7 @@ import kotlinx.coroutines.launch
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import my.ssdid.sdk.domain.model.Identity
-import my.ssdid.sdk.platform.notify.LocalNotificationStorage
+import my.ssdid.sdk.domain.notify.LocalNotificationStore
 import my.ssdid.sdk.domain.vault.Vault
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -49,7 +49,7 @@ import javax.inject.Inject
 @HiltViewModel
 class WalletHomeViewModel @Inject constructor(
     private val vault: Vault,
-    private val localNotificationStorage: LocalNotificationStorage
+    private val localNotificationStorage: LocalNotificationStore
 ) : ViewModel() {
     private val _identities = MutableStateFlow<List<Identity>>(emptyList())
     val identities = _identities.asStateFlow()

@@ -30,6 +30,12 @@ import my.ssdid.sdk.domain.oid4vp.OpenId4VpHandler
 import my.ssdid.sdk.domain.oid4vp.OpenId4VpTransport
 import my.ssdid.sdk.domain.oid4vp.PresentationDefinitionMatcher
 import my.ssdid.sdk.domain.recovery.RecoveryManager
+import my.ssdid.sdk.domain.recovery.social.SocialRecoveryManager
+import my.ssdid.sdk.domain.recovery.social.SocialRecoveryStorage
+import my.ssdid.sdk.domain.recovery.institutional.InstitutionalRecoveryManager
+import my.ssdid.sdk.domain.recovery.institutional.InstitutionalRecoveryStorage
+import my.ssdid.sdk.platform.storage.DataStoreSocialRecoveryStorage
+import my.ssdid.sdk.platform.storage.DataStoreInstitutionalRecoveryStorage
 import my.ssdid.sdk.domain.revocation.HttpStatusListFetcher
 import my.ssdid.sdk.domain.revocation.RevocationManager
 import my.ssdid.sdk.domain.rotation.KeyRotationManager
@@ -115,8 +121,10 @@ class SsdidSdk private constructor(
     @property:InternalSsdidApi val internalBundleSyncScheduler: BundleSyncScheduler,
     @property:InternalSsdidApi val internalBundleSyncWorkerFactory: BundleSyncWorkerFactory,
     @property:InternalSsdidApi val internalConnectivityMonitor: ConnectivityMonitor,
-    @property:InternalSsdidApi val internalLocalNotificationStorage: LocalNotificationStorage,
-    @property:InternalSsdidApi val internalNotifyStorage: NotifyStorage
+    @property:InternalSsdidApi val internalLocalNotificationStorage: LocalNotificationStore,
+    @property:InternalSsdidApi val internalNotifyStorage: NotifyStorage,
+    @property:InternalSsdidApi val internalSocialRecoveryManager: SocialRecoveryManager,
+    @property:InternalSsdidApi val internalInstitutionalRecoveryManager: InstitutionalRecoveryManager
 ) {
     companion object {
         fun builder(context: Context): Builder = Builder(context)
@@ -138,6 +146,8 @@ class SsdidSdk private constructor(
         private var customSettingsRepo: SettingsRepository? = null
         private var customCredentialRepo: CredentialRepository? = null
         private var customBundleStore: BundleStore? = null
+        private var customSocialRecoveryStorage: SocialRecoveryStorage? = null
+        private var customInstitutionalRecoveryStorage: InstitutionalRecoveryStorage? = null
 
         fun registryUrl(url: String) = apply { this.registryUrl = url }
         /**
@@ -163,6 +173,8 @@ class SsdidSdk private constructor(
         fun settingsRepository(repo: SettingsRepository) = apply { this.customSettingsRepo = repo }
         fun credentialRepository(repo: CredentialRepository) = apply { this.customCredentialRepo = repo }
         fun bundleStore(store: BundleStore) = apply { this.customBundleStore = store }
+        fun socialRecoveryStorage(storage: SocialRecoveryStorage) = apply { this.customSocialRecoveryStorage = storage }
+        fun institutionalRecoveryStorage(storage: InstitutionalRecoveryStorage) = apply { this.customInstitutionalRecoveryStorage = storage }
 
         fun build(): SsdidSdk {
             val regUrl = registryUrl ?: throw IllegalStateException("registryUrl is required")
@@ -238,6 +250,10 @@ class SsdidSdk private constructor(
 
             // Recovery
             val recoveryManager = RecoveryManager(vault, vaultStorage, classical, pqc, keystoreManager)
+            val socialRecoveryStorage = customSocialRecoveryStorage ?: DataStoreSocialRecoveryStorage(context)
+            val institutionalRecoveryStorage = customInstitutionalRecoveryStorage ?: DataStoreInstitutionalRecoveryStorage(context)
+            val socialRecoveryManager = SocialRecoveryManager(recoveryManager, socialRecoveryStorage)
+            val institutionalRecoveryManager = InstitutionalRecoveryManager(recoveryManager, institutionalRecoveryStorage)
 
             // Key rotation
             val rotationManager = KeyRotationManager(vaultStorage, classical, pqc, keystoreManager, activityRepo, { client })
@@ -317,8 +333,10 @@ class SsdidSdk private constructor(
                 internalBundleSyncScheduler = bundleSyncScheduler,
                 internalBundleSyncWorkerFactory = bundleSyncWorkerFactory,
                 internalConnectivityMonitor = connectivityMonitor,
-                internalLocalNotificationStorage = (localNotificationStore as? LocalNotificationStorage) ?: localNotificationStorageImpl,
-                internalNotifyStorage = notifyStorage
+                internalLocalNotificationStorage = localNotificationStore,
+                internalNotifyStorage = notifyStorage,
+                internalSocialRecoveryManager = socialRecoveryManager,
+                internalInstitutionalRecoveryManager = institutionalRecoveryManager
             )
         }
     }

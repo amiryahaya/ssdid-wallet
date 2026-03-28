@@ -50,7 +50,7 @@ class OpenId4VciHandler(
         walletDid: String,
         keyId: String,
         algorithm: String,
-        signer: (ByteArray) -> ByteArray
+        signer: suspend (ByteArray) -> ByteArray
     ): Result<IssuanceResult> = runCatching {
         // Step 1: Token exchange
         val tokenResponse = if (offer.preAuthorizedCode != null) {
@@ -89,7 +89,7 @@ class OpenId4VciHandler(
         walletDid: String,
         keyId: String,
         algorithm: String,
-        signer: (ByteArray) -> ByteArray
+        signer: suspend (ByteArray) -> ByteArray
     ): IssuanceResult {
         val currentNonce = nonceManager.current()
             ?: throw IllegalStateException("No c_nonce available")

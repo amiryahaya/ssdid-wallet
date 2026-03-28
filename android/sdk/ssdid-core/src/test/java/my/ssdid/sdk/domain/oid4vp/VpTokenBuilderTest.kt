@@ -1,6 +1,7 @@
 package my.ssdid.sdk.domain.oid4vp
 
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.runBlocking
 import my.ssdid.sdk.domain.sdjwt.StoredSdJwtVc
 import org.junit.Test
 
@@ -9,7 +10,7 @@ class VpTokenBuilderTest {
     private val signer: (ByteArray) -> ByteArray = { data -> data.copyOf(64) } // dummy signer
 
     @Test
-    fun buildVpTokenWithSelectedDisclosures() {
+    fun buildVpTokenWithSelectedDisclosures() = runBlocking {
         val cred = StoredSdJwtVc(
             id = "vc-1",
             compact = "eyJhbGciOiJFZERTQSJ9.eyJpc3MiOiJkaWQ6c3NkaWQ6aXNzdWVyMSJ9.sig~WyJzYWx0MSIsIm5hbWUiLCJBaG1hZCJd~WyJzYWx0MiIsImVtYWlsIiwiYUBleC5jb20iXQ~",
@@ -40,7 +41,7 @@ class VpTokenBuilderTest {
     }
 
     @Test
-    fun buildVpTokenWithAllDisclosures() {
+    fun buildVpTokenWithAllDisclosures() = runBlocking {
         val cred = StoredSdJwtVc(
             id = "vc-1",
             compact = "eyJhbGciOiJFZERTQSJ9.eyJpc3MiOiJkaWQ6c3NkaWQ6aXNzdWVyMSJ9.sig~WyJzYWx0MSIsIm5hbWUiLCJBaG1hZCJd~WyJzYWx0MiIsImVtYWlsIiwiYUBleC5jb20iXQ~",
@@ -67,7 +68,7 @@ class VpTokenBuilderTest {
     }
 
     @Test
-    fun buildVpTokenContainsOnlySelectedDisclosures() {
+    fun buildVpTokenContainsOnlySelectedDisclosures() = runBlocking {
         val cred = StoredSdJwtVc(
             id = "vc-1",
             compact = "eyJhbGciOiJFZERTQSJ9.eyJpc3MiOiJkaWQ6c3NkaWQ6aXNzdWVyMSJ9.sig~WyJzYWx0MSIsIm5hbWUiLCJBaG1hZCJd~WyJzYWx0MiIsImVtYWlsIiwiYUBleC5jb20iXQ~",

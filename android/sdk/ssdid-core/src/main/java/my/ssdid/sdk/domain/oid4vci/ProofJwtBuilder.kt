@@ -23,13 +23,13 @@ object ProofJwtBuilder {
      * @param issuedAt Unix timestamp for the iat claim
      * @return Compact JWS string (header.payload.signature)
      */
-    fun build(
+    suspend fun build(
         algorithm: String,
         keyId: String,
         walletDid: String,
         issuerUrl: String,
         nonce: String,
-        signer: (ByteArray) -> ByteArray,
+        signer: suspend (ByteArray) -> ByteArray,
         issuedAt: Long = System.currentTimeMillis() / 1000
     ): String {
         val header = buildJsonObject {

@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.sdk.domain.oid4vci.CredentialOffer
 import my.ssdid.sdk.domain.oid4vci.CredentialOfferReview
@@ -157,12 +156,8 @@ class CredentialOfferViewModel @Inject constructor(
                 walletDid = identity.did,
                 keyId = identity.keyId,
                 algorithm = identity.algorithm.toJwaName(),
-                // runBlocking is necessary here: ProofJwtBuilder.build() takes a synchronous
-                // signer lambda (ByteArray) -> ByteArray, but vault.sign() is a suspend fun.
-                // This is safe because we're inside viewModelScope.launch which runs on
-                // Dispatchers.Main, and vault.sign dispatches to IO internally.
                 signer = { data ->
-                    runBlocking { vault.sign(identity.keyId, data).getOrThrow() }
+                    vault.sign(identity.keyId, data).getOrThrow()
                 }
             ).fold(
                 onSuccess = { result ->

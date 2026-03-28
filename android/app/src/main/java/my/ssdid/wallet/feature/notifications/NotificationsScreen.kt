@@ -26,13 +26,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import my.ssdid.sdk.domain.notify.LocalNotification
-import my.ssdid.sdk.platform.notify.LocalNotificationStorage
+import my.ssdid.sdk.domain.notify.LocalNotificationStore
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
 
 @HiltViewModel
 class NotificationsViewModel @Inject constructor(
-    private val storage: LocalNotificationStorage
+    private val storage: LocalNotificationStore
 ) : ViewModel() {
 
     val notifications = storage.allNotifications

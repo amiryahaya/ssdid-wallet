@@ -1,16 +1,10 @@
 package my.ssdid.wallet.di
 
-import android.content.Context
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import my.ssdid.sdk.domain.recovery.institutional.InstitutionalRecoveryStorage
-import my.ssdid.sdk.domain.recovery.social.SocialRecoveryStorage
 import my.ssdid.sdk.domain.vault.VaultStorage
-import my.ssdid.sdk.platform.storage.DataStoreInstitutionalRecoveryStorage
-import my.ssdid.sdk.platform.storage.DataStoreSocialRecoveryStorage
 import my.ssdid.sdk.domain.storage.OnboardingStorage
 import javax.inject.Singleton
 
@@ -24,16 +18,10 @@ object StorageModule {
      */
     @Provides
     @Singleton
-    fun provideOnboardingStorage(vaultStorage: VaultStorage): OnboardingStorage =
-        vaultStorage as OnboardingStorage
-
-    @Provides
-    @Singleton
-    fun provideSocialRecoveryStorage(@ApplicationContext context: Context): SocialRecoveryStorage =
-        DataStoreSocialRecoveryStorage(context)
-
-    @Provides
-    @Singleton
-    fun provideInstitutionalRecoveryStorage(@ApplicationContext context: Context): InstitutionalRecoveryStorage =
-        DataStoreInstitutionalRecoveryStorage(context)
+    fun provideOnboardingStorage(vaultStorage: VaultStorage): OnboardingStorage {
+        check(vaultStorage is OnboardingStorage) {
+            "VaultStorage must implement OnboardingStorage. If using a custom VaultStorage via SsdidSdk.builder(), also implement OnboardingStorage."
+        }
+        return vaultStorage
+    }
 }

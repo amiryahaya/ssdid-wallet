@@ -100,12 +100,8 @@ class PresentationRequestViewModel @Inject constructor(
                 matchResult = current.matchResult,
                 selectedClaims = selectedClaims,
                 algorithm = identity.algorithm.toJwaName(),
-                // runBlocking is necessary here: VpTokenBuilder.build() takes a synchronous
-                // signer lambda (ByteArray) -> ByteArray, but vault.sign() is a suspend fun.
-                // This is safe because we're inside viewModelScope.launch which runs on
-                // Dispatchers.Main, and vault.sign dispatches to IO internally.
                 signer = { data ->
-                    kotlinx.coroutines.runBlocking { vault.sign(identity.keyId, data).getOrThrow() }
+                    vault.sign(identity.keyId, data).getOrThrow()
                 }
             )
 

@@ -24,13 +24,13 @@ object VpTokenBuilder {
      * @param issuedAt Unix timestamp for the KB-JWT (defaults to current time)
      * @return The assembled VP token string
      */
-    fun build(
+    suspend fun build(
         storedSdJwtVc: StoredSdJwtVc,
         selectedClaims: List<String>,
         audience: String,
         nonce: String,
         algorithm: String,
-        signer: (ByteArray) -> ByteArray,
+        signer: suspend (ByteArray) -> ByteArray,
         issuedAt: Long = System.currentTimeMillis() / 1000
     ): String {
         val parsed = SdJwtParser.parse(storedSdJwtVc.compact)

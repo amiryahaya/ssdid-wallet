@@ -1,6 +1,7 @@
 package my.ssdid.sdk.domain.sdjwt
 
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
 import org.junit.Test
 import java.util.Base64
@@ -10,7 +11,7 @@ class KeyBindingJwtTest {
     private val testSigner: (ByteArray) -> ByteArray = { "test-kb-signature".toByteArray() }
 
     @Test
-    fun `create produces valid KB-JWT structure`() {
+    fun `create produces valid KB-JWT structure`() = runBlocking {
         val kbJwt = KeyBindingJwt.create(
             sdJwtWithDisclosures = "eyJhbGciOiJFZDI1NTE5In0.eyJ0ZXN0IjoidHJ1ZSJ9.c2ln~WyJzYWx0IiwiYSIsImIiXQ~",
             audience = "https://verifier.example.com",
@@ -26,7 +27,7 @@ class KeyBindingJwtTest {
     }
 
     @Test
-    fun `KB-JWT header has typ kb+jwt`() {
+    fun `KB-JWT header has typ kb+jwt`() = runBlocking {
         val kbJwt = KeyBindingJwt.create(
             sdJwtWithDisclosures = "header.payload.sig~disc~",
             audience = "https://verifier.example.com",
@@ -42,7 +43,7 @@ class KeyBindingJwtTest {
     }
 
     @Test
-    fun `KB-JWT payload contains aud, nonce, iat, sd_hash`() {
+    fun `KB-JWT payload contains aud, nonce, iat, sd_hash`() = runBlocking {
         val kbJwt = KeyBindingJwt.create(
             sdJwtWithDisclosures = "header.payload.sig~disc~",
             audience = "https://verifier.example.com",
@@ -60,7 +61,7 @@ class KeyBindingJwtTest {
     }
 
     @Test
-    fun `sd_hash is deterministic for same input`() {
+    fun `sd_hash is deterministic for same input`() = runBlocking {
         val input = "header.payload.sig~disc~"
         val kbJwt1 = KeyBindingJwt.create(
             sdJwtWithDisclosures = input,
@@ -85,7 +86,7 @@ class KeyBindingJwtTest {
     }
 
     @Test
-    fun `KB-JWT can be parsed as last part of SD-JWT`() {
+    fun `KB-JWT can be parsed as last part of SD-JWT`() = runBlocking {
         val kbJwt = KeyBindingJwt.create(
             sdJwtWithDisclosures = "header.payload.sig~WyJzYWx0IiwiYSIsImIiXQ~",
             audience = "https://verifier.example.com",

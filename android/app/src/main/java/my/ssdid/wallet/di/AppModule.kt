@@ -11,16 +11,13 @@ import my.ssdid.sdk.SsdidSdk
 import my.ssdid.wallet.BuildConfig
 import my.ssdid.sdk.domain.SsdidClient
 import my.ssdid.sdk.domain.backup.BackupManager
-import my.ssdid.sdk.domain.credential.CredentialIssuanceManager
 import my.ssdid.sdk.domain.device.DeviceManager
 import my.ssdid.sdk.domain.history.ActivityRepository
 import my.ssdid.sdk.pqc.PqcProvider
 import my.ssdid.wallet.domain.profile.ProfileMigration
 import my.ssdid.sdk.domain.recovery.RecoveryManager
 import my.ssdid.sdk.domain.recovery.social.SocialRecoveryManager
-import my.ssdid.sdk.domain.recovery.social.SocialRecoveryStorage
 import my.ssdid.sdk.domain.recovery.institutional.InstitutionalRecoveryManager
-import my.ssdid.sdk.domain.recovery.institutional.InstitutionalRecoveryStorage
 import my.ssdid.sdk.domain.revocation.RevocationManager
 import my.ssdid.sdk.domain.rotation.KeyRotationManager
 import my.ssdid.sdk.domain.settings.SettingsRepository
@@ -43,7 +40,7 @@ import my.ssdid.sdk.domain.notify.NotifyManager
 import my.ssdid.sdk.domain.notify.NotifyStorage
 import my.ssdid.sdk.domain.oid4vci.OpenId4VciHandler
 import my.ssdid.sdk.domain.oid4vp.OpenId4VpHandler
-import my.ssdid.sdk.platform.notify.LocalNotificationStorage
+import my.ssdid.sdk.domain.notify.LocalNotificationStore
 import my.ssdid.sdk.platform.sync.BundleSyncWorkerFactory
 import my.ssdid.wallet.platform.biometric.BiometricAuthenticator
 import my.ssdid.wallet.platform.logging.SentryLogger
@@ -185,11 +182,7 @@ object AppModule {
     // ── Notification platform types ─────────────────────────────────────
 
     @Provides @Singleton
-    fun provideLocalNotificationStorage(sdk: SsdidSdk): LocalNotificationStorage =
-        sdk.internalLocalNotificationStorage
-
-    @Provides @Singleton
-    fun provideLocalNotificationStore(sdk: SsdidSdk): my.ssdid.sdk.domain.notify.LocalNotificationStore =
+    fun provideLocalNotificationStore(sdk: SsdidSdk): LocalNotificationStore =
         sdk.internalLocalNotificationStorage
 
     @Provides @Singleton
@@ -213,16 +206,12 @@ object AppModule {
     // ── Recovery (needs wallet-specific storage) ────────────────────────
 
     @Provides @Singleton
-    fun provideSocialRecoveryManager(
-        sdk: SsdidSdk,
-        storage: SocialRecoveryStorage
-    ): SocialRecoveryManager = SocialRecoveryManager(sdk.internalRecoveryManager, storage)
+    fun provideSocialRecoveryManager(sdk: SsdidSdk): SocialRecoveryManager =
+        sdk.internalSocialRecoveryManager
 
     @Provides @Singleton
-    fun provideInstitutionalRecoveryManager(
-        sdk: SsdidSdk,
-        storage: InstitutionalRecoveryStorage
-    ): InstitutionalRecoveryManager = InstitutionalRecoveryManager(sdk.internalRecoveryManager, storage)
+    fun provideInstitutionalRecoveryManager(sdk: SsdidSdk): InstitutionalRecoveryManager =
+        sdk.internalInstitutionalRecoveryManager
 
     // ── Wallet-specific (not from SDK) ──────────────────────────────────
 
@@ -232,7 +221,4 @@ object AppModule {
     @Provides @Singleton
     fun provideProfileMigration(vault: Vault): ProfileMigration = ProfileMigration(vault)
 
-    @Provides @Singleton
-    fun provideCredentialIssuanceManager(sdk: SsdidSdk): CredentialIssuanceManager =
-        CredentialIssuanceManager(sdk.internalVault, sdk.internalHttpClient)
 }
