@@ -2,7 +2,11 @@ import Foundation
 
 /// Facade for credential revocation checking.
 public struct RevocationApi {
-    let manager: RevocationManager
+    private let manager: RevocationManager
+
+    init(manager: RevocationManager) {
+        self.manager = manager
+    }
 
     public func checkStatus(_ credential: VerifiableCredential) async -> RevocationStatus {
         await manager.checkRevocation(credential)

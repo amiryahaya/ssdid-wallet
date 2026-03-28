@@ -2,7 +2,11 @@ import Foundation
 
 /// Facade for identity recovery operations.
 public struct RecoveryApi {
-    let manager: RecoveryManager
+    private let manager: RecoveryManager
+
+    init(manager: RecoveryManager) {
+        self.manager = manager
+    }
 
     public func generateRecoveryKey(identity: Identity) async throws -> Data {
         try await manager.generateRecoveryKey(identity: identity)

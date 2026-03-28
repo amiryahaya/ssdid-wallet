@@ -2,7 +2,11 @@ import Foundation
 
 /// Facade for activity history operations.
 public struct HistoryApi {
-    let repo: ActivityRepository
+    private let repo: ActivityRepository
+
+    init(repo: ActivityRepository) {
+        self.repo = repo
+    }
 
     public func log(_ record: ActivityRecord) async throws {
         try await repo.addActivity(record)

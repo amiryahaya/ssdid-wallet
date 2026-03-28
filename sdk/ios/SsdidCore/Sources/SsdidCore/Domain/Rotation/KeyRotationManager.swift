@@ -116,8 +116,9 @@ final class KeyRotationManager: @unchecked Sendable {
         var updatedIdentity = identity
         updatedIdentity.preRotatedKeyId = identity.keyId
 
-        let existingEncKey = await storage.getEncryptedPrivateKey(keyId: identity.keyId)
-            ?? { fatalError("Private key not found for: \(identity.keyId)") }()
+        guard let existingEncKey = await storage.getEncryptedPrivateKey(keyId: identity.keyId) else {
+            throw RotationError.privateKeyNotFound(identity.keyId)
+        }
         try await storage.saveIdentity(updatedIdentity, encryptedPrivateKey: existingEncKey)
 
         // Publish pre-commitment to registry

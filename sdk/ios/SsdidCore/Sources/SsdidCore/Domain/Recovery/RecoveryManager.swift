@@ -8,14 +8,14 @@ final class RecoveryManager: @unchecked Sendable {
     private let storage: VaultStorage
     private let classicalProvider: CryptoProvider
     private let pqcProvider: CryptoProvider
-    private let keychainManager: KeychainManager
+    private let keychainManager: KeychainManagerProtocol
 
     init(
         vault: Vault,
         storage: VaultStorage,
         classicalProvider: CryptoProvider,
         pqcProvider: CryptoProvider,
-        keychainManager: KeychainManager
+        keychainManager: KeychainManagerProtocol
     ) {
         self.vault = vault
         self.storage = storage

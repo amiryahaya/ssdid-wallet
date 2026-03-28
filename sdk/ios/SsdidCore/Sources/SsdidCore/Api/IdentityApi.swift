@@ -2,8 +2,13 @@ import Foundation
 
 /// Facade for identity lifecycle operations.
 public struct IdentityApi {
-    let vault: Vault
-    let client: SsdidClient
+    private let vault: Vault
+    private let client: SsdidClient
+
+    init(vault: Vault, client: SsdidClient) {
+        self.vault = vault
+        self.client = client
+    }
 
     public func create(name: String, algorithm: Algorithm) async throws -> Identity {
         try await client.initIdentity(name: name, algorithm: algorithm)

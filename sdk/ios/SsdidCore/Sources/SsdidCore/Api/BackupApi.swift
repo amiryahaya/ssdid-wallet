@@ -2,7 +2,11 @@ import Foundation
 
 /// Facade for encrypted backup and restore operations.
 public struct BackupApi {
-    let manager: BackupManager
+    private let manager: BackupManager
+
+    init(manager: BackupManager) {
+        self.manager = manager
+    }
 
     public func create(passphrase: String) async throws -> Data {
         try await manager.createBackup(passphrase: passphrase)

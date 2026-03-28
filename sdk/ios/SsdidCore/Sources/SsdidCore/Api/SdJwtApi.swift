@@ -2,7 +2,11 @@ import Foundation
 
 /// Facade for SD-JWT VC operations (parse, store, list).
 public struct SdJwtApi {
-    let storage: VaultStorage
+    private let storage: VaultStorage
+
+    init(storage: VaultStorage) {
+        self.storage = storage
+    }
 
     public func parse(compactSdJwt: String) throws -> SdJwtVc {
         try SdJwtParser.parse(compactSdJwt)

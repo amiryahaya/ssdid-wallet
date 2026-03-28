@@ -2,7 +2,11 @@ import Foundation
 
 /// Facade for online credential verification operations.
 public struct VerifierApi {
-    let verifier: Verifier
+    private let verifier: Verifier
+
+    init(verifier: Verifier) {
+        self.verifier = verifier
+    }
 
     public func verifyCredential(_ credential: VerifiableCredential) async throws -> Bool {
         try await verifier.verifyCredential(credential: credential)

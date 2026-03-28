@@ -2,7 +2,11 @@ import Foundation
 
 /// Facade for push notification and mailbox operations.
 public struct NotificationsApi {
-    let manager: NotifyManager
+    private let manager: NotifyManager
+
+    init(manager: NotifyManager) {
+        self.manager = manager
+    }
 
     @MainActor
     public func ensureInboxRegistered() async throws {

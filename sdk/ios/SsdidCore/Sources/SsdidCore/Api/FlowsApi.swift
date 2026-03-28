@@ -2,7 +2,11 @@ import Foundation
 
 /// Facade for SSDID protocol flows (registration, authentication, transaction signing).
 public struct FlowsApi {
-    let client: SsdidClient
+    private let client: SsdidClient
+
+    init(client: SsdidClient) {
+        self.client = client
+    }
 
     public func registerWithService(identity: Identity, serviceUrl: String) async throws -> VerifiableCredential {
         try await client.registerWithService(identity: identity, serverUrl: serviceUrl)

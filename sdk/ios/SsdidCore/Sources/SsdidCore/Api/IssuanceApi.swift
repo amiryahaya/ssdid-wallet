@@ -2,10 +2,18 @@ import Foundation
 
 /// Facade for OpenID4VCI credential issuance operations.
 public struct IssuanceApi {
-    let handler: OpenId4VciHandler
+    private let handler: OpenId4VciHandler
+
+    init(handler: OpenId4VciHandler) {
+        self.handler = handler
+    }
 
     public func processOffer(uri: String) async throws -> CredentialOfferReview {
         try await handler.processOffer(uri: uri)
+    }
+
+    public func processOfferJson(_ json: String) async throws -> CredentialOfferReview {
+        try await handler.processOfferJson(json: json)
     }
 
     public func acceptOffer(

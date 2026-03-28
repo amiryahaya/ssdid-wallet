@@ -2,9 +2,15 @@ import Foundation
 
 /// Facade for offline verification and bundle management.
 public struct OfflineApi {
-    let offlineVerifier: OfflineVerifier
-    let bundleManager: BundleManager
-    let orchestrator: VerificationOrchestrator
+    private let offlineVerifier: OfflineVerifier
+    private let bundleManager: BundleManager
+    private let orchestrator: VerificationOrchestrator
+
+    init(offlineVerifier: OfflineVerifier, bundleManager: BundleManager, orchestrator: VerificationOrchestrator) {
+        self.offlineVerifier = offlineVerifier
+        self.bundleManager = bundleManager
+        self.orchestrator = orchestrator
+    }
 
     public func prefetchBundle(issuerDid: String, statusListUrl: String? = nil) async -> Result<VerificationBundle, Error> {
         await bundleManager.prefetchBundle(issuerDid: issuerDid, statusListUrl: statusListUrl)

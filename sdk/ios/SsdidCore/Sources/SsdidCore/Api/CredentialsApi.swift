@@ -2,7 +2,11 @@ import Foundation
 
 /// Facade for verifiable credential storage operations.
 public struct CredentialsApi {
-    let vault: Vault
+    private let vault: Vault
+
+    init(vault: Vault) {
+        self.vault = vault
+    }
 
     public func store(_ credential: VerifiableCredential) async throws {
         try await vault.storeCredential(credential)

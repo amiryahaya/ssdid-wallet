@@ -2,7 +2,11 @@ import Foundation
 
 /// Facade for OpenID4VP presentation operations.
 public struct PresentationApi {
-    let handler: OpenId4VpHandler
+    private let handler: OpenId4VpHandler
+
+    init(handler: OpenId4VpHandler) {
+        self.handler = handler
+    }
 
     public func processRequest(uri: String) async throws -> PresentationReviewResult {
         try await handler.processRequest(uri: uri)

@@ -2,7 +2,11 @@ import Foundation
 
 /// Facade for multi-device management operations.
 public struct DeviceApi {
-    let manager: DeviceManager
+    private let manager: DeviceManager
+
+    init(manager: DeviceManager) {
+        self.manager = manager
+    }
 
     public func initiatePairing(identity: Identity) async throws -> PairingData {
         try await manager.initiatePairing(identity: identity)

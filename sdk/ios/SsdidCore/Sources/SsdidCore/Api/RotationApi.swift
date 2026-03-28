@@ -2,7 +2,11 @@ import Foundation
 
 /// Facade for KERI-inspired key rotation operations.
 public struct RotationApi {
-    let manager: KeyRotationManager
+    private let manager: KeyRotationManager
+
+    init(manager: KeyRotationManager) {
+        self.manager = manager
+    }
 
     public func prepare(identity: Identity) async throws -> String {
         try await manager.prepareRotation(identity: identity)

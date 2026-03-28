@@ -149,14 +149,14 @@ public final class SsdidSdk: @unchecked Sendable {
 
         /// Sets the classical crypto provider (Ed25519, ECDSA).
         @discardableResult
-        func classicalProvider(_ provider: CryptoProvider) -> Builder {
+        public func classicalProvider(_ provider: CryptoProvider) -> Builder {
             self._classicalProvider = provider
             return self
         }
 
         /// Sets the PQC crypto provider (KAZ-Sign).
         @discardableResult
-        func pqcProvider(_ provider: CryptoProvider) -> Builder {
+        public func pqcProvider(_ provider: CryptoProvider) -> Builder {
             self._pqcProvider = provider
             return self
         }
@@ -203,6 +203,10 @@ public final class SsdidSdk: @unchecked Sendable {
                 keychainManager: keychain,
                 localNotificationStorage: localNotifStorage
             )
+
+            notifyMgr.identityProvider = { [weak vaultImpl] in
+                await vaultImpl?.listIdentities() ?? []
+            }
 
             let revocationMgr = RevocationManager(fetcher: HttpStatusListFetcher())
 

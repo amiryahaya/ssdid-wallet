@@ -2,7 +2,11 @@ import Foundation
 
 /// Facade for cryptographic vault operations (signing, proof creation).
 public struct VaultApi {
-    let vault: Vault
+    private let vault: Vault
+
+    init(vault: Vault) {
+        self.vault = vault
+    }
 
     public func sign(keyId: String, data: Data) async throws -> Data {
         try await vault.sign(keyId: keyId, data: data)
