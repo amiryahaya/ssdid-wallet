@@ -244,13 +244,21 @@ final class DeviceManagerTests: XCTestCase {
         }
     }
 
-    // MARK: - 9. revokeDevice succeeds for non-primary key
+    // MARK: - 9. revokeDevice throws notSupported (multi-device revocation not yet implemented)
 
-    func testRevokeDeviceSucceedsForNonPrimaryKey() async throws {
-        try await manager.revokeDevice(identity: testIdentity, targetKeyId: "key-2")
-
-        // Verify DID document was updated using the primary key
-        XCTAssertEqual(ssdidClientProvider.updateDidDocumentCalledWith, "key-1")
+    func testRevokeDeviceThrowsNotSupportedForNonPrimaryKey() async {
+        do {
+            try await manager.revokeDevice(identity: testIdentity, targetKeyId: "key-2")
+            XCTFail("Expected notSupported error")
+        } catch let error as DeviceManagerError {
+            if case .notSupported = error {
+                // Expected
+            } else {
+                XCTFail("Unexpected error: \(error)")
+            }
+        } catch {
+            XCTFail("Unexpected error type: \(error)")
+        }
     }
 
     // MARK: - 10. listDevices returns at least primary device
