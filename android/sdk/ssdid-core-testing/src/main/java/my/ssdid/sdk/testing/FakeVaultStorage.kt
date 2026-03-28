@@ -1,9 +1,11 @@
-package my.ssdid.sdk.domain.vault
+package my.ssdid.sdk.testing
 
 import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.sdk.domain.model.VerifiableCredential
 import my.ssdid.sdk.domain.rotation.RotationEntry
 import my.ssdid.sdk.domain.sdjwt.StoredSdJwtVc
+import my.ssdid.sdk.domain.vault.PreRotatedKeyData
+import my.ssdid.sdk.domain.vault.VaultStorage
 
 class FakeVaultStorage : VaultStorage {
     private val identities = mutableMapOf<String, Identity>()

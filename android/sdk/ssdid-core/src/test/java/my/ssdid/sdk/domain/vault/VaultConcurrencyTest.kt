@@ -7,6 +7,7 @@ import kotlinx.coroutines.test.runTest
 import my.ssdid.sdk.domain.crypto.ClassicalProvider
 import my.ssdid.sdk.domain.crypto.CryptoProvider
 import my.ssdid.sdk.domain.model.Algorithm
+import my.ssdid.sdk.testing.FakeVaultStorage
 import org.junit.Before
 import org.junit.Test
 

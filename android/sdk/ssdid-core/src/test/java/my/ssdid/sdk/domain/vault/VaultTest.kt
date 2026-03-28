@@ -13,6 +13,7 @@ import my.ssdid.sdk.domain.crypto.CryptoProvider
 import my.ssdid.sdk.domain.crypto.Multibase
 import my.ssdid.sdk.domain.model.*
 import my.ssdid.sdk.domain.vault.KeystoreManager
+import my.ssdid.sdk.testing.FakeVaultStorage
 import org.junit.Before
 import org.junit.Test
 
