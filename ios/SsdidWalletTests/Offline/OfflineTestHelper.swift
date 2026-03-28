@@ -1,3 +1,4 @@
+@testable import SsdidCore
 import Foundation
 import CryptoKit
 @testable import SsdidWallet

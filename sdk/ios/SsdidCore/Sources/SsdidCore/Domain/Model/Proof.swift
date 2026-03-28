@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Proof: Codable {
+public struct Proof: Codable, Sendable {
     public let type: String
     public let created: String
     public let verificationMethod: String

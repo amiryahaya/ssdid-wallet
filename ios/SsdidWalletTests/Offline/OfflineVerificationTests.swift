@@ -1,3 +1,4 @@
+@testable import SsdidCore
 import XCTest
 import zlib
 @testable import SsdidWallet

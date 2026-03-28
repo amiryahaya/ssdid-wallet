@@ -1,3 +1,4 @@
+@testable import SsdidCore
 import XCTest
 import LibOQS
 @testable import SsdidWallet
@@ -82,8 +83,8 @@ final class RegistryIntegrationTests: XCTestCase {
 
         let optionsJson = JsonUtils.canonicalJson(proofOptions)
         let docJson = JsonUtils.canonicalJson(document)
-        let optionsHash = SHA3.sha256(Data(optionsJson.utf8))
-        let docHash = SHA3.sha256(Data(docJson.utf8))
+        let optionsHash = SsdidCore.SHA3.sha256(Data(optionsJson.utf8))
+        let docHash = SsdidCore.SHA3.sha256(Data(docJson.utf8))
         var payload = optionsHash
         payload.append(docHash)
 

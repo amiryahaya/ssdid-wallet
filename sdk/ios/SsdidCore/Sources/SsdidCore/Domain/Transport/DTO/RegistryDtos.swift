@@ -2,7 +2,7 @@ import Foundation
 
 /// Request/response DTOs for Registry API interactions.
 
-public struct RegisterDidRequest: Codable {
+public struct RegisterDidRequest: Codable, Sendable {
     public let didDocument: DidDocument
     public let proof: Proof
 
@@ -12,12 +12,12 @@ public struct RegisterDidRequest: Codable {
     }
 }
 
-public struct RegisterDidResponse: Codable {
+public struct RegisterDidResponse: Codable, Sendable {
     public let did: String
     public let status: String
 }
 
-public struct UpdateDidRequest: Codable {
+public struct UpdateDidRequest: Codable, Sendable {
     public let didDocument: DidDocument
     public let proof: Proof
 
@@ -27,11 +27,11 @@ public struct UpdateDidRequest: Codable {
     }
 }
 
-public struct DeactivateDidRequest: Codable {
+public struct DeactivateDidRequest: Codable, Sendable {
     public let proof: Proof
 }
 
-public struct ChallengeResponse: Codable {
+public struct ChallengeResponse: Codable, Sendable {
     public let challenge: String
     public var expiresAt: String? = nil
     public var domain: String? = nil
@@ -45,7 +45,7 @@ public struct ChallengeResponse: Codable {
     }
 }
 
-public struct RegistryInfoResponse: Codable {
+public struct RegistryInfoResponse: Codable, Sendable {
     public let name: String
     public let version: String
     public let didMethod: String
@@ -62,7 +62,7 @@ public struct RegistryInfoResponse: Codable {
     }
 }
 
-public struct RegistryPolicies: Codable {
+public struct RegistryPolicies: Codable, Sendable {
     public var proofMaxAgeSeconds: Int? = nil
 
     enum CodingKeys: String, CodingKey {

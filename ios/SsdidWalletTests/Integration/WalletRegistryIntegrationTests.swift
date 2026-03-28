@@ -1,3 +1,4 @@
+@testable import SsdidCore
 @preconcurrency import XCTest
 @preconcurrency import LibOQS
 @preconcurrency @testable import SsdidWallet
@@ -66,8 +67,8 @@ final class WalletRegistryIntegrationTests: XCTestCase {
 
         let optionsJson = JsonUtils.canonicalJson(proofOptions)
         let docJson = JsonUtils.canonicalJson(document)
-        let optionsHash = SHA3.sha256(Data(optionsJson.utf8))
-        let docHash = SHA3.sha256(Data(docJson.utf8))
+        let optionsHash = SsdidCore.SHA3.sha256(Data(optionsJson.utf8))
+        let docHash = SsdidCore.SHA3.sha256(Data(docJson.utf8))
         var payload = optionsHash
         payload.append(docHash)
 
@@ -180,7 +181,7 @@ final class WalletRegistryIntegrationTests: XCTestCase {
 
         // 6. Update DID doc (add nextKeyHash)
         let nextKeyPair = try classical.generateKeyPair(algorithm: .ED25519)
-        let nextKeyHash = Multibase.encode(SHA3.sha256(nextKeyPair.publicKey))
+        let nextKeyHash = Multibase.encode(SsdidCore.SHA3.sha256(nextKeyPair.publicKey))
 
         let updatedDoc = DidDocument(
             id: regUnwrapped.did.value,
@@ -262,7 +263,7 @@ final class WalletRegistryIntegrationTests: XCTestCase {
 
         // 2. Generate next keypair, compute SHA3-256 hash of the new public key
         let nextKeyPair = try classical.generateKeyPair(algorithm: .ED25519)
-        let nextKeyHash = Multibase.encode(SHA3.sha256(nextKeyPair.publicKey))
+        let nextKeyHash = Multibase.encode(SsdidCore.SHA3.sha256(nextKeyPair.publicKey))
 
         // 3. Update DID doc with nextKeyHash
         let challenge1 = try await registryApi.createChallenge(did: regUnwrapped.did.value)
@@ -386,8 +387,8 @@ final class WalletRegistryIntegrationTests: XCTestCase {
         let canonicalDoc = JsonUtils.canonicalJson(docDict)
 
         // 3. SHA3-256 hash both
-        let optionsHash = SHA3.sha256(Data(canonicalOptions.utf8))
-        let docHash = SHA3.sha256(Data(canonicalDoc.utf8))
+        let optionsHash = SsdidCore.SHA3.sha256(Data(canonicalOptions.utf8))
+        let docHash = SsdidCore.SHA3.sha256(Data(canonicalDoc.utf8))
 
         // 4. Concatenate hashes
         var payload = optionsHash

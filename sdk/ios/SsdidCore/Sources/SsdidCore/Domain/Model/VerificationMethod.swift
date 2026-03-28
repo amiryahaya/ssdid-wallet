@@ -1,6 +1,6 @@
 import Foundation
 
-public struct VerificationMethod: Codable, Equatable {
+public struct VerificationMethod: Codable, Equatable, Sendable {
     public let id: String
     public let type: String
     public let controller: String

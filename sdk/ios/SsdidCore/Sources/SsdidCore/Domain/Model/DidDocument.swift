@@ -1,6 +1,6 @@
 import Foundation
 
-public struct DidDocument: Codable {
+public struct DidDocument: Codable, Sendable {
     public let context: [String]
     public let id: String
     public var controller: String = ""

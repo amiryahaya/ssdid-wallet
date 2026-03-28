@@ -1,3 +1,4 @@
+@testable import SsdidCore
 import XCTest
 @testable import SsdidWallet
 
@@ -75,6 +76,17 @@ private final class InMemoryVaultStorage: VaultStorage, @unchecked Sendable {
 
     func deletePreRotatedKey(keyId: String) async throws {
         preRotatedKeys.removeValue(forKey: keyId)
+    }
+
+    // Rotation history
+    private var rotationHistory: [String: [RotationEntry]] = [:]
+
+    func addRotationEntry(did: String, entry: RotationEntry) async throws {
+        rotationHistory[did, default: []].append(entry)
+    }
+
+    func getRotationHistory(did: String) async -> [RotationEntry] {
+        rotationHistory[did] ?? []
     }
 
     func isOnboardingCompleted() async -> Bool { onboardingDone }
