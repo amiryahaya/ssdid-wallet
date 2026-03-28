@@ -3,6 +3,7 @@ android/.gradle/
 android/build/
 android/app/build/
 android/sdk/ssdid-core/build/
+android/sdk/ssdid-core-testing/build/
 android/local.properties
 android/captures/
 android/.externalNativeBuild/
