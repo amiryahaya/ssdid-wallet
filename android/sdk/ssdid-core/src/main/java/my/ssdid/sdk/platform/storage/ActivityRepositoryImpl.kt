@@ -1,7 +1,6 @@
 package my.ssdid.sdk.platform.storage
 
 import android.content.Context
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -12,12 +11,15 @@ import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import my.ssdid.sdk.domain.history.ActivityRepository
+import my.ssdid.sdk.domain.logging.NoOpLogger
+import my.ssdid.sdk.domain.logging.SsdidLogger
 import my.ssdid.sdk.domain.model.ActivityRecord
 
 private val Context.activityStore: DataStore<Preferences> by preferencesDataStore(name = "ssdid_activity")
 
 class ActivityRepositoryImpl(
-    private val context: Context
+    private val context: Context,
+    private val logger: SsdidLogger = NoOpLogger()
 ) : ActivityRepository {
 
     private val json = Json { ignoreUnknownKeys = true }
@@ -38,7 +40,7 @@ class ActivityRepositoryImpl(
             val records: List<ActivityRecord> = json.decodeFromString(jsonStr)
             records.sortedByDescending { it.timestamp }
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to deserialize activities", e)
+            logger.error(TAG, "Failed to deserialize activities", e)
             emptyList()
         }
     }

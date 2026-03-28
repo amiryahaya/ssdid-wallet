@@ -1,4 +1,4 @@
-package my.ssdid.sdk.platform.storage
+package my.ssdid.sdk.domain.storage
 
 interface OnboardingStorage {
     suspend fun isOnboardingCompleted(): Boolean

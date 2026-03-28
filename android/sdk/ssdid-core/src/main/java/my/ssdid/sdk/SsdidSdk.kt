@@ -89,34 +89,34 @@ class SsdidSdk private constructor(
     val history: HistoryApi,
     // Migration helpers — exposed for wallet app DI backward compatibility.
     // Prefer the public API sub-objects (identity, vault, credentials, etc.) for new code.
-    val internalVault: Vault,
-    val internalVerifier: Verifier,
-    val internalClient: SsdidClient,
-    val internalHttpClient: SsdidHttpClient,
-    val internalOid4VciHandler: OpenId4VciHandler,
-    val internalOid4VpHandler: OpenId4VpHandler,
-    val internalNotifyManager: NotifyManager,
-    val internalRecoveryManager: RecoveryManager,
-    val internalKeyRotationManager: KeyRotationManager,
-    val internalBackupManager: BackupManager,
-    val internalDeviceManager: DeviceManager,
-    val internalRevocationManager: RevocationManager,
-    val internalActivityRepo: ActivityRepository,
-    val internalOkHttpClient: OkHttpClient,
-    val internalVaultStorage: VaultStorage,
-    val internalKeystoreManager: KeystoreManager,
-    val internalSettingsRepository: SettingsRepository,
-    val internalBundleStore: BundleStore,
-    val internalTtlProvider: TtlProvider,
-    val internalBundleManager: BundleManager,
-    val internalOfflineVerifier: OfflineVerifier,
-    val internalVerificationOrchestrator: VerificationOrchestrator,
-    val internalCredentialRepository: CredentialRepository,
-    val internalBundleSyncScheduler: BundleSyncScheduler,
-    val internalBundleSyncWorkerFactory: BundleSyncWorkerFactory,
-    val internalConnectivityMonitor: ConnectivityMonitor,
-    val internalLocalNotificationStorage: LocalNotificationStorage,
-    val internalNotifyStorage: NotifyStorage
+    @property:InternalSsdidApi val internalVault: Vault,
+    @property:InternalSsdidApi val internalVerifier: Verifier,
+    @property:InternalSsdidApi val internalClient: SsdidClient,
+    @property:InternalSsdidApi val internalHttpClient: SsdidHttpClient,
+    @property:InternalSsdidApi val internalOid4VciHandler: OpenId4VciHandler,
+    @property:InternalSsdidApi val internalOid4VpHandler: OpenId4VpHandler,
+    @property:InternalSsdidApi val internalNotifyManager: NotifyManager,
+    @property:InternalSsdidApi val internalRecoveryManager: RecoveryManager,
+    @property:InternalSsdidApi val internalKeyRotationManager: KeyRotationManager,
+    @property:InternalSsdidApi val internalBackupManager: BackupManager,
+    @property:InternalSsdidApi val internalDeviceManager: DeviceManager,
+    @property:InternalSsdidApi val internalRevocationManager: RevocationManager,
+    @property:InternalSsdidApi val internalActivityRepo: ActivityRepository,
+    @property:InternalSsdidApi val internalOkHttpClient: OkHttpClient,
+    @property:InternalSsdidApi val internalVaultStorage: VaultStorage,
+    @property:InternalSsdidApi val internalKeystoreManager: KeystoreManager,
+    @property:InternalSsdidApi val internalSettingsRepository: SettingsRepository,
+    @property:InternalSsdidApi val internalBundleStore: BundleStore,
+    @property:InternalSsdidApi val internalTtlProvider: TtlProvider,
+    @property:InternalSsdidApi val internalBundleManager: BundleManager,
+    @property:InternalSsdidApi val internalOfflineVerifier: OfflineVerifier,
+    @property:InternalSsdidApi val internalVerificationOrchestrator: VerificationOrchestrator,
+    @property:InternalSsdidApi val internalCredentialRepository: CredentialRepository,
+    @property:InternalSsdidApi val internalBundleSyncScheduler: BundleSyncScheduler,
+    @property:InternalSsdidApi val internalBundleSyncWorkerFactory: BundleSyncWorkerFactory,
+    @property:InternalSsdidApi val internalConnectivityMonitor: ConnectivityMonitor,
+    @property:InternalSsdidApi val internalLocalNotificationStorage: LocalNotificationStorage,
+    @property:InternalSsdidApi val internalNotifyStorage: NotifyStorage
 ) {
     companion object {
         fun builder(context: Context): Builder = Builder(context)
@@ -140,6 +140,10 @@ class SsdidSdk private constructor(
         private var customBundleStore: BundleStore? = null
 
         fun registryUrl(url: String) = apply { this.registryUrl = url }
+        /**
+         * Set the notification service URL. If not set, defaults to [registryUrl].
+         * Required for push notification features (createMailbox, fetchAndDemux).
+         */
         fun notifyUrl(url: String) = apply { this.notifyUrl = url }
         fun certificatePinning(
             enabled: Boolean,
@@ -313,7 +317,7 @@ class SsdidSdk private constructor(
                 internalBundleSyncScheduler = bundleSyncScheduler,
                 internalBundleSyncWorkerFactory = bundleSyncWorkerFactory,
                 internalConnectivityMonitor = connectivityMonitor,
-                internalLocalNotificationStorage = localNotificationStorageImpl,
+                internalLocalNotificationStorage = (localNotificationStore as? LocalNotificationStorage) ?: localNotificationStorageImpl,
                 internalNotifyStorage = notifyStorage
             )
         }

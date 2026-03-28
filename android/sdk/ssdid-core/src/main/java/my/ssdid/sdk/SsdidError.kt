@@ -16,4 +16,5 @@ sealed class SsdidError : Exception() {
     data class NoMatchingCredentials(val requestId: String) : SsdidError()
     data class RecoveryFailed(val reason: String) : SsdidError()
     data class RotationFailed(val reason: String) : SsdidError()
+    data class BackupFailed(val reason: String) : SsdidError()
 }

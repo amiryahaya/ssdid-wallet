@@ -11,7 +11,7 @@ import my.ssdid.sdk.domain.recovery.social.SocialRecoveryStorage
 import my.ssdid.sdk.domain.vault.VaultStorage
 import my.ssdid.sdk.platform.storage.DataStoreInstitutionalRecoveryStorage
 import my.ssdid.sdk.platform.storage.DataStoreSocialRecoveryStorage
-import my.ssdid.sdk.platform.storage.OnboardingStorage
+import my.ssdid.sdk.domain.storage.OnboardingStorage
 import javax.inject.Singleton
 
 @Module

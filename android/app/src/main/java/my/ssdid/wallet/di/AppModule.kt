@@ -6,6 +6,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import my.ssdid.sdk.InternalSsdidApi
 import my.ssdid.sdk.SsdidSdk
 import my.ssdid.wallet.BuildConfig
 import my.ssdid.sdk.domain.SsdidClient
@@ -55,6 +56,7 @@ import javax.inject.Singleton
  * Simplified DI module that builds SsdidSdk once and provides individual
  * domain classes from it for backward-compatible ViewModel injection.
  */
+@OptIn(InternalSsdidApi::class)
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {

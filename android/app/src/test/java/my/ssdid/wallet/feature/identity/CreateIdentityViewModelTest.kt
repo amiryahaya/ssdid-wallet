@@ -16,7 +16,7 @@ import my.ssdid.sdk.domain.SsdidClient
 import my.ssdid.sdk.domain.model.Algorithm
 import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.sdk.domain.vault.Vault
-import my.ssdid.sdk.platform.storage.OnboardingStorage
+import my.ssdid.sdk.domain.storage.OnboardingStorage
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule

@@ -6,7 +6,8 @@ import my.ssdid.sdk.domain.model.Algorithm
 import java.security.MessageDigest
 
 class FakeCryptoProvider(
-    private val supportedAlgorithms: Set<Algorithm> = setOf(Algorithm.ED25519, Algorithm.ECDSA_P256)
+    private val supportedAlgorithms: Set<Algorithm> = setOf(Algorithm.ED25519, Algorithm.ECDSA_P256),
+    private val shouldVerify: Boolean = true
 ) : CryptoProvider {
     override fun supportsAlgorithm(algorithm: Algorithm): Boolean = algorithm in supportedAlgorithms
 
@@ -26,7 +27,6 @@ class FakeCryptoProvider(
     }
 
     override fun verify(algorithm: Algorithm, publicKey: ByteArray, signature: ByteArray, data: ByteArray): Boolean {
-        // Always returns true for testing
-        return true
+        return shouldVerify
     }
 }

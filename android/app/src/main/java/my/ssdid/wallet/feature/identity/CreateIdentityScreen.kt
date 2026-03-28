@@ -39,7 +39,7 @@ import my.ssdid.sdk.domain.transport.ConfirmCodeRequest
 import my.ssdid.sdk.domain.transport.EmailVerifyApi
 import my.ssdid.sdk.domain.transport.SendCodeRequest
 import my.ssdid.sdk.domain.vault.Vault
-import my.ssdid.sdk.platform.storage.OnboardingStorage
+import my.ssdid.sdk.domain.storage.OnboardingStorage
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.ui.platform.LocalView

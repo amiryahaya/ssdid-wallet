@@ -1,7 +1,6 @@
 package my.ssdid.sdk.platform.storage
 
 import android.content.Context
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -12,6 +11,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import my.ssdid.sdk.domain.storage.OnboardingStorage
+import my.ssdid.sdk.domain.logging.NoOpLogger
+import my.ssdid.sdk.domain.logging.SsdidLogger
 import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.sdk.domain.model.VerifiableCredential
 import my.ssdid.sdk.domain.rotation.RotationEntry
@@ -25,7 +27,10 @@ import java.util.Base64
 // Private keys are stored separately in filesDir/keys/, encrypted with Android Keystore AES-256-GCM.
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "ssdid_vault")
 
-class DataStoreVaultStorage(private val context: Context) : VaultStorage, OnboardingStorage {
+class DataStoreVaultStorage(
+    private val context: Context,
+    private val logger: SsdidLogger = NoOpLogger()
+) : VaultStorage, OnboardingStorage {
 
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -57,7 +62,7 @@ class DataStoreVaultStorage(private val context: Context) : VaultStorage, Onboar
         return try {
             json.decodeFromString(jsonStr)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to deserialize identities — data may be corrupted", e)
+            logger.error(TAG, "Failed to deserialize identities — data may be corrupted", e)
             emptyList()
         }
     }
@@ -93,7 +98,7 @@ class DataStoreVaultStorage(private val context: Context) : VaultStorage, Onboar
         return try {
             json.decodeFromString(jsonStr)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to deserialize credentials — data may be corrupted", e)
+            logger.error(TAG, "Failed to deserialize credentials — data may be corrupted", e)
             emptyList()
         }
     }
@@ -121,7 +126,7 @@ class DataStoreVaultStorage(private val context: Context) : VaultStorage, Onboar
         return try {
             json.decodeFromString(jsonStr)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to deserialize SD-JWT VCs — data may be corrupted", e)
+            logger.error(TAG, "Failed to deserialize SD-JWT VCs — data may be corrupted", e)
             emptyList()
         }
     }
@@ -198,7 +203,7 @@ class DataStoreVaultStorage(private val context: Context) : VaultStorage, Onboar
         return try {
             json.decodeFromString(jsonStr)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to deserialize rotation history", e)
+            logger.error(TAG, "Failed to deserialize rotation history", e)
             emptyMap()
         }
     }
