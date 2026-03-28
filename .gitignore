@@ -101,3 +101,4 @@ ios/.spm-cache/
 ios/DerivedData/
 e2e/playwright/node_modules/
 beta-api/node_modules/
+sdk/ios/SsdidPqc/.build/
