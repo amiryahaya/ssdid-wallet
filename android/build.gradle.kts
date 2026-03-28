@@ -7,4 +7,5 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose") version "2.2.10" apply false
     id("org.jetbrains.kotlinx.kover") version "0.9.1" apply false
     id("io.sentry.android.gradle") version "4.14.1" apply false
+    id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.17.0" apply false
 }

@@ -2,6 +2,8 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.serialization")
+    id("maven-publish")
+    id("org.jetbrains.kotlinx.binary-compatibility-validator")
 }
 
 android {
@@ -52,4 +54,38 @@ dependencies {
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     testImplementation("org.robolectric:robolectric:4.14.1")
     testImplementation("androidx.test:core:1.6.1")
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                from(components["release"])
+                groupId = findProperty("SDK_GROUP") as String? ?: "my.ssdid.sdk"
+                artifactId = "ssdid-core"
+                version = findProperty("SDK_VERSION") as String? ?: "0.1.0"
+
+                pom {
+                    name.set("SSDID Core SDK")
+                    description.set("Self-sovereign decentralized identity SDK with post-quantum cryptography support")
+                    url.set("https://github.com/amiryahaya/ssdid-wallet")
+                    licenses {
+                        license {
+                            name.set("Proprietary")
+                        }
+                    }
+                }
+            }
+        }
+        repositories {
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/amiryahaya/ssdid-wallet")
+                credentials {
+                    username = System.getenv("GITHUB_ACTOR") ?: findProperty("gpr.user") as String? ?: ""
+                    password = System.getenv("GITHUB_TOKEN") ?: findProperty("gpr.token") as String? ?: ""
+                }
+            }
+        }
+    }
 }
