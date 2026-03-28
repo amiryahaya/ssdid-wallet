@@ -1,5 +1,6 @@
 package my.ssdid.sdk.api
 
+import kotlinx.coroutines.runBlocking
 import my.ssdid.sdk.domain.oid4vci.CredentialOffer
 import my.ssdid.sdk.domain.oid4vci.CredentialOfferReview
 import my.ssdid.sdk.domain.oid4vci.IssuanceResult
@@ -17,8 +18,8 @@ class IssuanceApi internal constructor(private val handler: OpenId4VciHandler) {
         walletDid: String,
         keyId: String,
         algorithm: String,
-        signer: (ByteArray) -> ByteArray
+        signer: CredentialSigner
     ): Result<IssuanceResult> = handler.acceptOffer(
-        offer, metadata, selectedConfigId, txCode, walletDid, keyId, algorithm, signer
-    )
+        offer, metadata, selectedConfigId, txCode, walletDid, keyId, algorithm
+    ) { data -> runBlocking { signer.sign(data) } }
 }

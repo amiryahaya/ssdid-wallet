@@ -1,5 +1,6 @@
 package my.ssdid.sdk.api
 
+import kotlinx.coroutines.runBlocking
 import my.ssdid.sdk.domain.oid4vp.AuthorizationRequest
 import my.ssdid.sdk.domain.oid4vp.MatchResult
 import my.ssdid.sdk.domain.oid4vp.OpenId4VpHandler
@@ -14,8 +15,8 @@ class PresentationApi internal constructor(private val handler: OpenId4VpHandler
         matchResult: MatchResult,
         selectedClaims: List<String>,
         algorithm: String,
-        signer: (ByteArray) -> ByteArray
+        signer: CredentialSigner
     ): Result<Unit> = handler.submitPresentation(
-        authRequest, matchResult, selectedClaims, algorithm, signer
-    )
+        authRequest, matchResult, selectedClaims, algorithm
+    ) { data -> runBlocking { signer.sign(data) } }
 }
