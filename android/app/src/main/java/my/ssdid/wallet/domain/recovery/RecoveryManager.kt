@@ -4,9 +4,9 @@ import my.ssdid.sdk.domain.crypto.CryptoProvider
 import my.ssdid.sdk.domain.crypto.Multibase
 import my.ssdid.sdk.domain.model.Algorithm
 import my.ssdid.sdk.domain.model.Identity
-import my.ssdid.wallet.domain.vault.Vault
-import my.ssdid.wallet.domain.vault.VaultStorage
-import my.ssdid.wallet.domain.vault.KeystoreManager
+import my.ssdid.sdk.domain.vault.Vault
+import my.ssdid.sdk.domain.vault.VaultStorage
+import my.ssdid.sdk.domain.vault.KeystoreManager
 import java.security.MessageDigest
 import java.time.Instant
 import java.util.Base64

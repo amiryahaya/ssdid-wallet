@@ -5,16 +5,16 @@ import io.mockk.*
 import kotlinx.coroutines.test.runTest
 import my.ssdid.sdk.domain.crypto.Multibase
 import my.ssdid.sdk.domain.model.*
-import my.ssdid.wallet.domain.history.ActivityRepository
+import my.ssdid.sdk.domain.history.ActivityRepository
 import my.ssdid.wallet.domain.notify.NotifyManager
-import my.ssdid.wallet.domain.revocation.RevocationManager
-import my.ssdid.wallet.domain.revocation.RevocationStatus
-import my.ssdid.wallet.domain.transport.RegistryApi
-import my.ssdid.wallet.domain.transport.ServerApi
-import my.ssdid.wallet.domain.transport.SsdidHttpClient
-import my.ssdid.wallet.domain.transport.dto.*
-import my.ssdid.wallet.domain.vault.Vault
-import my.ssdid.wallet.domain.verifier.Verifier
+import my.ssdid.sdk.domain.revocation.RevocationManager
+import my.ssdid.sdk.domain.revocation.RevocationStatus
+import my.ssdid.sdk.domain.transport.RegistryApi
+import my.ssdid.sdk.domain.transport.ServerApi
+import my.ssdid.sdk.domain.transport.SsdidHttpClient
+import my.ssdid.sdk.domain.transport.dto.*
+import my.ssdid.sdk.domain.vault.Vault
+import my.ssdid.sdk.domain.verifier.Verifier
 import org.junit.Before
 import org.junit.Test
 

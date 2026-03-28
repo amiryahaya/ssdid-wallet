@@ -3,6 +3,7 @@ package my.ssdid.wallet.domain.sdjwt
 import com.google.common.truth.Truth.assertThat
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import my.ssdid.sdk.domain.sdjwt.StoredSdJwtVc
 import org.junit.Test
 
 class StoredSdJwtVcTest {

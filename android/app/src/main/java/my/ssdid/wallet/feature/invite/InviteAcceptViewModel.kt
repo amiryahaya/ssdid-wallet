@@ -13,11 +13,11 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import my.ssdid.sdk.domain.model.Did
 import my.ssdid.sdk.domain.model.Identity
-import my.ssdid.wallet.domain.transport.SsdidHttpClient
-import my.ssdid.wallet.domain.transport.dto.AcceptWithWalletRequest
-import my.ssdid.wallet.domain.transport.dto.InvitationDetailsResponse
-import my.ssdid.wallet.domain.vault.Vault
-import my.ssdid.wallet.domain.verifier.Verifier
+import my.ssdid.sdk.domain.transport.SsdidHttpClient
+import my.ssdid.sdk.domain.transport.dto.AcceptWithWalletRequest
+import my.ssdid.sdk.domain.transport.dto.InvitationDetailsResponse
+import my.ssdid.sdk.domain.vault.Vault
+import my.ssdid.sdk.domain.verifier.Verifier
 import my.ssdid.wallet.platform.security.UrlValidator
 import javax.inject.Inject
 

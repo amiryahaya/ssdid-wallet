@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.map
 import my.ssdid.sdk.domain.logging.NoOpLogger
 import my.ssdid.sdk.domain.logging.SsdidLogger
 import my.ssdid.wallet.domain.notify.NotifyStorage
-import my.ssdid.wallet.domain.vault.KeystoreManager
+import my.ssdid.sdk.domain.vault.KeystoreManager
 import java.util.Base64
 
 private val Context.notifyStore: DataStore<Preferences> by preferencesDataStore(name = "ssdid_notify")

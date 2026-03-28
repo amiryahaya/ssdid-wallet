@@ -25,9 +25,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import my.ssdid.sdk.domain.model.VerifiableCredential
-import my.ssdid.wallet.domain.settings.TtlProvider
-import my.ssdid.wallet.domain.vault.Vault
-import my.ssdid.wallet.domain.verifier.offline.BundleStore
+import my.ssdid.sdk.domain.settings.TtlProvider
+import my.ssdid.sdk.domain.vault.Vault
+import my.ssdid.sdk.domain.verifier.offline.BundleStore
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack

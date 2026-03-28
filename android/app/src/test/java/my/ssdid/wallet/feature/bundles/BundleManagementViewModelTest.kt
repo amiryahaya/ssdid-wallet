@@ -11,10 +11,10 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import my.ssdid.wallet.domain.settings.TtlProvider
-import my.ssdid.wallet.domain.verifier.offline.BundleManager
-import my.ssdid.wallet.domain.verifier.offline.BundleStore
-import my.ssdid.wallet.domain.verifier.offline.VerificationBundle
+import my.ssdid.sdk.domain.settings.TtlProvider
+import my.ssdid.sdk.domain.verifier.offline.BundleManager
+import my.ssdid.sdk.domain.verifier.offline.BundleStore
+import my.ssdid.sdk.domain.verifier.offline.VerificationBundle
 import org.junit.After
 import org.junit.Before
 import org.junit.Test

@@ -7,9 +7,9 @@ import my.ssdid.sdk.domain.crypto.ClassicalProvider
 import my.ssdid.sdk.domain.crypto.CryptoProvider
 import my.ssdid.sdk.domain.model.Algorithm
 import my.ssdid.sdk.domain.model.Identity
-import my.ssdid.wallet.domain.vault.FakeVaultStorage
-import my.ssdid.wallet.domain.vault.VaultImpl
-import my.ssdid.wallet.domain.vault.KeystoreManager
+import my.ssdid.sdk.domain.vault.FakeVaultStorage
+import my.ssdid.sdk.domain.vault.VaultImpl
+import my.ssdid.sdk.domain.vault.KeystoreManager
 import org.junit.Before
 import org.junit.Test
 

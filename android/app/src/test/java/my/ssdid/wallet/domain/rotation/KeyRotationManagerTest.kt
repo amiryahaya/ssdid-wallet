@@ -6,12 +6,12 @@ import kotlinx.coroutines.test.runTest
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.sdk.domain.crypto.CryptoProvider
 import my.ssdid.sdk.domain.crypto.KeyPairResult
-import my.ssdid.wallet.domain.history.ActivityRepository
+import my.ssdid.sdk.domain.history.ActivityRepository
 import my.ssdid.sdk.domain.model.Algorithm
 import my.ssdid.sdk.domain.model.Identity
-import my.ssdid.wallet.domain.vault.PreRotatedKeyData
-import my.ssdid.wallet.domain.vault.VaultStorage
-import my.ssdid.wallet.domain.vault.KeystoreManager
+import my.ssdid.sdk.domain.vault.PreRotatedKeyData
+import my.ssdid.sdk.domain.vault.VaultStorage
+import my.ssdid.sdk.domain.vault.KeystoreManager
 import org.junit.Before
 import org.junit.Test
 

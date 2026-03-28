@@ -12,7 +12,7 @@ import my.ssdid.wallet.domain.oid4vp.AuthorizationRequest
 import my.ssdid.wallet.domain.oid4vp.MatchResult
 import my.ssdid.wallet.domain.oid4vp.OpenId4VpHandler
 import my.ssdid.wallet.domain.oid4vp.PresentationReviewResult
-import my.ssdid.wallet.domain.vault.Vault
+import my.ssdid.sdk.domain.vault.Vault
 import javax.inject.Inject
 
 @HiltViewModel

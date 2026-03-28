@@ -1,7 +1,7 @@
 package my.ssdid.wallet.domain.oid4vp
 
 import kotlinx.serialization.json.*
-import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
+import my.ssdid.sdk.domain.sdjwt.StoredSdJwtVc
 
 class DcqlMatcher {
 

@@ -2,7 +2,7 @@ package my.ssdid.wallet.platform.sync
 
 import android.content.Context
 import androidx.work.*
-import my.ssdid.wallet.domain.verifier.offline.sync.BundleSyncScheduler
+import my.ssdid.sdk.domain.verifier.offline.sync.BundleSyncScheduler
 import java.util.concurrent.TimeUnit
 
 class WorkManagerBundleSyncScheduler(private val context: Context) : BundleSyncScheduler {

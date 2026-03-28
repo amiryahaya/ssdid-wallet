@@ -14,11 +14,11 @@ import my.ssdid.sdk.domain.crypto.CryptoProvider
 import my.ssdid.sdk.domain.crypto.Multibase
 import my.ssdid.wallet.domain.crypto.PqcProvider
 import my.ssdid.sdk.domain.model.*
-import my.ssdid.wallet.domain.transport.RegistryApi
-import my.ssdid.wallet.domain.transport.dto.DeactivateDidRequest
-import my.ssdid.wallet.domain.transport.dto.RegisterDidRequest
-import my.ssdid.wallet.domain.transport.dto.UpdateDidRequest
-import my.ssdid.wallet.domain.vault.VaultImpl
+import my.ssdid.sdk.domain.transport.RegistryApi
+import my.ssdid.sdk.domain.transport.dto.DeactivateDidRequest
+import my.ssdid.sdk.domain.transport.dto.RegisterDidRequest
+import my.ssdid.sdk.domain.transport.dto.UpdateDidRequest
+import my.ssdid.sdk.domain.vault.VaultImpl
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import org.junit.Assume.assumeTrue

@@ -1,8 +1,8 @@
 package my.ssdid.wallet.domain.oid4vci
 
 import kotlinx.serialization.json.*
-import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
-import my.ssdid.wallet.domain.vault.Vault
+import my.ssdid.sdk.domain.sdjwt.StoredSdJwtVc
+import my.ssdid.sdk.domain.vault.Vault
 
 data class CredentialOfferReview(
     val offer: CredentialOffer,

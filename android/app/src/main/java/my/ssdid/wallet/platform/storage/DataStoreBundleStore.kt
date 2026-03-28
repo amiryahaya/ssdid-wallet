@@ -5,8 +5,8 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import my.ssdid.wallet.domain.verifier.offline.BundleStore
-import my.ssdid.wallet.domain.verifier.offline.VerificationBundle
+import my.ssdid.sdk.domain.verifier.offline.BundleStore
+import my.ssdid.sdk.domain.verifier.offline.VerificationBundle
 import java.io.File
 import java.security.KeyStore
 import javax.crypto.Cipher

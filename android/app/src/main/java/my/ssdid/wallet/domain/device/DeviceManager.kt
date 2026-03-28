@@ -3,12 +3,12 @@ package my.ssdid.wallet.domain.device
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.sdk.domain.crypto.Multibase
 import my.ssdid.sdk.domain.model.Identity
-import my.ssdid.wallet.domain.transport.SsdidHttpClient
-import my.ssdid.wallet.domain.transport.dto.PairingApproveRequest
-import my.ssdid.wallet.domain.transport.dto.PairingInitRequest
-import my.ssdid.wallet.domain.transport.dto.PairingJoinRequest
-import my.ssdid.wallet.domain.transport.dto.PairingStatusResponse
-import my.ssdid.wallet.domain.vault.Vault
+import my.ssdid.sdk.domain.transport.SsdidHttpClient
+import my.ssdid.sdk.domain.transport.dto.PairingApproveRequest
+import my.ssdid.sdk.domain.transport.dto.PairingInitRequest
+import my.ssdid.sdk.domain.transport.dto.PairingJoinRequest
+import my.ssdid.sdk.domain.transport.dto.PairingStatusResponse
+import my.ssdid.sdk.domain.vault.Vault
 import java.util.UUID
 
 class DeviceManager(

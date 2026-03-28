@@ -3,11 +3,11 @@ package my.ssdid.wallet.domain.backup
 import com.google.common.truth.Truth.assertThat
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
-import my.ssdid.wallet.domain.history.ActivityRepository
+import my.ssdid.sdk.domain.history.ActivityRepository
 import my.ssdid.sdk.domain.model.Algorithm
 import my.ssdid.sdk.domain.model.Identity
-import my.ssdid.wallet.domain.vault.Vault
-import my.ssdid.wallet.domain.vault.KeystoreManager
+import my.ssdid.sdk.domain.vault.Vault
+import my.ssdid.sdk.domain.vault.KeystoreManager
 import org.junit.Before
 import org.junit.Test
 import java.util.Base64

@@ -8,10 +8,10 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.sdk.domain.model.*
-import my.ssdid.wallet.domain.transport.RegistryApi
-import my.ssdid.wallet.domain.transport.SsdidHttpClient
-import my.ssdid.wallet.domain.transport.dto.*
-import my.ssdid.wallet.domain.vault.Vault
+import my.ssdid.sdk.domain.transport.RegistryApi
+import my.ssdid.sdk.domain.transport.SsdidHttpClient
+import my.ssdid.sdk.domain.transport.dto.*
+import my.ssdid.sdk.domain.vault.Vault
 import org.junit.Before
 import org.junit.Test
 

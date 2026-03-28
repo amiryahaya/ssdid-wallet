@@ -9,7 +9,7 @@ import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.sdk.domain.model.CredentialSubject
 import my.ssdid.sdk.domain.model.Proof
 import my.ssdid.sdk.domain.model.VerifiableCredential
-import my.ssdid.wallet.domain.rotation.RotationEntry
+import my.ssdid.sdk.domain.rotation.RotationEntry
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith

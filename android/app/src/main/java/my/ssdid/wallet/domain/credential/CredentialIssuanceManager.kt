@@ -3,10 +3,10 @@ package my.ssdid.wallet.domain.credential
 import my.ssdid.sdk.domain.crypto.Multibase
 import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.sdk.domain.model.VerifiableCredential
-import my.ssdid.wallet.domain.transport.SsdidHttpClient
-import my.ssdid.wallet.domain.transport.dto.CredentialAcceptRequest
-import my.ssdid.wallet.domain.transport.dto.CredentialOfferResponse
-import my.ssdid.wallet.domain.vault.Vault
+import my.ssdid.sdk.domain.transport.SsdidHttpClient
+import my.ssdid.sdk.domain.transport.dto.CredentialAcceptRequest
+import my.ssdid.sdk.domain.transport.dto.CredentialOfferResponse
+import my.ssdid.sdk.domain.vault.Vault
 
 @Deprecated("Use OpenId4VciHandler for OID4VCI flows. This class handles legacy custom issuer API flows only.")
 class CredentialIssuanceManager(

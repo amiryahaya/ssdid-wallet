@@ -25,11 +25,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import my.ssdid.sdk.domain.model.VerifiableCredential
-import my.ssdid.wallet.domain.revocation.RevocationManager
-import my.ssdid.wallet.domain.revocation.RevocationStatus
-import my.ssdid.wallet.domain.settings.TtlProvider
-import my.ssdid.wallet.domain.vault.Vault
-import my.ssdid.wallet.domain.verifier.offline.BundleStore
+import my.ssdid.sdk.domain.revocation.RevocationManager
+import my.ssdid.sdk.domain.revocation.RevocationStatus
+import my.ssdid.sdk.domain.settings.TtlProvider
+import my.ssdid.sdk.domain.vault.Vault
+import my.ssdid.sdk.domain.verifier.offline.BundleStore
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.VerifiedUser

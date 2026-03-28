@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import my.ssdid.wallet.domain.settings.SettingsRepository
+import my.ssdid.sdk.domain.settings.SettingsRepository
 import my.ssdid.wallet.platform.i18n.LocalizationManager
 import javax.inject.Inject
 

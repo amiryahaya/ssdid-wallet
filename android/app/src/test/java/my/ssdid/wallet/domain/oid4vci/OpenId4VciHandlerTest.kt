@@ -3,7 +3,7 @@ package my.ssdid.wallet.domain.oid4vci
 import com.google.common.truth.Truth.assertThat
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
-import my.ssdid.wallet.domain.vault.Vault
+import my.ssdid.sdk.domain.vault.Vault
 import org.junit.Before
 import org.junit.Test
 

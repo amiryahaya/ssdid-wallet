@@ -7,11 +7,11 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import my.ssdid.sdk.domain.model.*
-import my.ssdid.wallet.domain.transport.IssuerApi
-import my.ssdid.wallet.domain.transport.SsdidHttpClient
-import my.ssdid.wallet.domain.transport.dto.CredentialAcceptResponse
-import my.ssdid.wallet.domain.transport.dto.CredentialOfferResponse
-import my.ssdid.wallet.domain.vault.Vault
+import my.ssdid.sdk.domain.transport.IssuerApi
+import my.ssdid.sdk.domain.transport.SsdidHttpClient
+import my.ssdid.sdk.domain.transport.dto.CredentialAcceptResponse
+import my.ssdid.sdk.domain.transport.dto.CredentialOfferResponse
+import my.ssdid.sdk.domain.vault.Vault
 import org.junit.Before
 import org.junit.Test
 

@@ -7,9 +7,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import my.ssdid.wallet.domain.settings.TtlProvider
-import my.ssdid.wallet.domain.verifier.offline.BundleManager
-import my.ssdid.wallet.domain.verifier.offline.BundleStore
+import my.ssdid.sdk.domain.settings.TtlProvider
+import my.ssdid.sdk.domain.verifier.offline.BundleManager
+import my.ssdid.sdk.domain.verifier.offline.BundleStore
 
 class AppLifecycleObserver(
     private val bundleStore: BundleStore,

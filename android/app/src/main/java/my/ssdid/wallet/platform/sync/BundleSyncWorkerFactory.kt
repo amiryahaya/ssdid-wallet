@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.work.ListenableWorker
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
-import my.ssdid.wallet.domain.verifier.offline.BundleManager
-import my.ssdid.wallet.domain.verifier.offline.CredentialRepository
+import my.ssdid.sdk.domain.verifier.offline.BundleManager
+import my.ssdid.sdk.domain.verifier.offline.CredentialRepository
 import javax.inject.Inject
 
 class BundleSyncWorkerFactory @Inject constructor(

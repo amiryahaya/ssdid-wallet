@@ -21,7 +21,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import my.ssdid.wallet.domain.history.ActivityRepository
+import my.ssdid.sdk.domain.history.ActivityRepository
 import my.ssdid.sdk.domain.model.ActivityRecord
 import my.ssdid.sdk.domain.model.ActivityType
 import androidx.compose.material.icons.Icons

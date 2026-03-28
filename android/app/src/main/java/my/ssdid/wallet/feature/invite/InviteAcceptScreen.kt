@@ -194,7 +194,7 @@ fun InviteAcceptScreen(
                                 Spacer(Modifier.height(12.dp))
 
                                 if (!invitation.inviterName.isNullOrBlank()) {
-                                    InvitationDetailRow("Invited by", invitation.inviterName)
+                                    InvitationDetailRow("Invited by", invitation.inviterName!!)
                                 }
                                 InvitationDetailRow("Role", invitation.role.replaceFirstChar { it.uppercase() })
                                 InvitationDetailRow("Email", invitation.email)
@@ -209,7 +209,7 @@ fun InviteAcceptScreen(
                                     )
                                     Spacer(Modifier.height(4.dp))
                                     Text(
-                                        invitation.message,
+                                        invitation.message!!,
                                         fontSize = 14.sp,
                                         color = TextSecondary
                                     )

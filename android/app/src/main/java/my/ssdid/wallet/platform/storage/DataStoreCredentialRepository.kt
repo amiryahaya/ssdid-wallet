@@ -6,7 +6,7 @@ import android.security.keystore.KeyProperties
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import my.ssdid.sdk.domain.model.VerifiableCredential
-import my.ssdid.wallet.domain.verifier.offline.CredentialRepository
+import my.ssdid.sdk.domain.verifier.offline.CredentialRepository
 import java.io.File
 import java.security.KeyStore
 import javax.crypto.Cipher

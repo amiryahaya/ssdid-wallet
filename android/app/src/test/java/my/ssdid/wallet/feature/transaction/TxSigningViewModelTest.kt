@@ -16,8 +16,8 @@ import kotlinx.coroutines.test.setMain
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.sdk.domain.model.Algorithm
 import my.ssdid.sdk.domain.model.Identity
-import my.ssdid.wallet.domain.transport.dto.TxSubmitResponse
-import my.ssdid.wallet.domain.vault.Vault
+import my.ssdid.sdk.domain.transport.dto.TxSubmitResponse
+import my.ssdid.sdk.domain.vault.Vault
 import my.ssdid.wallet.platform.biometric.BiometricAuthenticator
 import my.ssdid.wallet.platform.biometric.BiometricResult
 import org.junit.Before

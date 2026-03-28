@@ -8,7 +8,7 @@ import android.net.NetworkRequest
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import my.ssdid.wallet.domain.verifier.offline.sync.ConnectivityMonitor
+import my.ssdid.sdk.domain.verifier.offline.sync.ConnectivityMonitor
 
 class AndroidConnectivityMonitor(private val context: Context) : ConnectivityMonitor {
     private val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager

@@ -14,10 +14,10 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.sdk.domain.model.VerifiableCredential
-import my.ssdid.wallet.domain.rotation.RotationEntry
-import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
-import my.ssdid.wallet.domain.vault.PreRotatedKeyData
-import my.ssdid.wallet.domain.vault.VaultStorage
+import my.ssdid.sdk.domain.rotation.RotationEntry
+import my.ssdid.sdk.domain.sdjwt.StoredSdJwtVc
+import my.ssdid.sdk.domain.vault.PreRotatedKeyData
+import my.ssdid.sdk.domain.vault.VaultStorage
 import java.io.File
 import java.util.Base64
 

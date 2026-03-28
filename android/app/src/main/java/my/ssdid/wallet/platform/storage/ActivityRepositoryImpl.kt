@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import my.ssdid.wallet.domain.history.ActivityRepository
+import my.ssdid.sdk.domain.history.ActivityRepository
 import my.ssdid.sdk.domain.model.ActivityRecord
 import javax.inject.Inject
 import javax.inject.Singleton

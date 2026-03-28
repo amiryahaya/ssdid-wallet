@@ -15,8 +15,8 @@ import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.sdk.domain.model.CredentialSubject
 import my.ssdid.sdk.domain.model.Proof
 import my.ssdid.sdk.domain.model.VerifiableCredential
-import my.ssdid.wallet.domain.transport.dto.AuthenticateResponse
-import my.ssdid.wallet.domain.vault.Vault
+import my.ssdid.sdk.domain.transport.dto.AuthenticateResponse
+import my.ssdid.sdk.domain.vault.Vault
 import my.ssdid.wallet.platform.biometric.BiometricAuthenticator
 import org.junit.Before
 import org.junit.Rule

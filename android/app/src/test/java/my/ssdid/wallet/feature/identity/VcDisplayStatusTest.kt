@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import my.ssdid.sdk.domain.model.CredentialSubject
 import my.ssdid.sdk.domain.model.Proof
 import my.ssdid.sdk.domain.model.VerifiableCredential
-import my.ssdid.wallet.domain.revocation.RevocationStatus
+import my.ssdid.sdk.domain.revocation.RevocationStatus
 import org.junit.Test
 import java.time.Instant
 import java.time.temporal.ChronoUnit

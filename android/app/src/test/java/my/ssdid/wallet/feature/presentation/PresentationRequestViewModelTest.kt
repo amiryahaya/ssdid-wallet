@@ -16,8 +16,8 @@ import my.ssdid.wallet.domain.oid4vp.AuthorizationRequest
 import my.ssdid.wallet.domain.oid4vp.MatchResult
 import my.ssdid.wallet.domain.oid4vp.OpenId4VpHandler
 import my.ssdid.wallet.domain.oid4vp.PresentationReviewResult
-import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
-import my.ssdid.wallet.domain.vault.Vault
+import my.ssdid.sdk.domain.sdjwt.StoredSdJwtVc
+import my.ssdid.sdk.domain.vault.Vault
 import org.junit.After
 import org.junit.Before
 import org.junit.Test

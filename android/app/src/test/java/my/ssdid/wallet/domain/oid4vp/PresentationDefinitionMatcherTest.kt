@@ -3,7 +3,7 @@ package my.ssdid.wallet.domain.oid4vp
 import com.google.common.truth.Truth.assertThat
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
+import my.ssdid.sdk.domain.sdjwt.StoredSdJwtVc
 import org.junit.Test
 
 class PresentationDefinitionMatcherTest {

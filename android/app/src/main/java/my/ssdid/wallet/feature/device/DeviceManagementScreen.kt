@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 import my.ssdid.wallet.domain.device.DeviceInfo
 import my.ssdid.wallet.domain.device.DeviceManager
 import my.ssdid.sdk.domain.model.Identity
-import my.ssdid.wallet.domain.vault.Vault
+import my.ssdid.sdk.domain.vault.Vault
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack

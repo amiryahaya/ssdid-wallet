@@ -12,7 +12,7 @@ import dagger.hilt.android.testing.UninstallModules
 import kotlinx.coroutines.runBlocking
 import my.ssdid.wallet.MainActivity
 import my.ssdid.wallet.di.OfflineModule
-import my.ssdid.wallet.domain.verifier.offline.BundleStore
+import my.ssdid.sdk.domain.verifier.offline.BundleStore
 import org.junit.Assume
 import org.junit.Before
 import org.junit.Rule

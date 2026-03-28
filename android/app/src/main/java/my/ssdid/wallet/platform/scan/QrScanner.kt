@@ -9,7 +9,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
-import my.ssdid.wallet.domain.transport.dto.ClaimRequest
+import my.ssdid.sdk.domain.transport.dto.ClaimRequest
 import my.ssdid.wallet.platform.security.UrlValidator
 
 @Serializable

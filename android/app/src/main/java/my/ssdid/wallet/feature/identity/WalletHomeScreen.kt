@@ -30,7 +30,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.wallet.platform.notify.LocalNotificationStorage
-import my.ssdid.wallet.domain.vault.Vault
+import my.ssdid.sdk.domain.vault.Vault
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Description

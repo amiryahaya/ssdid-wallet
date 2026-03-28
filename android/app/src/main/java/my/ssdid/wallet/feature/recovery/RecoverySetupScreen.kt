@@ -35,7 +35,7 @@ import my.ssdid.wallet.domain.recovery.social.SocialRecoveryConfig
 import my.ssdid.wallet.domain.recovery.social.SocialRecoveryManager
 import my.ssdid.wallet.domain.recovery.institutional.InstitutionalRecoveryManager
 import my.ssdid.wallet.domain.recovery.institutional.OrgRecoveryConfig
-import my.ssdid.wallet.domain.vault.Vault
+import my.ssdid.sdk.domain.vault.Vault
 import androidx.compose.ui.platform.LocalView
 import my.ssdid.wallet.ui.components.HapticManager
 import my.ssdid.wallet.ui.theme.*

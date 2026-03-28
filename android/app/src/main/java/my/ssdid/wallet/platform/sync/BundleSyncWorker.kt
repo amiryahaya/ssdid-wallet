@@ -3,8 +3,8 @@ package my.ssdid.wallet.platform.sync
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import my.ssdid.wallet.domain.verifier.offline.BundleManager
-import my.ssdid.wallet.domain.verifier.offline.CredentialRepository
+import my.ssdid.sdk.domain.verifier.offline.BundleManager
+import my.ssdid.sdk.domain.verifier.offline.CredentialRepository
 
 /**
  * WorkManager worker that pre-fetches verification bundles for all held credentials.

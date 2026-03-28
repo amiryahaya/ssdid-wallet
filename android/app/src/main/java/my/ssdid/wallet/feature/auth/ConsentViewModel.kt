@@ -18,11 +18,11 @@ import kotlinx.serialization.json.Json
 import my.ssdid.sdk.domain.crypto.Multibase
 import my.ssdid.sdk.domain.model.Did
 import my.ssdid.sdk.domain.model.Identity
-import my.ssdid.wallet.domain.transport.SsdidHttpClient
-import my.ssdid.wallet.domain.transport.dto.AuthVerifyRequest
-import my.ssdid.wallet.domain.transport.dto.ClaimRequest
-import my.ssdid.wallet.domain.vault.Vault
-import my.ssdid.wallet.domain.verifier.Verifier
+import my.ssdid.sdk.domain.transport.SsdidHttpClient
+import my.ssdid.sdk.domain.transport.dto.AuthVerifyRequest
+import my.ssdid.sdk.domain.transport.dto.ClaimRequest
+import my.ssdid.sdk.domain.vault.Vault
+import my.ssdid.sdk.domain.verifier.Verifier
 import my.ssdid.wallet.platform.biometric.BiometricAuthenticator
 import my.ssdid.wallet.platform.biometric.BiometricResult
 import my.ssdid.wallet.platform.security.UrlValidator

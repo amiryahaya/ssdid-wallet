@@ -1,7 +1,7 @@
 package my.ssdid.wallet.ui.offline
 
-import my.ssdid.wallet.domain.verifier.offline.BundleStore
-import my.ssdid.wallet.domain.verifier.offline.VerificationBundle
+import my.ssdid.sdk.domain.verifier.offline.BundleStore
+import my.ssdid.sdk.domain.verifier.offline.VerificationBundle
 
 class InMemoryBundleStore : BundleStore {
     private val bundles = mutableMapOf<String, VerificationBundle>()

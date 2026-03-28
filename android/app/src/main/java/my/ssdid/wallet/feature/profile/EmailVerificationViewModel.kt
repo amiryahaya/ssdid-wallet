@@ -13,9 +13,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import my.ssdid.wallet.domain.transport.ConfirmCodeRequest
-import my.ssdid.wallet.domain.transport.EmailVerifyApi
-import my.ssdid.wallet.domain.transport.SendCodeRequest
+import my.ssdid.sdk.domain.transport.ConfirmCodeRequest
+import my.ssdid.sdk.domain.transport.EmailVerifyApi
+import my.ssdid.sdk.domain.transport.SendCodeRequest
 import java.util.UUID
 import javax.inject.Inject
 

@@ -7,14 +7,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import my.ssdid.sdk.domain.model.VerifiableCredential
-import my.ssdid.wallet.domain.verifier.offline.CheckStatus
-import my.ssdid.wallet.domain.verifier.offline.CheckType
-import my.ssdid.wallet.domain.verifier.offline.CredentialRepository
-import my.ssdid.wallet.domain.verifier.offline.UnifiedVerificationResult
-import my.ssdid.wallet.domain.verifier.offline.VerificationCheck
-import my.ssdid.wallet.domain.verifier.offline.VerificationOrchestrator
-import my.ssdid.wallet.domain.verifier.offline.VerificationSource
-import my.ssdid.wallet.domain.verifier.offline.VerificationStatus
+import my.ssdid.sdk.domain.verifier.offline.CheckStatus
+import my.ssdid.sdk.domain.verifier.offline.CheckType
+import my.ssdid.sdk.domain.verifier.offline.CredentialRepository
+import my.ssdid.sdk.domain.verifier.offline.UnifiedVerificationResult
+import my.ssdid.sdk.domain.verifier.offline.VerificationCheck
+import my.ssdid.sdk.domain.verifier.offline.VerificationOrchestrator
+import my.ssdid.sdk.domain.verifier.offline.VerificationSource
+import my.ssdid.sdk.domain.verifier.offline.VerificationStatus
 import javax.inject.Inject
 
 @HiltViewModel

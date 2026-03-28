@@ -6,9 +6,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import my.ssdid.wallet.domain.settings.TtlProvider
-import my.ssdid.wallet.domain.verifier.offline.BundleManager
-import my.ssdid.wallet.domain.verifier.offline.BundleStore
+import my.ssdid.sdk.domain.settings.TtlProvider
+import my.ssdid.sdk.domain.verifier.offline.BundleManager
+import my.ssdid.sdk.domain.verifier.offline.BundleStore
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter

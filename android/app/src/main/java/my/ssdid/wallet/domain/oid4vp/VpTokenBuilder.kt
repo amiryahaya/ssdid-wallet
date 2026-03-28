@@ -2,7 +2,7 @@ package my.ssdid.wallet.domain.oid4vp
 
 import my.ssdid.wallet.domain.sdjwt.KeyBindingJwt
 import my.ssdid.wallet.domain.sdjwt.SdJwtParser
-import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
+import my.ssdid.sdk.domain.sdjwt.StoredSdJwtVc
 
 /**
  * Assembles SD-JWT VP tokens with selective disclosure and Key Binding JWT.

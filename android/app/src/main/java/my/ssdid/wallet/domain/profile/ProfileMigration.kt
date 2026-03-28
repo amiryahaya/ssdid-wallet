@@ -2,7 +2,7 @@ package my.ssdid.wallet.domain.profile
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import my.ssdid.wallet.domain.vault.Vault
+import my.ssdid.sdk.domain.vault.Vault
 class ProfileMigration(private val vault: Vault) {
 
     private val migrationMutex = Mutex()

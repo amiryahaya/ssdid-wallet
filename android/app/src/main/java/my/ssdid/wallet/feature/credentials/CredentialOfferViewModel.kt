@@ -14,7 +14,7 @@ import my.ssdid.wallet.domain.oid4vci.CredentialOffer
 import my.ssdid.wallet.domain.oid4vci.CredentialOfferReview
 import my.ssdid.wallet.domain.oid4vci.IssuanceResult
 import my.ssdid.wallet.domain.oid4vci.OpenId4VciHandler
-import my.ssdid.wallet.domain.vault.Vault
+import my.ssdid.sdk.domain.vault.Vault
 import javax.inject.Inject
 
 sealed class CredentialOfferUiState {

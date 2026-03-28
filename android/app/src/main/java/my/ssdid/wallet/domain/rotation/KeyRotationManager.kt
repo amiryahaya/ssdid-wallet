@@ -4,15 +4,16 @@ import kotlinx.serialization.Serializable
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.sdk.domain.crypto.CryptoProvider
 import my.ssdid.sdk.domain.crypto.Multibase
-import my.ssdid.wallet.domain.history.ActivityRepository
+import my.ssdid.sdk.domain.history.ActivityRepository
 import my.ssdid.sdk.domain.model.ActivityRecord
 import my.ssdid.sdk.domain.model.ActivityStatus
 import my.ssdid.sdk.domain.model.ActivityType
 import my.ssdid.sdk.domain.model.Algorithm
 import my.ssdid.sdk.domain.model.Did
 import my.ssdid.sdk.domain.model.Identity
-import my.ssdid.wallet.domain.vault.VaultStorage
-import my.ssdid.wallet.domain.vault.KeystoreManager
+import my.ssdid.sdk.domain.rotation.RotationEntry
+import my.ssdid.sdk.domain.vault.VaultStorage
+import my.ssdid.sdk.domain.vault.KeystoreManager
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.security.MessageDigest
@@ -28,13 +29,6 @@ data class RotationStatus(
     val nextKeyHash: String?,
     val lastRotatedAt: String?,
     val rotationHistory: List<RotationEntry>
-)
-
-@Serializable
-data class RotationEntry(
-    val timestamp: String,
-    val oldKeyIdFragment: String,
-    val newKeyIdFragment: String
 )
 
 class KeyRotationManager(

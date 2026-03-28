@@ -8,11 +8,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import my.ssdid.sdk.domain.crypto.ClassicalProvider
 import my.ssdid.sdk.domain.model.*
-import my.ssdid.wallet.domain.revocation.StatusListCredential
-import my.ssdid.wallet.domain.revocation.StatusListSubject
-import my.ssdid.wallet.domain.settings.SettingsRepository
-import my.ssdid.wallet.domain.settings.TtlProvider
-import my.ssdid.wallet.domain.verifier.offline.*
+import my.ssdid.sdk.domain.revocation.StatusListCredential
+import my.ssdid.sdk.domain.revocation.StatusListSubject
+import my.ssdid.sdk.domain.settings.SettingsRepository
+import my.ssdid.sdk.domain.settings.TtlProvider
+import my.ssdid.sdk.domain.verifier.offline.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith

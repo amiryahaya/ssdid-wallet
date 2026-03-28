@@ -33,9 +33,9 @@ import kotlinx.coroutines.launch
 import my.ssdid.wallet.domain.SsdidClient
 import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.sdk.domain.model.VerifiableCredential
-import my.ssdid.wallet.domain.revocation.RevocationManager
-import my.ssdid.wallet.domain.revocation.RevocationStatus
-import my.ssdid.wallet.domain.vault.Vault
+import my.ssdid.sdk.domain.revocation.RevocationManager
+import my.ssdid.sdk.domain.revocation.RevocationStatus
+import my.ssdid.sdk.domain.vault.Vault
 import my.ssdid.wallet.ui.theme.*
 import java.time.Instant
 import java.time.temporal.ChronoUnit

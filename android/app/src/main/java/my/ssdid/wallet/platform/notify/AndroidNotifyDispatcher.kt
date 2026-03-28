@@ -7,7 +7,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import my.ssdid.wallet.R
 import my.ssdid.wallet.domain.notify.NotifyDispatcher
-import my.ssdid.wallet.domain.transport.dto.PendingNotification
+import my.ssdid.sdk.domain.transport.dto.PendingNotification
 
 /**
  * Dispatches demultiplexed notifications as Android system notifications.

@@ -1,6 +1,6 @@
 package my.ssdid.wallet.domain.notify
 
-import my.ssdid.wallet.domain.transport.dto.PendingNotification
+import my.ssdid.sdk.domain.transport.dto.PendingNotification
 
 /**
  * Callback interface for dispatching demultiplexed notifications.

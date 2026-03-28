@@ -3,8 +3,8 @@ package my.ssdid.wallet.domain.oid4vp
 import com.google.common.truth.Truth.assertThat
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
-import my.ssdid.wallet.domain.sdjwt.StoredSdJwtVc
-import my.ssdid.wallet.domain.vault.Vault
+import my.ssdid.sdk.domain.sdjwt.StoredSdJwtVc
+import my.ssdid.sdk.domain.vault.Vault
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith

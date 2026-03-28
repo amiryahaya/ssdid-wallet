@@ -8,9 +8,9 @@ import io.mockk.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
-import my.ssdid.wallet.domain.transport.ConfirmCodeResponse
-import my.ssdid.wallet.domain.transport.EmailVerifyApi
-import my.ssdid.wallet.domain.transport.SendCodeResponse
+import my.ssdid.sdk.domain.transport.ConfirmCodeResponse
+import my.ssdid.sdk.domain.transport.EmailVerifyApi
+import my.ssdid.sdk.domain.transport.SendCodeResponse
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.After

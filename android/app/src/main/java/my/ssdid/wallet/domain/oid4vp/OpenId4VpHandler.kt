@@ -2,7 +2,7 @@ package my.ssdid.wallet.domain.oid4vp
 
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
-import my.ssdid.wallet.domain.vault.Vault
+import my.ssdid.sdk.domain.vault.Vault
 
 class NoMatchingCredentialsException(message: String) : Exception(message)
 

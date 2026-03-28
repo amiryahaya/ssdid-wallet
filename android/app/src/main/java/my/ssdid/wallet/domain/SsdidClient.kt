@@ -1,16 +1,16 @@
 package my.ssdid.wallet.domain
 
 import my.ssdid.sdk.domain.crypto.Multibase
-import my.ssdid.wallet.domain.history.ActivityRepository
+import my.ssdid.sdk.domain.history.ActivityRepository
 import my.ssdid.sdk.domain.model.*
 import my.ssdid.wallet.domain.notify.NotifyManager
-import my.ssdid.wallet.domain.revocation.RevocationManager
-import my.ssdid.wallet.domain.revocation.RevocationStatus
-import my.ssdid.wallet.domain.transport.NetworkResult
-import my.ssdid.wallet.domain.transport.SsdidHttpClient
-import my.ssdid.wallet.domain.transport.dto.*
-import my.ssdid.wallet.domain.vault.Vault
-import my.ssdid.wallet.domain.verifier.Verifier
+import my.ssdid.sdk.domain.revocation.RevocationManager
+import my.ssdid.sdk.domain.revocation.RevocationStatus
+import my.ssdid.sdk.domain.transport.NetworkResult
+import my.ssdid.sdk.domain.transport.SsdidHttpClient
+import my.ssdid.sdk.domain.transport.dto.*
+import my.ssdid.sdk.domain.vault.Vault
+import my.ssdid.sdk.domain.verifier.Verifier
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject

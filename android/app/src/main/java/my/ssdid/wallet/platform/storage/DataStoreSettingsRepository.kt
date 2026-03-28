@@ -9,7 +9,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import my.ssdid.wallet.domain.settings.SettingsRepository
+import my.ssdid.sdk.domain.settings.SettingsRepository
 
 private val Context.settingsStore by preferencesDataStore(name = "ssdid_settings")
 

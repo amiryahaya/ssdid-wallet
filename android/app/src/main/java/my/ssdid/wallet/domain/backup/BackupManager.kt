@@ -2,13 +2,13 @@ package my.ssdid.wallet.domain.backup
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import my.ssdid.wallet.domain.history.ActivityRepository
+import my.ssdid.sdk.domain.history.ActivityRepository
 import my.ssdid.sdk.domain.model.ActivityRecord
 import my.ssdid.sdk.domain.model.ActivityStatus
 import my.ssdid.sdk.domain.model.ActivityType
 import my.ssdid.sdk.domain.model.Did
-import my.ssdid.wallet.domain.vault.Vault
-import my.ssdid.wallet.domain.vault.KeystoreManager
+import my.ssdid.sdk.domain.vault.Vault
+import my.ssdid.sdk.domain.vault.KeystoreManager
 import java.security.MessageDigest
 import java.security.SecureRandom
 import java.time.Instant
