@@ -6,7 +6,7 @@ import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import my.ssdid.wallet.R
-import my.ssdid.wallet.domain.notify.NotifyDispatcher
+import my.ssdid.sdk.domain.notify.NotifyDispatcher
 import my.ssdid.sdk.domain.transport.dto.PendingNotification
 
 /**

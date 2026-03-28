@@ -28,7 +28,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import my.ssdid.wallet.R
 import my.ssdid.sdk.domain.model.Identity
-import my.ssdid.wallet.domain.recovery.institutional.InstitutionalRecoveryManager
+import my.ssdid.sdk.domain.recovery.institutional.InstitutionalRecoveryManager
 import my.ssdid.sdk.domain.vault.Vault
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack

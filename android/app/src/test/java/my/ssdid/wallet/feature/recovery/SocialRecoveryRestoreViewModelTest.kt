@@ -7,10 +7,10 @@ import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import my.ssdid.wallet.domain.SsdidClient
+import my.ssdid.sdk.domain.SsdidClient
 import my.ssdid.sdk.domain.model.Algorithm
 import my.ssdid.sdk.domain.model.Identity
-import my.ssdid.wallet.domain.recovery.social.SocialRecoveryManager
+import my.ssdid.sdk.domain.recovery.social.SocialRecoveryManager
 import my.ssdid.wallet.platform.storage.OnboardingStorage
 import my.ssdid.wallet.feature.identity.MainDispatcherRule
 import org.junit.Before

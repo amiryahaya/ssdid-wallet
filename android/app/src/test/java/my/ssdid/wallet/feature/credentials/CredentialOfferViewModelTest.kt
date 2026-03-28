@@ -15,11 +15,11 @@ import kotlinx.coroutines.test.setMain
 import kotlinx.serialization.json.JsonObject
 import my.ssdid.sdk.domain.model.Algorithm
 import my.ssdid.sdk.domain.model.Identity
-import my.ssdid.wallet.domain.oid4vci.CredentialOffer
-import my.ssdid.wallet.domain.oid4vci.CredentialOfferReview
-import my.ssdid.wallet.domain.oid4vci.IssuanceResult
-import my.ssdid.wallet.domain.oid4vci.IssuerMetadata
-import my.ssdid.wallet.domain.oid4vci.OpenId4VciHandler
+import my.ssdid.sdk.domain.oid4vci.CredentialOffer
+import my.ssdid.sdk.domain.oid4vci.CredentialOfferReview
+import my.ssdid.sdk.domain.oid4vci.IssuanceResult
+import my.ssdid.sdk.domain.oid4vci.IssuerMetadata
+import my.ssdid.sdk.domain.oid4vci.OpenId4VciHandler
 import my.ssdid.sdk.domain.sdjwt.StoredSdJwtVc
 import my.ssdid.sdk.domain.vault.Vault
 import org.junit.After
@@ -193,7 +193,7 @@ class CredentialOfferViewModelTest {
     @Test
     fun acceptOfferWithTxCodeTransitionsToPinEntry() = runTest(testDispatcher) {
         val offerWithTxCode = testOffer.copy(
-            txCode = my.ssdid.wallet.domain.oid4vci.TxCodeRequirement(
+            txCode = my.ssdid.sdk.domain.oid4vci.TxCodeRequirement(
                 inputMode = "numeric",
                 length = 6,
                 description = "Enter the PIN from your email"

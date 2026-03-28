@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import my.ssdid.sdk.domain.logging.NoOpLogger
 import my.ssdid.sdk.domain.logging.SsdidLogger
-import my.ssdid.wallet.domain.notify.NotifyStorage
+import my.ssdid.sdk.domain.notify.NotifyStorage
 import my.ssdid.sdk.domain.vault.KeystoreManager
 import java.util.Base64
 

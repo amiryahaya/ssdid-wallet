@@ -10,10 +10,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import my.ssdid.sdk.domain.model.Identity
-import my.ssdid.wallet.domain.oid4vci.CredentialOffer
-import my.ssdid.wallet.domain.oid4vci.CredentialOfferReview
-import my.ssdid.wallet.domain.oid4vci.IssuanceResult
-import my.ssdid.wallet.domain.oid4vci.OpenId4VciHandler
+import my.ssdid.sdk.domain.oid4vci.CredentialOffer
+import my.ssdid.sdk.domain.oid4vci.CredentialOfferReview
+import my.ssdid.sdk.domain.oid4vci.IssuanceResult
+import my.ssdid.sdk.domain.oid4vci.OpenId4VciHandler
 import my.ssdid.sdk.domain.vault.Vault
 import javax.inject.Inject
 

@@ -25,7 +25,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
-import my.ssdid.wallet.domain.notify.LocalNotification
+import my.ssdid.sdk.domain.notify.LocalNotification
 import my.ssdid.wallet.platform.notify.LocalNotificationStorage
 import my.ssdid.wallet.ui.theme.*
 import javax.inject.Inject
@@ -190,9 +190,10 @@ private fun NotificationRow(
                 )
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
-                    if (notification.identityName != null) {
+                    val identityName = notification.identityName
+                    if (identityName != null) {
                         Text(
-                            notification.identityName,
+                            identityName,
                             fontSize = 12.sp,
                             color = TextTertiary,
                             fontWeight = FontWeight.Medium

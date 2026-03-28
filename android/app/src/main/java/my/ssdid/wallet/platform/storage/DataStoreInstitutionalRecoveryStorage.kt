@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import my.ssdid.wallet.domain.recovery.institutional.InstitutionalRecoveryStorage
-import my.ssdid.wallet.domain.recovery.institutional.OrgRecoveryConfig
+import my.ssdid.sdk.domain.recovery.institutional.InstitutionalRecoveryStorage
+import my.ssdid.sdk.domain.recovery.institutional.OrgRecoveryConfig
 import javax.inject.Inject
 import javax.inject.Singleton
 

@@ -23,9 +23,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import my.ssdid.sdk.domain.model.Identity
-import my.ssdid.wallet.domain.rotation.KeyRotationManager
+import my.ssdid.sdk.domain.rotation.KeyRotationManager
 import my.ssdid.sdk.domain.rotation.RotationEntry
-import my.ssdid.wallet.domain.rotation.RotationStatus
+import my.ssdid.sdk.domain.rotation.RotationStatus
 import my.ssdid.sdk.domain.vault.Vault
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack

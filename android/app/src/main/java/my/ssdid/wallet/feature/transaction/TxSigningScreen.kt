@@ -29,7 +29,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.FragmentActivity
-import my.ssdid.wallet.domain.SsdidClient
+import my.ssdid.sdk.domain.SsdidClient
 import my.ssdid.sdk.domain.vault.Vault
 import my.ssdid.wallet.platform.biometric.BiometricAuthenticator
 import my.ssdid.wallet.platform.biometric.BiometricResult

@@ -6,8 +6,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import my.ssdid.wallet.domain.recovery.institutional.InstitutionalRecoveryStorage
-import my.ssdid.wallet.domain.recovery.social.SocialRecoveryStorage
+import my.ssdid.sdk.domain.recovery.institutional.InstitutionalRecoveryStorage
+import my.ssdid.sdk.domain.recovery.social.SocialRecoveryStorage
 import my.ssdid.sdk.domain.vault.VaultStorage
 import my.ssdid.wallet.platform.storage.DataStoreInstitutionalRecoveryStorage
 import my.ssdid.wallet.platform.storage.DataStoreSocialRecoveryStorage

@@ -12,7 +12,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import androidx.lifecycle.SavedStateHandle
-import my.ssdid.wallet.domain.SsdidClient
+import my.ssdid.sdk.domain.SsdidClient
 import my.ssdid.sdk.domain.model.Algorithm
 import my.ssdid.sdk.domain.model.Identity
 import my.ssdid.sdk.domain.vault.Vault

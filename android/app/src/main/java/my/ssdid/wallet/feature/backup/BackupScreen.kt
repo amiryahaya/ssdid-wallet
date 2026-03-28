@@ -35,7 +35,7 @@ import androidx.core.content.FileProvider
 import java.io.File
 import androidx.compose.ui.res.stringResource
 import my.ssdid.wallet.R
-import my.ssdid.wallet.domain.backup.BackupManager
+import my.ssdid.sdk.domain.backup.BackupManager
 import my.ssdid.wallet.platform.biometric.BiometricAuthenticator
 import my.ssdid.wallet.platform.biometric.BiometricResult
 import androidx.compose.material.icons.Icons

@@ -8,10 +8,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import my.ssdid.wallet.domain.oid4vp.AuthorizationRequest
-import my.ssdid.wallet.domain.oid4vp.MatchResult
-import my.ssdid.wallet.domain.oid4vp.OpenId4VpHandler
-import my.ssdid.wallet.domain.oid4vp.PresentationReviewResult
+import my.ssdid.sdk.domain.oid4vp.AuthorizationRequest
+import my.ssdid.sdk.domain.oid4vp.MatchResult
+import my.ssdid.sdk.domain.oid4vp.OpenId4VpHandler
+import my.ssdid.sdk.domain.oid4vp.PresentationReviewResult
 import my.ssdid.sdk.domain.vault.Vault
 import javax.inject.Inject
 

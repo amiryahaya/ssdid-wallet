@@ -30,11 +30,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import my.ssdid.wallet.R
 import my.ssdid.sdk.domain.model.Identity
-import my.ssdid.wallet.domain.recovery.RecoveryManager
-import my.ssdid.wallet.domain.recovery.social.SocialRecoveryConfig
-import my.ssdid.wallet.domain.recovery.social.SocialRecoveryManager
-import my.ssdid.wallet.domain.recovery.institutional.InstitutionalRecoveryManager
-import my.ssdid.wallet.domain.recovery.institutional.OrgRecoveryConfig
+import my.ssdid.sdk.domain.recovery.RecoveryManager
+import my.ssdid.sdk.domain.recovery.social.SocialRecoveryConfig
+import my.ssdid.sdk.domain.recovery.social.SocialRecoveryManager
+import my.ssdid.sdk.domain.recovery.institutional.InstitutionalRecoveryManager
+import my.ssdid.sdk.domain.recovery.institutional.OrgRecoveryConfig
 import my.ssdid.sdk.domain.vault.Vault
 import androidx.compose.ui.platform.LocalView
 import my.ssdid.wallet.ui.components.HapticManager

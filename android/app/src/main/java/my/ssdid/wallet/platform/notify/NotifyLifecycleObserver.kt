@@ -6,7 +6,7 @@ import androidx.lifecycle.LifecycleOwner
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import my.ssdid.wallet.SsdidApp
-import my.ssdid.wallet.domain.notify.NotifyManager
+import my.ssdid.sdk.domain.notify.NotifyManager
 import my.ssdid.sdk.domain.vault.Vault
 
 /**

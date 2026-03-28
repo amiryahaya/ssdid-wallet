@@ -1,7 +1,7 @@
 package my.ssdid.wallet.platform.device
 
 import android.os.Build
-import my.ssdid.wallet.domain.device.DeviceInfoProvider
+import my.ssdid.sdk.domain.device.DeviceInfoProvider
 import javax.inject.Inject
 
 class AndroidDeviceInfoProvider @Inject constructor() : DeviceInfoProvider {

@@ -8,24 +8,24 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.sentry.okhttp.SentryOkHttpInterceptor
 import my.ssdid.wallet.BuildConfig
-import my.ssdid.wallet.domain.SsdidClient
-import my.ssdid.wallet.domain.backup.BackupManager
-import my.ssdid.wallet.domain.credential.CredentialIssuanceManager
-import my.ssdid.wallet.domain.device.DeviceInfoProvider
-import my.ssdid.wallet.domain.device.DeviceManager
+import my.ssdid.sdk.domain.SsdidClient
+import my.ssdid.sdk.domain.backup.BackupManager
+import my.ssdid.sdk.domain.credential.CredentialIssuanceManager
+import my.ssdid.sdk.domain.device.DeviceInfoProvider
+import my.ssdid.sdk.domain.device.DeviceManager
 import my.ssdid.sdk.domain.crypto.ClassicalProvider
 import my.ssdid.sdk.domain.crypto.CryptoProvider
 import my.ssdid.wallet.domain.crypto.PqcProvider
 import my.ssdid.sdk.domain.history.ActivityRepository
 import my.ssdid.wallet.domain.profile.ProfileMigration
-import my.ssdid.wallet.domain.recovery.RecoveryManager
-import my.ssdid.wallet.domain.recovery.social.SocialRecoveryManager
-import my.ssdid.wallet.domain.recovery.social.SocialRecoveryStorage
-import my.ssdid.wallet.domain.recovery.institutional.InstitutionalRecoveryManager
-import my.ssdid.wallet.domain.recovery.institutional.InstitutionalRecoveryStorage
+import my.ssdid.sdk.domain.recovery.RecoveryManager
+import my.ssdid.sdk.domain.recovery.social.SocialRecoveryManager
+import my.ssdid.sdk.domain.recovery.social.SocialRecoveryStorage
+import my.ssdid.sdk.domain.recovery.institutional.InstitutionalRecoveryManager
+import my.ssdid.sdk.domain.recovery.institutional.InstitutionalRecoveryStorage
 import my.ssdid.sdk.domain.revocation.HttpStatusListFetcher
 import my.ssdid.sdk.domain.revocation.RevocationManager
-import my.ssdid.wallet.domain.rotation.KeyRotationManager
+import my.ssdid.sdk.domain.rotation.KeyRotationManager
 import my.ssdid.sdk.domain.transport.RetryInterceptor
 import my.ssdid.sdk.domain.transport.SsdidHttpClient
 import kotlinx.serialization.json.Json
@@ -47,21 +47,21 @@ import my.ssdid.sdk.domain.vault.KeystoreManager
 import my.ssdid.sdk.domain.settings.SettingsRepository
 import my.ssdid.sdk.domain.verifier.offline.CredentialRepository
 import my.ssdid.wallet.platform.storage.DataStoreSettingsRepository
-import my.ssdid.wallet.domain.oid4vp.DcqlMatcher
-import my.ssdid.wallet.domain.oid4vp.OpenId4VpHandler
-import my.ssdid.wallet.domain.oid4vp.OpenId4VpTransport
-import my.ssdid.wallet.domain.oid4vp.PresentationDefinitionMatcher
-import my.ssdid.wallet.domain.notify.NotifyManager
-import my.ssdid.wallet.domain.notify.NotifyStorage
+import my.ssdid.sdk.domain.oid4vp.DcqlMatcher
+import my.ssdid.sdk.domain.oid4vp.OpenId4VpHandler
+import my.ssdid.sdk.domain.oid4vp.OpenId4VpTransport
+import my.ssdid.sdk.domain.oid4vp.PresentationDefinitionMatcher
+import my.ssdid.sdk.domain.notify.NotifyManager
+import my.ssdid.sdk.domain.notify.NotifyStorage
 import my.ssdid.wallet.platform.notify.AndroidNotifyDispatcher
 import my.ssdid.wallet.platform.notify.DataStoreNotifyStorage
 import my.ssdid.wallet.platform.notify.LocalNotificationStorage
 import my.ssdid.wallet.platform.notify.NotifyLifecycleObserver
-import my.ssdid.wallet.domain.oid4vci.IssuerMetadataResolver
-import my.ssdid.wallet.domain.oid4vci.NonceManager
-import my.ssdid.wallet.domain.oid4vci.OpenId4VciHandler
-import my.ssdid.wallet.domain.oid4vci.OpenId4VciTransport
-import my.ssdid.wallet.domain.oid4vci.TokenClient
+import my.ssdid.sdk.domain.oid4vci.IssuerMetadataResolver
+import my.ssdid.sdk.domain.oid4vci.NonceManager
+import my.ssdid.sdk.domain.oid4vci.OpenId4VciHandler
+import my.ssdid.sdk.domain.oid4vci.OpenId4VciTransport
+import my.ssdid.sdk.domain.oid4vci.TokenClient
 import my.ssdid.sdk.domain.transport.EmailVerifyApi
 import my.ssdid.sdk.domain.transport.NotifyApi
 import my.ssdid.sdk.domain.transport.RegistryApi
@@ -287,7 +287,7 @@ object AppModule {
     @Singleton
     fun provideLocalNotificationStore(
         impl: LocalNotificationStorage
-    ): my.ssdid.wallet.domain.notify.LocalNotificationStore = impl
+    ): my.ssdid.sdk.domain.notify.LocalNotificationStore = impl
 
     @Provides
     @Singleton
@@ -295,7 +295,7 @@ object AppModule {
         notifyApi: NotifyApi,
         storage: NotifyStorage,
         dispatcher: AndroidNotifyDispatcher,
-        localNotificationStore: my.ssdid.wallet.domain.notify.LocalNotificationStore
+        localNotificationStore: my.ssdid.sdk.domain.notify.LocalNotificationStore
     ): NotifyManager = NotifyManager(notifyApi, storage, dispatcher, localNotificationStore)
 
     @Provides

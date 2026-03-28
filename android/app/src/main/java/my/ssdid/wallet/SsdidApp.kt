@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import androidx.work.Configuration
 import androidx.work.WorkManager
 import my.ssdid.wallet.platform.notify.NotifyLifecycleObserver
-import my.ssdid.wallet.domain.notify.NotifyManager
+import my.ssdid.sdk.domain.notify.NotifyManager
 import my.ssdid.wallet.domain.profile.ProfileMigration
 import my.ssdid.sdk.domain.settings.SettingsRepository
 import my.ssdid.sdk.domain.settings.TtlProvider
