@@ -136,13 +136,20 @@ final class OfflineVerifier {
     }
 }
 
-struct OfflineVerificationResult {
-    let signatureValid: Bool
-    let revocationStatus: RevocationStatus
-    let bundleFresh: Bool
-    var error: String? = nil
+public struct OfflineVerificationResult {
+    public let signatureValid: Bool
+    public let revocationStatus: RevocationStatus
+    public let bundleFresh: Bool
+    public var error: String? = nil
 
-    var isValid: Bool {
+    public init(signatureValid: Bool, revocationStatus: RevocationStatus, bundleFresh: Bool, error: String? = nil) {
+        self.signatureValid = signatureValid
+        self.revocationStatus = revocationStatus
+        self.bundleFresh = bundleFresh
+        self.error = error
+    }
+
+    public var isValid: Bool {
         signatureValid && revocationStatus != .revoked && error == nil
     }
 }

@@ -1,9 +1,9 @@
 import Foundation
 
-struct CredentialSubject: Codable {
-    let id: String
-    var claims: [String: String] = [:]
-    var additionalProperties: [String: AnyCodable] = [:]
+public struct CredentialSubject: Codable {
+    public let id: String
+    public var claims: [String: String] = [:]
+    public var additionalProperties: [String: AnyCodable] = [:]
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -24,13 +24,13 @@ struct CredentialSubject: Codable {
         }
     }
 
-    init(id: String, claims: [String: String] = [:], additionalProperties: [String: AnyCodable] = [:]) {
+    public init(id: String, claims: [String: String] = [:], additionalProperties: [String: AnyCodable] = [:]) {
         self.id = id
         self.claims = claims
         self.additionalProperties = additionalProperties
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: DynamicKey.self)
 
         // Extract "id"
@@ -48,7 +48,7 @@ struct CredentialSubject: Codable {
         additionalProperties = extra
     }
 
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: DynamicKey.self)
 
         // Always encode id

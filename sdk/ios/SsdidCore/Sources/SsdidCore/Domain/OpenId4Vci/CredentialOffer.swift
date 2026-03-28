@@ -1,20 +1,26 @@
 import Foundation
 
 /// Transaction code requirement for pre-authorized code flow.
-struct TxCodeRequirement {
-    let inputMode: String
-    let length: Int
-    let description: String?
+public struct TxCodeRequirement {
+    public let inputMode: String
+    public let length: Int
+    public let description: String?
+
+    public init(inputMode: String, length: Int, description: String?) {
+        self.inputMode = inputMode
+        self.length = length
+        self.description = description
+    }
 }
 
 /// Parsed OpenID4VCI credential offer.
-struct CredentialOffer {
-    let credentialIssuer: String
-    let credentialConfigurationIds: [String]
-    let preAuthorizedCode: String?
-    let txCode: TxCodeRequirement?
-    let authorizationCodeGrant: Bool
-    let issuerState: String?
+public struct CredentialOffer {
+    public let credentialIssuer: String
+    public let credentialConfigurationIds: [String]
+    public let preAuthorizedCode: String?
+    public let txCode: TxCodeRequirement?
+    public let authorizationCodeGrant: Bool
+    public let issuerState: String?
 
     /// Parses a credential offer from a JSON string.
     static func parse(_ jsonString: String) throws -> CredentialOffer {

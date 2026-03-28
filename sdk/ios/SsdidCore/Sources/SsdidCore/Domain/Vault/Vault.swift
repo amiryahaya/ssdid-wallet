@@ -1,14 +1,14 @@
 import Foundation
 
 /// Error types for vault operations.
-enum VaultError: Error, LocalizedError {
+public enum VaultError: Error, LocalizedError {
     case identityNotFound(String)
     case identityNameExists(String)
     case privateKeyNotFound(String)
     case credentialNotFound(String)
     case storageFailed(String)
 
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .identityNotFound(let keyId):
             return "Identity not found: \(keyId)"
@@ -25,7 +25,7 @@ enum VaultError: Error, LocalizedError {
 }
 
 /// Vault protocol for managing identities, credentials, and cryptographic operations.
-protocol Vault: Sendable {
+public protocol Vault: Sendable {
     /// Creates a new identity with the given name and algorithm.
     func createIdentity(name: String, algorithm: Algorithm) async throws -> Identity
 

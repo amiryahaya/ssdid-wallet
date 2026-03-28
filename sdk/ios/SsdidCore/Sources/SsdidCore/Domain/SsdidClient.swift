@@ -325,12 +325,12 @@ final class SsdidClient: @unchecked Sendable {
 }
 
 /// Errors specific to SsdidClient operations.
-enum SsdidClientError: Error, LocalizedError {
+public enum SsdidClientError: Error, LocalizedError {
     case mutualAuthFailed(String)
     case serializationFailed(String)
     case credentialRevoked
 
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .mutualAuthFailed(let reason):
             return "Mutual authentication failed: \(reason)"

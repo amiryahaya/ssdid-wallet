@@ -53,11 +53,11 @@ struct PairingApproveRequest: Codable {
     }
 }
 
-struct PairingStatusResponse: Codable {
-    let status: String
-    var deviceName: String? = nil
-    var publicKey: String? = nil
-    var signedChallenge: String? = nil
+public struct PairingStatusResponse: Codable {
+    public let status: String
+    public var deviceName: String? = nil
+    public var publicKey: String? = nil
+    public var signedChallenge: String? = nil
 
     enum CodingKeys: String, CodingKey {
         case status

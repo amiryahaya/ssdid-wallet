@@ -1,9 +1,9 @@
 import Foundation
 
-enum DidError: Error, LocalizedError {
+public enum DidError: Error, LocalizedError {
     case invalidFormat(String)
 
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .invalidFormat(let reason):
             return "Invalid DID format: \(reason)"
@@ -11,26 +11,26 @@ enum DidError: Error, LocalizedError {
     }
 }
 
-struct Did {
-    let value: String
+public struct Did {
+    public let value: String
 
-    func keyId(keyIndex: Int = 1) -> String {
+    public func keyId(keyIndex: Int = 1) -> String {
         "\(value)#key-\(keyIndex)"
     }
 
-    func methodSpecificId() -> String {
+    public func methodSpecificId() -> String {
         precondition(value.hasPrefix("did:ssdid:"), "methodSpecificId() called on malformed DID: \(value)")
         return String(value.dropFirst("did:ssdid:".count))
     }
 
-    static func generate() -> Did {
+    public static func generate() -> Did {
         var bytes = [UInt8](repeating: 0, count: 16)
         _ = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
         let id = Data(bytes).base64URLEncodedStringNoPadding()
         return Did(value: "did:ssdid:\(id)")
     }
 
-    static func validate(_ value: String) throws -> Did {
+    public static func validate(_ value: String) throws -> Did {
         guard value.hasPrefix("did:ssdid:") else {
             throw DidError.invalidFormat("must start with 'did:ssdid:'")
         }
@@ -52,7 +52,7 @@ struct Did {
         return Did(value: value)
     }
 
-    static func fromKeyId(_ keyId: String) -> Did {
+    public static func fromKeyId(_ keyId: String) -> Did {
         let didPart = keyId.components(separatedBy: "#").first ?? keyId
         return Did(value: didPart)
     }

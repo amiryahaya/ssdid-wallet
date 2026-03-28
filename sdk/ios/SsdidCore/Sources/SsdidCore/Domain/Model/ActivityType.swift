@@ -1,6 +1,6 @@
 import Foundation
 
-enum ActivityType: String, Codable, CaseIterable {
+public enum ActivityType: String, Codable, CaseIterable {
     case IDENTITY_CREATED
     case IDENTITY_DEACTIVATED
     case KEY_ROTATED

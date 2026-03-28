@@ -1,7 +1,7 @@
 import Foundation
 
 /// Error types for OpenID4VCI operations.
-enum OpenId4VciError: Error, LocalizedError {
+public enum OpenId4VciError: Error, LocalizedError {
     case invalidOffer(String)
     case metadataError(String)
     case tokenError(String)
@@ -10,7 +10,7 @@ enum OpenId4VciError: Error, LocalizedError {
     case credentialError(String)
     case unsupported(String)
 
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .invalidOffer(let reason):
             return "Invalid credential offer: \(reason)"
@@ -31,14 +31,20 @@ enum OpenId4VciError: Error, LocalizedError {
 }
 
 /// Result of processing a credential offer before user consent.
-struct CredentialOfferReview {
-    let offer: CredentialOffer
-    let metadata: IssuerMetadata
-    let credentialConfigNames: [String]
+public struct CredentialOfferReview {
+    public let offer: CredentialOffer
+    public let metadata: IssuerMetadata
+    public let credentialConfigNames: [String]
+
+    public init(offer: CredentialOffer, metadata: IssuerMetadata, credentialConfigNames: [String]) {
+        self.offer = offer
+        self.metadata = metadata
+        self.credentialConfigNames = credentialConfigNames
+    }
 }
 
 /// Result of a credential issuance attempt.
-enum IssuanceResult {
+public enum IssuanceResult {
     case success(StoredSdJwtVc)
     case deferred(transactionId: String, deferredEndpoint: String, accessToken: String)
     case failed(String)

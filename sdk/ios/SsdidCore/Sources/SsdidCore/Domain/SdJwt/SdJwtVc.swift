@@ -1,11 +1,17 @@
 import Foundation
 
-struct SdJwtVc {
-    let issuerJwt: String
-    let disclosures: [Disclosure]
-    let keyBindingJwt: String?
+public struct SdJwtVc {
+    public let issuerJwt: String
+    public let disclosures: [Disclosure]
+    public let keyBindingJwt: String?
 
-    func present(selectedDisclosures: [Disclosure], kbJwt: String? = nil) throws -> String {
+    public init(issuerJwt: String, disclosures: [Disclosure], keyBindingJwt: String?) {
+        self.issuerJwt = issuerJwt
+        self.disclosures = disclosures
+        self.keyBindingJwt = keyBindingJwt
+    }
+
+    public func present(selectedDisclosures: [Disclosure], kbJwt: String? = nil) throws -> String {
         var parts = [issuerJwt]
         for d in selectedDisclosures {
             parts.append(try d.encode())

@@ -18,28 +18,43 @@ protocol DeviceManagerSsdidClientProvider: Sendable {
 // MARK: - Models
 
 /// Data returned after initiating a pairing session.
-struct PairingData {
-    let pairingId: String
-    let challenge: String
-    let did: String
+public struct PairingData {
+    public let pairingId: String
+    public let challenge: String
+    public let did: String
+
+    public init(pairingId: String, challenge: String, did: String) {
+        self.pairingId = pairingId
+        self.challenge = challenge
+        self.did = did
+    }
 }
 
 /// Information about a device enrolled under a DID.
-struct DeviceInfo {
-    let deviceId: String
-    let name: String
-    let platform: String
-    let keyId: String
-    let enrolledAt: String
-    let isPrimary: Bool
+public struct DeviceInfo {
+    public let deviceId: String
+    public let name: String
+    public let platform: String
+    public let keyId: String
+    public let enrolledAt: String
+    public let isPrimary: Bool
+
+    public init(deviceId: String, name: String, platform: String, keyId: String, enrolledAt: String, isPrimary: Bool) {
+        self.deviceId = deviceId
+        self.name = name
+        self.platform = platform
+        self.keyId = keyId
+        self.enrolledAt = enrolledAt
+        self.isPrimary = isPrimary
+    }
 }
 
 // MARK: - Errors
 
-enum DeviceManagerError: Error, LocalizedError {
+public enum DeviceManagerError: Error, LocalizedError {
     case cannotRevokePrimaryKey
 
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .cannotRevokePrimaryKey:
             return "Cannot revoke primary device key"

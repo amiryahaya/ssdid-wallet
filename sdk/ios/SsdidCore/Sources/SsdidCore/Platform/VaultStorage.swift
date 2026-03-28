@@ -246,3 +246,7 @@ final class FileVaultStorage: VaultStorage {
         try vaultDirectory().appendingPathComponent("prk_\(safeFileName(keyId)).pub")
     }
 }
+
+// MARK: - SdJwtVcStore conformance for OpenId4VpHandler
+
+extension FileVaultStorage: SdJwtVcStore {}

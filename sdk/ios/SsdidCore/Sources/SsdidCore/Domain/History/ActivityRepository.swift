@@ -1,7 +1,7 @@
 import Foundation
 
 /// Protocol for persisting activity records.
-protocol ActivityRepository {
+public protocol ActivityRepository {
     func addActivity(_ record: ActivityRecord) async throws
     func listActivities() async -> [ActivityRecord]
     func listActivitiesForDid(_ did: String) async -> [ActivityRecord]

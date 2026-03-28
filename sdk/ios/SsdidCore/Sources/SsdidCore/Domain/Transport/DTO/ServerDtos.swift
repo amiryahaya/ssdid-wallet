@@ -50,13 +50,13 @@ struct AuthenticateRequest: Codable {
     let credential: VerifiableCredential
 }
 
-struct AuthenticateResponse: Codable {
-    let sessionToken: String
-    let serverDid: String
-    let serverKeyId: String
-    var serverSignature: String? = nil
-    var status: String? = nil
-    var did: String? = nil
+public struct AuthenticateResponse: Codable {
+    public let sessionToken: String
+    public let serverDid: String
+    public let serverKeyId: String
+    public var serverSignature: String? = nil
+    public var status: String? = nil
+    public var did: String? = nil
 
     enum CodingKeys: String, CodingKey {
         case sessionToken = "session_token"
@@ -98,9 +98,9 @@ struct TxSubmitRequest: Codable {
     }
 }
 
-struct TxSubmitResponse: Codable {
-    let transactionId: String
-    let status: String
+public struct TxSubmitResponse: Codable {
+    public let transactionId: String
+    public let status: String
 
     enum CodingKeys: String, CodingKey {
         case transactionId = "transaction_id"

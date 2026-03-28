@@ -1,6 +1,6 @@
 import Foundation
 
-enum OpenId4VpError: Error, LocalizedError {
+public enum OpenId4VpError: Error, LocalizedError {
     case missingClientId
     case missingResponseType
     case missingNonce
@@ -20,7 +20,7 @@ enum OpenId4VpError: Error, LocalizedError {
     case transportError(String)
     case noMatchingCredentials(String)
 
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .missingClientId:
             return "Missing required parameter: client_id"

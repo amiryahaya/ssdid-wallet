@@ -1,9 +1,23 @@
 import Foundation
 
-struct VerificationMethod: Codable, Equatable {
-    let id: String
-    let type: String
-    let controller: String
-    var publicKeyMultibase: String = ""
-    var publicKeyJwk: [String: String]? = nil
+public struct VerificationMethod: Codable, Equatable {
+    public let id: String
+    public let type: String
+    public let controller: String
+    public var publicKeyMultibase: String = ""
+    public var publicKeyJwk: [String: String]? = nil
+
+    public init(
+        id: String,
+        type: String,
+        controller: String,
+        publicKeyMultibase: String = "",
+        publicKeyJwk: [String: String]? = nil
+    ) {
+        self.id = id
+        self.type = type
+        self.controller = controller
+        self.publicKeyMultibase = publicKeyMultibase
+        self.publicKeyJwk = publicKeyJwk
+    }
 }

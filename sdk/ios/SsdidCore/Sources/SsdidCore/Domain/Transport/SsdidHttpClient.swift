@@ -2,14 +2,14 @@ import Foundation
 import CryptoKit
 
 /// Error types for HTTP operations.
-enum HttpError: Error, LocalizedError {
+public enum HttpError: Error, LocalizedError {
     case invalidURL(String)
     case requestFailed(statusCode: Int, message: String?)
     case decodingFailed(String)
     case networkError(Error)
     case timeout
 
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .invalidURL(let url):
             return "Invalid URL: \(url)"

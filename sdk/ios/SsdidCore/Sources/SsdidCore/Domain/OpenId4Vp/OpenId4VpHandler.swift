@@ -1,9 +1,14 @@
 import Foundation
 
 /// Result of processing an authorization request before user consent.
-struct PresentationReviewResult {
-    let authRequest: AuthorizationRequest
-    let matches: [VpMatchResult]
+public struct PresentationReviewResult {
+    public let authRequest: AuthorizationRequest
+    public let matches: [VpMatchResult]
+
+    public init(authRequest: AuthorizationRequest, matches: [VpMatchResult]) {
+        self.authRequest = authRequest
+        self.matches = matches
+    }
 }
 
 /// Protocol for listing stored SD-JWT VCs, implemented by VaultStorage.

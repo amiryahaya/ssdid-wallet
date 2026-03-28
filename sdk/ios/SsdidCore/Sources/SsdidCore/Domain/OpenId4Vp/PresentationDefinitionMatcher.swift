@@ -1,11 +1,18 @@
 import Foundation
 
 /// Result of matching a credential against a presentation definition or DCQL query.
-struct VpMatchResult {
-    let credential: StoredSdJwtVc
-    let descriptorId: String
-    let requiredClaims: [String]
-    let optionalClaims: [String]
+public struct VpMatchResult {
+    public let credential: StoredSdJwtVc
+    public let descriptorId: String
+    public let requiredClaims: [String]
+    public let optionalClaims: [String]
+
+    public init(credential: StoredSdJwtVc, descriptorId: String, requiredClaims: [String], optionalClaims: [String]) {
+        self.credential = credential
+        self.descriptorId = descriptorId
+        self.requiredClaims = requiredClaims
+        self.optionalClaims = optionalClaims
+    }
 }
 
 /// Matches stored SD-JWT VCs against a Presentation Exchange presentation_definition.

@@ -228,10 +228,10 @@ final class NotifyManager {
 
 // MARK: - NotifyError
 
-enum NotifyError: Error, LocalizedError {
+public enum NotifyError: Error, LocalizedError {
     case inboxNotRegistered
 
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .inboxNotRegistered:
             return "Notify inbox has not been registered yet. Call ensureInboxRegistered() first."

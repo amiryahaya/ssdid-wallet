@@ -1,18 +1,18 @@
 import Foundation
 
 /// Metadata for a stored SD-JWT VC, alongside the compact SD-JWT string.
-struct StoredSdJwtVc: Codable, Equatable {
-    let id: String
-    let compact: String
-    let issuer: String
-    let subject: String
-    let type: String
-    let claims: [String: String]
-    let disclosableClaims: [String]
-    let issuedAt: Int64
-    let expiresAt: Int64?
+public struct StoredSdJwtVc: Codable, Equatable {
+    public let id: String
+    public let compact: String
+    public let issuer: String
+    public let subject: String
+    public let type: String
+    public let claims: [String: String]
+    public let disclosableClaims: [String]
+    public let issuedAt: Int64
+    public let expiresAt: Int64?
 
-    init(
+    public init(
         id: String,
         compact: String,
         issuer: String,

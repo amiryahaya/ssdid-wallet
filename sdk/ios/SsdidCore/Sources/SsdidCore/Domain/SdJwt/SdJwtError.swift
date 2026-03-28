@@ -1,6 +1,6 @@
 import Foundation
 
-enum SdJwtError: Error, LocalizedError {
+public enum SdJwtError: Error, LocalizedError {
     case emptyInput
     case invalidDisclosure
     case invalidJwt
@@ -8,7 +8,7 @@ enum SdJwtError: Error, LocalizedError {
     case unsupportedAlgorithm(String)
     case serializationFailed
 
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .emptyInput: return "Empty SD-JWT input"
         case .invalidDisclosure: return "Invalid disclosure format"

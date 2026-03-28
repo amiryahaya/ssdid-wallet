@@ -1,7 +1,7 @@
 import Foundation
 
 /// Protocol for verifying DID signatures and credentials.
-protocol Verifier {
+public protocol Verifier {
     /// Resolves a DID Document from the registry.
     func resolveDid(did: String) async throws -> DidDocument
 
@@ -116,14 +116,14 @@ final class VerifierImpl: Verifier {
 }
 
 /// Errors specific to verification operations.
-enum VerifierError: Error, LocalizedError {
+public enum VerifierError: Error, LocalizedError {
     case keyNotFound(keyId: String, did: String)
     case unknownAlgorithmType(String)
     case credentialExpired(String)
     case credentialNotYetValid(String)
     case serializationFailed
 
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .keyNotFound(let keyId, let did):
             return "Key \(keyId) not found in DID Document for \(did)"

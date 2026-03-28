@@ -155,11 +155,11 @@ final class RecoveryManager: @unchecked Sendable {
 }
 
 /// Errors specific to recovery operations.
-enum RecoveryError: Error, LocalizedError {
+public enum RecoveryError: Error, LocalizedError {
     case invalidRecoveryKey(String)
     case verificationFailed(String)
 
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .invalidRecoveryKey(let reason):
             return "Invalid recovery key: \(reason)"

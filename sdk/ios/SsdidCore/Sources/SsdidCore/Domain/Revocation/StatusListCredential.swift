@@ -1,6 +1,6 @@
 import Foundation
 
-struct StatusListCredential: Codable {
+public struct StatusListCredential: Codable {
     let context: [String]
     let id: String?
     let type: [String]
@@ -30,7 +30,7 @@ struct StatusListCredential: Codable {
     }
 }
 
-struct StatusListSubject: Codable {
+public struct StatusListSubject: Codable {
     let type: String
     let statusPurpose: String
     let encodedList: String

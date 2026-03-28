@@ -283,13 +283,13 @@ struct BackupIdentity: Codable {
 }
 
 /// Errors specific to backup operations.
-enum BackupError: Error, LocalizedError {
+public enum BackupError: Error, LocalizedError {
     case noIdentities
     case hmacVerificationFailed
     case keyDerivationFailed
     case invalidBackupFormat(String)
 
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .noIdentities:
             return "No identities to back up"

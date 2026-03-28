@@ -1,39 +1,52 @@
 import Foundation
 
-enum VerificationStatus: Hashable {
+public enum VerificationStatus: Hashable {
     case verified
     case verifiedOffline
     case failed
     case degraded
 }
 
-enum VerificationSource: Hashable {
+public enum VerificationSource: Hashable {
     case online
     case offline
 }
 
-enum CheckType: Hashable {
+public enum CheckType: Hashable {
     case signature
     case expiry
     case revocation
     case bundleFreshness
 }
 
-enum CheckStatus: Hashable {
+public enum CheckStatus: Hashable {
     case pass
     case fail
     case unknown
 }
 
-struct VerificationCheck: Hashable {
-    let type: CheckType
-    let status: CheckStatus
-    let message: String
+public struct VerificationCheck: Hashable {
+    public let type: CheckType
+    public let status: CheckStatus
+    public let message: String
+
+    public init(type: CheckType, status: CheckStatus, message: String) {
+        self.type = type
+        self.status = status
+        self.message = message
+    }
 }
 
-struct UnifiedVerificationResult: Hashable {
-    let status: VerificationStatus
-    let checks: [VerificationCheck]
-    let source: VerificationSource
-    var bundleAge: TimeInterval? = nil
+public struct UnifiedVerificationResult: Hashable {
+    public let status: VerificationStatus
+    public let checks: [VerificationCheck]
+    public let source: VerificationSource
+    public var bundleAge: TimeInterval? = nil
+
+    public init(status: VerificationStatus, checks: [VerificationCheck], source: VerificationSource, bundleAge: TimeInterval? = nil) {
+        self.status = status
+        self.checks = checks
+        self.source = source
+        self.bundleAge = bundleAge
+    }
 }

@@ -2,14 +2,14 @@ import Foundation
 
 /// A type-erased Codable wrapper that preserves arbitrary JSON values
 /// including nested arrays and objects for round-trip fidelity.
-struct AnyCodable: Codable, Equatable {
-    let value: Any
+public struct AnyCodable: Codable, Equatable {
+    public let value: Any
 
-    init(_ value: Any) {
+    public init(_ value: Any) {
         self.value = value
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
 
         if container.decodeNil() {
@@ -34,7 +34,7 @@ struct AnyCodable: Codable, Equatable {
         }
     }
 
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
 
         switch value {
@@ -63,7 +63,7 @@ struct AnyCodable: Codable, Equatable {
         }
     }
 
-    static func == (lhs: AnyCodable, rhs: AnyCodable) -> Bool {
+    public static func == (lhs: AnyCodable, rhs: AnyCodable) -> Bool {
         switch (lhs.value, rhs.value) {
         case is (NSNull, NSNull):
             return true

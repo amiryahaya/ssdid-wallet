@@ -1,7 +1,7 @@
 import Foundation
 
-enum SdJwtParser {
-    static func parse(_ compact: String) throws -> SdJwtVc {
+public enum SdJwtParser {
+    public static func parse(_ compact: String) throws -> SdJwtVc {
         let parts = compact.split(separator: "~", omittingEmptySubsequences: false).map(String.init)
         guard !parts.isEmpty else { throw SdJwtError.emptyInput }
 

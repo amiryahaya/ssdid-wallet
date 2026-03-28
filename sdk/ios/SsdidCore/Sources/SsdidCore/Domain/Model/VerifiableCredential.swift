@@ -1,15 +1,15 @@
 import Foundation
 
-struct VerifiableCredential: Codable, Identifiable, @unchecked Sendable {
-    let context: [String]
-    let id: String
-    let type: [String]
-    let issuer: String
-    let issuanceDate: String
-    var expirationDate: String? = nil
-    let credentialSubject: CredentialSubject
-    var credentialStatus: CredentialStatus? = nil
-    let proof: Proof
+public struct VerifiableCredential: Codable, Identifiable, @unchecked Sendable {
+    public let context: [String]
+    public let id: String
+    public let type: [String]
+    public let issuer: String
+    public let issuanceDate: String
+    public var expirationDate: String? = nil
+    public let credentialSubject: CredentialSubject
+    public var credentialStatus: CredentialStatus? = nil
+    public let proof: Proof
 
     enum CodingKeys: String, CodingKey {
         case context = "@context"
@@ -17,7 +17,7 @@ struct VerifiableCredential: Codable, Identifiable, @unchecked Sendable {
         case credentialSubject, credentialStatus, proof
     }
 
-    init(
+    public init(
         context: [String] = ["https://www.w3.org/ns/credentials/v2"],
         id: String,
         type: [String],

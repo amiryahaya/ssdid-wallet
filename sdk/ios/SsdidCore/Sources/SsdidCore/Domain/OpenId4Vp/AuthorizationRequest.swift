@@ -1,18 +1,18 @@
 import Foundation
 
 /// Parsed OpenID4VP authorization request parameters.
-struct AuthorizationRequest: Equatable {
-    let clientId: String
-    let requestUri: String?
-    let responseUri: String?
-    let nonce: String?
-    let state: String?
-    let responseType: String?
-    let responseMode: String?
-    let presentationDefinition: [String: Any]?
-    let dcqlQuery: [String: Any]?
+public struct AuthorizationRequest: Equatable {
+    public let clientId: String
+    public let requestUri: String?
+    public let responseUri: String?
+    public let nonce: String?
+    public let state: String?
+    public let responseType: String?
+    public let responseMode: String?
+    public let presentationDefinition: [String: Any]?
+    public let dcqlQuery: [String: Any]?
 
-    static func == (lhs: AuthorizationRequest, rhs: AuthorizationRequest) -> Bool {
+    public static func == (lhs: AuthorizationRequest, rhs: AuthorizationRequest) -> Bool {
         lhs.clientId == rhs.clientId
             && lhs.requestUri == rhs.requestUri
             && lhs.responseUri == rhs.responseUri

@@ -11,71 +11,105 @@ import Foundation
 /// ```
 public final class SsdidSdk: @unchecked Sendable {
 
+    // MARK: - Public API Facades
+
+    /// Identity lifecycle: create, list, delete, DID document management.
+    public let identity: IdentityApi
+
+    /// Cryptographic vault: signing, proof creation.
+    public let vault: VaultApi
+
+    /// Verifiable credential storage: store, list, delete.
+    public let credentials: CredentialsApi
+
+    /// SSDID protocol flows: registration, authentication, transaction signing.
+    public let flows: FlowsApi
+
+    /// OpenID4VCI credential issuance.
+    public let issuance: IssuanceApi
+
+    /// OpenID4VP presentation.
+    public let presentation: PresentationApi
+
+    /// SD-JWT VC operations: parse, store, list.
+    public let sdJwt: SdJwtApi
+
+    /// Online credential verification.
+    public let verifier: VerifierApi
+
+    /// Offline verification and bundle management.
+    public let offline: OfflineApi
+
+    /// Identity recovery operations.
+    public let recovery: RecoveryApi
+
+    /// KERI-inspired key rotation.
+    public let rotation: RotationApi
+
+    /// Encrypted backup and restore.
+    public let backup: BackupApi
+
+    /// Multi-device management.
+    public let device: DeviceApi
+
+    /// Push notification and mailbox management.
+    public let notifications: NotificationsApi
+
+    /// Credential revocation checking.
+    public let revocation: RevocationApi
+
+    /// Activity history log.
+    public let history: HistoryApi
+
+    // MARK: - Internal Services (kept for backward compatibility)
+
     /// The HTTP client used for all network operations.
     let httpClient: SsdidHttpClient
-
-    /// The Vault for managing identities, credentials, and cryptographic operations.
-    let vault: Vault
-
-    /// The orchestrator for SSDID operations (identity creation, registration, auth, tx signing).
-    let client: SsdidClient
-
-    /// Backup manager for identity backup/restore.
-    let backupManager: BackupManager
-
-    /// Key rotation manager.
-    let keyRotationManager: KeyRotationManager
-
-    /// Recovery manager.
-    let recoveryManager: RecoveryManager
-
-    /// Revocation checking.
-    let revocationManager: RevocationManager
-
-    /// Notify manager for push notification mailboxes.
-    let notifyManager: NotifyManager
-
-    /// Offline verification.
-    let offlineVerifier: OfflineVerifier
-
-    /// Verification orchestrator (online + offline).
-    let verificationOrchestrator: VerificationOrchestrator
-
-    /// Bundle manager for verification bundle lifecycle.
-    let bundleManager: BundleManager
 
     /// Bundle sync manager for background refresh.
     let bundleSyncManager: BundleSyncManager
 
     /// The logger instance.
-    let logger: SsdidLogger
+    public let logger: SsdidLogger
 
     private init(
+        identity: IdentityApi,
+        vault: VaultApi,
+        credentials: CredentialsApi,
+        flows: FlowsApi,
+        issuance: IssuanceApi,
+        presentation: PresentationApi,
+        sdJwt: SdJwtApi,
+        verifier: VerifierApi,
+        offline: OfflineApi,
+        recovery: RecoveryApi,
+        rotation: RotationApi,
+        backup: BackupApi,
+        device: DeviceApi,
+        notifications: NotificationsApi,
+        revocation: RevocationApi,
+        history: HistoryApi,
         httpClient: SsdidHttpClient,
-        vault: Vault,
-        client: SsdidClient,
-        backupManager: BackupManager,
-        keyRotationManager: KeyRotationManager,
-        recoveryManager: RecoveryManager,
-        revocationManager: RevocationManager,
-        notifyManager: NotifyManager,
-        offlineVerifier: OfflineVerifier,
-        verificationOrchestrator: VerificationOrchestrator,
-        bundleManager: BundleManager,
         bundleSyncManager: BundleSyncManager,
         logger: SsdidLogger
     ) {
-        self.httpClient = httpClient
+        self.identity = identity
         self.vault = vault
-        self.client = client
-        self.backupManager = backupManager
-        self.keyRotationManager = keyRotationManager
-        self.recoveryManager = recoveryManager
-        self.revocationManager = revocationManager
-        self.notifyManager = notifyManager
-        self.offlineVerifier = offlineVerifier
-        self.verificationOrchestrator = verificationOrchestrator
-        self.bundleManager = bundleManager
+        self.credentials = credentials
+        self.flows = flows
+        self.issuance = issuance
+        self.presentation = presentation
+        self.sdJwt = sdJwt
+        self.verifier = verifier
+        self.offline = offline
+        self.recovery = recovery
+        self.rotation = rotation
+        self.backup = backup
+        self.device = device
+        self.notifications = notifications
+        self.revocation = revocation
+        self.history = history
+        self.httpClient = httpClient
         self.bundleSyncManager = bundleSyncManager
         self.logger = logger
     }
@@ -157,7 +191,7 @@ public final class SsdidSdk: @unchecked Sendable {
                 keyResolver: DidKeyResolver(),
                 jwkResolver: DidJwkResolver()
             )
-            let verifier = VerifierImpl(
+            let verifierImpl = VerifierImpl(
                 didResolver: didResolver,
                 classicalProvider: classical,
                 pqcProvider: pqc
@@ -174,7 +208,7 @@ public final class SsdidSdk: @unchecked Sendable {
 
             let ssdidClient = SsdidClient(
                 vault: vaultImpl,
-                verifier: verifier,
+                verifier: verifierImpl,
                 httpClient: httpClient,
                 activityRepo: activityRepo,
                 revocationManager: revocationMgr,
@@ -216,13 +250,13 @@ public final class SsdidSdk: @unchecked Sendable {
             )
 
             let verificationOrc = VerificationOrchestrator(
-                onlineVerifier: verifier,
+                onlineVerifier: verifierImpl,
                 offlineVerifier: offlineVerifierImpl,
                 bundleStore: fileBundleStore
             )
 
             let bundleMgr = BundleManager(
-                verifier: verifier,
+                verifier: verifierImpl,
                 statusListFetcher: HttpStatusListFetcher(),
                 bundleStore: fileBundleStore,
                 ttlProvider: ttl
@@ -235,18 +269,78 @@ public final class SsdidSdk: @unchecked Sendable {
                 ttlProvider: ttl
             )
 
-            return SsdidSdk(
-                httpClient: httpClient,
+            // OpenID4VCI handler
+            let vciTransport = OpenId4VciTransport()
+            let metadataResolver = IssuerMetadataResolver()
+            let tokenClient = TokenClient()
+            let nonceManager = NonceManager()
+            let vciHandler = OpenId4VciHandler(
+                metadataResolver: metadataResolver,
+                tokenClient: tokenClient,
+                nonceManager: nonceManager,
+                transport: vciTransport,
+                vcStorage: storage
+            )
+
+            // OpenID4VP handler
+            let vpTransport = OpenId4VpTransport()
+            let vpHandler = OpenId4VpHandler(
+                transport: vpTransport,
+                vcStore: storage
+            )
+
+            // Device manager
+            let deviceInfoProvider = DeviceInfoProvider()
+            let deviceRegistryClient = HttpDeviceManagerRegistryClient(registryApi: httpClient.registry)
+            let deviceSsdidProvider = SsdidClientDeviceProvider(ssdidClient: ssdidClient)
+            let deviceMgr = DeviceManager(
                 vault: vaultImpl,
-                client: ssdidClient,
-                backupManager: backupMgr,
-                keyRotationManager: keyRotationMgr,
-                recoveryManager: recoveryMgr,
-                revocationManager: revocationMgr,
-                notifyManager: notifyMgr,
+                registryClient: deviceRegistryClient,
+                ssdidClientProvider: deviceSsdidProvider,
+                deviceName: deviceInfoProvider.deviceName,
+                platform: "ios"
+            )
+
+            // Build all API facades
+            let identityApi = IdentityApi(vault: vaultImpl, client: ssdidClient)
+            let vaultApi = VaultApi(vault: vaultImpl)
+            let credentialsApi = CredentialsApi(vault: vaultImpl)
+            let flowsApi = FlowsApi(client: ssdidClient)
+            let issuanceApi = IssuanceApi(handler: vciHandler)
+            let presentationApi = PresentationApi(handler: vpHandler)
+            let sdJwtApi = SdJwtApi(storage: storage)
+            let verifierApi = VerifierApi(verifier: verifierImpl)
+            let offlineApi = OfflineApi(
                 offlineVerifier: offlineVerifierImpl,
-                verificationOrchestrator: verificationOrc,
                 bundleManager: bundleMgr,
+                orchestrator: verificationOrc
+            )
+            let recoveryApi = RecoveryApi(manager: recoveryMgr)
+            let rotationApi = RotationApi(manager: keyRotationMgr)
+            let backupApi = BackupApi(manager: backupMgr)
+            let deviceApi = DeviceApi(manager: deviceMgr)
+            let notificationsApi = NotificationsApi(manager: notifyMgr)
+            let revocationApi = RevocationApi(manager: revocationMgr)
+            let historyApi = HistoryApi(repo: activityRepo)
+
+            return SsdidSdk(
+                identity: identityApi,
+                vault: vaultApi,
+                credentials: credentialsApi,
+                flows: flowsApi,
+                issuance: issuanceApi,
+                presentation: presentationApi,
+                sdJwt: sdJwtApi,
+                verifier: verifierApi,
+                offline: offlineApi,
+                recovery: recoveryApi,
+                rotation: rotationApi,
+                backup: backupApi,
+                device: deviceApi,
+                notifications: notificationsApi,
+                revocation: revocationApi,
+                history: historyApi,
+                httpClient: httpClient,
                 bundleSyncManager: syncMgr,
                 logger: _logger
             )

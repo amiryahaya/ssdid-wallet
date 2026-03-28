@@ -4,28 +4,41 @@ import CryptoKit
 // MARK: - Supporting Types
 
 /// Status of the KERI-inspired pre-rotation commitment for an identity.
-struct RotationStatus {
-    let hasPreCommitment: Bool
-    let nextKeyHash: String?
-    let lastRotatedAt: String?
-    let rotationHistory: [RotationEntry]
+public struct RotationStatus {
+    public let hasPreCommitment: Bool
+    public let nextKeyHash: String?
+    public let lastRotatedAt: String?
+    public let rotationHistory: [RotationEntry]
+
+    public init(hasPreCommitment: Bool, nextKeyHash: String?, lastRotatedAt: String?, rotationHistory: [RotationEntry]) {
+        self.hasPreCommitment = hasPreCommitment
+        self.nextKeyHash = nextKeyHash
+        self.lastRotatedAt = lastRotatedAt
+        self.rotationHistory = rotationHistory
+    }
 }
 
 /// A single entry in the rotation history log.
-struct RotationEntry: Codable {
-    let timestamp: String
-    let oldKeyIdFragment: String
-    let newKeyIdFragment: String
+public struct RotationEntry: Codable {
+    public let timestamp: String
+    public let oldKeyIdFragment: String
+    public let newKeyIdFragment: String
+
+    public init(timestamp: String, oldKeyIdFragment: String, newKeyIdFragment: String) {
+        self.timestamp = timestamp
+        self.oldKeyIdFragment = oldKeyIdFragment
+        self.newKeyIdFragment = newKeyIdFragment
+    }
 }
 
 /// Errors that can occur during key rotation.
-enum RotationError: Error, LocalizedError {
+public enum RotationError: Error, LocalizedError {
     case noPreCommitment
     case preRotatedKeyNotFound(String)
     case privateKeyNotFound(String)
     case identityNotFound(String)
 
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .noPreCommitment:
             return "No pre-commitment exists. Call prepareRotation first."

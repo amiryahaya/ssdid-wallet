@@ -1,14 +1,14 @@
 import Foundation
 
-struct DidDocument: Codable {
-    let context: [String]
-    let id: String
-    var controller: String = ""
-    let verificationMethod: [VerificationMethod]
-    var authentication: [String] = []
-    var assertionMethod: [String] = []
-    var capabilityInvocation: [String] = []
-    var nextKeyHash: String? = nil
+public struct DidDocument: Codable {
+    public let context: [String]
+    public let id: String
+    public var controller: String = ""
+    public let verificationMethod: [VerificationMethod]
+    public var authentication: [String] = []
+    public var assertionMethod: [String] = []
+    public var capabilityInvocation: [String] = []
+    public var nextKeyHash: String? = nil
 
     enum CodingKeys: String, CodingKey {
         case context = "@context"
@@ -16,7 +16,7 @@ struct DidDocument: Codable {
         case authentication, assertionMethod, capabilityInvocation, nextKeyHash
     }
 
-    init(
+    public init(
         context: [String] = ["https://www.w3.org/ns/did/v1"],
         id: String,
         controller: String = "",
@@ -36,7 +36,7 @@ struct DidDocument: Codable {
         self.nextKeyHash = nextKeyHash
     }
 
-    static func build(
+    public static func build(
         did: Did,
         keyId: String,
         algorithm: Algorithm,

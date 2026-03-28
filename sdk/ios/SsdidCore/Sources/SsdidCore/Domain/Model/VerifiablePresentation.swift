@@ -3,19 +3,19 @@ import Foundation
 /// W3C Verifiable Presentation wrapper for presenting one or more VCs.
 /// Used for JSON-LD VC presentations. For SD-JWT VCs, the presentation
 /// is implicit (SD-JWT + selected disclosures + KB-JWT).
-struct VerifiablePresentation: Codable {
-    let context: [String]
-    let type: [String]
-    let holder: String
-    var verifiableCredential: [VerifiableCredential]
-    var proof: Proof?
+public struct VerifiablePresentation: Codable {
+    public let context: [String]
+    public let type: [String]
+    public let holder: String
+    public var verifiableCredential: [VerifiableCredential]
+    public var proof: Proof?
 
     enum CodingKeys: String, CodingKey {
         case context = "@context"
         case type, holder, verifiableCredential, proof
     }
 
-    init(
+    public init(
         context: [String] = ["https://www.w3.org/ns/credentials/v2"],
         type: [String] = ["VerifiablePresentation"],
         holder: String,

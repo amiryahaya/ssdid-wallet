@@ -1,15 +1,15 @@
 import Foundation
 
-struct LocalNotification: Codable, Identifiable, Equatable {
-    let id: String
-    let mailboxId: String
-    let identityName: String?
-    let payload: String
-    let priority: String
-    let receivedAt: String
-    var isRead: Bool
+public struct LocalNotification: Codable, Identifiable, Equatable {
+    public let id: String
+    public let mailboxId: String
+    public let identityName: String?
+    public let payload: String
+    public let priority: String
+    public let receivedAt: String
+    public var isRead: Bool
 
-    init(
+    public init(
         id: String,
         mailboxId: String,
         identityName: String?,

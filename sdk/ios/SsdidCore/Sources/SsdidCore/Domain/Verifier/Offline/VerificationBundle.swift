@@ -2,12 +2,20 @@ import Foundation
 
 /// A self-contained verification bundle that enables offline credential verification.
 /// Contains the issuer's DID Document and optionally a cached status list snapshot.
-struct VerificationBundle: Codable {
-    let issuerDid: String
-    let didDocument: DidDocument
-    var statusList: StatusListCredential? = nil
-    let fetchedAt: String
-    let expiresAt: String
+public struct VerificationBundle: Codable {
+    public let issuerDid: String
+    public let didDocument: DidDocument
+    public var statusList: StatusListCredential? = nil
+    public let fetchedAt: String
+    public let expiresAt: String
+
+    public init(issuerDid: String, didDocument: DidDocument, statusList: StatusListCredential? = nil, fetchedAt: String, expiresAt: String) {
+        self.issuerDid = issuerDid
+        self.didDocument = didDocument
+        self.statusList = statusList
+        self.fetchedAt = fetchedAt
+        self.expiresAt = expiresAt
+    }
 }
 
 /// Storage for verification bundles.
