@@ -6,7 +6,7 @@ import my.ssdid.sdk.domain.verifier.offline.sync.BundleSyncScheduler
 import java.util.concurrent.TimeUnit
 
 class WorkManagerBundleSyncScheduler(private val context: Context) : BundleSyncScheduler {
-    private val workManager = WorkManager.getInstance(context)
+    private val workManager by lazy { WorkManager.getInstance(context) }
 
     override fun schedulePeriodicSync(intervalHours: Long) {
         val constraints = Constraints.Builder()

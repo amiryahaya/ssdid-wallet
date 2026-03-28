@@ -49,6 +49,8 @@ import my.ssdid.sdk.domain.verifier.offline.BundleStore
 import my.ssdid.sdk.domain.verifier.offline.CredentialRepository
 import my.ssdid.sdk.domain.verifier.offline.OfflineVerifier
 import my.ssdid.sdk.domain.verifier.offline.VerificationOrchestrator
+import my.ssdid.sdk.domain.verifier.offline.sync.BundleSyncScheduler
+import my.ssdid.sdk.domain.verifier.offline.sync.ConnectivityMonitor
 import my.ssdid.sdk.platform.device.AndroidDeviceInfoProvider
 import my.ssdid.sdk.platform.keystore.AndroidKeystoreManager
 import my.ssdid.sdk.platform.notify.DataStoreNotifyStorage
@@ -58,6 +60,9 @@ import my.ssdid.sdk.platform.storage.DataStoreBundleStore
 import my.ssdid.sdk.platform.storage.DataStoreCredentialRepository
 import my.ssdid.sdk.platform.storage.DataStoreSettingsRepository
 import my.ssdid.sdk.platform.storage.DataStoreVaultStorage
+import my.ssdid.sdk.platform.sync.AndroidConnectivityMonitor
+import my.ssdid.sdk.platform.sync.BundleSyncWorkerFactory
+import my.ssdid.sdk.platform.sync.WorkManagerBundleSyncScheduler
 import kotlinx.serialization.json.Json
 import okhttp3.CertificatePinner
 import okhttp3.OkHttpClient
@@ -82,20 +87,36 @@ class SsdidSdk private constructor(
     val notifications: NotificationsApi,
     val revocation: RevocationApi,
     val history: HistoryApi,
-    // Internal access for wallet app migration
-    internal val internalVault: Vault,
-    internal val internalVerifier: Verifier,
-    internal val internalClient: SsdidClient,
-    internal val internalHttpClient: SsdidHttpClient,
-    internal val internalOid4VciHandler: OpenId4VciHandler,
-    internal val internalOid4VpHandler: OpenId4VpHandler,
-    internal val internalNotifyManager: NotifyManager,
-    internal val internalRecoveryManager: RecoveryManager,
-    internal val internalKeyRotationManager: KeyRotationManager,
-    internal val internalBackupManager: BackupManager,
-    internal val internalDeviceManager: DeviceManager,
-    internal val internalRevocationManager: RevocationManager,
-    internal val internalActivityRepo: ActivityRepository
+    // Migration helpers — exposed for wallet app DI backward compatibility.
+    // Prefer the public API sub-objects (identity, vault, credentials, etc.) for new code.
+    val internalVault: Vault,
+    val internalVerifier: Verifier,
+    val internalClient: SsdidClient,
+    val internalHttpClient: SsdidHttpClient,
+    val internalOid4VciHandler: OpenId4VciHandler,
+    val internalOid4VpHandler: OpenId4VpHandler,
+    val internalNotifyManager: NotifyManager,
+    val internalRecoveryManager: RecoveryManager,
+    val internalKeyRotationManager: KeyRotationManager,
+    val internalBackupManager: BackupManager,
+    val internalDeviceManager: DeviceManager,
+    val internalRevocationManager: RevocationManager,
+    val internalActivityRepo: ActivityRepository,
+    val internalOkHttpClient: OkHttpClient,
+    val internalVaultStorage: VaultStorage,
+    val internalKeystoreManager: KeystoreManager,
+    val internalSettingsRepository: SettingsRepository,
+    val internalBundleStore: BundleStore,
+    val internalTtlProvider: TtlProvider,
+    val internalBundleManager: BundleManager,
+    val internalOfflineVerifier: OfflineVerifier,
+    val internalVerificationOrchestrator: VerificationOrchestrator,
+    val internalCredentialRepository: CredentialRepository,
+    val internalBundleSyncScheduler: BundleSyncScheduler,
+    val internalBundleSyncWorkerFactory: BundleSyncWorkerFactory,
+    val internalConnectivityMonitor: ConnectivityMonitor,
+    val internalLocalNotificationStorage: LocalNotificationStorage,
+    val internalNotifyStorage: NotifyStorage
 ) {
     companion object {
         fun builder(context: Context): Builder = Builder(context)
@@ -197,7 +218,8 @@ class SsdidSdk private constructor(
             // Notify
             val notifyStorage = customNotifyStorage ?: DataStoreNotifyStorage(context, keystoreManager)
             val notifyDispatcher = customNotifyDispatcher ?: NotifyDispatcher { _, _ -> }
-            val localNotificationStore = customLocalNotificationStore ?: LocalNotificationStorage(context)
+            val localNotificationStorageImpl = LocalNotificationStorage(context)
+            val localNotificationStore = customLocalNotificationStore ?: localNotificationStorageImpl
             val notifyApiInstance = httpClient.notifyApi(notifyUrl ?: regUrl)
             val notifyManager = NotifyManager(
                 notifyApi = notifyApiInstance,
@@ -242,6 +264,11 @@ class SsdidSdk private constructor(
             val bundleManager = BundleManager(verifier, HttpStatusListFetcher(okHttpClient, json), bundleStore, ttlProvider)
             val orchestrator = VerificationOrchestrator(verifier, offlineVerifier, bundleStore)
 
+            // Sync infrastructure
+            val bundleSyncWorkerFactory = BundleSyncWorkerFactory(bundleManager, credentialRepository)
+            val connectivityMonitor: ConnectivityMonitor = AndroidConnectivityMonitor(context)
+            val bundleSyncScheduler: BundleSyncScheduler = WorkManagerBundleSyncScheduler(context)
+
             // Build API sub-objects
             return SsdidSdk(
                 identity = IdentityApi(vault, client),
@@ -272,7 +299,22 @@ class SsdidSdk private constructor(
                 internalBackupManager = backupManager,
                 internalDeviceManager = deviceManager,
                 internalRevocationManager = revocationManager,
-                internalActivityRepo = activityRepo
+                internalActivityRepo = activityRepo,
+                internalOkHttpClient = okHttpClient,
+                internalVaultStorage = vaultStorage,
+                internalKeystoreManager = keystoreManager,
+                internalSettingsRepository = settingsRepo,
+                internalBundleStore = bundleStore,
+                internalTtlProvider = ttlProvider,
+                internalBundleManager = bundleManager,
+                internalOfflineVerifier = offlineVerifier,
+                internalVerificationOrchestrator = orchestrator,
+                internalCredentialRepository = credentialRepository,
+                internalBundleSyncScheduler = bundleSyncScheduler,
+                internalBundleSyncWorkerFactory = bundleSyncWorkerFactory,
+                internalConnectivityMonitor = connectivityMonitor,
+                internalLocalNotificationStorage = localNotificationStorageImpl,
+                internalNotifyStorage = notifyStorage
             )
         }
     }

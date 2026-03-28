@@ -11,7 +11,6 @@ import my.ssdid.sdk.domain.recovery.social.SocialRecoveryStorage
 import my.ssdid.sdk.domain.vault.VaultStorage
 import my.ssdid.sdk.platform.storage.DataStoreInstitutionalRecoveryStorage
 import my.ssdid.sdk.platform.storage.DataStoreSocialRecoveryStorage
-import my.ssdid.sdk.platform.storage.DataStoreVaultStorage
 import my.ssdid.sdk.platform.storage.OnboardingStorage
 import javax.inject.Singleton
 
@@ -19,18 +18,14 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object StorageModule {
 
+    /**
+     * OnboardingStorage is backed by VaultStorage (DataStoreVaultStorage implements both).
+     * The VaultStorage instance is provided by AppModule via SsdidSdk.
+     */
     @Provides
     @Singleton
-    fun provideDataStoreVaultStorage(@ApplicationContext context: Context): DataStoreVaultStorage =
-        DataStoreVaultStorage(context)
-
-    @Provides
-    @Singleton
-    fun provideVaultStorage(dataStore: DataStoreVaultStorage): VaultStorage = dataStore
-
-    @Provides
-    @Singleton
-    fun provideOnboardingStorage(dataStore: DataStoreVaultStorage): OnboardingStorage = dataStore
+    fun provideOnboardingStorage(vaultStorage: VaultStorage): OnboardingStorage =
+        vaultStorage as OnboardingStorage
 
     @Provides
     @Singleton
