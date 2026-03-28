@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidPqc/.build/arm64-apple-macosx/debug/SsdidPqc.build/master.swiftdeps"
+  },
+  "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidPqc/Sources/SsdidPqc/PqcProvider.swift": {
+    "dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidPqc/.build/arm64-apple-macosx/debug/SsdidPqc.build/PqcProvider.d",
+    "object": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidPqc/.build/arm64-apple-macosx/debug/SsdidPqc.build/PqcProvider.swift.o",
+    "swiftmodule": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidPqc/.build/arm64-apple-macosx/debug/SsdidPqc.build/PqcProvider~partial.swiftmodule",
+    "swift-dependencies": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidPqc/.build/arm64-apple-macosx/debug/SsdidPqc.build/PqcProvider.swiftdeps",
+    "diagnostics": "/Users/amirrudinyahaya/Workspace/ssdid-wallet/sdk/ios/SsdidPqc/.build/arm64-apple-macosx/debug/SsdidPqc.build/PqcProvider.dia"
+  }
+}

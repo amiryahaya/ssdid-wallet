@@ -11,7 +11,7 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.UninstallModules
 import kotlinx.coroutines.runBlocking
 import my.ssdid.wallet.MainActivity
-import my.ssdid.wallet.di.OfflineModule
+import my.ssdid.wallet.di.AppModule
 import my.ssdid.sdk.domain.verifier.offline.BundleStore
 import org.junit.Assume
 import org.junit.Before
@@ -21,7 +21,7 @@ import org.junit.runner.RunWith
 import androidx.test.ext.junit.runners.AndroidJUnit4
 
 @HiltAndroidTest
-@UninstallModules(OfflineModule::class)
+@UninstallModules(AppModule::class)
 @RunWith(AndroidJUnit4::class)
 class OfflineSettingsTest {
 

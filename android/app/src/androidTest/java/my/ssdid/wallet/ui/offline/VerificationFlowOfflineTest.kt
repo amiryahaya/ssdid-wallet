@@ -10,7 +10,7 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.UninstallModules
 import kotlinx.coroutines.runBlocking
 import my.ssdid.wallet.MainActivity
-import my.ssdid.wallet.di.OfflineModule
+import my.ssdid.wallet.di.AppModule
 import my.ssdid.sdk.domain.verifier.Verifier
 import my.ssdid.sdk.domain.verifier.offline.BundleStore
 import org.junit.Before
@@ -21,20 +21,20 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 
 /**
  * Tests 3-6: Offline/degraded/failed verification flows.
- * Uses @UninstallModules(OfflineModule::class) so that FakeOnlineVerifier and
+ * Uses @UninstallModules(AppModule::class) so that FakeOnlineVerifier and
  * InMemoryBundleStore replace the real network-dependent implementations.
  */
 @HiltAndroidTest
-@UninstallModules(OfflineModule::class)
+@UninstallModules(AppModule::class)
 @RunWith(AndroidJUnit4::class)
 class VerificationFlowOfflineTest {
 
-    /** FakeOnlineVerifier replaces the real Verifier binding from OfflineModule */
+    /** FakeOnlineVerifier replaces the real Verifier binding from AppModule */
     @BindValue
     @JvmField
     val fakeVerifier: Verifier = FakeOnlineVerifier(shouldThrow = null, shouldReturn = false)
 
-    /** InMemoryBundleStore replaces DataStoreBundleStore binding from OfflineModule */
+    /** InMemoryBundleStore replaces DataStoreBundleStore binding from AppModule */
     @BindValue
     @JvmField
     val bundleStore: BundleStore = InMemoryBundleStore()
