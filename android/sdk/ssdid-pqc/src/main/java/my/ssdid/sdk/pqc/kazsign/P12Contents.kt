@@ -5,7 +5,7 @@
  * PKCS#12 keystore contents data class for KAZ-SIGN.
  */
 
-package my.ssdid.wallet.domain.crypto.kazsign
+package my.ssdid.sdk.pqc.kazsign
 
 /**
  * Contents loaded from a PKCS#12 keystore.

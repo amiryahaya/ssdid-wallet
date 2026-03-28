@@ -5,7 +5,7 @@
  * Key pair data class for KAZ-SIGN.
  */
 
-package my.ssdid.wallet.domain.crypto.kazsign
+package my.ssdid.sdk.pqc.kazsign
 
 /**
  * A KAZ-SIGN key pair containing public and secret keys.

@@ -13,7 +13,7 @@ import my.ssdid.sdk.domain.backup.BackupManager
 import my.ssdid.sdk.domain.credential.CredentialIssuanceManager
 import my.ssdid.sdk.domain.device.DeviceManager
 import my.ssdid.sdk.domain.history.ActivityRepository
-import my.ssdid.wallet.domain.crypto.PqcProvider
+import my.ssdid.sdk.pqc.PqcProvider
 import my.ssdid.wallet.domain.profile.ProfileMigration
 import my.ssdid.sdk.domain.recovery.RecoveryManager
 import my.ssdid.sdk.domain.recovery.social.SocialRecoveryManager

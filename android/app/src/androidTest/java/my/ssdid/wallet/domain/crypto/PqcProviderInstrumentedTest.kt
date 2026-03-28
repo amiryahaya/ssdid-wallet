@@ -3,6 +3,7 @@ package my.ssdid.wallet.domain.crypto
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import my.ssdid.sdk.domain.model.Algorithm
+import my.ssdid.sdk.pqc.PqcProvider
 import org.junit.Test
 import org.junit.runner.RunWith
 

@@ -20,3 +20,4 @@ rootProject.name = "ssdid-wallet"
 include(":app")
 include(":sdk:ssdid-core")
 include(":sdk:ssdid-core-testing")
+include(":sdk:ssdid-pqc")

@@ -1,4 +1,4 @@
-package my.ssdid.wallet.domain.crypto
+package my.ssdid.sdk.pqc
 
 import com.google.common.truth.Truth.assertThat
 import my.ssdid.sdk.domain.model.Algorithm

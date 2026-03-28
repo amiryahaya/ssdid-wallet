@@ -12,7 +12,7 @@
  *   val result = signer.verify(signature, keyPair.publicKey)
  */
 
-package my.ssdid.wallet.domain.crypto.kazsign
+package my.ssdid.sdk.pqc.kazsign
 
 import java.io.Closeable
 

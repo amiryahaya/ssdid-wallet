@@ -5,7 +5,7 @@
  * Security level enumeration for KAZ-SIGN operations.
  */
 
-package my.ssdid.wallet.domain.crypto.kazsign
+package my.ssdid.sdk.pqc.kazsign
 
 /**
  * Security level for KAZ-SIGN cryptographic operations.

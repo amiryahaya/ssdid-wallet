@@ -2,6 +2,8 @@ package my.ssdid.wallet.domain.crypto.kazsign
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import my.ssdid.sdk.pqc.kazsign.KazSigner
+import my.ssdid.sdk.pqc.kazsign.SecurityLevel
 import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -214,13 +216,13 @@ class KazSignInstrumentedTest {
     // ---------- Native Parameter API ----------
 
     @Test
-    fun nativeParametersMatchSecurityLevel() {
+    fun signerPropertiesMatchSecurityLevel() {
         val level = SecurityLevel.LEVEL_128
-        KazSigner(level).use {
-            assertThat(KazSignNative.nativeGetSecretKeyBytes(128)).isEqualTo(level.secretKeyBytes)
-            assertThat(KazSignNative.nativeGetPublicKeyBytes(128)).isEqualTo(level.publicKeyBytes)
-            assertThat(KazSignNative.nativeGetSignatureOverhead(128)).isEqualTo(level.signatureOverhead)
-            assertThat(KazSignNative.nativeGetHashBytes(128)).isEqualTo(level.hashBytes)
+        KazSigner(level).use { signer ->
+            assertThat(signer.secretKeyBytes).isEqualTo(level.secretKeyBytes)
+            assertThat(signer.publicKeyBytes).isEqualTo(level.publicKeyBytes)
+            assertThat(signer.signatureOverhead).isEqualTo(level.signatureOverhead)
+            assertThat(signer.hashBytes).isEqualTo(level.hashBytes)
         }
     }
 

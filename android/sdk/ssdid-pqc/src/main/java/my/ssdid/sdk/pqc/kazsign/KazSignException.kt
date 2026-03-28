@@ -5,7 +5,7 @@
  * Exception class for KAZ-SIGN errors.
  */
 
-package my.ssdid.wallet.domain.crypto.kazsign
+package my.ssdid.sdk.pqc.kazsign
 
 /**
  * Exception thrown when a KAZ-SIGN operation fails.

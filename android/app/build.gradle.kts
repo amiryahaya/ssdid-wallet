@@ -68,19 +68,10 @@ android {
         versionCode = 4
         versionName = "1.0.0"
         testInstrumentationRunner = "my.ssdid.wallet.HiltTestRunner"
-        ndk {
-            abiFilters += listOf("arm64-v8a", "x86_64")
-        }
         buildConfigField("String", "SENTRY_DSN", "\"$sentryDsn\"")
         buildConfigField("String", "SENTRY_ENVIRONMENT", "\"$sentryEnv\"")
         buildConfigField("String", "EMAIL_VERIFY_URL", "\"$emailVerifyUrl\"")
         buildConfigField("String", "NOTIFY_URL", "\"$notifyUrl\"")
-    }
-    externalNativeBuild {
-        cmake {
-            path = file("src/main/cpp/CMakeLists.txt")
-            version = "3.22.1"
-        }
     }
     buildFeatures {
         compose = true
@@ -171,6 +162,7 @@ dependencies {
 
     // SDK
     implementation(project(":sdk:ssdid-core"))
+    implementation(project(":sdk:ssdid-pqc"))
 
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.1.1")

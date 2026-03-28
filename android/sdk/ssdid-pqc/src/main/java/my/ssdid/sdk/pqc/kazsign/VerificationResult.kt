@@ -5,7 +5,7 @@
  * Verification result data class for KAZ-SIGN.
  */
 
-package my.ssdid.wallet.domain.crypto.kazsign
+package my.ssdid.sdk.pqc.kazsign
 
 /**
  * Result of a signature verification operation.

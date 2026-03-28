@@ -1,10 +1,10 @@
-package my.ssdid.wallet.domain.crypto
+package my.ssdid.sdk.pqc
 
 import my.ssdid.sdk.domain.crypto.BouncyCastleInstaller
 import my.ssdid.sdk.domain.crypto.CryptoProvider
 import my.ssdid.sdk.domain.crypto.KeyPairResult
-import my.ssdid.wallet.domain.crypto.kazsign.KazSigner
-import my.ssdid.wallet.domain.crypto.kazsign.SecurityLevel
+import my.ssdid.sdk.pqc.kazsign.KazSigner
+import my.ssdid.sdk.pqc.kazsign.SecurityLevel
 import my.ssdid.sdk.domain.model.Algorithm
 import java.security.*
 import java.security.spec.PKCS8EncodedKeySpec

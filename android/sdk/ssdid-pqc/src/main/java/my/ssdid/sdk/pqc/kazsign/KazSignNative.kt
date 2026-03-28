@@ -7,7 +7,7 @@
  * For most use cases, use KazSigner instead.
  */
 
-package my.ssdid.wallet.domain.crypto.kazsign
+package my.ssdid.sdk.pqc.kazsign
 
 /**
  * Native JNI interface for KAZ-SIGN library.

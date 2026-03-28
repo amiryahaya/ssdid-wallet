@@ -5,7 +5,7 @@
  * Extension functions for KAZ-SIGN.
  */
 
-package my.ssdid.wallet.domain.crypto.kazsign
+package my.ssdid.sdk.pqc.kazsign
 
 /**
  * Convert a byte array to a hexadecimal string.

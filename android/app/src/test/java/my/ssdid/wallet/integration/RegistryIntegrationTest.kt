@@ -12,7 +12,7 @@ import kotlinx.serialization.json.put
 import my.ssdid.sdk.domain.crypto.ClassicalProvider
 import my.ssdid.sdk.domain.crypto.CryptoProvider
 import my.ssdid.sdk.domain.crypto.Multibase
-import my.ssdid.wallet.domain.crypto.PqcProvider
+import my.ssdid.sdk.pqc.PqcProvider
 import my.ssdid.sdk.domain.model.*
 import my.ssdid.sdk.domain.transport.RegistryApi
 import my.ssdid.sdk.domain.transport.dto.DeactivateDidRequest

@@ -4,6 +4,8 @@ android/build/
 android/app/build/
 android/sdk/ssdid-core/build/
 android/sdk/ssdid-core-testing/build/
+android/sdk/ssdid-pqc/build/
+android/sdk/ssdid-pqc/.cxx/
 android/local.properties
 android/captures/
 android/.externalNativeBuild/
@@ -65,6 +67,8 @@ harmony/.idea/
 # Exception: pre-built xcframework static libraries needed for iOS CI
 !ios/Packages/KazSign/KazSignNative.xcframework/**/*.a
 !ios/Packages/LibOQS/LibOQSNative.xcframework/**/*.a
+# Exception: pre-built OpenSSL static libraries needed for Android PQC module
+!android/sdk/ssdid-pqc/src/main/cpp/libs/**/*.a
 
 # .NET / API
 api/SsdidEmailVerify/bin/

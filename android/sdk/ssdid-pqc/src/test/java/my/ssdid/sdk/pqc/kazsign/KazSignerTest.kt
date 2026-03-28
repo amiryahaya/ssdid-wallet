@@ -1,4 +1,4 @@
-package my.ssdid.wallet.domain.crypto.kazsign
+package my.ssdid.sdk.pqc.kazsign
 
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test

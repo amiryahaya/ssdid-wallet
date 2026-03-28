@@ -73,7 +73,7 @@ static void throw_kazsign_exception(JNIEnv *env, int error_code) {
             message = "Unknown error";
             break;
     }
-    throw_exception(env, "my/ssdid/wallet/domain/crypto/kazsign/KazSignException", message);
+    throw_exception(env, "my/ssdid/sdk/pqc/kazsign/KazSignException", message);
 }
 
 /* ============================================================================
@@ -81,7 +81,7 @@ static void throw_kazsign_exception(JNIEnv *env, int error_code) {
  * ============================================================================ */
 
 JNIEXPORT jstring JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeGetVersion(JNIEnv *env, jclass clazz) {
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativeGetVersion(JNIEnv *env, jclass clazz) {
     (void)clazz;
     const char *version = kaz_sign_version();
     if (!version) version = "unknown";
@@ -89,7 +89,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeGetVersion(JNIEnv
 }
 
 JNIEXPORT jint JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeGetVersionNumber(JNIEnv *env, jclass clazz) {
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativeGetVersionNumber(JNIEnv *env, jclass clazz) {
     (void)env;
     (void)clazz;
     return kaz_sign_version_number();
@@ -100,21 +100,21 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeGetVersionNumber(
  * ============================================================================ */
 
 JNIEXPORT jint JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeInitLevel(JNIEnv *env, jclass clazz, jint level) {
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativeInitLevel(JNIEnv *env, jclass clazz, jint level) {
     (void)env;
     (void)clazz;
     return kaz_sign_init_level(int_to_level(level));
 }
 
 JNIEXPORT void JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeClearLevel(JNIEnv *env, jclass clazz, jint level) {
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativeClearLevel(JNIEnv *env, jclass clazz, jint level) {
     (void)env;
     (void)clazz;
     kaz_sign_clear_level(int_to_level(level));
 }
 
 JNIEXPORT void JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeClearAll(JNIEnv *env, jclass clazz) {
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativeClearAll(JNIEnv *env, jclass clazz) {
     (void)env;
     (void)clazz;
     kaz_sign_clear_all();
@@ -125,7 +125,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeClearAll(JNIEnv *
  * ============================================================================ */
 
 JNIEXPORT jint JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeGetSecretKeyBytes(JNIEnv *env, jclass clazz, jint level) {
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativeGetSecretKeyBytes(JNIEnv *env, jclass clazz, jint level) {
     (void)env;
     (void)clazz;
     const kaz_sign_level_params_t *params = kaz_sign_get_level_params(int_to_level(level));
@@ -133,7 +133,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeGetSecretKeyBytes
 }
 
 JNIEXPORT jint JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeGetPublicKeyBytes(JNIEnv *env, jclass clazz, jint level) {
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativeGetPublicKeyBytes(JNIEnv *env, jclass clazz, jint level) {
     (void)env;
     (void)clazz;
     const kaz_sign_level_params_t *params = kaz_sign_get_level_params(int_to_level(level));
@@ -141,7 +141,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeGetPublicKeyBytes
 }
 
 JNIEXPORT jint JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeGetSignatureOverhead(JNIEnv *env, jclass clazz, jint level) {
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativeGetSignatureOverhead(JNIEnv *env, jclass clazz, jint level) {
     (void)env;
     (void)clazz;
     const kaz_sign_level_params_t *params = kaz_sign_get_level_params(int_to_level(level));
@@ -149,7 +149,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeGetSignatureOverh
 }
 
 JNIEXPORT jint JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeGetHashBytes(JNIEnv *env, jclass clazz, jint level) {
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativeGetHashBytes(JNIEnv *env, jclass clazz, jint level) {
     (void)env;
     (void)clazz;
     const kaz_sign_level_params_t *params = kaz_sign_get_level_params(int_to_level(level));
@@ -161,7 +161,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeGetHashBytes(JNIE
  * ============================================================================ */
 
 JNIEXPORT jobject JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeGenerateKeyPair(JNIEnv *env, jclass clazz, jint level) {
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativeGenerateKeyPair(JNIEnv *env, jclass clazz, jint level) {
     (void)clazz;
 
     const kaz_sign_level_params_t *params = kaz_sign_get_level_params(int_to_level(level));
@@ -219,7 +219,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeGenerateKeyPair(J
     free(sk);
 
     // Create KeyPair object
-    jclass keyPairClass = (*env)->FindClass(env, "my/ssdid/wallet/domain/crypto/kazsign/KeyPair");
+    jclass keyPairClass = (*env)->FindClass(env, "my/ssdid/sdk/pqc/kazsign/KeyPair");
     if (!keyPairClass) {
         (*env)->DeleteLocalRef(env, publicKeyArray);
         (*env)->DeleteLocalRef(env, secretKeyArray);
@@ -249,7 +249,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeGenerateKeyPair(J
  * ============================================================================ */
 
 JNIEXPORT jbyteArray JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeSign(JNIEnv *env, jclass clazz,
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativeSign(JNIEnv *env, jclass clazz,
                                                jint level, jbyteArray message, jbyteArray secretKey) {
     (void)clazz;
 
@@ -328,7 +328,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeSign(JNIEnv *env,
  * ============================================================================ */
 
 JNIEXPORT jobject JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeVerify(JNIEnv *env, jclass clazz,
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativeVerify(JNIEnv *env, jclass clazz,
                                                  jint level, jbyteArray signature, jbyteArray publicKey) {
     (void)clazz;
 
@@ -377,7 +377,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeVerify(JNIEnv *en
     (*env)->ReleaseByteArrayElements(env, publicKey, pkData, JNI_ABORT);
 
     // Create VerificationResult object
-    jclass resultClass = (*env)->FindClass(env, "my/ssdid/wallet/domain/crypto/kazsign/VerificationResult");
+    jclass resultClass = (*env)->FindClass(env, "my/ssdid/sdk/pqc/kazsign/VerificationResult");
     if (!resultClass) {
         free(msg);
         return NULL;
@@ -416,7 +416,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeVerify(JNIEnv *en
  * ============================================================================ */
 
 JNIEXPORT jbyteArray JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeHash(JNIEnv *env, jclass clazz,
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativeHash(JNIEnv *env, jclass clazz,
                                                jint level, jbyteArray message) {
     (void)clazz;
 
@@ -474,7 +474,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeHash(JNIEnv *env,
  * ============================================================================ */
 
 JNIEXPORT jbyteArray JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeSignDetached(JNIEnv *env, jclass clazz,
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativeSignDetached(JNIEnv *env, jclass clazz,
                                                         jint level, jbyteArray message, jbyteArray secretKey) {
     (void)clazz;
 
@@ -543,7 +543,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeSignDetached(JNIE
 }
 
 JNIEXPORT jboolean JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeVerifyDetached(JNIEnv *env, jclass clazz,
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativeVerifyDetached(JNIEnv *env, jclass clazz,
                                                            jint level, jbyteArray message,
                                                            jbyteArray signature, jbyteArray publicKey) {
     (void)clazz;
@@ -594,7 +594,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeVerifyDetached(JN
  * ============================================================================ */
 
 JNIEXPORT jbyteArray JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeSha3_1256(JNIEnv *env, jclass clazz,
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativeSha3_1256(JNIEnv *env, jclass clazz,
                                                       jbyteArray data) {
     (void)clazz;
 
@@ -637,7 +637,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeSha3_1256(JNIEnv 
  * ============================================================================ */
 
 JNIEXPORT jbyteArray JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativePublicKeyToDer(JNIEnv *env, jclass clazz,
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativePublicKeyToDer(JNIEnv *env, jclass clazz,
                                                            jint level, jbyteArray publicKey) {
     (void)clazz;
 
@@ -693,7 +693,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativePublicKeyToDer(JN
 }
 
 JNIEXPORT jbyteArray JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativePublicKeyFromDer(JNIEnv *env, jclass clazz,
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativePublicKeyFromDer(JNIEnv *env, jclass clazz,
                                                              jint level, jbyteArray der) {
     (void)clazz;
 
@@ -742,7 +742,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativePublicKeyFromDer(
 }
 
 JNIEXPORT jbyteArray JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativePrivateKeyToDer(JNIEnv *env, jclass clazz,
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativePrivateKeyToDer(JNIEnv *env, jclass clazz,
                                                             jint level, jbyteArray secretKey) {
     (void)clazz;
 
@@ -799,7 +799,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativePrivateKeyToDer(J
 }
 
 JNIEXPORT jbyteArray JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativePrivateKeyFromDer(JNIEnv *env, jclass clazz,
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativePrivateKeyFromDer(JNIEnv *env, jclass clazz,
                                                               jint level, jbyteArray der) {
     (void)clazz;
 
@@ -855,7 +855,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativePrivateKeyFromDer
  * ============================================================================ */
 
 JNIEXPORT jbyteArray JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeGenerateCsr(JNIEnv *env, jclass clazz,
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativeGenerateCsr(JNIEnv *env, jclass clazz,
                                                         jint level, jbyteArray secretKey,
                                                         jbyteArray publicKey, jstring subject) {
     (void)clazz;
@@ -930,7 +930,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeGenerateCsr(JNIEn
 }
 
 JNIEXPORT jboolean JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeVerifyCsr(JNIEnv *env, jclass clazz,
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativeVerifyCsr(JNIEnv *env, jclass clazz,
                                                         jint level, jbyteArray csrData) {
     (void)clazz;
 
@@ -957,7 +957,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeVerifyCsr(JNIEnv 
 }
 
 JNIEXPORT jbyteArray JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeIssueCertificate(JNIEnv *env, jclass clazz,
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativeIssueCertificate(JNIEnv *env, jclass clazz,
                                                              jint level, jbyteArray issuerSk,
                                                              jbyteArray issuerPk,
                                                              jstring issuerName,
@@ -1043,7 +1043,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeIssueCertificate(
 }
 
 JNIEXPORT jboolean JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeVerifyCertificate(JNIEnv *env, jclass clazz,
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativeVerifyCertificate(JNIEnv *env, jclass clazz,
                                                               jint level, jbyteArray cert,
                                                               jbyteArray issuerPk) {
     (void)clazz;
@@ -1083,7 +1083,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeVerifyCertificate
 }
 
 JNIEXPORT jbyteArray JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeExtractPublicKey(JNIEnv *env, jclass clazz,
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativeExtractPublicKey(JNIEnv *env, jclass clazz,
                                                              jint level, jbyteArray cert) {
     (void)clazz;
 
@@ -1136,7 +1136,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeExtractPublicKey(
  * ============================================================================ */
 
 JNIEXPORT jbyteArray JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeCreateP12(JNIEnv *env, jclass clazz,
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativeCreateP12(JNIEnv *env, jclass clazz,
                                                       jint level, jbyteArray secretKey,
                                                       jbyteArray publicKey, jbyteArray cert,
                                                       jstring password, jstring name) {
@@ -1229,7 +1229,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeCreateP12(JNIEnv 
 }
 
 JNIEXPORT jobject JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeLoadP12(JNIEnv *env, jclass clazz,
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativeLoadP12(JNIEnv *env, jclass clazz,
                                                     jint level, jbyteArray p12Data,
                                                     jstring password) {
     (void)clazz;
@@ -1324,7 +1324,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeLoadP12(JNIEnv *e
     free(cert);
 
     // Create P12Contents object
-    jclass p12Class = (*env)->FindClass(env, "my/ssdid/wallet/domain/crypto/kazsign/P12Contents");
+    jclass p12Class = (*env)->FindClass(env, "my/ssdid/sdk/pqc/kazsign/P12Contents");
     if (!p12Class) {
         (*env)->DeleteLocalRef(env, skArray);
         (*env)->DeleteLocalRef(env, pkArray);
@@ -1357,7 +1357,7 @@ Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeLoadP12(JNIEnv *e
  * ============================================================================ */
 
 JNIEXPORT jbyteArray JNICALL
-Java_my_ssdid_wallet_domain_crypto_kazsign_KazSignNative_nativeSigToWire(JNIEnv *env, jclass clazz,
+Java_my_ssdid_sdk_pqc_kazsign_KazSignNative_nativeSigToWire(JNIEnv *env, jclass clazz,
                                                       jint level, jbyteArray signature) {
     (void)clazz;
 
