@@ -68,8 +68,8 @@ final class KeychainManager: KeychainManagerProtocol {
     /// (Face ID / Touch ID). The biometric check uses `.biometryCurrentSet`, meaning
     /// stored keys are invalidated if the enrolled biometrics change.
     ///
-    /// - Important: Defaults to `false` for development.
-    // TODO: Set requireBiometric = true before production release.
+    /// - Important: Defaults to `false` in DEBUG builds, `true` in release builds.
+    ///   Configured via ``SsdidSdk/Builder/requireBiometric(_:)``.
     let requireBiometric: Bool
 
     /// Cached SE master key to avoid repeated Keychain lookups.

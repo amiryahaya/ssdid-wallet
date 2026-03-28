@@ -53,11 +53,14 @@ public struct DeviceInfo {
 
 public enum DeviceManagerError: Error, LocalizedError {
     case cannotRevokePrimaryKey
+    case notSupported(String)
 
     public var errorDescription: String? {
         switch self {
         case .cannotRevokePrimaryKey:
             return "Cannot revoke primary device key"
+        case .notSupported(let reason):
+            return "Operation not supported: \(reason)"
         }
     }
 }
@@ -144,12 +147,19 @@ final class DeviceManager: @unchecked Sendable {
         try await ssdidClientProvider.updateDidDocument(keyId: identity.keyId)
     }
 
-    /// Revokes a secondary device key. Rejects attempts to revoke the primary key.
+    /// Revoke a device key. Currently publishes a DID document update but does not
+    /// remove the target key from the document. Full key revocation requires
+    /// multi-device key management support in a future release.
     func revokeDevice(identity: Identity, targetKeyId: String) async throws {
         guard targetKeyId != identity.keyId else {
             throw DeviceManagerError.cannotRevokePrimaryKey
         }
-        try await ssdidClientProvider.updateDidDocument(keyId: identity.keyId)
+        // TODO: Remove targetKeyId from the DID document's verification methods
+        // when multi-device key management is fully implemented. Currently the
+        // rebuilt DID document does not exclude the target key.
+        throw DeviceManagerError.notSupported(
+            "Device key revocation requires multi-device key management support"
+        )
     }
 
     /// Lists all devices enrolled under the identity by inspecting the DID document.

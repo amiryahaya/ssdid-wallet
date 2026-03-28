@@ -40,6 +40,8 @@ public struct DeviceApi {
         try await manager.listDevices(identity: identity)
     }
 
+    /// Revoke a device key. Currently throws ``DeviceManagerError/notSupported(_:)``
+    /// because full key revocation requires multi-device key management support.
     public func revokeDevice(identity: Identity, targetKeyId: String) async throws {
         try await manager.revokeDevice(identity: identity, targetKeyId: targetKeyId)
     }

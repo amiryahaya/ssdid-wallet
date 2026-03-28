@@ -32,6 +32,10 @@ protocol VaultStorage: SdJwtVcStorage {
     func getPreRotatedKey(keyId: String) async -> PreRotatedKeyData?
     func deletePreRotatedKey(keyId: String) async throws
 
+    // Rotation history
+    func addRotationEntry(did: String, entry: RotationEntry) async throws
+    func getRotationHistory(did: String) async -> [RotationEntry]
+
     // Onboarding state
     func isOnboardingCompleted() async -> Bool
     func setOnboardingCompleted() async throws
@@ -198,6 +202,24 @@ final class FileVaultStorage: VaultStorage {
         if let pubPath = try? preRotatedPublicKeyFilePath(keyId: keyId) {
             try? fileManager.removeItem(at: pubPath)
         }
+    }
+
+    // MARK: - Rotation History
+
+    private func rotationHistoryKey(did: String) -> String {
+        "ssdid_rotation_history_\(did)"
+    }
+
+    func addRotationEntry(did: String, entry: RotationEntry) async throws {
+        var history = await getRotationHistory(did: did)
+        history.append(entry)
+        let data = try encoder.encode(history)
+        defaults.set(data, forKey: rotationHistoryKey(did: did))
+    }
+
+    func getRotationHistory(did: String) async -> [RotationEntry] {
+        guard let data = defaults.data(forKey: rotationHistoryKey(did: did)) else { return [] }
+        return (try? decoder.decode([RotationEntry].self, from: data)) ?? []
     }
 
     // MARK: - Onboarding

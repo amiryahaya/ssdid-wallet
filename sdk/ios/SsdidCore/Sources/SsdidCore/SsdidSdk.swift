@@ -123,6 +123,13 @@ public final class SsdidSdk: @unchecked Sendable {
         private var _logger: SsdidLogger = NoOpLogger()
         private var _classicalProvider: CryptoProvider?
         private var _pqcProvider: CryptoProvider?
+        private var _requireBiometric: Bool = {
+            #if DEBUG
+            return false
+            #else
+            return true
+            #endif
+        }()
 
         public init() {}
 
@@ -161,6 +168,14 @@ public final class SsdidSdk: @unchecked Sendable {
             return self
         }
 
+        /// Configure whether vault keys require biometric authentication.
+        /// Defaults to `false` in DEBUG builds, `true` in release builds.
+        @discardableResult
+        public func requireBiometric(_ value: Bool) -> Builder {
+            self._requireBiometric = value
+            return self
+        }
+
         /// Builds and returns a fully wired ``SsdidSdk`` instance.
         @MainActor
         public func build() -> SsdidSdk {
@@ -172,7 +187,7 @@ public final class SsdidSdk: @unchecked Sendable {
             // PQC provider is optional — if not set, use a no-op provider.
             let pqc = _pqcProvider ?? NoOpCryptoProvider()
 
-            let keychain = KeychainManager()
+            let keychain = KeychainManager(requireBiometric: _requireBiometric)
             let storage = FileVaultStorage()
             let activityRepo = UserDefaultsActivityRepository()
 

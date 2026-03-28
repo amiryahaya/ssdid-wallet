@@ -181,6 +181,14 @@ final class KeyRotationManager: @unchecked Sendable {
         // Publish to registry BEFORE deleting old data (crash-safe ordering)
         try await ssdidClient.updateDidDocument(keyId: newIdentity.keyId)
 
+        // Record rotation history entry
+        let entry = RotationEntry(
+            timestamp: ISO8601DateFormatter().string(from: Date()),
+            oldKeyIdFragment: identity.keyId,
+            newKeyIdFragment: newKeyId
+        )
+        try await storage.addRotationEntry(did: identity.did, entry: entry)
+
         // Clean up old identity and pre-rotated key
         try await storage.deleteIdentity(keyId: identity.keyId)
         try await storage.deletePreRotatedKey(keyId: identity.keyId)
@@ -203,11 +211,14 @@ final class KeyRotationManager: @unchecked Sendable {
             nextKeyHash = Multibase.encode(hashBytes)
         }
 
+        let history = await storage.getRotationHistory(did: identity.did)
+        let lastRotated = history.last?.timestamp
+
         return RotationStatus(
             hasPreCommitment: hasPreCommitment,
             nextKeyHash: nextKeyHash,
-            lastRotatedAt: nil,
-            rotationHistory: []
+            lastRotatedAt: lastRotated,
+            rotationHistory: history
         )
     }
 

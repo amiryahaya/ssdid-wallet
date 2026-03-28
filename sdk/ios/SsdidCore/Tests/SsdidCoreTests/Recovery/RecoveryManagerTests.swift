@@ -11,6 +11,7 @@ private final class InMemoryVaultStorage: VaultStorage, @unchecked Sendable {
     private var credentials: [VerifiableCredential] = []
     private var sdJwtVcs: [StoredSdJwtVc] = []
     private var preRotatedKeys: [String: PreRotatedKeyData] = [:]
+    private var rotationHistoryMap: [String: [RotationEntry]] = [:]
     private var onboardingDone = false
 
     func saveIdentity(_ identity: Identity, encryptedPrivateKey: Data) async throws {
@@ -75,6 +76,14 @@ private final class InMemoryVaultStorage: VaultStorage, @unchecked Sendable {
 
     func deletePreRotatedKey(keyId: String) async throws {
         preRotatedKeys.removeValue(forKey: keyId)
+    }
+
+    func addRotationEntry(did: String, entry: RotationEntry) async throws {
+        rotationHistoryMap[did, default: []].append(entry)
+    }
+
+    func getRotationHistory(did: String) async -> [RotationEntry] {
+        rotationHistoryMap[did] ?? []
     }
 
     func isOnboardingCompleted() async -> Bool { onboardingDone }
