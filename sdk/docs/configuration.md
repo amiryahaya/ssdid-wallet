@@ -149,7 +149,48 @@ Override offline verification storage backends.
 .bundleStore(MyBundleStore())
 ```
 
+### socialRecoveryStorage (Android)
+
+Replace the default DataStore-backed social recovery share storage with a custom `SocialRecoveryStorage` implementation.
+
+```kotlin
+// Kotlin
+.socialRecoveryStorage(MySocialRecoveryStorage())
+```
+
+### institutionalRecoveryStorage (Android)
+
+Replace the default DataStore-backed institutional recovery storage with a custom `InstitutionalRecoveryStorage` implementation.
+
+```kotlin
+// Kotlin
+.institutionalRecoveryStorage(MyInstitutionalRecoveryStorage())
+```
+
+### localNotificationStore (Android)
+
+Replace the default `LocalNotificationStorage` with a custom `LocalNotificationStore` implementation. The `LocalNotificationStore` interface exposes `allNotifications` and `unreadCount` as reactive `Flow` properties.
+
+```kotlin
+// Kotlin
+.localNotificationStore(MyLocalNotificationStore())
+```
+
+### requireBiometric (iOS only)
+
+Configure whether vault keys require biometric authentication. Defaults to `false` in DEBUG builds and `true` in release builds.
+
+```swift
+// Swift
+SsdidSdk.Builder()
+    .registryUrl("https://registry.ssdid.my")
+    .requireBiometric(true)
+    .build()
+```
+
 ## Full Example
+
+### Kotlin
 
 ```kotlin
 val sdk = SsdidSdk.builder(applicationContext)
@@ -159,6 +200,20 @@ val sdk = SsdidSdk.builder(applicationContext)
         "registry.ssdid.my" to listOf("sha256/abc123...")
     ))
     .addCryptoProvider(PqcProvider())
+    .socialRecoveryStorage(MySocialRecoveryStorage())
+    .institutionalRecoveryStorage(MyInstitutionalRecoveryStorage())
+    .logger(MyLogger())
+    .build()
+```
+
+### Swift
+
+```swift
+let sdk = SsdidSdk.Builder()
+    .registryUrl("https://registry.ssdid.my")
+    .notifyUrl("https://notify.ssdid.my")
+    .pqcProvider(PqcProvider())
+    .requireBiometric(true)
     .logger(MyLogger())
     .build()
 ```

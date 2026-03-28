@@ -144,6 +144,34 @@ Controls how incoming notifications are routed to the app's UI layer.
 })
 ```
 
+## LocalNotificationStore (Android)
+
+Controls how in-app notifications are persisted and observed. The `LocalNotificationStore` interface provides reactive `Flow` properties (`allNotifications`, `unreadCount`) for UI binding.
+
+### Interface (Kotlin)
+
+```kotlin
+interface LocalNotificationStore {
+    val allNotifications: Flow<List<LocalNotification>>
+    val unreadCount: Flow<Int>
+    suspend fun save(notification: LocalNotification)
+    suspend fun markAsRead(id: String)
+    suspend fun markAllAsRead()
+    suspend fun delete(id: String)
+}
+```
+
+The default implementation is `LocalNotificationStorage`, which uses DataStore. To provide your own:
+
+```kotlin
+val sdk = SsdidSdk.builder(context)
+    .registryUrl("https://registry.ssdid.my")
+    .localNotificationStore(MyLocalNotificationStore())
+    .build()
+```
+
+On iOS, `LocalNotificationStorage` is a concrete `ObservableObject` class with `@Published` properties for SwiftUI reactivity. It is not currently replaceable via the iOS builder.
+
 ## CredentialRepository / BundleStore
 
 Override offline verification storage for custom persistence backends.
@@ -151,6 +179,15 @@ Override offline verification storage for custom persistence backends.
 ```kotlin
 .credentialRepository(MyCredentialRepository())
 .bundleStore(MyBundleStore())
+```
+
+## SocialRecoveryStorage / InstitutionalRecoveryStorage (Android)
+
+Override the persistence layer for social and institutional recovery data. The defaults use DataStore.
+
+```kotlin
+.socialRecoveryStorage(MySocialRecoveryStorage())
+.institutionalRecoveryStorage(MyInstitutionalRecoveryStorage())
 ```
 
 ## See Also

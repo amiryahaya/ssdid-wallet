@@ -100,7 +100,7 @@ val data = sdk.backup.create(passphrase).getOrThrow()
 
 ## Gradual Migration Strategy
 
-You do not need to migrate everything at once. The SDK exposes `internal*` properties for backward compatibility during the transition.
+You do not need to migrate everything at once. The SDK exposes `internal*` properties for backward compatibility during the transition. These are annotated with `@InternalSsdidApi` -- a `@RequiresOptIn` annotation that produces a compile error if used without `@OptIn(InternalSsdidApi::class)`. This ensures you consciously acknowledge the instability of these APIs.
 
 ### Step 1: Replace Hilt Wiring with SDK
 
@@ -121,9 +121,10 @@ object SdkModule {
 
 ### Step 2: Bridge Internal Dependencies
 
-If existing ViewModels inject domain classes directly, bridge them through the SDK's internal properties:
+If existing ViewModels inject domain classes directly, bridge them through the SDK's internal properties. These properties are annotated with `@InternalSsdidApi`, an opt-in annotation that signals they may change without notice. You must opt in explicitly:
 
 ```kotlin
+@OptIn(InternalSsdidApi::class)
 @Module
 @InstallIn(SingletonComponent::class)
 object BridgeModule {

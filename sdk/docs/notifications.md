@@ -122,7 +122,26 @@ func application(_ application: UIApplication,
 4. When a push arrives, call `fetchAndDemux()` to retrieve and dispatch the full notification
 5. After processing, call `ackPending()` to acknowledge
 
+## Local Notification Store
+
+On Android, the SDK uses the `LocalNotificationStore` interface for persisting in-app notifications. This interface exposes reactive `Flow` properties for observing notifications.
+
+```kotlin
+interface LocalNotificationStore {
+    val allNotifications: Flow<List<LocalNotification>>
+    val unreadCount: Flow<Int>
+    suspend fun save(notification: LocalNotification)
+    suspend fun markAsRead(id: String)
+    suspend fun markAllAsRead()
+    suspend fun delete(id: String)
+}
+```
+
+The default implementation is `LocalNotificationStorage` (DataStore-backed). You can provide a custom implementation via the builder's `localNotificationStore()` method.
+
+On iOS, `LocalNotificationStorage` is a concrete `ObservableObject` class with `@Published` properties for SwiftUI reactivity.
+
 ## See Also
 
 - [Identity Management](identity-management.md) -- managing identities
-- [Custom Implementations](custom-implementations.md) -- custom NotifyStorage and NotifyDispatcher
+- [Custom Implementations](custom-implementations.md) -- custom NotifyStorage, NotifyDispatcher, and LocalNotificationStore

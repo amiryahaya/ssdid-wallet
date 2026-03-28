@@ -29,7 +29,7 @@ print("Verifier: \(review.authRequest.clientId)")
 
 ### Step 2: Select Claims and Submit
 
-Choose which claims to disclose (for selective disclosure) and submit the presentation.
+Choose which claims to disclose (for selective disclosure) and submit the presentation. The signer parameter takes a `CredentialSigner` (see [Credentials](credentials.md#credentialsigner)).
 
 #### Kotlin
 
@@ -41,7 +41,7 @@ sdk.presentation.submitPresentation(
     matchResult = review.matchResult,
     selectedClaims = listOf("name", "dateOfBirth"), // selective disclosure
     algorithm = identity.algorithm.w3cType,
-    signer = { data ->
+    signer = CredentialSigner { data ->
         sdk.vault.sign(identity.keyId, data).getOrThrow()
     }
 ).onSuccess {
@@ -62,7 +62,7 @@ sdk.presentation.submitPresentation(
     matchResult = review.matchResult,
     selectedClaims = listOf("given_name", "country"),
     algorithm = identity.algorithm.w3cType,
-    signer = { data ->
+    signer = CredentialSigner { data ->
         sdk.vault.sign(identity.keyId, data).getOrThrow()
     }
 )

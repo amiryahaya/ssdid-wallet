@@ -2,6 +2,22 @@
 
 The SDK supports credential issuance via OID4VCI, local storage, and retrieval.
 
+## CredentialSigner
+
+Signing operations in the issuance and presentation flows use the `CredentialSigner` interface instead of a raw lambda. This is a `fun interface` (Kotlin) / closure (Swift), so you can pass a lambda directly.
+
+### Kotlin
+
+```kotlin
+fun interface CredentialSigner {
+    suspend fun sign(data: ByteArray): ByteArray
+}
+```
+
+### Swift
+
+On iOS, the signer parameter is a `@Sendable (Data) -> Data` closure.
+
 ## OID4VCI Issuance Flow
 
 The OID4VCI (OpenID for Verifiable Credential Issuance) flow has two steps: parse the offer, then accept it.
@@ -32,7 +48,7 @@ print("Issuer: \(review.metadata.credentialIssuer)")
 
 ### Step 2: Accept the Offer
 
-Accept the offer with the selected configuration. You provide a signer closure that uses the vault to sign the proof JWT.
+Accept the offer with the selected configuration. You provide a `CredentialSigner` that uses the vault to sign the proof JWT.
 
 #### Kotlin
 
@@ -46,13 +62,24 @@ val issuanceResult = sdk.issuance.acceptOffer(
     walletDid = identity.did,
     keyId = identity.keyId,
     algorithm = identity.algorithm.w3cType,
-    signer = { data ->
+    signer = CredentialSigner { data ->
         sdk.vault.sign(identity.keyId, data).getOrThrow()
     }
 )
 issuanceResult.onSuccess { result ->
     println("Credential issued: ${result.credential}")
 }
+```
+
+### Processing Raw JSON Offers (iOS)
+
+On iOS, you can also process a credential offer from raw JSON (e.g., when the offer is embedded in a notification payload rather than a URI).
+
+#### Swift
+
+```swift
+let review = try await sdk.issuance.processOfferJson(json)
+print("Issuer: \(review.metadata.credentialIssuer)")
 ```
 
 ## Store a Credential

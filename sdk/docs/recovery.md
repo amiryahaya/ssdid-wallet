@@ -86,6 +86,17 @@ Social recovery is managed through the `SocialRecoveryManager` in the domain lay
 2. **Collection:** Gathering shares from guardians during recovery
 3. **Reconstruction:** Combining shares and restoring the identity
 
+### Builder Configuration
+
+On Android, you can provide a custom `SocialRecoveryStorage` implementation via the builder. The default uses DataStore.
+
+```kotlin
+SsdidSdk.builder(context)
+    .registryUrl("https://registry.ssdid.my")
+    .socialRecoveryStorage(MySocialRecoveryStorage())
+    .build()
+```
+
 ## Institutional Recovery
 
 Institutional recovery delegates key custody to a trusted institution (e.g., an enterprise IT department or a regulated custodian).
@@ -98,6 +109,17 @@ Institutional recovery delegates key custody to a trusted institution (e.g., an 
 4. The wallet restores the identity using the released material
 
 This approach suits enterprise deployments where regulatory requirements demand custodial backup of identity keys.
+
+### Builder Configuration
+
+On Android, you can provide a custom `InstitutionalRecoveryStorage` implementation via the builder. The default uses DataStore.
+
+```kotlin
+SsdidSdk.builder(context)
+    .registryUrl("https://registry.ssdid.my")
+    .institutionalRecoveryStorage(MyInstitutionalRecoveryStorage())
+    .build()
+```
 
 ## Choosing a Strategy
 
