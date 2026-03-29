@@ -26,15 +26,17 @@ public final class ClassicalProvider: CryptoProvider {
 
         case .ECDSA_P256:
             let privateKey = P256.Signing.PrivateKey()
+            // Use x963Representation (0x04 || x || y) for interop with registry/Android
             return KeyPairResult(
-                publicKey: privateKey.publicKey.rawRepresentation,
+                publicKey: privateKey.publicKey.x963Representation,
                 privateKey: privateKey.rawRepresentation
             )
 
         case .ECDSA_P384:
             let privateKey = P384.Signing.PrivateKey()
+            // Use x963Representation (0x04 || x || y) for interop with registry/Android
             return KeyPairResult(
-                publicKey: privateKey.publicKey.rawRepresentation,
+                publicKey: privateKey.publicKey.x963Representation,
                 privateKey: privateKey.rawRepresentation
             )
 
@@ -51,10 +53,10 @@ public final class ClassicalProvider: CryptoProvider {
             return signature
 
         case .ECDSA_P256:
-            return try signEcdsaSha512Der(privateKey: privateKey, data: data, keySizeInBits: 256)
+            return try signEcdsaDer(privateKey: privateKey, data: data, keySizeInBits: 256)
 
         case .ECDSA_P384:
-            return try signEcdsaSha512Der(privateKey: privateKey, data: data, keySizeInBits: 384)
+            return try signEcdsaDer(privateKey: privateKey, data: data, keySizeInBits: 384)
 
         default:
             throw CryptoError.unsupportedAlgorithm(algorithm)
@@ -68,10 +70,10 @@ public final class ClassicalProvider: CryptoProvider {
             return key.isValidSignature(signature, for: data)
 
         case .ECDSA_P256:
-            return try verifyEcdsaSha512Der(publicKey: publicKey, signature: signature, data: data, keySizeInBits: 256)
+            return try verifyEcdsaDer(publicKey: publicKey, signature: signature, data: data, keySizeInBits: 256)
 
         case .ECDSA_P384:
-            return try verifyEcdsaSha512Der(publicKey: publicKey, signature: signature, data: data, keySizeInBits: 384)
+            return try verifyEcdsaDer(publicKey: publicKey, signature: signature, data: data, keySizeInBits: 384)
 
         default:
             throw CryptoError.unsupportedAlgorithm(algorithm)
@@ -80,7 +82,7 @@ public final class ClassicalProvider: CryptoProvider {
 
     // MARK: - ECDSA SHA-512 DER helpers (Security framework)
 
-    private func signEcdsaSha512Der(privateKey: Data, data: Data, keySizeInBits: Int) throws -> Data {
+    private func signEcdsaDer(privateKey: Data, data: Data, keySizeInBits: Int) throws -> Data {
         // Build SecKey from raw private key using CryptoKit as intermediate
         let fullKeyData: Data
         if keySizeInBits == 256 {
@@ -111,7 +113,7 @@ public final class ClassicalProvider: CryptoProvider {
         return signature as Data
     }
 
-    private func verifyEcdsaSha512Der(publicKey: Data, signature: Data, data: Data, keySizeInBits: Int) throws -> Bool {
+    private func verifyEcdsaDer(publicKey: Data, signature: Data, data: Data, keySizeInBits: Int) throws -> Bool {
         // Public key should be in uncompressed point format (0x04 || x || y)
         let pubKeyData: Data
         if publicKey.first == 0x04 {

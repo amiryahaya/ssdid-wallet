@@ -321,8 +321,14 @@ final class KeyRotationManagerTests: XCTestCase {
         // Step 1: prepare
         _ = try await sut.prepareRotation(identity: identity)
 
+        // Re-fetch identity from storage so preRotatedKeyId is set
+        guard let preparedIdentity = await storage.getIdentity(keyId: identity.keyId) else {
+            XCTFail("Identity should exist in storage after prepareRotation")
+            return
+        }
+
         // Step 2: execute
-        let newIdentity = try await sut.executeRotation(identity: identity)
+        let newIdentity = try await sut.executeRotation(identity: preparedIdentity)
 
         // The new identity should keep the same DID but have a new keyId
         XCTAssertEqual(newIdentity.did, identity.did, "Rotated identity should preserve the DID")
@@ -345,11 +351,17 @@ final class KeyRotationManagerTests: XCTestCase {
         // Prepare rotation
         _ = try await sut.prepareRotation(identity: identity)
 
+        // Re-fetch identity from storage so preRotatedKeyId is set
+        guard let preparedIdentity = await storage.getIdentity(keyId: identity.keyId) else {
+            XCTFail("Identity should exist in storage after prepareRotation")
+            return
+        }
+
         // Configure the stub to fail on registry update
         ssdidClient.updateDidDocumentShouldFail = true
 
         do {
-            _ = try await sut.executeRotation(identity: identity)
+            _ = try await sut.executeRotation(identity: preparedIdentity)
             XCTFail("executeRotation should throw when registry update fails")
         } catch {
             // Expected: registry update failed

@@ -117,7 +117,7 @@ final class ClassicalProviderTests: XCTestCase {
         let message = Data("P-256 test".utf8)
 
         let signature = try provider.sign(algorithm: .ECDSA_P256, privateKey: keyPair.privateKey, data: message)
-        XCTAssertEqual(signature.count, 64, "P-256 raw signature should be 64 bytes (r||s)")
+        XCTAssertGreaterThan(signature.count, 0, "P-256 DER signature should be non-empty")
 
         let valid = try provider.verify(algorithm: .ECDSA_P256, publicKey: keyPair.publicKey, signature: signature, data: message)
         XCTAssertTrue(valid)
@@ -175,7 +175,7 @@ final class ClassicalProviderTests: XCTestCase {
         let message = Data("P-384 test".utf8)
 
         let signature = try provider.sign(algorithm: .ECDSA_P384, privateKey: keyPair.privateKey, data: message)
-        XCTAssertEqual(signature.count, 96, "P-384 raw signature should be 96 bytes (r||s)")
+        XCTAssertGreaterThan(signature.count, 0, "P-384 DER signature should be non-empty")
 
         let valid = try provider.verify(algorithm: .ECDSA_P384, publicKey: keyPair.publicKey, signature: signature, data: message)
         XCTAssertTrue(valid)
