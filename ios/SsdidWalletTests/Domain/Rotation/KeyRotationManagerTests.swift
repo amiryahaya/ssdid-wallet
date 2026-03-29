@@ -315,7 +315,6 @@ final class KeyRotationManagerTests: XCTestCase {
     // MARK: - Test 3: executeRotation promotes pre-rotated key
 
     func testExecuteRotationPromotesPreRotatedKey() async throws {
-        try XCTSkipUnless(KeychainAvailability.isAvailable, "Keychain not available (CI simulator)")
         let identity = makeIdentity()
         try await seedIdentity(identity)
 

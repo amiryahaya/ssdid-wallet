@@ -1,5 +1,6 @@
 import Foundation
 import CryptoKit
+import Security
 
 /// CryptoProvider implementation for classical (non-PQC) algorithms
 /// using Apple CryptoKit: Ed25519, ECDSA P-256, ECDSA P-384.
@@ -50,14 +51,10 @@ public final class ClassicalProvider: CryptoProvider {
             return signature
 
         case .ECDSA_P256:
-            let key = try P256.Signing.PrivateKey(rawRepresentation: privateKey)
-            let signature = try key.signature(for: data)
-            return signature.rawRepresentation
+            return try signEcdsaSha512Der(privateKey: privateKey, data: data, keySizeInBits: 256)
 
         case .ECDSA_P384:
-            let key = try P384.Signing.PrivateKey(rawRepresentation: privateKey)
-            let signature = try key.signature(for: data)
-            return signature.rawRepresentation
+            return try signEcdsaSha512Der(privateKey: privateKey, data: data, keySizeInBits: 384)
 
         default:
             throw CryptoError.unsupportedAlgorithm(algorithm)
@@ -71,27 +68,70 @@ public final class ClassicalProvider: CryptoProvider {
             return key.isValidSignature(signature, for: data)
 
         case .ECDSA_P256:
-            let key: P256.Signing.PublicKey
-            if publicKey.count == 33 {
-                key = try P256.Signing.PublicKey(compressedRepresentation: publicKey)
-            } else {
-                key = try P256.Signing.PublicKey(rawRepresentation: publicKey)
-            }
-            let ecdsaSig = try P256.Signing.ECDSASignature(rawRepresentation: signature)
-            return key.isValidSignature(ecdsaSig, for: data)
+            return try verifyEcdsaSha512Der(publicKey: publicKey, signature: signature, data: data, keySizeInBits: 256)
 
         case .ECDSA_P384:
-            let key: P384.Signing.PublicKey
-            if publicKey.count == 49 {
-                key = try P384.Signing.PublicKey(compressedRepresentation: publicKey)
-            } else {
-                key = try P384.Signing.PublicKey(rawRepresentation: publicKey)
-            }
-            let ecdsaSig = try P384.Signing.ECDSASignature(rawRepresentation: signature)
-            return key.isValidSignature(ecdsaSig, for: data)
+            return try verifyEcdsaSha512Der(publicKey: publicKey, signature: signature, data: data, keySizeInBits: 384)
 
         default:
             throw CryptoError.unsupportedAlgorithm(algorithm)
         }
+    }
+
+    // MARK: - ECDSA SHA-512 DER helpers (Security framework)
+
+    private func signEcdsaSha512Der(privateKey: Data, data: Data, keySizeInBits: Int) throws -> Data {
+        // Build SecKey from raw private key using CryptoKit as intermediate
+        let fullKeyData: Data
+        if keySizeInBits == 256 {
+            let ck = try P256.Signing.PrivateKey(rawRepresentation: privateKey)
+            fullKeyData = ck.x963Representation
+        } else {
+            let ck = try P384.Signing.PrivateKey(rawRepresentation: privateKey)
+            fullKeyData = ck.x963Representation
+        }
+
+        let attributes: [String: Any] = [
+            kSecAttrKeyType as String: kSecAttrKeyTypeECSECPrimeRandom,
+            kSecAttrKeyClass as String: kSecAttrKeyClassPrivate,
+            kSecAttrKeySizeInBits as String: keySizeInBits
+        ]
+        var error: Unmanaged<CFError>?
+        guard let secKey = SecKeyCreateWithData(fullKeyData as CFData, attributes as CFDictionary, &error) else {
+            throw CryptoError.signingFailed("Failed to create SecKey: \(error!.takeRetainedValue())")
+        }
+
+        let algorithm = SecKeyAlgorithm.ecdsaSignatureMessageX962SHA512
+        guard SecKeyIsAlgorithmSupported(secKey, .sign, algorithm) else {
+            throw CryptoError.unsupportedAlgorithm(keySizeInBits == 256 ? .ECDSA_P256 : .ECDSA_P384)
+        }
+        guard let signature = SecKeyCreateSignature(secKey, algorithm, data as CFData, &error) else {
+            throw CryptoError.signingFailed("ECDSA sign failed: \(error!.takeRetainedValue())")
+        }
+        return signature as Data
+    }
+
+    private func verifyEcdsaSha512Der(publicKey: Data, signature: Data, data: Data, keySizeInBits: Int) throws -> Bool {
+        // Public key should be in uncompressed point format (0x04 || x || y)
+        let pubKeyData: Data
+        if publicKey.first == 0x04 {
+            pubKeyData = publicKey
+        } else {
+            // Try wrapping raw key bytes
+            pubKeyData = Data([0x04]) + publicKey
+        }
+
+        let attributes: [String: Any] = [
+            kSecAttrKeyType as String: kSecAttrKeyTypeECSECPrimeRandom,
+            kSecAttrKeyClass as String: kSecAttrKeyClassPublic,
+            kSecAttrKeySizeInBits as String: keySizeInBits
+        ]
+        var error: Unmanaged<CFError>?
+        guard let secKey = SecKeyCreateWithData(pubKeyData as CFData, attributes as CFDictionary, &error) else {
+            throw CryptoError.verificationFailed("Failed to create public SecKey: \(error!.takeRetainedValue())")
+        }
+
+        let algorithm = SecKeyAlgorithm.ecdsaSignatureMessageX962SHA512
+        return SecKeyVerifySignature(secKey, algorithm, data as CFData, signature as CFData, &error)
     }
 }
