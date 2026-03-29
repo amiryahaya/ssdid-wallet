@@ -70,6 +70,9 @@ class WalletRegistryIntegrationTest {
             .build()
             .create(RegistryApi::class.java)
 
+        // Pause between tests to avoid HTTP 429 rate limiting
+        Thread.sleep(2000)
+
         classical = ClassicalProvider()
         pqc = PqcProvider()
     }
